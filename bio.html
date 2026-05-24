@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bio — Geordie Crawley</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Spectral:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body {
+      min-height:100%;
+      font-family:'IBM Plex Mono',monospace;
+      background:#0a0a0a;
+      color:#f4f2ee;
+    }
+
+    /* Fixed atmospheric background */
+    .bg {
+      position:fixed; inset:0; z-index:0;
+      background:#0a0a0a;
+    }
+    .bg img {
+      width:100%; height:100%; object-fit:cover;
+      opacity:0; transition:opacity 1.4s ease;
+    }
+    .bg img.loaded { opacity:1; }
+    /* subtle darkening at the bottom so nav + text stay legible */
+    .bg::after {
+      content:""; position:absolute; inset:0;
+      background:linear-gradient(180deg, rgba(10,10,12,0.15) 0%, rgba(10,10,12,0.05) 40%, rgba(10,10,12,0.55) 100%);
+    }
+
+    .page {
+      position:relative; z-index:1;
+      min-height:100vh;
+      display:flex; align-items:center; justify-content:center;
+      padding:clamp(80px,10vh,140px) clamp(20px,5vw,60px) clamp(120px,16vh,180px);
+    }
+
+    .bio-wrap {
+      display:flex;
+      gap:clamp(28px,4vw,56px);
+      align-items:stretch;
+      max-width:1100px;
+      width:100%;
+      opacity:0; transform:translateY(16px);
+      transition:opacity 0.9s ease 0.3s, transform 0.9s ease 0.3s;
+    }
+    .bio-wrap.visible { opacity:1; transform:translateY(0); }
+
+    /* Portrait placeholder / image */
+    .portrait {
+      flex:0 0 clamp(220px,30%,340px);
+      border-radius:18px;
+      overflow:hidden;
+      background:rgba(20,20,22,0.30);
+      backdrop-filter:blur(16px) saturate(1.2);
+      -webkit-backdrop-filter:blur(16px) saturate(1.2);
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow:0 8px 32px rgba(0,0,0,0.28);
+      position:relative;
+      min-height:340px;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .portrait img {
+      width:100%; height:100%; object-fit:cover;
+      position:absolute; inset:0;
+    }
+    /* Placeholder shown until a real portrait is dropped in */
+    .portrait .placeholder {
+      text-align:center;
+      font-family:'Spectral',serif;
+      font-style:italic;
+      font-size:0.95rem;
+      color:rgba(244,242,238,0.5);
+      padding:24px;
+      line-height:1.6;
+    }
+    .portrait .placeholder span { display:block; font-size:1.8rem; margin-bottom:12px; opacity:0.6; }
+
+    /* Bio reading panel — frosted glass, matching the home nav material */
+    .bio {
+      flex:1 1 auto;
+      padding:clamp(28px,3.5vw,48px);
+      border-radius:18px;
+      background:rgba(20,20,22,0.34);
+      backdrop-filter:blur(18px) saturate(1.2);
+      -webkit-backdrop-filter:blur(18px) saturate(1.2);
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow:0 8px 32px rgba(0,0,0,0.28);
+    }
+    .bio h1 {
+      font-family:'IBM Plex Mono',monospace;
+      font-weight:700;
+      font-size:clamp(1.4rem,3vw,2.1rem);
+      letter-spacing:-0.02em;
+      margin-bottom:clamp(20px,2.4vw,30px);
+      line-height:1.1;
+    }
+    .bio p {
+      font-family:'Spectral',serif;
+      font-weight:400;
+      font-size:clamp(1.02rem,1.5vw,1.18rem);
+      line-height:1.65;
+      margin-bottom:1.05em;
+      color:#ebe9e4;
+      text-shadow:0 1px 10px rgba(0,0,0,0.35);
+    }
+    .bio p:last-child { margin-bottom:0; }
+    .bio a {
+      color:#fff;
+      text-decoration:none;
+      font-style:italic;
+      border-bottom:1.5px solid rgba(255,255,255,0.45);
+      transition:border-color 0.3s ease, opacity 0.3s ease;
+      white-space:nowrap;
+    }
+    .bio a:hover { border-bottom-color:#fff; opacity:0.85; }
+    .bio em { font-style:italic; }
+
+    /* Shared bottom nav — identical to home page */
+    nav {
+      position:fixed;
+      bottom:clamp(20px,4vw,44px);
+      left:50%; transform:translateX(-50%);
+      display:flex; justify-content:center; align-items:center;
+      gap:clamp(14px,3vw,40px);
+      flex-wrap:wrap;
+      z-index:3;
+      padding:14px clamp(20px,4vw,36px);
+      border-radius:16px;
+      background:rgba(20,20,22,0.28);
+      backdrop-filter:blur(16px) saturate(1.2);
+      -webkit-backdrop-filter:blur(16px) saturate(1.2);
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow:0 8px 32px rgba(0,0,0,0.25);
+      max-width:calc(100% - 32px);
+      opacity:0;
+      transition:opacity 0.6s ease 0.7s;
+    }
+    nav.visible { opacity:1; }
+    nav a {
+      font-family:'Spectral',serif;
+      font-style:italic;
+      font-weight:400;
+      font-size:clamp(0.95rem,2vw,1.2rem);
+      color:#f4f2ee;
+      text-decoration:none;
+      letter-spacing:0.01em;
+      padding:2px 0;
+      border-bottom:1.5px solid transparent;
+      transition:border-color 0.3s ease, opacity 0.3s ease;
+      text-shadow:0 1px 8px rgba(0,0,0,0.4);
+      white-space:nowrap;
+    }
+    nav a:hover { border-bottom-color:currentColor; opacity:0.85; }
+    nav a.current { border-bottom-color:rgba(244,242,238,0.5); }
+
+    @media (max-width:760px){
+      .bio-wrap { flex-direction:column; }
+      .portrait { flex:0 0 auto; min-height:280px; max-height:360px; }
+      nav { gap:6px 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg"><img id="bgImg" src="images/IMG_4335.jpg" alt=""></div>
+
+  <div class="page">
+    <div class="bio-wrap" id="bioWrap">
+
+      <div class="portrait">
+        <!-- When you have a portrait, drop it into images/ and set its src here,
+             e.g. <img src="images/portrait.jpg" alt="Geordie Crawley">.
+             Until then, this placeholder shows. -->
+        <div class="placeholder">
+          <span>◳</span>
+          Portrait
+          coming soon
+        </div>
+      </div>
+
+      <div class="bio">
+        <h1>Geordie Crawley</h1>
+        <p>Geordie Crawley is a Melbourne-based playwright, creative, and improvisor. He is the co-founder of the multi-award-winning independent theatre company Rorschach Beast and a former curator for STRUT's site-specific dance platform Situ8.</p>
+        <p>Geordie's play <em>Logue Lake</em> premiered at the 2024 Perth Festival, sweeping the Performing Arts WA Awards including Best Mainstage Production and Best New Work. His other writing credits include <em>Hive Mind</em>, <em>Girl in the Wood</em>, <em>All That Is Solid Melts Into Air</em>, and <em>The Narwhal</em>.</p>
+        <p>A long-time performer, Geordie has been improvising with The Big HOO-HAA!! since 2012 and is the creator of the hit extravaganza Impro Musical <em>BangTown!</em>. He has also worked with The Last Great Hunt and Spare Parts Puppet Theatre.</p>
+        <p>He is also the creator of the game <a href="provenance.html">Provenance</a> and writes an irregularly updated <a href="https://substack.com" target="_blank" rel="noopener">Substack</a>.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <nav id="nav">
+    <a href="index.html">Home</a>
+    <a href="provenance.html">Provenance — An Art Game</a>
+    <a href="scripts.html">Scripts</a>
+    <a href="bio.html" class="current">Bio</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+
+  <script>
+    const img = document.getElementById('bgImg');
+    const wrap = document.getElementById('bioWrap');
+    const nav = document.getElementById('nav');
+
+    function reveal() {
+      wrap.classList.add('visible');
+      nav.classList.add('visible');
+    }
+    if (img.complete) {
+      img.classList.add('loaded');
+      reveal();
+    } else {
+      img.addEventListener('load', () => { img.classList.add('loaded'); reveal(); });
+      img.addEventListener('error', reveal);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logue Lake — Geordie Crawley</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Spectral:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body {
+      min-height:100%;
+      font-family:'IBM Plex Mono',monospace;
+      background:#0a0a0a;
+      color:#f4f2ee;
+    }
+
+    .bg { position:fixed; inset:0; z-index:0; background:#0a0a0a; }
+    .bg img {
+      width:100%; height:100%; object-fit:cover;
+      object-position:center center;
+      opacity:0; transition:opacity 1.4s ease;
+    }
+    .bg img.loaded { opacity:1; }
+    /* Darker overlay — this is a horror page, lean moody */
+    .bg::after {
+      content:""; position:absolute; inset:0;
+      background:linear-gradient(180deg, rgba(8,8,10,0.55) 0%, rgba(8,8,10,0.45) 35%, rgba(8,8,10,0.70) 100%);
+    }
+
+    .page {
+      position:relative; z-index:1;
+      min-height:100vh;
+      display:flex; flex-direction:column; align-items:center;
+      padding:clamp(70px,9vh,120px) clamp(20px,5vw,60px) clamp(120px,16vh,180px);
+    }
+
+    .container {
+      width:100%;
+      max-width:760px;
+      opacity:0; transform:translateY(16px);
+      transition:opacity 0.9s ease 0.25s, transform 0.9s ease 0.25s;
+    }
+    .container.visible { opacity:1; transform:translateY(0); }
+
+    /* Title block */
+    .title-block { text-align:center; margin-bottom:clamp(28px,4vh,44px); }
+    .title-block .eyebrow {
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.74rem;
+      letter-spacing:0.16em;
+      text-transform:uppercase;
+      color:rgba(244,242,238,0.6);
+      margin-bottom:16px;
+    }
+    .title-block h1 {
+      font-family:'IBM Plex Mono',monospace;
+      font-weight:700;
+      font-size:clamp(2.4rem,7vw,4.4rem);
+      letter-spacing:-0.02em;
+      line-height:1.0;
+      text-shadow:0 2px 40px rgba(0,0,0,0.5);
+    }
+    .title-block .tagline {
+      font-family:'Spectral',serif;
+      font-style:italic;
+      font-size:clamp(1.05rem,2.2vw,1.35rem);
+      margin-top:18px;
+      color:rgba(244,242,238,0.9);
+      text-shadow:0 1px 14px rgba(0,0,0,0.5);
+    }
+
+    /* Production image placeholder */
+    /* Production gallery */
+    .gallery { margin-bottom:clamp(24px,3.4vh,38px); }
+    .hero-shot {
+      display:block; width:100%; padding:0; cursor:pointer;
+      border-radius:16px; overflow:hidden; background:none;
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow:0 8px 32px rgba(0,0,0,0.3);
+      margin-bottom:clamp(10px,1.4vw,14px);
+    }
+    .hero-shot img {
+      width:100%; height:auto; display:block;
+      transition:transform 0.6s cubic-bezier(0.2,0.8,0.3,1);
+    }
+    .hero-shot:hover img { transform:scale(1.03); }
+    .grid-shots {
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:clamp(10px,1.4vw,14px);
+    }
+    .shot {
+      padding:0; cursor:pointer; background:none;
+      border-radius:12px; overflow:hidden;
+      border:1px solid rgba(255,255,255,0.12);
+      aspect-ratio:3/2;
+      box-shadow:0 6px 20px rgba(0,0,0,0.26);
+    }
+    .shot img {
+      width:100%; height:100%; object-fit:cover; display:block;
+      transition:transform 0.6s cubic-bezier(0.2,0.8,0.3,1);
+    }
+    .shot:hover img { transform:scale(1.06); }
+
+    /* Lightbox */
+    .lightbox {
+      position:fixed; inset:0; z-index:50;
+      background:rgba(6,6,8,0.92);
+      backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+      display:flex; align-items:center; justify-content:center;
+      padding:clamp(20px,4vw,60px);
+      opacity:0; pointer-events:none;
+      transition:opacity 0.35s ease;
+      cursor:zoom-out;
+    }
+    .lightbox.open { opacity:1; pointer-events:auto; }
+    .lightbox img {
+      max-width:100%; max-height:100%;
+      border-radius:8px;
+      box-shadow:0 20px 60px rgba(0,0,0,0.6);
+      transform:scale(0.97); transition:transform 0.35s ease;
+    }
+    .lightbox.open img { transform:scale(1); }
+    .lightbox .close {
+      position:absolute; top:clamp(16px,3vw,28px); right:clamp(16px,3vw,28px);
+      font-family:'IBM Plex Mono',monospace; font-size:1.5rem;
+      color:rgba(244,242,238,0.8); background:none; border:none; cursor:pointer;
+      width:44px; height:44px; line-height:1;
+      transition:color 0.3s ease;
+    }
+    .lightbox .close:hover { color:#fff; }
+
+    /* Tabs */
+    .tabs {
+      display:flex; gap:8px;
+      margin-bottom:clamp(20px,2.6vh,28px);
+      justify-content:center;
+    }
+    .tab {
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.82rem;
+      letter-spacing:0.05em;
+      color:rgba(244,242,238,0.7);
+      background:rgba(20,20,22,0.30);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius:10px;
+      padding:10px 22px;
+      cursor:pointer;
+      transition:background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    .tab:hover { color:#fff; border-color:rgba(255,255,255,0.25); }
+    .tab.active {
+      background:rgba(244,242,238,0.92);
+      color:#14140f;
+      border-color:rgba(244,242,238,0.92);
+    }
+
+    /* Panel */
+    .panel {
+      padding:clamp(28px,3.6vw,46px);
+      border-radius:18px;
+      background:rgba(18,18,20,0.42);
+      backdrop-filter:blur(20px) saturate(1.2);
+      -webkit-backdrop-filter:blur(20px) saturate(1.2);
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow:0 8px 32px rgba(0,0,0,0.3);
+    }
+    .tab-content { display:none; }
+    .tab-content.active { display:block; animation:fade 0.5s ease; }
+    @keyframes fade { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+    .panel p {
+      font-family:'Spectral',serif;
+      font-size:clamp(1.02rem,1.5vw,1.16rem);
+      line-height:1.7;
+      margin-bottom:1.1em;
+      color:#ebe9e4;
+      text-shadow:0 1px 10px rgba(0,0,0,0.4);
+    }
+    .panel p:last-child { margin-bottom:0; }
+    .panel .lead {
+      font-style:italic;
+      color:#fff;
+      border-left:2px solid rgba(255,255,255,0.3);
+      padding-left:20px;
+    }
+
+    /* Team grid */
+    .credits { display:grid; grid-template-columns:1fr 1fr; gap:clamp(20px,2.4vw,30px); }
+    .credit .role {
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.72rem;
+      letter-spacing:0.1em;
+      text-transform:uppercase;
+      color:rgba(244,242,238,0.55);
+      margin-bottom:6px;
+    }
+    .credit .names {
+      font-family:'Spectral',serif;
+      font-size:clamp(1.02rem,1.6vw,1.18rem);
+      line-height:1.5;
+      color:#f4f2ee;
+    }
+    .credit .names div { margin-bottom:2px; }
+    .credits .full { grid-column:1 / -1; }
+    .presented {
+      grid-column:1 / -1;
+      margin-top:8px; padding-top:20px;
+      border-top:1px solid rgba(255,255,255,0.12);
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.82rem;
+      color:rgba(244,242,238,0.7);
+      text-align:center;
+      letter-spacing:0.03em;
+    }
+
+    /* Scripts download list */
+    .doc-list { display:flex; flex-direction:column; gap:10px; }
+    .doc {
+      display:flex; align-items:center; gap:16px;
+      padding:16px 20px;
+      border-radius:12px;
+      background:rgba(28,28,30,0.5);
+      border:1px solid rgba(255,255,255,0.12);
+      color:#f4f2ee;
+      text-decoration:none;
+      transition:background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+    }
+    .doc:hover {
+      background:rgba(40,40,42,0.6);
+      border-color:rgba(255,255,255,0.28);
+      transform:translateX(3px);
+    }
+    .doc .doc-icon {
+      flex:0 0 auto;
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.66rem;
+      letter-spacing:0.06em;
+      color:rgba(244,242,238,0.6);
+      border:1px solid rgba(255,255,255,0.22);
+      border-radius:6px;
+      padding:5px 8px;
+    }
+    .doc .doc-name {
+      flex:1 1 auto;
+      font-family:'Spectral',serif;
+      font-size:clamp(1rem,1.5vw,1.14rem);
+      line-height:1.3;
+    }
+    .doc .doc-dl {
+      flex:0 0 auto;
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.74rem;
+      letter-spacing:0.05em;
+      color:rgba(244,242,238,0.55);
+      opacity:0; transform:translateX(-4px);
+      transition:opacity 0.3s ease, transform 0.3s ease;
+    }
+    .doc:hover .doc-dl { opacity:1; transform:translateX(0); }
+    .doc-note {
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.76rem;
+      color:rgba(244,242,238,0.5);
+      margin-top:18px;
+      line-height:1.5;
+      text-align:center;
+    }
+
+    nav {
+      position:fixed;
+      bottom:clamp(20px,4vw,44px);
+      left:50%; transform:translateX(-50%);
+      display:flex; justify-content:center; align-items:center;
+      gap:clamp(14px,3vw,40px);
+      flex-wrap:wrap;
+      z-index:3;
+      padding:14px clamp(20px,4vw,36px);
+      border-radius:16px;
+      background:rgba(20,20,22,0.28);
+      backdrop-filter:blur(16px) saturate(1.2);
+      -webkit-backdrop-filter:blur(16px) saturate(1.2);
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow:0 8px 32px rgba(0,0,0,0.25);
+      max-width:calc(100% - 32px);
+      opacity:0;
+      transition:opacity 0.6s ease 0.6s;
+    }
+    nav.visible { opacity:1; }
+    nav a {
+      font-family:'Spectral',serif;
+      font-style:italic;
+      font-weight:400;
+      font-size:clamp(0.95rem,2vw,1.2rem);
+      color:#f4f2ee;
+      text-decoration:none;
+      letter-spacing:0.01em;
+      padding:2px 0;
+      border-bottom:1.5px solid transparent;
+      transition:border-color 0.3s ease, opacity 0.3s ease;
+      text-shadow:0 1px 8px rgba(0,0,0,0.4);
+      white-space:nowrap;
+    }
+    nav a:hover { border-bottom-color:currentColor; opacity:0.85; }
+
+    @media (max-width:560px){
+      .credits { grid-template-columns:1fr; }
+      nav { gap:6px 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg"><img id="bgImg" src="images/IMG_0318-positive.jpg" alt=""></div>
+
+  <div class="page">
+    <div class="container" id="container">
+
+      <div class="title-block">
+        <div class="eyebrow">Logue Lake · Perth Festival 2024</div>
+        <h1>Logue Lake</h1>
+        <div class="tagline">A queer cabin-in-the-woods horror</div>
+      </div>
+
+      <div class="gallery">
+        <button class="hero-shot" data-full="images/logue-lake/logue-lake-21.jpg">
+          <img src="images/logue-lake/logue-lake-21.jpg" alt="The wall-less skeletal cabin set of Logue Lake, seen from above" loading="lazy">
+        </button>
+        <div class="grid-shots">
+          <button class="shot" data-full="images/logue-lake/logue-lake-8.jpg"><img src="images/logue-lake/logue-lake-8.jpg" alt="Logue Lake production photo" loading="lazy"></button>
+          <button class="shot" data-full="images/logue-lake/logue-lake-32.jpg"><img src="images/logue-lake/logue-lake-32.jpg" alt="Logue Lake production photo" loading="lazy"></button>
+          <button class="shot" data-full="images/logue-lake/logue-lake-37.jpg"><img src="images/logue-lake/logue-lake-37.jpg" alt="Logue Lake production photo" loading="lazy"></button>
+          <button class="shot" data-full="images/logue-lake/logue-lake-45.jpg"><img src="images/logue-lake/logue-lake-45.jpg" alt="Logue Lake production photo" loading="lazy"></button>
+          <button class="shot" data-full="images/logue-lake/logue-lake-71.jpg"><img src="images/logue-lake/logue-lake-71.jpg" alt="Logue Lake production photo" loading="lazy"></button>
+          <button class="shot" data-full="images/logue-lake/logue-lake-83.jpg"><img src="images/logue-lake/logue-lake-83.jpg" alt="Logue Lake production photo" loading="lazy"></button>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" data-tab="synopsis">Synopsis</button>
+        <button class="tab" data-tab="team">Team</button>
+        <button class="tab" data-tab="scripts">Scripts</button>
+      </div>
+
+      <div class="panel">
+        <div class="tab-content active" id="synopsis">
+          <p class="lead">At the start of the show each audience member is given a small FM radio and a pair of headphones. Inside the Studio Underground, the traditional stage is replaced by a skeletal, wall-less 1970s cabin, allowing the audience to roam freely around the perimeter and look into every room simultaneously.</p>
+          <p>By toggling between five different radio frequencies, viewers can tune into the specific audio feed of individual characters — eavesdropping on private conversations, uncovering internal monologues, and listening to a tense, atmospheric soundtrack. This innovative setup transforms a weekend getaway between four friends and a mysterious stranger into a deeply voyeuristic, psychological puzzle, where the audience must stitch together their own unique narrative path to uncover the truth of the haunting mystery.</p>
+          <p>Set against the isolated backdrop of a remote family cabin, <em>Logue Lake</em> is a tense psychological thriller fuelled by repressed desire and long-buried grief. The story revolves around Michael and Alex, two best friends who fell in love during high school. While Alex eventually came out of the closet and moved on, Michael chose to stay deeply closeted. Years later, Michael is now dating Carrie, who — unaware of her boyfriend's hidden past — has organised a weekend getaway to Logue Lake with the secret intention of proposing to him. Alex has tagged along, determined to use the weekend to prove to himself, and to Michael, that he is finally over their past romance.</p>
+          <p>The underlying romantic and emotional tensions reach a breaking point with the arrival of Hugh, a mysterious hiker who seeks shelter at the cabin. As the night unfolds, Hugh's presence begins to warp reality inside the isolated house. In a surreal, horror-infused twist, Hugh gradually transforms into an exact physical double of Michael. However, this manifestation represents everything Michael has suppressed: he is a version of Michael who is entirely unburdened by shame and capable of loving Alex openly. As this supernatural double forces the characters to confront the lies they've been living, the weekend spirals into a haunting, voyeuristic climax where secret identities and repressed truths can no longer stay hidden in the dark.</p>
+        </div>
+
+        <div class="tab-content" id="team">
+          <div class="credits">
+            <div class="credit">
+              <div class="role">Writer &amp; Co-Creator</div>
+              <div class="names"><div>Geordie Crawley</div></div>
+            </div>
+            <div class="credit">
+              <div class="role">Director &amp; Co-Creator</div>
+              <div class="names"><div>Elise Wilson</div></div>
+            </div>
+            <div class="credit">
+              <div class="role">Producer</div>
+              <div class="names"><div>Erin Lockyer</div></div>
+            </div>
+            <div class="credit">
+              <div class="role">Composer</div>
+              <div class="names"><div>Louis Frére-Harvey</div></div>
+            </div>
+            <div class="credit full">
+              <div class="role">Performers</div>
+              <div class="names">
+                <div>Isaac Diamond</div>
+                <div>Will O'Mahony</div>
+                <div>Timothy Green</div>
+                <div>Lila McGuire</div>
+                <div>Alicia Osyka</div>
+              </div>
+            </div>
+            <div class="credit">
+              <div class="role">Sound Design</div>
+              <div class="names"><div>Ben Collins</div></div>
+            </div>
+            <div class="credit">
+              <div class="role">Designer</div>
+              <div class="names"><div>Samuel Diamond</div></div>
+            </div>
+            <div class="credit">
+              <div class="role">Lighting Designer</div>
+              <div class="names"><div>Peter Young</div></div>
+            </div>
+            <div class="presented">Originally presented by Perth Festival in 2024</div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="scripts">
+          <div class="doc-list">
+            <!-- Drop the files into a "scripts" folder next to this page,
+                 matching the filenames below (or update the href to match yours). -->
+            <a class="doc" href="scripts/Logue-Lake-Master-Script.pdf" download>
+              <span class="doc-icon">PDF</span>
+              <span class="doc-name">Logue Lake — Master Script</span>
+              <span class="doc-dl">↓ Download</span>
+            </a>
+            <a class="doc" href="scripts/Logue-Lake-Scene-Map.pdf" download>
+              <span class="doc-icon">PDF</span>
+              <span class="doc-name">Logue Lake — Scene Map</span>
+              <span class="doc-dl">↓ Download</span>
+            </a>
+            <a class="doc" href="scripts/Logue-Lake-Michael.pdf" download>
+              <span class="doc-icon">PDF</span>
+              <span class="doc-name">Logue Lake — Michael</span>
+              <span class="doc-dl">↓ Download</span>
+            </a>
+            <a class="doc" href="scripts/Logue-Lake-Alex.pdf" download>
+              <span class="doc-icon">PDF</span>
+              <span class="doc-name">Logue Lake — Alex</span>
+              <span class="doc-dl">↓ Download</span>
+            </a>
+            <a class="doc" href="scripts/Logue-Lake-Reagan.pdf" download>
+              <span class="doc-icon">PDF</span>
+              <span class="doc-name">Logue Lake — Reagan</span>
+              <span class="doc-dl">↓ Download</span>
+            </a>
+            <a class="doc" href="scripts/Logue-Lake-Carrie.pdf" download>
+              <span class="doc-icon">PDF</span>
+              <span class="doc-name">Logue Lake — Carrie</span>
+              <span class="doc-dl">↓ Download</span>
+            </a>
+            <a class="doc" href="scripts/Logue-Lake-Hugh.pdf" download>
+              <span class="doc-icon">PDF</span>
+              <span class="doc-name">Logue Lake — Hugh</span>
+              <span class="doc-dl">↓ Download</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="lightbox" id="lightbox">
+    <button class="close" id="lightboxClose" aria-label="Close">✕</button>
+    <img id="lightboxImg" src="" alt="">
+  </div>
+
+  <nav id="nav">
+    <a href="index.html">Home</a>
+    <a href="scripts.html">Scripts</a>
+    <a href="bio.html">Bio</a>
+  </nav>
+
+  <script>
+    const img = document.getElementById('bgImg');
+    const container = document.getElementById('container');
+    const nav = document.getElementById('nav');
+
+    function reveal() {
+      container.classList.add('visible');
+      nav.classList.add('visible');
+    }
+    if (img.complete) { img.classList.add('loaded'); reveal(); }
+    else {
+      img.addEventListener('load', () => { img.classList.add('loaded'); reveal(); });
+      img.addEventListener('error', reveal);
+    }
+
+    // Lightbox
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+    const lightboxClose = document.getElementById('lightboxClose');
+
+    document.querySelectorAll('[data-full]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        lightboxImg.src = btn.dataset.full;
+        lightbox.classList.add('open');
+      });
+    });
+    function closeLightbox() {
+      lightbox.classList.remove('open');
+      setTimeout(() => { lightboxImg.src = ''; }, 350);
+    }
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox || e.target === lightboxClose) closeLightbox();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && lightbox.classList.contains('open')) closeLightbox();
+    });
+
+    // Tab switching
+    const tabs = document.querySelectorAll('.tab');
+    const contents = document.querySelectorAll('.tab-content');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const target = tab.dataset.tab;
+        tabs.forEach(t => t.classList.remove('active'));
+        contents.forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(target).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Girl in the Wood — Geordie Crawley</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Spectral:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body {
+      min-height:100%;
+      font-family:'IBM Plex Mono',monospace;
+      background:#0a0a0a;
+      color:#f4f2ee;
+    }
+
+    .bg { position:fixed; inset:0; z-index:0; background:#0a0a0a; }
+    .bg img {
+      width:100%; height:100%; object-fit:cover;
+      object-position:center center;
+      opacity:0; transition:opacity 1.4s ease;
+    }
+    .bg img.loaded { opacity:1; }
+    .bg::after {
+      content:""; position:absolute; inset:0;
+      background:linear-gradient(180deg, rgba(8,9,12,0.52) 0%, rgba(8,9,12,0.42) 35%, rgba(8,9,12,0.70) 100%);
+    }
+
+    .page {
+      position:relative; z-index:1;
+      min-height:100vh;
+      display:flex; flex-direction:column; align-items:center;
+      padding:clamp(70px,9vh,120px) clamp(20px,5vw,60px) clamp(120px,16vh,180px);
+    }
+
+    .container {
+      width:100%;
+      max-width:760px;
+      opacity:0; transform:translateY(16px);
+      transition:opacity 0.9s ease 0.25s, transform 0.9s ease 0.25s;
+    }
+    .container.visible { opacity:1; transform:translateY(0); }
+
+    .title-block { text-align:center; margin-bottom:clamp(28px,4vh,44px); }
+    .title-block .eyebrow {
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.74rem;
+      letter-spacing:0.16em;
+      text-transform:uppercase;
+      color:rgba(244,242,238,0.6);
+      margin-bottom:16px;
+    }
+    .title-block h1 {
+      font-family:'IBM Plex Mono',monospace;
+      font-weight:700;
+      font-size:clamp(2.4rem,7vw,4.4rem);
+      letter-spacing:-0.02em;
+      line-height:1.0;
+      text-shadow:0 2px 40px rgba(0,0,0,0.5);
+    }
+    .title-block .tagline {
+      font-family:'Spectral',serif;
+      font-style:italic;
+      font-size:clamp(1.05rem,2.2vw,1.35rem);
+      margin-top:18px;
+      color:rgba(244,242,238,0.9);
+      text-shadow:0 1px 14px rgba(0,0,0,0.5);
+    }
+
+    .feature-shot {
+      display:block; width:100%; padding:0; cursor:pointer;
+      border-radius:16px; overflow:hidden; background:none;
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow:0 8px 32px rgba(0,0,0,0.35);
+      margin-bottom:clamp(24px,3.4vh,38px);
+    }
+    .feature-shot img {
+      width:100%; height:auto; display:block;
+      transition:transform 0.6s cubic-bezier(0.2,0.8,0.3,1);
+    }
+    .feature-shot:hover img { transform:scale(1.03); }
+
+    .tabs {
+      display:flex; gap:8px;
+      margin-bottom:clamp(20px,2.6vh,28px);
+      justify-content:center;
+    }
+    .tab {
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.82rem;
+      letter-spacing:0.05em;
+      color:rgba(244,242,238,0.7);
+      background:rgba(20,20,22,0.30);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius:10px;
+      padding:10px 22px;
+      cursor:pointer;
+      transition:background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    .tab:hover { color:#fff; border-color:rgba(255,255,255,0.25); }
+    .tab.active {
+      background:rgba(244,242,238,0.92);
+      color:#14140f;
+      border-color:rgba(244,242,238,0.92);
+    }
+
+    .panel {
+      padding:clamp(28px,3.6vw,46px);
+      border-radius:18px;
+      background:rgba(18,18,20,0.42);
+      backdrop-filter:blur(20px) saturate(1.2);
+      -webkit-backdrop-filter:blur(20px) saturate(1.2);
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow:0 8px 32px rgba(0,0,0,0.3);
+    }
+    .tab-content { display:none; }
+    .tab-content.active { display:block; animation:fade 0.5s ease; }
+    @keyframes fade { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+    .panel p {
+      font-family:'Spectral',serif;
+      font-size:clamp(1.02rem,1.5vw,1.16rem);
+      line-height:1.7;
+      margin-bottom:1.1em;
+      color:#ebe9e4;
+      text-shadow:0 1px 10px rgba(0,0,0,0.4);
+    }
+    .panel p:last-child { margin-bottom:0; }
+
+    .doc-list { display:flex; flex-direction:column; gap:10px; }
+    .doc {
+      display:flex; align-items:center; gap:16px;
+      padding:16px 20px;
+      border-radius:12px;
+      background:rgba(28,28,30,0.5);
+      border:1px solid rgba(255,255,255,0.12);
+      color:#f4f2ee;
+      text-decoration:none;
+      transition:background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+    }
+    .doc:hover {
+      background:rgba(40,40,42,0.6);
+      border-color:rgba(255,255,255,0.28);
+      transform:translateX(3px);
+    }
+    .doc .doc-icon {
+      flex:0 0 auto;
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.66rem;
+      letter-spacing:0.06em;
+      color:rgba(244,242,238,0.6);
+      border:1px solid rgba(255,255,255,0.22);
+      border-radius:6px;
+      padding:5px 8px;
+    }
+    .doc .doc-name {
+      flex:1 1 auto;
+      font-family:'Spectral',serif;
+      font-size:clamp(1rem,1.5vw,1.14rem);
+      line-height:1.3;
+    }
+    .doc .doc-dl {
+      flex:0 0 auto;
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.74rem;
+      letter-spacing:0.05em;
+      color:rgba(244,242,238,0.55);
+      opacity:0; transform:translateX(-4px);
+      transition:opacity 0.3s ease, transform 0.3s ease;
+    }
+    .doc:hover .doc-dl { opacity:1; transform:translateX(0); }
+
+    /* Lightbox */
+    .lightbox {
+      position:fixed; inset:0; z-index:50;
+      background:rgba(6,6,8,0.94);
+      backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+      display:flex; align-items:center; justify-content:center;
+      padding:clamp(20px,4vw,60px);
+      opacity:0; pointer-events:none;
+      transition:opacity 0.35s ease;
+      cursor:zoom-out;
+    }
+    .lightbox.open { opacity:1; pointer-events:auto; }
+    .lightbox img {
+      max-width:100%; max-height:100%;
+      border-radius:8px;
+      box-shadow:0 20px 60px rgba(0,0,0,0.6);
+      transform:scale(0.97); transition:transform 0.35s ease;
+    }
+    .lightbox.open img { transform:scale(1); }
+    .lightbox .close {
+      position:absolute; top:clamp(16px,3vw,28px); right:clamp(16px,3vw,28px);
+      font-family:'IBM Plex Mono',monospace; font-size:1.5rem;
+      color:rgba(244,242,238,0.8); background:none; border:none; cursor:pointer;
+      width:44px; height:44px; line-height:1;
+      transition:color 0.3s ease;
+    }
+    .lightbox .close:hover { color:#fff; }
+
+    nav {
+      position:fixed;
+      bottom:clamp(20px,4vw,44px);
+      left:50%; transform:translateX(-50%);
+      display:flex; justify-content:center; align-items:center;
+      gap:clamp(14px,3vw,40px);
+      flex-wrap:wrap;
+      z-index:3;
+      padding:14px clamp(20px,4vw,36px);
+      border-radius:16px;
+      background:rgba(20,20,22,0.28);
+      backdrop-filter:blur(16px) saturate(1.2);
+      -webkit-backdrop-filter:blur(16px) saturate(1.2);
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow:0 8px 32px rgba(0,0,0,0.25);
+      max-width:calc(100% - 32px);
+      opacity:0;
+      transition:opacity 0.6s ease 0.6s;
+    }
+    nav.visible { opacity:1; }
+    nav a {
+      font-family:'Spectral',serif;
+      font-style:italic;
+      font-weight:400;
+      font-size:clamp(0.95rem,2vw,1.2rem);
+      color:#f4f2ee;
+      text-decoration:none;
+      letter-spacing:0.01em;
+      padding:2px 0;
+      border-bottom:1.5px solid transparent;
+      transition:border-color 0.3s ease, opacity 0.3s ease;
+      text-shadow:0 1px 8px rgba(0,0,0,0.4);
+      white-space:nowrap;
+    }
+    nav a:hover { border-bottom-color:currentColor; opacity:0.85; }
+
+    @media (max-width:560px){
+      nav { gap:6px 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg"><img id="bgImg" src="images/IMG_0312-positive.jpg" alt=""></div>
+
+  <div class="page">
+    <div class="container" id="container">
+
+      <div class="title-block">
+        <div class="eyebrow">An eco-horror fairytale</div>
+        <h1>Girl in the Wood</h1>
+        <div class="tagline">A spooky forest fairytale</div>
+      </div>
+
+      <button class="feature-shot" data-full="images/girl-in-the-wood/girl-in-the-wood-7865.jpg">
+        <img src="images/girl-in-the-wood/girl-in-the-wood-7865.jpg" alt="A masked figure confronts a creature made of black plastic bags in Girl in the Wood" loading="lazy">
+      </button>
+
+      <div class="tabs">
+        <button class="tab active" data-tab="synopsis">Synopsis</button>
+        <button class="tab" data-tab="script">Script</button>
+      </div>
+
+      <div class="panel">
+        <div class="tab-content active" id="synopsis">
+          <p>Step into a darkly whimsical, edge-of-your-seat psychological thriller with <em>Girl in the Wood</em>, a spellbinding eco-horror drama that flips classic fairy-tale tropes completely on their head.</p>
+          <p>The story follows Peggy, a fiercely determined young girl who plunges into a perilous, enchanted European forest after her older brother, Chuck, is violently dragged into the shadows by a creature of pure evil known as Il Buio. Armed with nothing but her brother's knife and a sharp wit, Peggy forms a desperate alliance with Johnny Arkansas — a swaggering, directionally challenged cowboy hunting for his own long-lost father. Together, they must navigate a surreal gauntlet of eccentric and terrifying woodland horrors, from a bizarre, prophecy-spitting blind oracle to a pair of deceptive, ancient twin hunger demons.</p>
+          <p>To bargain for Chuck's soul, Peggy is forced to hunt down three mythical ingredients before a strict midnight deadline: the sharpest point, the oldest page, and her own heart. Written with a mischievous, fast-paced energy, the narrative effortlessly balances laugh-out-loud comedy — featuring absurd, knee-slapping duels with a band of animal-masked bandits — and suffocating, plastic-tendriled terror.</p>
+          <p>Enhanced by a haunting, live-scored musical atmosphere, <em>Girl in the Wood</em> is an imaginative, visually striking theatrical ride about the lengths we will go to save the people we love, proving that the deepest shadows can only be conquered by the very things born from them.</p>
+        </div>
+
+        <div class="tab-content" id="script">
+          <div class="doc-list">
+            <!-- Drop the file into the "scripts" folder, matching the filename below
+                 (or update the href to match yours). -->
+            <a class="doc" href="scripts/Girl-in-the-Wood-Fourth-Draft.pdf" download>
+              <span class="doc-icon">PDF</span>
+              <span class="doc-name">Girl in the Wood — Fourth Draft</span>
+              <span class="doc-dl">↓ Download</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="lightbox" id="lightbox">
+    <button class="close" id="lightboxClose" aria-label="Close">✕</button>
+    <img id="lightboxImg" src="" alt="">
+  </div>
+
+  <nav id="nav">
+    <a href="index.html">Home</a>
+    <a href="scripts.html">Scripts</a>
+    <a href="bio.html">Bio</a>
+  </nav>
+
+  <script>
+    const img = document.getElementById('bgImg');
+    const container = document.getElementById('container');
+    const nav = document.getElementById('nav');
+
+    function reveal() {
+      container.classList.add('visible');
+      nav.classList.add('visible');
+    }
+    if (img.complete) { img.classList.add('loaded'); reveal(); }
+    else {
+      img.addEventListener('load', () => { img.classList.add('loaded'); reveal(); });
+      img.addEventListener('error', reveal);
+    }
+
+    // Lightbox
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+    const lightboxClose = document.getElementById('lightboxClose');
+    document.querySelectorAll('[data-full]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        lightboxImg.src = btn.dataset.full;
+        lightbox.classList.add('open');
+      });
+    });
+    function closeLightbox() {
+      lightbox.classList.remove('open');
+      setTimeout(() => { lightboxImg.src = ''; }, 350);
+    }
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox || e.target === lightboxClose) closeLightbox();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && lightbox.classList.contains('open')) closeLightbox();
+    });
+
+    // Tab switching
+    const tabs = document.querySelectorAll('.tab');
+    const contents = document.querySelectorAll('.tab-content');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const target = tab.dataset.tab;
+        tabs.forEach(t => t.classList.remove('active'));
+        contents.forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(target).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

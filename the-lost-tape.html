@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Lost Tape — Geordie Crawley</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Spectral:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body {
+      min-height:100%;
+      font-family:'IBM Plex Mono',monospace;
+      background:#0a0a0a;
+      color:#f4f2ee;
+    }
+
+    .bg { position:fixed; inset:0; z-index:0; background:#0a0a0a; }
+    .bg img {
+      width:100%; height:100%; object-fit:cover;
+      object-position:center center;
+      opacity:0; transition:opacity 1.4s ease;
+    }
+    .bg img.loaded { opacity:1; }
+    .bg::after {
+      content:""; position:absolute; inset:0;
+      background:linear-gradient(180deg, rgba(8,9,12,0.42) 0%, rgba(8,9,12,0.34) 35%, rgba(8,9,12,0.64) 100%);
+    }
+
+    .page {
+      position:relative; z-index:1;
+      min-height:100vh;
+      display:flex; flex-direction:column; align-items:center;
+      padding:clamp(70px,9vh,120px) clamp(20px,5vw,60px) clamp(120px,16vh,180px);
+    }
+
+    .container {
+      width:100%;
+      max-width:760px;
+      opacity:0; transform:translateY(16px);
+      transition:opacity 0.9s ease 0.25s, transform 0.9s ease 0.25s;
+    }
+    .container.visible { opacity:1; transform:translateY(0); }
+
+    .title-block { text-align:center; margin-bottom:clamp(28px,4vh,44px); }
+    .title-block .eyebrow {
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.74rem;
+      letter-spacing:0.16em;
+      text-transform:uppercase;
+      color:rgba(244,242,238,0.6);
+      margin-bottom:16px;
+    }
+    .title-block h1 {
+      font-family:'IBM Plex Mono',monospace;
+      font-weight:700;
+      font-size:clamp(2.4rem,7vw,4.4rem);
+      letter-spacing:-0.02em;
+      line-height:1.0;
+      text-shadow:0 2px 40px rgba(0,0,0,0.5);
+    }
+    .title-block .tagline {
+      font-family:'Spectral',serif;
+      font-style:italic;
+      font-size:clamp(1.05rem,2.2vw,1.35rem);
+      margin-top:18px;
+      color:rgba(244,242,238,0.9);
+      text-shadow:0 1px 14px rgba(0,0,0,0.5);
+    }
+
+    .panel {
+      padding:clamp(28px,3.6vw,46px);
+      border-radius:18px;
+      background:rgba(18,18,20,0.42);
+      backdrop-filter:blur(20px) saturate(1.2);
+      -webkit-backdrop-filter:blur(20px) saturate(1.2);
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow:0 8px 32px rgba(0,0,0,0.3);
+    }
+    .panel p {
+      font-family:'Spectral',serif;
+      font-size:clamp(1.02rem,1.5vw,1.16rem);
+      line-height:1.7;
+      margin-bottom:1.1em;
+      color:#ebe9e4;
+      text-shadow:0 1px 10px rgba(0,0,0,0.4);
+    }
+    .panel p:last-child { margin-bottom:0; }
+
+    /* SoundCloud embed */
+    .player {
+      margin-top:clamp(24px,3vh,34px);
+      border-radius:12px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,0.12);
+      box-shadow:0 6px 24px rgba(0,0,0,0.3);
+      background:rgba(0,0,0,0.2);
+    }
+    .player iframe { display:block; }
+    .player-credit {
+      margin-top:12px;
+      font-size:10px;
+      color:#cccccc;
+      line-break:anywhere;
+      word-break:normal;
+      overflow:hidden;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+      font-family:'IBM Plex Mono',monospace;
+      font-weight:400;
+    }
+    .player-credit a { color:rgba(244,242,238,0.7); text-decoration:none; }
+    .player-credit a:hover { color:#fff; }
+
+    nav {
+      position:fixed;
+      bottom:clamp(20px,4vw,44px);
+      left:50%; transform:translateX(-50%);
+      display:flex; justify-content:center; align-items:center;
+      gap:clamp(14px,3vw,40px);
+      flex-wrap:wrap;
+      z-index:3;
+      padding:14px clamp(20px,4vw,36px);
+      border-radius:16px;
+      background:rgba(20,20,22,0.28);
+      backdrop-filter:blur(16px) saturate(1.2);
+      -webkit-backdrop-filter:blur(16px) saturate(1.2);
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow:0 8px 32px rgba(0,0,0,0.25);
+      max-width:calc(100% - 32px);
+      opacity:0;
+      transition:opacity 0.6s ease 0.6s;
+    }
+    nav.visible { opacity:1; }
+    nav a {
+      font-family:'Spectral',serif;
+      font-style:italic;
+      font-weight:400;
+      font-size:clamp(0.95rem,2vw,1.2rem);
+      color:#f4f2ee;
+      text-decoration:none;
+      letter-spacing:0.01em;
+      padding:2px 0;
+      border-bottom:1.5px solid transparent;
+      transition:border-color 0.3s ease, opacity 0.3s ease;
+      text-shadow:0 1px 8px rgba(0,0,0,0.4);
+      white-space:nowrap;
+    }
+    nav a:hover { border-bottom-color:currentColor; opacity:0.85; }
+
+    @media (max-width:560px){
+      nav { gap:6px 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg"><img id="bgImg" src="images/JP-SK_-_23.jpg" alt=""></div>
+
+  <div class="page">
+    <div class="container" id="container">
+
+      <div class="title-block">
+        <div class="eyebrow">Experimental recordings</div>
+        <h1>The Lost Tape</h1>
+        <div class="tagline">Micro dramas on tape</div>
+      </div>
+
+      <div class="panel">
+        <p>This was a series of experimental recordings and compositions made when I had a lot of free time on my hands. Some were written, some were improvised. None of them particularly nice to listen to.</p>
+        <p>Enjoy???</p>
+
+        <div class="player">
+          <iframe width="100%" height="450" scrolling="no" frameborder="no" allow="autoplay; encrypted-media" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/soundcloud%253Aplaylists%253A458255520&color=%23f4f2ee&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true"></iframe>
+        </div>
+        <div class="player-credit">
+          <a href="https://soundcloud.com/gcrawl" title="G.Crawl" target="_blank" rel="noopener">G.Crawl</a> · <a href="https://soundcloud.com/gcrawl/sets/i-see-you" title="I See You" target="_blank" rel="noopener">I See You</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <nav id="nav">
+    <a href="index.html">Home</a>
+    <a href="scripts.html">Scripts</a>
+    <a href="bio.html">Bio</a>
+  </nav>
+
+  <script>
+    const img = document.getElementById('bgImg');
+    const container = document.getElementById('container');
+    const nav = document.getElementById('nav');
+
+    function reveal() {
+      container.classList.add('visible');
+      nav.classList.add('visible');
+    }
+    if (img.complete) { img.classList.add('loaded'); reveal(); }
+    else {
+      img.addEventListener('load', () => { img.classList.add('loaded'); reveal(); });
+      img.addEventListener('error', reveal);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scripts — Geordie Crawley</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Spectral:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body {
+      min-height:100%;
+      font-family:'IBM Plex Mono',monospace;
+      background:#0a0a0a;
+      color:#f4f2ee;
+    }
+
+    .bg { position:fixed; inset:0; z-index:0; background:#0a0a0a; }
+    .bg img {
+      width:100%; height:100%; object-fit:cover;
+      object-position:center 60%;
+      opacity:0; transition:opacity 1.4s ease;
+    }
+    .bg img.loaded { opacity:1; }
+    .bg::after {
+      content:""; position:absolute; inset:0;
+      background:linear-gradient(180deg, rgba(10,10,12,0.12) 0%, rgba(10,10,12,0.04) 35%, rgba(10,10,12,0.52) 100%);
+    }
+
+    .page {
+      position:relative; z-index:1;
+      min-height:100vh;
+      padding:clamp(70px,9vh,120px) clamp(20px,5vw,60px) clamp(120px,16vh,180px);
+      display:flex; flex-direction:column; align-items:center;
+    }
+
+    header.intro {
+      text-align:center;
+      margin-bottom:clamp(36px,5vh,64px);
+      opacity:0; transform:translateY(14px);
+      transition:opacity 0.8s ease 0.2s, transform 0.8s ease 0.2s;
+    }
+    header.intro.visible { opacity:1; transform:translateY(0); }
+    header.intro h1 {
+      font-family:'IBM Plex Mono',monospace;
+      font-weight:700;
+      font-size:clamp(2rem,6vw,3.6rem);
+      letter-spacing:-0.02em;
+      line-height:1.05;
+      text-shadow:0 2px 30px rgba(0,0,0,0.4);
+    }
+    header.intro p {
+      font-family:'Spectral',serif;
+      font-style:italic;
+      font-size:clamp(1rem,2vw,1.25rem);
+      margin-top:14px;
+      color:rgba(244,242,238,0.85);
+      text-shadow:0 1px 12px rgba(0,0,0,0.4);
+    }
+
+    .works {
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));
+      gap:clamp(16px,2vw,24px);
+      width:100%;
+      max-width:920px;
+    }
+
+    .work {
+      display:block;
+      text-decoration:none;
+      color:inherit;
+      padding:clamp(24px,2.6vw,34px);
+      border-radius:16px;
+      background:rgba(20,20,22,0.32);
+      backdrop-filter:blur(16px) saturate(1.2);
+      -webkit-backdrop-filter:blur(16px) saturate(1.2);
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow:0 8px 32px rgba(0,0,0,0.26);
+      transition:transform 0.4s cubic-bezier(0.2,0.8,0.3,1), border-color 0.4s ease, background 0.4s ease;
+      opacity:0; transform:translateY(18px);
+      position:relative;
+      overflow:hidden;
+    }
+    .work.visible { opacity:1; transform:translateY(0); }
+    .work:hover {
+      transform:translateY(-4px);
+      border-color:rgba(255,255,255,0.3);
+      background:rgba(28,28,30,0.42);
+    }
+    .work .num {
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.72rem;
+      letter-spacing:0.12em;
+      color:rgba(244,242,238,0.45);
+      margin-bottom:14px;
+    }
+    .work h2 {
+      font-family:'Spectral',serif;
+      font-weight:500;
+      font-style:italic;
+      font-size:clamp(1.35rem,2.4vw,1.85rem);
+      line-height:1.15;
+      margin-bottom:10px;
+      text-shadow:0 1px 14px rgba(0,0,0,0.35);
+    }
+    .work .meta {
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.82rem;
+      color:rgba(244,242,238,0.68);
+      line-height:1.5;
+      letter-spacing:0.01em;
+      padding-right:24px;
+      min-height:1.2em;
+    }
+    .work .arrow {
+      position:absolute;
+      right:clamp(20px,2.4vw,30px);
+      bottom:clamp(20px,2.4vw,30px);
+      font-size:1.1rem;
+      opacity:0;
+      transform:translateX(-6px);
+      transition:opacity 0.4s ease, transform 0.4s ease;
+    }
+    .work:hover .arrow { opacity:0.7; transform:translateX(0); }
+
+    nav {
+      position:fixed;
+      bottom:clamp(20px,4vw,44px);
+      left:50%; transform:translateX(-50%);
+      display:flex; justify-content:center; align-items:center;
+      gap:clamp(14px,3vw,40px);
+      flex-wrap:wrap;
+      z-index:3;
+      padding:14px clamp(20px,4vw,36px);
+      border-radius:16px;
+      background:rgba(20,20,22,0.28);
+      backdrop-filter:blur(16px) saturate(1.2);
+      -webkit-backdrop-filter:blur(16px) saturate(1.2);
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow:0 8px 32px rgba(0,0,0,0.25);
+      max-width:calc(100% - 32px);
+      opacity:0;
+      transition:opacity 0.6s ease 0.7s;
+    }
+    nav.visible { opacity:1; }
+    nav a {
+      font-family:'Spectral',serif;
+      font-style:italic;
+      font-weight:400;
+      font-size:clamp(0.95rem,2vw,1.2rem);
+      color:#f4f2ee;
+      text-decoration:none;
+      letter-spacing:0.01em;
+      padding:2px 0;
+      border-bottom:1.5px solid transparent;
+      transition:border-color 0.3s ease, opacity 0.3s ease;
+      text-shadow:0 1px 8px rgba(0,0,0,0.4);
+      white-space:nowrap;
+    }
+    nav a:hover { border-bottom-color:currentColor; opacity:0.85; }
+    nav a.current { border-bottom-color:rgba(244,242,238,0.5); }
+
+    @media (max-width:540px){
+      .works { grid-template-columns:1fr; }
+      nav { gap:6px 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg"><img id="bgImg" src="images/IMG_6631.jpg" alt=""></div>
+
+  <div class="page">
+    <header class="intro" id="intro">
+      <h1>Scripts</h1>
+      <p>Plays &amp; works for performance</p>
+    </header>
+
+    <div class="works" id="works">
+      <!-- Each card links to its own page (to be built). Update href when ready. -->
+      <a class="work" href="logue-lake.html">
+        <div class="num">01</div>
+        <h2>Logue Lake</h2>
+        <div class="meta">A queer cabin-in-the-woods horror</div>
+        <div class="arrow">→</div>
+      </a>
+
+      <a class="work" href="all-that-is-solid.html">
+        <div class="num">02</div>
+        <h2>All That Is Solid Melts Into Air</h2>
+        <div class="meta">Would you want to live forever?</div>
+        <div class="arrow">→</div>
+      </a>
+
+      <a class="work" href="hive-mind.html">
+        <div class="num">03</div>
+        <h2>Hive Mind</h2>
+        <div class="meta">A bee cult takes over</div>
+        <div class="arrow">→</div>
+      </a>
+
+      <a class="work" href="girl-in-the-wood.html">
+        <div class="num">04</div>
+        <h2>Girl in the Wood</h2>
+        <div class="meta">A spooky forest fairytale</div>
+        <div class="arrow">→</div>
+      </a>
+
+      <a class="work" href="the-lost-tape.html">
+        <div class="num">05</div>
+        <h2>The Lost Tape</h2>
+        <div class="meta">Micro dramas on tape</div>
+        <div class="arrow">→</div>
+      </a>
+
+      <a class="work" href="deadline-gang.html">
+        <div class="num">06</div>
+        <h2>Deadline Gang</h2>
+        <div class="meta">A writing program</div>
+        <div class="arrow">→</div>
+      </a>
+    </div>
+  </div>
+
+  <nav id="nav">
+    <a href="index.html">Home</a>
+    <a href="provenance.html">Provenance — An Art Game</a>
+    <a href="scripts.html" class="current">Scripts</a>
+    <a href="bio.html">Bio</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+
+  <script>
+    const img = document.getElementById('bgImg');
+    const intro = document.getElementById('intro');
+    const nav = document.getElementById('nav');
+    const works = Array.from(document.querySelectorAll('.work'));
+
+    function reveal() {
+      intro.classList.add('visible');
+      nav.classList.add('visible');
+      // staggered reveal of the work cards
+      works.forEach((w, i) => {
+        setTimeout(() => w.classList.add('visible'), 200 + i * 110);
+      });
+    }
+    if (img.complete) {
+      img.classList.add('loaded');
+      reveal();
+    } else {
+      img.addEventListener('load', () => { img.classList.add('loaded'); reveal(); });
+      img.addEventListener('error', reveal);
+    }
+  </script>
+</body>
+</html>
