@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Lost Tape — Geordie Crawley</title>
+  <title>Contact — Geordie Crawley</title>
   <link rel="icon" type="image/png" href="/favicon.png">
   <script defer src="https://cloud.umami.is/script.js" data-website-id="6e8639e8-bf58-459d-9a37-5f0f82788902"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,93 +28,88 @@
     .bg img.loaded { opacity:1; }
     .bg::after {
       content:""; position:absolute; inset:0;
-      background:linear-gradient(180deg, rgba(8,9,12,0.42) 0%, rgba(8,9,12,0.34) 35%, rgba(8,9,12,0.64) 100%);
+      background:linear-gradient(180deg, rgba(8,9,12,0.46) 0%, rgba(8,9,12,0.38) 35%, rgba(8,9,12,0.66) 100%);
     }
 
     .page {
       position:relative; z-index:1;
       min-height:100vh;
-      display:flex; flex-direction:column; align-items:center;
-      padding:clamp(70px,9vh,120px) clamp(20px,5vw,60px) clamp(120px,16vh,180px);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding:clamp(80px,10vh,140px) clamp(20px,5vw,60px) clamp(120px,16vh,180px);
     }
 
     .container {
       width:100%;
-      max-width:760px;
+      max-width:520px;
       opacity:0; transform:translateY(16px);
       transition:opacity 0.9s ease 0.25s, transform 0.9s ease 0.25s;
     }
     .container.visible { opacity:1; transform:translateY(0); }
 
     .title-block { text-align:center; margin-bottom:clamp(28px,4vh,44px); }
-    .title-block .eyebrow {
-      font-family:'IBM Plex Mono',monospace;
-      font-size:0.74rem;
-      letter-spacing:0.16em;
-      text-transform:uppercase;
-      color:rgba(244,242,238,0.6);
-      margin-bottom:16px;
-    }
     .title-block h1 {
       font-family:'IBM Plex Mono',monospace;
       font-weight:700;
-      font-size:clamp(2.4rem,7vw,4.4rem);
+      font-size:clamp(2.4rem,7vw,4rem);
       letter-spacing:-0.02em;
       line-height:1.0;
       text-shadow:0 2px 40px rgba(0,0,0,0.5);
     }
-    .title-block .tagline {
+    .title-block p {
       font-family:'Spectral',serif;
       font-style:italic;
-      font-size:clamp(1.05rem,2.2vw,1.35rem);
-      margin-top:18px;
+      font-size:clamp(1.05rem,2.2vw,1.3rem);
+      margin-top:16px;
       color:rgba(244,242,238,0.9);
       text-shadow:0 1px 14px rgba(0,0,0,0.5);
     }
 
-    .panel {
-      padding:clamp(28px,3.6vw,46px);
-      border-radius:18px;
+    .links {
+      display:flex; flex-direction:column; gap:12px;
+    }
+    .clink {
+      display:flex; align-items:center; gap:18px;
+      padding:18px 24px;
+      border-radius:14px;
       background:rgba(18,18,20,0.42);
-      backdrop-filter:blur(20px) saturate(1.2);
-      -webkit-backdrop-filter:blur(20px) saturate(1.2);
+      backdrop-filter:blur(18px) saturate(1.2);
+      -webkit-backdrop-filter:blur(18px) saturate(1.2);
       border:1px solid rgba(255,255,255,0.14);
-      box-shadow:0 8px 32px rgba(0,0,0,0.3);
+      box-shadow:0 8px 28px rgba(0,0,0,0.28);
+      color:#f4f2ee;
+      text-decoration:none;
+      transition:background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
     }
-    .panel p {
-      font-family:'Spectral',serif;
-      font-size:clamp(1.02rem,1.5vw,1.16rem);
-      line-height:1.7;
-      margin-bottom:1.1em;
-      color:#ebe9e4;
-      text-shadow:0 1px 10px rgba(0,0,0,0.4);
+    .clink:hover {
+      background:rgba(30,30,32,0.5);
+      border-color:rgba(255,255,255,0.3);
+      transform:translateY(-2px);
     }
-    .panel p:last-child { margin-bottom:0; }
-
-    /* SoundCloud embed */
-    .player {
-      margin-top:clamp(24px,3vh,34px);
-      border-radius:12px;
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,0.12);
-      box-shadow:0 6px 24px rgba(0,0,0,0.3);
-      background:rgba(0,0,0,0.2);
-    }
-    .player iframe { display:block; }
-    .player-credit {
-      margin-top:12px;
-      font-size:10px;
-      color:#cccccc;
-      line-break:anywhere;
-      word-break:normal;
-      overflow:hidden;
-      white-space:nowrap;
-      text-overflow:ellipsis;
+    .clink .label {
+      flex:0 0 auto;
       font-family:'IBM Plex Mono',monospace;
-      font-weight:400;
+      font-size:0.7rem;
+      letter-spacing:0.12em;
+      text-transform:uppercase;
+      color:rgba(244,242,238,0.55);
+      width:84px;
     }
-    .player-credit a { color:rgba(244,242,238,0.7); text-decoration:none; }
-    .player-credit a:hover { color:#fff; }
+    .clink .value {
+      flex:1 1 auto;
+      font-family:'Spectral',serif;
+      font-size:clamp(1.05rem,1.8vw,1.25rem);
+      line-height:1.3;
+      word-break:break-word;
+    }
+    .clink .arrow {
+      flex:0 0 auto;
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.95rem;
+      color:rgba(244,242,238,0.5);
+      opacity:0; transform:translateX(-4px);
+      transition:opacity 0.3s ease, transform 0.3s ease;
+    }
+    .clink:hover .arrow { opacity:1; transform:translateX(0); }
 
     nav {
       position:fixed;
@@ -154,31 +149,42 @@
 
     @media (max-width:560px){
       nav { gap:6px 18px; }
+      .clink .label { width:64px; }
     }
   </style>
 </head>
 <body>
-  <div class="bg"><img id="bgImg" src="images/JP-SK_-_23.jpg" alt=""></div>
+  <div class="bg"><img id="bgImg" src="images/F1010004.jpg" alt=""></div>
 
   <div class="page">
     <div class="container" id="container">
 
       <div class="title-block">
-        <div class="eyebrow">Experimental recordings</div>
-        <h1>The Lost Tape</h1>
-        <div class="tagline">Micro dramas on tape</div>
+        <h1>Contact</h1>
+        <p>Get in touch, or find me elsewhere</p>
       </div>
 
-      <div class="panel">
-        <p>This was a series of experimental recordings and compositions made when I had a lot of free time on my hands. Some were written, some were improvised. None of them particularly nice to listen to.</p>
-        <p>Enjoy???</p>
-
-        <div class="player">
-          <iframe width="100%" height="450" scrolling="no" frameborder="no" allow="autoplay; encrypted-media" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/soundcloud%253Aplaylists%253A458255520&color=%23f4f2ee&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true"></iframe>
-        </div>
-        <div class="player-credit">
-          <a href="https://soundcloud.com/gcrawl" title="G.Crawl" target="_blank" rel="noopener">G.Crawl</a> · <a href="https://soundcloud.com/gcrawl/sets/i-see-you" title="I See You" target="_blank" rel="noopener">I See You</a>
-        </div>
+      <div class="links">
+        <a class="clink" href="mailto:geordie.business@hotmail.com">
+          <span class="label">Email</span>
+          <span class="value">geordie.business@hotmail.com</span>
+          <span class="arrow">→</span>
+        </a>
+        <a class="clink" href="https://instagram.com/g.crawl" target="_blank" rel="noopener">
+          <span class="label">Instagram</span>
+          <span class="value">@g.crawl</span>
+          <span class="arrow">↗</span>
+        </a>
+        <a class="clink" href="https://tiktok.com/@gcrawl" target="_blank" rel="noopener">
+          <span class="label">TikTok</span>
+          <span class="value">@gcrawl</span>
+          <span class="arrow">↗</span>
+        </a>
+        <a class="clink" href="https://geordiedotlove.substack.com" target="_blank" rel="noopener">
+          <span class="label">Substack</span>
+          <span class="value">geordiedotlove.substack.com</span>
+          <span class="arrow">↗</span>
+        </a>
       </div>
 
     </div>
@@ -186,6 +192,7 @@
 
   <nav id="nav">
     <a href="/">Home</a>
+    <a href="/game">Provenance — An Art Game</a>
     <a href="/scripts">Creative Works</a>
     <a href="/bio">Bio</a>
   </nav>
@@ -194,7 +201,6 @@
     const img = document.getElementById('bgImg');
     const container = document.getElementById('container');
     const nav = document.getElementById('nav');
-
     function reveal() {
       container.classList.add('visible');
       nav.classList.add('visible');

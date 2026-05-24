@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 — Geordie Crawley</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="6e8639e8-bf58-459d-9a37-5f0f82788902"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Spectral:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      min-height:100vh;
+      font-family:'IBM Plex Mono',monospace;
+      background:#0a0a0a;
+      color:#f4f2ee;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      padding:clamp(60px,9vh,110px) clamp(20px,5vw,60px) clamp(110px,15vh,170px);
+      text-align:center;
+    }
+
+    .wrap {
+      max-width:440px; width:100%;
+      opacity:0; transform:translateY(16px);
+      transition:opacity 0.9s ease 0.15s, transform 0.9s ease 0.15s;
+    }
+    .wrap.visible { opacity:1; transform:translateY(0); }
+
+    .icecream {
+      width:100%; max-width:340px;
+      aspect-ratio:1/1;
+      margin:0 auto clamp(24px,3.6vh,40px);
+      border-radius:18px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow:0 10px 40px rgba(0,0,0,0.4);
+    }
+    .icecream img { width:100%; height:100%; object-fit:cover; display:block; }
+
+    h1 {
+      font-family:'IBM Plex Mono',monospace;
+      font-weight:700;
+      font-size:clamp(1.6rem,5vw,2.4rem);
+      letter-spacing:-0.02em;
+      line-height:1.1;
+      margin-bottom:16px;
+    }
+    .subtitle {
+      font-family:'Spectral',serif;
+      font-style:italic;
+      font-size:clamp(1.1rem,2.6vw,1.4rem);
+      line-height:1.4;
+      color:rgba(244,242,238,0.9);
+      margin-bottom:clamp(28px,4vh,40px);
+    }
+
+    .links {
+      display:flex; justify-content:center; align-items:center;
+      gap:clamp(14px,3vw,32px);
+      flex-wrap:wrap;
+    }
+    .links a {
+      font-family:'Spectral',serif;
+      font-style:italic;
+      font-size:clamp(0.95rem,2vw,1.15rem);
+      color:#f4f2ee;
+      text-decoration:none;
+      letter-spacing:0.01em;
+      padding:2px 0;
+      border-bottom:1.5px solid transparent;
+      transition:border-color 0.3s ease, opacity 0.3s ease;
+      white-space:nowrap;
+    }
+    .links a:hover { border-bottom-color:currentColor; opacity:0.85; }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="wrap">
+    <div class="icecream">
+      <img src="/images/404-icecream.jpg" alt="A melted ice cream on the pavement">
+    </div>
+    <h1>404 — Page Not Found</h1>
+    <p class="subtitle">When will the government stop your sinful hand?</p>
+    <div class="links">
+      <a href="/">Home</a>
+      <a href="/game">Provenance</a>
+      <a href="/scripts">Creative Works</a>
+      <a href="/bio">Bio</a>
+      <a href="/contact">Contact</a>
+    </div>
+  </div>
+
+  <script>
+    requestAnimationFrame(() => document.getElementById('wrap').classList.add('visible'));
+  </script>
+</body>
+</html>
