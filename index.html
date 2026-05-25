@@ -1,318 +1,749 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Geordie Crawley</title>
-  <link rel="icon" type="image/png" href="/favicon.png">
-  <script defer src="https://cloud.umami.is/script.js" data-website-id="6e8639e8-bf58-459d-9a37-5f0f82788902"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Spectral:ital,wght@1,400;1,500&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-    html, body {
-      height:100%; overflow:hidden;
-      font-family:'IBM Plex Mono',monospace;
-      background:#0a0a0a;
-    }
-    .bg { position:fixed; inset:0; z-index:0; }
-    .bg img {
-      width:100%; height:100%; object-fit:cover;
-      opacity:0; transition:opacity 1.2s ease;
-    }
-    .bg img.loaded { opacity:1; }
-
-    .content {
-      position:relative; z-index:1; height:100%;
-      display:flex; align-items:center; justify-content:center;
-      padding:clamp(24px,5vw,60px);
-      text-align:center;
-    }
-
-    .name {
-      font-size:clamp(2.2rem,8vw,6rem);
-      font-weight:700;
-      letter-spacing:-0.02em;
-      line-height:1.05;
-      opacity:0;
-      transition:opacity 0.8s ease 0.4s;
-      white-space:nowrap;
-      user-select:none;
-    }
-    .name.visible { opacity:1; }
-    .name .letter {
-      display:inline-block;
-      will-change:transform;
-      transition:transform 0.55s cubic-bezier(0.34,1.56,0.4,1);
-    }
-    .name .space { display:inline-block; width:0.4em; }
-
-    nav {
-      position:fixed;
-      bottom:clamp(20px,4vw,44px);
-      left:50%; transform:translateX(-50%);
-      display:flex; justify-content:center; align-items:center;
-      gap:clamp(14px,3vw,40px);
-      flex-wrap:wrap;
-      z-index:2;
-      padding:14px clamp(20px,4vw,36px);
-      border-radius:16px;
-      background:rgba(20,20,22,0.28);
-      backdrop-filter:blur(16px) saturate(1.2);
-      -webkit-backdrop-filter:blur(16px) saturate(1.2);
-      border:1px solid rgba(255,255,255,0.14);
-      box-shadow:0 8px 32px rgba(0,0,0,0.25);
-      opacity:0;
-      transition:opacity 0.6s ease 0.8s;
-      max-width:calc(100% - 32px);
-    }
-    nav.visible { opacity:1; }
-    nav a {
-      font-family:'Spectral',serif;
-      font-style:italic;
-      font-weight:400;
-      font-size:clamp(0.95rem,2vw,1.2rem);
-      color:#f4f2ee;
-      text-decoration:none;
-      letter-spacing:0.01em;
-      padding:2px 0;
-      border-bottom:1.5px solid transparent;
-      transition:border-color 0.3s ease, opacity 0.3s ease;
-      text-shadow:0 1px 8px rgba(0,0,0,0.4);
-      white-space:nowrap;
-    }
-    nav a:hover { border-bottom-color:currentColor; opacity:0.85; }
-    #sampler { display:none; }
-
-    @media (max-width:540px){
-      .name { white-space:normal; }
-      nav { gap:6px 18px; }
-    }
-  
-    /* --- Mobile collapsible nav --- */
-    .nav-toggle { display:none; }
-    .nav-links { display:contents; }
-    @media (max-width:600px){
-      nav {
-        flex-direction:column;
-        gap:0;
-        padding:0;
-        width:auto;
-        max-width:calc(100% - 32px);
-        overflow:hidden;
-      }
-      .nav-toggle {
-        display:flex; align-items:center; justify-content:center; gap:9px;
-        font-family:'IBM Plex Mono',monospace;
-        font-size:0.82rem; letter-spacing:0.06em;
-        color:#f4f2ee;
-        background:none; border:none; cursor:pointer;
-        padding:13px 26px;
-        width:100%;
-        text-shadow:0 1px 8px rgba(0,0,0,0.4);
-      }
-      .nav-toggle .bars {
-        display:inline-flex; flex-direction:column; gap:3px;
-      }
-      .nav-toggle .bars span {
-        display:block; width:16px; height:1.6px; background:currentColor;
-        transition:transform 0.3s ease, opacity 0.3s ease;
-      }
-      nav.open .nav-toggle .bars span:nth-child(1){ transform:translateY(4.6px) rotate(45deg); }
-      nav.open .nav-toggle .bars span:nth-child(2){ opacity:0; }
-      nav.open .nav-toggle .bars span:nth-child(3){ transform:translateY(-4.6px) rotate(-45deg); }
-      .nav-links {
-        display:flex; flex-direction:column; align-items:center;
-        gap:0;
-        max-height:0; overflow:hidden;
-        width:100%;
-        transition:max-height 0.4s ease;
-      }
-      nav.open .nav-links { max-height:60vh; }
-      .nav-links a {
-        padding:13px 26px;
-        width:100%; text-align:center;
-        border-top:1px solid rgba(255,255,255,0.10);
-        border-bottom:none;
-      }
-      .nav-links a:hover { border-bottom:none; }
-    }
-  </style>
+<meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="https://lonepine23.github.io/oujia-stain/game/Favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROVENANCE — guess the artwork</title>
+<!-- Link preview / social share card -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Provenance — Competitive Art History">
+<meta property="og:description" content="No plaque? No problem. Name the artist, movement, year and country of famous artworks.">
+<meta property="og:url" content="https://geordie.lol/game">
+<meta property="og:image" content="https://lonepine23.github.io/oujia-stain/game/imagepreview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Provenance — Competitive Art History">
+<meta name="twitter:description" content="No plaque? No problem. Name the artist, movement, year and country of famous artworks.">
+<meta name="twitter:image" content="https://lonepine23.github.io/oujia-stain/game/imagepreview.png">
+<!-- Umami analytics (privacy-friendly, anonymous) -->
+<script defer src="https://cloud.umami.is/script.js" data-website-id="6e8639e8-bf58-459d-9a37-5f0f82788902"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,900&family=DM+Mono:wght@400;500&display=swap');
+  :root{--ink:#1a1714;--paper:#f4efe6;--card:#fbf8f1;--line:#d8cfbe;--accent:#b3402d;--gold:#9a7b3f;--green:#4a6b3f;--muted:#8a8174;--shadow:rgba(40,30,20,0.12);--framemat:#f4efe6;--field:#ffffff;}
+  [data-theme="dark"]{--ink:#e4e8f0;--paper:#141a26;--card:#1b2230;--line:#2e384a;--accent:#e07a62;--gold:#c9aa6a;--green:#7fb08a;--muted:#8a93a6;--shadow:rgba(0,0,0,0.5);--framemat:#10141d;--field:#222b3b;}
+  html{transition:background 0.3s;}
+  [data-theme="dark"] input:disabled{background:#1a2030;}
+  [data-theme="dark"] .suggestions div{border-bottom-color:#2a3346;}
+  [data-theme="dark"] .suggestions div:hover,[data-theme="dark"] .suggestions div.active{background:#2a3346;}
+  [data-theme="dark"] .suggestions .grouphead,[data-theme="dark"] .suggestions .grouphead:hover{background:#10141d;}
+  [data-theme="dark"] .choice:hover:not(.sel){background:#2a3346;}
+  [data-theme="dark"] .hintbar{background:#1a2030;}
+  [data-theme="dark"] .titlecaption,[data-theme="dark"] .es-bar{background:var(--card);}
+  [data-theme="dark"] .es-bar{background:#2a3346;}
+  [data-theme="dark"] .artwrap{background:#0d1019;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Fraunces',serif;background:var(--paper);background-image:radial-gradient(circle at 20% 10%,rgba(179,64,45,0.04),transparent 40%),radial-gradient(circle at 80% 90%,rgba(154,123,63,0.05),transparent 40%);color:var(--ink);min-height:100vh;padding:24px 16px 60px;display:flex;justify-content:center;}
+  .wrap{width:100%;max-width:560px;}
+  header{text-align:center;margin-bottom:22px;position:relative;}
+  .kicker{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.35em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+  h1{font-weight:900;font-size:44px;letter-spacing:-0.02em;line-height:0.95;}
+  h1 .dot{color:var(--accent);}
+  .subtitle{font-style:italic;font-size:15px;color:var(--muted);margin-top:8px;}
+  .scorebar{display:flex;justify-content:space-between;align-items:center;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.05em;color:var(--muted);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:10px 4px;margin-bottom:20px;}
+  .scorebar .total{color:var(--ink);font-weight:500;}
+  .scorebar .total b{color:var(--accent);font-size:15px;}
+  .frame{background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 18px 40px -20px var(--shadow);overflow:hidden;}
+  .artwrap{background:#2a2520;position:relative;min-height:300px;display:flex;align-items:center;justify-content:center;padding:28px;}
+  .artwrap img{max-width:100%;max-height:460px;display:block;box-shadow:0 10px 30px rgba(0,0,0,0.5);border:6px solid var(--framemat);cursor:zoom-in;}
+  .zoomcue{position:absolute;bottom:10px;right:10px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#f4efe6;background:rgba(0,0,0,0.35);border-radius:50%;pointer-events:none;opacity:0.55;transition:opacity 0.2s;}
+  .artwrap:hover .zoomcue{opacity:0.8;}
+  .lightbox{position:fixed;inset:0;background:rgba(10,8,6,0.92);z-index:200;display:none;align-items:center;justify-content:center;padding:30px;cursor:zoom-out;}
+  .lightbox.open{display:flex;}
+  .lightbox img{max-width:96vw;max-height:92vh;box-shadow:0 20px 60px rgba(0,0,0,0.6);border:8px solid var(--framemat);cursor:default;}
+  .lightbox-close{position:fixed;top:18px;right:22px;font-family:'DM Mono',monospace;font-size:26px;line-height:1;color:#f4efe6;background:none;border:none;cursor:pointer;padding:6px 10px;opacity:0.8;}
+  .lightbox-close:hover{opacity:1;}
+  .loading,.imgerr{color:#cdbfa6;font-family:'DM Mono',monospace;font-size:13px;text-align:center;letter-spacing:0.1em;padding:60px 20px;line-height:1.7;}
+  .spinner{width:26px;height:26px;border:2px solid rgba(205,191,166,0.25);border-top-color:#cdbfa6;border-radius:50%;margin:0 auto 14px;animation:spin 0.9s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .body{padding:22px 20px 24px;}
+  .field{margin-bottom:20px;}
+  .field-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:8px;align-items:baseline;}
+  .field-label .pts{color:var(--gold);transition:color 0.2s;}
+  .field-label .pts.reduced{color:var(--accent);}
+  input[type=text],input[type=number]{width:100%;font-family:'Fraunces',serif;font-size:17px;padding:11px 13px;background:var(--field);border:1px solid var(--line);border-radius:3px;color:var(--ink);transition:border-color 0.2s;}
+  input:focus{outline:none;border-color:var(--accent);}
+  input:disabled{background:#f0ebe0;color:var(--muted);}
+  input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+  input[type=number]{-moz-appearance:textfield;}
+  .yearrow{display:flex;align-items:center;gap:10px;}
+  .yearrow input[type=number]{flex:1;}
+  .era-toggle{display:flex;border:1px solid var(--line);border-radius:3px;overflow:hidden;font-family:'DM Mono',monospace;font-size:12px;}
+  .era-toggle button{background:var(--field);border:none;padding:11px 12px;cursor:pointer;color:var(--muted);font-family:inherit;font-size:inherit;}
+  .era-toggle button.on{background:var(--ink);color:var(--paper);}
+  /* combobox (type-to-filter) shared */
+  .combo{position:relative;}
+  .combo-row{display:flex;gap:8px;align-items:stretch;}
+  .combo-row input{flex:1;}
+  .listbtn{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;background:var(--field);border:1px solid var(--line);color:var(--muted);padding:0 13px;border-radius:3px;cursor:pointer;white-space:nowrap;}
+  .listbtn:hover{border-color:var(--accent);color:var(--accent);}
+  .listbtn:disabled{opacity:0.45;cursor:default;}
+  .suggestions{position:absolute;top:calc(100% + 3px);left:0;right:0;background:var(--field);border:1px solid var(--line);border-radius:3px;box-shadow:0 10px 24px -8px var(--shadow);z-index:30;max-height:240px;overflow-y:auto;}
+  .suggestions div{padding:9px 13px;font-size:15px;cursor:pointer;border-bottom:1px solid #f0ebe0;}
+  .suggestions div:last-child{border-bottom:none;}
+  .suggestions div:hover,.suggestions div.active{background:#f6efe0;color:var(--accent);}
+  .suggestions .grouphead{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);background:#f0ebe0;cursor:default;padding:6px 13px;}
+  .suggestions .grouphead:hover{background:#f0ebe0;color:var(--muted);}
+  /* artist hint */
+  .artist-hint{display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:10px;}
+  .narrowbtn{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;background:none;border:1px solid var(--gold);color:var(--gold);padding:7px 12px;border-radius:3px;cursor:pointer;white-space:nowrap;}
+  .narrowbtn:hover{background:var(--gold);color:var(--paper);}
+  .narrowbtn:disabled{opacity:0.4;cursor:default;background:none;color:var(--gold);}
+  .narrow-note{font-style:italic;font-size:13px;color:var(--muted);}
+  .choices{display:flex;flex-direction:column;gap:8px;}
+  .choice{font-family:'Fraunces',serif;font-size:16px;text-align:left;padding:12px 14px;background:var(--field);border:1px solid var(--line);border-radius:3px;color:var(--ink);cursor:pointer;transition:border-color 0.15s,color 0.15s;}
+  .choice:hover{border-color:var(--accent);background:#f6efe0;}
+  .choice.sel,.choice.sel:hover{border-color:var(--accent);background:var(--accent);color:var(--paper);}
+  .titlecaption{background:var(--card);border-bottom:1px solid var(--line);padding:14px 20px;text-align:center;font-style:italic;font-size:17px;color:var(--ink);}
+  .titlecaption .tc-label{font-family:'DM Mono',monospace;font-style:normal;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:3px;}
+  .hintbtn{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;background:none;border:1px solid var(--gold);color:var(--gold);padding:8px 12px;border-radius:3px;cursor:pointer;white-space:nowrap;}
+  .hintbtn:hover{background:var(--gold);color:var(--paper);}
+  .hintbtn:disabled{opacity:0.4;cursor:default;}
+  .submit{width:100%;font-family:'DM Mono',monospace;font-size:13px;letter-spacing:0.2em;text-transform:uppercase;padding:15px;background:var(--ink);color:var(--paper);border:none;border-radius:3px;cursor:pointer;transition:background 0.2s,transform 0.1s;margin-top:4px;}
+  .submit:hover{background:var(--accent);}
+  .submit:active{transform:scale(0.99);}
+  .results{padding:0;}
+  .reveal{background:#2a2018;color:#f4efe6;padding:26px 24px 24px;text-align:center;}
+  .reveal .rt-title{font-size:26px;font-weight:900;line-height:1.1;letter-spacing:-0.01em;color:#f4efe6;}
+  .reveal .rt-artist{font-size:18px;font-style:italic;margin-top:6px;color:#e3d6c0;}
+  .reveal .rt-meta{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#bcab8e;margin-top:12px;}
+  [data-theme="dark"] .reveal{background:#1b2230;color:#f1ede4;}
+  [data-theme="dark"] .reveal .rt-title{color:#f1ede4;}
+  [data-theme="dark"] .reveal .rt-artist{color:#cbd2dd;}
+  [data-theme="dark"] .reveal .rt-meta{color:#9aa3b2;}
+  .breakdown{padding:6px 20px 20px;}
+  .res-row{display:flex;justify-content:space-between;align-items:baseline;padding:12px 0;border-bottom:1px solid var(--line);}
+  .res-row:last-of-type{border-bottom:none;}
+  .res-cat{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);}
+  .res-detail{font-size:14px;margin-top:3px;color:var(--muted);}
+  .res-detail .ok{color:var(--green);font-weight:500;}
+  .res-pts{font-family:'DM Mono',monospace;font-size:17px;font-weight:500;white-space:nowrap;padding-left:12px;}
+  .res-pts.good{color:var(--green);} .res-pts.mid{color:var(--gold);} .res-pts.low{color:var(--accent);}
+  .roundtotal{text-align:center;margin:16px 0 6px;}
+  .roundtotal .num{font-size:38px;font-weight:900;color:var(--accent);}
+  .roundtotal .lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);}
+  footer{text-align:center;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.15em;color:var(--muted);margin-top:22px;text-transform:uppercase;}
+  .startscreen{padding:54px 30px 50px;text-align:center;}
+  .ss-eyebrow{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);margin-bottom:18px;}
+  .ss-choices{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+  .ss-round{font-family:'Fraunces',serif;font-size:20px;font-weight:600;padding:18px 26px;background:var(--field);border:1px solid var(--line);border-radius:4px;color:var(--ink);cursor:pointer;transition:all 0.15s;}
+  .ss-round:hover{background:var(--ink);color:var(--paper);border-color:var(--ink);transform:translateY(-2px);}
+  .ss-note{font-style:italic;font-size:14px;color:var(--muted);margin-top:24px;line-height:1.5;max-width:380px;margin-left:auto;margin-right:auto;}
+  .ss-intro{margin-top:0;margin-bottom:30px;font-size:15px;}
+  .ss-rules-btn{margin-top:26px;background:none;border:none;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);cursor:pointer;padding:8px;text-decoration:underline;text-underline-offset:3px;}
+  .ss-rules-btn:hover{color:var(--accent);}
+  .ss-byline{margin-top:10px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);}
+  .ss-byline a{color:var(--muted);text-decoration:underline;text-underline-offset:3px;}
+  .ss-byline a:hover{color:var(--accent);}
+  .rulesscreen{padding:40px 30px;text-align:left;max-width:480px;margin:0 auto;}
+  .rules-h{font-family:'Fraunces',serif;font-size:20px;font-weight:700;color:var(--accent);margin:24px 0 8px;}
+  .rulesscreen .rules-h:first-child{margin-top:0;}
+  .rules-p{font-size:15px;line-height:1.6;color:var(--ink);margin-bottom:10px;}
+  .rules-list{list-style:none;margin:0 0 10px;padding:0;}
+  .rules-list li{font-size:14px;line-height:1.55;color:var(--ink);padding:7px 0 7px 16px;border-left:2px solid var(--line);margin-bottom:8px;}
+  .rulesscreen .es-again{margin-top:24px;}
+  .ss-best{margin-top:26px;padding-top:20px;border-top:1px solid var(--line);font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.08em;color:var(--muted);max-width:300px;margin-left:auto;margin-right:auto;}
+  .ssb-head{text-transform:uppercase;letter-spacing:0.2em;font-size:10px;margin-bottom:10px;}
+  .ssb-row{display:flex;justify-content:space-between;padding:4px 0;}
+  .ssb-mode{text-transform:uppercase;}
+  .ssb-val b{color:var(--accent);}
+  .es-newbest{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:var(--green);margin-bottom:10px;}
+  .endscreen{padding:44px 30px 40px;text-align:center;}
+  .es-eyebrow{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.25em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+  .es-rating{font-size:38px;font-weight:900;line-height:1.05;letter-spacing:-0.02em;color:var(--accent);margin-bottom:10px;}
+  .es-blurb{font-style:italic;font-size:16px;color:var(--ink);margin-bottom:24px;line-height:1.5;}
+  .es-score{font-family:'DM Mono',monospace;font-size:13px;letter-spacing:0.1em;color:var(--muted);margin-bottom:6px;}
+  .es-score b{color:var(--ink);font-size:22px;}
+  .es-bar{height:10px;background:#e7ddc9;border-radius:5px;overflow:hidden;margin:18px 0 28px;}
+  .es-bar-fill{height:100%;background:var(--accent);border-radius:5px;}
+  .es-again{width:100%;font-family:'DM Mono',monospace;font-size:13px;letter-spacing:0.2em;text-transform:uppercase;padding:15px;background:var(--ink);color:var(--paper);border:none;border-radius:3px;cursor:pointer;}
+  .es-again:hover{background:var(--accent);}
+  .themesw{display:inline-flex;border:1px solid var(--line);border-radius:3px;overflow:hidden;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.06em;text-transform:uppercase;}
+  .themesw button{background:transparent;border:none;border-left:1px solid var(--line);padding:6px 9px;cursor:pointer;color:var(--muted);font-family:inherit;font-size:inherit;}
+  .themesw button:first-child{border-left:none;}
+  .themesw button.on{background:var(--ink);color:var(--paper);}
+  .hidden{display:none !important;}
+</style>
 </head>
 <body>
-  <canvas id="sampler"></canvas>
-  <div class="bg"><img id="bgImg" alt="" crossorigin="anonymous"></div>
-  <div class="content">
-    <h1 class="name" id="name" aria-label="Geordie Crawley"></h1>
+<div class="wrap">
+  <header>
+    <div class="kicker">a guessing game</div>
+    <h1 id="homeLink" style="cursor:pointer">Provenance<span class="dot">.</span></h1>
+    <div class="subtitle">No plaque? No problem.</div>
+  </header>
+  <div class="scorebar hidden" id="scorebar">
+    <span>Round <span id="roundNum">1</span><span id="roundTotal"></span></span>
+    <span class="total">SCORE&nbsp; <b id="totalScore">0</b></span>
   </div>
-  <nav id="nav">
-    <button class="nav-toggle" aria-label="Menu"><span class="bars"><span></span><span></span><span></span></span>Menu</button>
-    <div class="nav-links">
-    <a href="/game">Provenance</a>
-    <a href="/scripts">Creative Works</a>
-    <a href="/bio">Bio</a>
-    <a href="/contact">Contact</a>
+  <div class="frame">
+    <!-- START SCREEN -->
+    <div class="startscreen" id="startScreen">
+      <div class="ss-note ss-intro">Name the artist, movement, year and country for each work. The closer you are, the more you score.</div>
+      <div class="ss-eyebrow">A game in</div>
+      <div class="ss-choices">
+        <button class="ss-round" data-n="5">5 rounds</button>
+        <button class="ss-round" data-n="10">10 rounds</button>
+        <button class="ss-round" data-n="15">15 rounds</button>
+      </div>
+      <div class="ss-best hidden" id="ssBest"></div>
+      <button class="ss-rules-btn" id="rulesBtn">How to play & scoring →</button>
+      <div class="ss-byline">By <a href="https://geordie.lol" target="_blank" rel="noopener">Geordie Crawley</a></div>
     </div>
-  </nav>
+    <!-- GAME (hidden until started) -->
+    <div id="gameArea" class="hidden">
+    <div class="artwrap" id="artwrap"><div class="loading"><div class="spinner"></div>HANGING THE WORK…</div></div>
+    <div class="titlecaption" id="titleCaption"></div>
+    <div class="body" id="guessPanel">
 
-  <script>
-    /* PHOTOS_START — do not edit this list by hand; run update-photos.command */
-    const photos = [
-      'images/F1000037.jpg',
-      'images/F1010002.jpg',
-      'images/F1010004.jpg',
-      'images/F1010004_2.jpg',
-      'images/F1010010.jpg',
-      'images/F1010014.jpg',
-      'images/F1010020.jpg',
-      'images/F1010025.jpg',
-      'images/F1010032.jpg',
-      'images/F1020011.jpg',
-      'images/F1020013.jpg',
-      'images/IMG_0302-positive.jpg',
-      'images/IMG_0312-positive.jpg',
-      'images/IMG_0318-positive.jpg',
-      'images/IMG_0322-positive.jpg',
-      'images/IMG_0323-positive.jpg',
-      'images/IMG_0324-positive.jpg',
-      'images/IMG_0328-positive.jpg',
-      'images/IMG_4335.jpg',
-      'images/JP-SK_-_23.jpg'
-    ];
-    /* PHOTOS_END */
-    const img = document.getElementById('bgImg');
-    const nameEl = document.getElementById('name');
-    const navEl = document.getElementById('nav');
-    const canvas = document.getElementById('sampler');
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      <div class="field">
+        <div class="field-label"><span>Artist</span><span class="pts" id="artistPts">1000 pts</span></div>
+        <!-- type-to-filter mode -->
+        <div class="combo" id="artistCombo">
+          <input type="text" id="artistInput" placeholder="Begin typing a name…" autocomplete="off">
+          <div class="suggestions hidden" id="artistSug"></div>
+        </div>
+        <!-- multiple-choice mode (after hint) -->
+        <div class="choices hidden" id="artistChoices"></div>
+        <div class="artist-hint">
+          <span class="narrow-note" id="narrowNote">Not sure? Narrow it down.</span>
+          <button class="narrowbtn" id="narrowBtn">Narrow it down</button>
+        </div>
+      </div>
 
-    const text = 'Geordie Crawley';
-    const letters = [];
-    for (const ch of text) {
-      if (ch === ' ') {
-        const sp = document.createElement('span');
-        sp.className = 'space';
-        nameEl.appendChild(sp);
-      } else {
-        const sp = document.createElement('span');
-        sp.className = 'letter';
-        sp.textContent = ch;
-        nameEl.appendChild(sp);
-        letters.push(sp);
-      }
-    }
+      <div class="field">
+        <div class="field-label"><span>Movement</span><span class="pts" id="movementPts">1000 pts</span></div>
+        <div class="combo" id="movementCombo">
+          <div class="combo-row">
+            <input type="text" id="movementInput" placeholder="Type to filter…" autocomplete="off">
+            <button type="button" class="listbtn" id="movementListBtn">Full list</button>
+          </div>
+          <div class="suggestions hidden" id="movementSug"></div>
+        </div>
+        <div class="choices hidden" id="movementChoices"></div>
+        <div class="artist-hint">
+          <span class="narrow-note" id="movNarrowNote">Not sure? Narrow it down.</span>
+          <button class="narrowbtn" id="movNarrowBtn">Narrow it down</button>
+        </div>
+      </div>
 
-    // Load only ONE random photo per visit
-    const chosen = photos[Math.floor(Math.random() * photos.length)];
-    img.src = chosen;
+      <div class="field">
+        <div class="field-label"><span>Year</span><span class="pts">up to 1000 pts</span></div>
+        <div class="yearrow"><input type="number" id="yearInput" placeholder="e.g. 1889" min="1" max="2026"><div class="era-toggle"><button type="button" id="ceBtn" class="on">CE</button><button type="button" id="bceBtn">BCE</button></div></div>
+      </div>
 
-    function reveal(colour, shadow) {
-      if (colour) {
-        nameEl.style.color = colour;
-        nameEl.style.textShadow = `0 2px 40px ${shadow}, 0 1px 5px ${shadow}`;
-      } else {
-        nameEl.style.color = '#e8e8e8';
-      }
-      nameEl.classList.add('visible');
-      navEl.classList.add('visible');
-    }
+      <div class="field">
+        <div class="field-label"><span>Country of origin</span><span class="pts">up to 1000 pts</span></div>
+        <div class="combo">
+          <div class="combo-row">
+            <input type="text" id="countryInput" placeholder="Type to filter…" autocomplete="off">
+            <button type="button" class="listbtn" id="countryListBtn">Full list</button>
+          </div>
+          <div class="suggestions hidden" id="countrySug"></div>
+        </div>
+      </div>
 
-    img.addEventListener('load', () => {
-      img.classList.add('loaded');
-      let colour = null, shadow = 'rgba(0,0,0,0.5)';
-      try {
-        const s = 64;
-        canvas.width = s; canvas.height = s;
-        ctx.drawImage(img, 0, 0, s, s);
-        const data = ctx.getImageData(0, 0, s, s).data;
-        let tR=0,tG=0,tB=0; const n=s*s;
-        for (let i=0;i<data.length;i+=4){ tR+=data[i]; tG+=data[i+1]; tB+=data[i+2]; }
-        const aR=tR/n, aG=tG/n, aB=tB/n;
-        const lum=(0.299*aR+0.587*aG+0.114*aB)/255;
+      <button class="submit" id="submitBtn">Submit guess</button>
+    </div>
+    <div class="results hidden" id="resultPanel"></div>
+    </div><!-- /gameArea -->
+    <!-- END SCREEN -->
+    <div class="endscreen hidden" id="endScreen"></div>
+    <!-- RULES SCREEN -->
+    <div class="rulesscreen hidden" id="rulesScreen">
+      <h2 class="rules-h">How to play</h2>
+      <p class="rules-p">You're shown a painting — its title is given as a starting clue. Identify four things about it: the <b>artist</b>, the art <b>movement</b>, the <b>year</b> it was made, and its <b>country</b> of origin. Each is scored out of 1000, so a perfect round is 4000 points.</p>
+      <p class="rules-p">For artist and movement you either type your answer (start typing to filter the list) or, if you're stuck, hit <b>“Not sure? Narrow it down”</b> to turn the field into a multiple choice — at a points cost. For year, type a number and pick CE or BCE. For country, type or pick from the list.</p>
+      <p class="rules-p">Click the artwork at any time to see it enlarged.</p>
 
-        const hue=Math.floor(Math.random()*360);
-        const sat=50+Math.floor(Math.random()*40);
-        let light;
-        if (lum>0.55) light=8+Math.floor(Math.random()*18);
-        else if (lum<0.35) light=78+Math.floor(Math.random()*18);
-        else light = (Math.random()>0.3) ? 82+Math.floor(Math.random()*14) : 8+Math.floor(Math.random()*15);
+      <h2 class="rules-h">How scoring works</h2>
+      <p class="rules-p">Two fields are all-or-something, two reward getting close:</p>
+      <ul class="rules-list">
+        <li><b>Artist</b> — 1000 for the right name, 0 otherwise. Spelling is forgiving (surnames and minor variations are accepted).</li>
+        <li><b>Movement</b> — 1000 for a correct movement, 0 otherwise. Many works belong to more than one, and any of them scores.</li>
+        <li><b>Year</b> — 1000 if exact, then you lose 10 points for every year you're off, reaching 0 at 100 years. Some works are dated to a <b>range</b>; any guess inside the range scores full marks, and you're scored from the nearest end if you're outside it.</li>
+        <li><b>Country</b> — 1000 if exact, otherwise scored by how far your country is from the right one, fading to 0 at roughly the other side of the world.</li>
+      </ul>
 
-        colour=`hsl(${hue}, ${sat}%, ${light}%)`;
-        const shadowAlpha = lum>0.5 ? 0.3 : 0.55;
-        shadow=`rgba(0,0,0,${shadowAlpha})`;
-      } catch (e) {
-        // canvas sampling can fail in rare cases; fall back to light text
-        colour = null;
-      }
-      reveal(colour, shadow);
+      <h2 class="rules-h">The “Narrow it down” hint</h2>
+      <p class="rules-p">Stuck on the artist or movement? Narrowing turns it into a multiple choice but caps that field's score: narrow to 4 options for −250, and narrow again to 2 options for another −250 (so the field tops out at 500). Guess wrong after a hint and you simply score 0 for that field — never negative.</p>
+
+      <h2 class="rules-h">Prehistoric works</h2>
+      <p class="rules-p">For very old works, exact dates are impossible, so they're scored gently: you lose 10 points per 100 years off rather than per year. Being a few thousand years out still scores well.</p>
+
+      <h2 class="rules-h">Your rating</h2>
+      <p class="rules-p">At the end of a 5-, 10- or 15-round game your total is compared to the maximum possible and turned into a rating — from <b>Curator At Large</b> at the top down to <b>Complete Philistine</b>. Your best score for each game length is remembered on this device.</p>
+
+      <button class="es-again" id="rulesBackBtn">← Back</button>
+    </div>
+  </div>
+  <footer>
+    <div class="themesw" id="themeSw">
+      <button type="button" data-theme-choice="system">Auto</button>
+      <button type="button" data-theme-choice="light">Light</button>
+      <button type="button" data-theme-choice="dark">Dark</button>
+    </div>
+  </footer>
+</div>
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose" aria-label="Close">×</button>
+  <img id="lightboxImg" alt="artwork enlarged">
+</div>
+<script>
+const ARTWORKS = [{"image":"https://commons.wikimedia.org/wiki/Special:FilePath/Vincent_van_Gogh_-_Wheatfield_with_crows_-_Google_Art_Project.jpg","title":"Wheatfield with Crows","artist":"Vincent van Gogh","year":1890,"movements":["Post-Impressionism"],"country":"Netherlands","altNames":["van gogh","vangogh"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/5/54/Claude_Monet%2C_Impression%2C_soleil_levant.jpg","title":"Impression, Sunrise","artist":"Claude Monet","year":1872,"movements":["Impressionism"],"country":"France","altNames":["monet"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/A_Sunday_on_La_Grande_Jatte%2C_Georges_Seurat%2C_1884.jpg/1280px-A_Sunday_on_La_Grande_Jatte%2C_Georges_Seurat%2C_1884.jpg","title":"A Sunday on La Grande Jatte","artist":"Georges Seurat","year":1886,"movements":["Pointillism","Post-Impressionism"],"country":"France","altNames":["seurat"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/c/c5/Edvard_Munch%2C_1893%2C_The_Scream%2C_oil%2C_tempera_and_pastel_on_cardboard%2C_91_x_73_cm%2C_National_Gallery_of_Norway.jpg","title":"The Scream","artist":"Edvard Munch","year":1893,"movements":["Expressionism","Symbolism"],"country":"Norway","altNames":["munch"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/4/4d/Klimt_-_Der_Kuss.jpeg","title":"The Kiss","artist":"Gustav Klimt","year":1908,"movements":["Art Nouveau","Symbolism"],"country":"Austria","altNames":["klimt"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/1665_Girl_with_a_Pearl_Earring.jpg/960px-1665_Girl_with_a_Pearl_Earring.jpg","title":"Girl with a Pearl Earring","artist":"Johannes Vermeer","year":1665,"movements":["Baroque"],"country":"Netherlands","altNames":["vermeer"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/c/cc/Grant_Wood_-_American_Gothic_-_Google_Art_Project.jpg","title":"American Gothic","artist":"Grant Wood","year":1930,"movements":["Regionalism","Realism"],"country":"United States","altNames":["grant wood"]},{"image":"https://upload.wikimedia.org/wikipedia/en/1/1c/Pablo_Picasso%2C_1910%2C_Girl_with_a_Mandolin_%28Fanny_Tellier%29%2C_oil_on_canvas%2C_100.3_x_73.6_cm%2C_Museum_of_Modern_Art_New_York..jpg","title":"Girl with a Mandolin","artist":"Pablo Picasso","year":1910,"movements":["Cubism"],"country":"Spain","altNames":["picasso"]},{"image":"https://upload.wikimedia.org/wikipedia/en/d/dd/The_Persistence_of_Memory.jpg","title":"The Persistence of Memory","artist":"Salvador Dalí","year":1931,"movements":["Surrealism"],"country":"Spain","altNames":["dali","dalí"]},{"image":"https://commons.wikimedia.org/wiki/Special:FilePath/Katsushika_Hokusai_-_Thirty-Six_Views_of_Mount_Fuji-_The_Great_Wave_Off_the_Coast_of_Kanagawa_-_Google_Art_Project.jpg","title":"The Great Wave off Kanagawa","artist":"Katsushika Hokusai","year":1831,"movements":["Ukiyo-e"],"country":"Japan","altNames":["hokusai"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/7/73/Leonardo_da_Vinci_-_Mona_Lisa_%28Louvre%2C_Paris%29.jpg","title":"Mona Lisa","artist":"Leonardo da Vinci","year":1503,"movements":["High Renaissance"],"country":"Italy","altNames":["da vinci","leonardo"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Rembrandt_van_Rijn_-_Self-Portrait_-_Google_Art_Project.jpg/960px-Rembrandt_van_Rijn_-_Self-Portrait_-_Google_Art_Project.jpg","title":"Self-Portrait","artist":"Rembrandt","year":1659,"movements":["Baroque"],"country":"Netherlands","altNames":["rembrandt"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/c/cc/Arcimboldo_Earth.jpg","title":"Earth","artist":"Giuseppe Arcimboldo","year":1566,"movements":["Mannerism","Renaissance","Northern Mannerism","Surrealism"],"country":"Austria","altNames":["arcimboldo"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/4/4a/Albrecht_Altdorfer_-_Schlacht_bei_Issus_%28Alte_Pinakothek%2C_M%C3%BCnchen%29_-_Google_Art_Project.jpg","title":"The Battle of Alexander at Issus","artist":"Albrecht Altdorfer","year":1529,"movements":["Northern Renaissance","Renaissance"],"country":"Germany","altNames":["altdorfer"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/b/b8/Hendrik_Avercamp_-_Winter_Scene_on_a_Canal_-_Google_Art_Project.jpg","title":"Winter Scene on a Canal","artist":"Hendrik Avercamp","year":1630,"movements":["Baroque","Realism"],"country":"Netherlands","altNames":["avercamp"]},{"image":"https://media.tate.org.uk/art/images/work/N/N06/N06171_10.jpg","title":"Three Studies for Figures at the Base of a Crucifixion","artist":"Francis Bacon","year":1944,"movements":["Expressionism","Surrealism","Modernism","Existential Art"],"country":"United Kingdom","altNames":["bacon"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Gw11_0001031_20170619_001_Baldung_Der_Tod_und_das_Maedchen.jpg/500px-Gw11_0001031_20170619_001_Baldung_Der_Tod_und_das_Maedchen.jpg","title":"Death and the Maiden, or Death and Lust","artist":"Hans Baldung","year":1517,"movements":["Northern Renaissance","Renaissance","Symbolism","Northern Mannerism"],"country":"France","altNames":["baldung"]},{"image":"https://upload.wikimedia.org/wikipedia/en/1/12/GBallaArt.jpg","title":"Abstract Speed + Sound","artist":"Giacomo Balla","year":1914,"movements":["Futurism","Abstract Art","Cubism"],"country":"Italy","altNames":["balla"]},{"image":"https://d7hftxdivxxvm.cloudfront.net/?height=1332&quality=85&resize_to=fit&src=https%3A%2F%2Fd32dm0rphc51dk.cloudfront.net%2FKJ-em7uWjytcA-wceX0bhg%2Fnormalized.jpg&width=1600","title":"The Great Friends","artist":"Georg Baselitz","year":1965,"movements":["Neo-Expressionism"],"country":"Germany","altNames":["baselitz"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/c/c5/Max_Beckmann_-_Actors.jpg","title":"Actors - Triptych","artist":"Max Beckmann","year":1942,"movements":["Expressionism","New Objectivity","Modernism"],"country":"Netherlands","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/1/10/Bellini%2CGiovanni_-_Agony_in_the_Garden_-_National_Gallery.jpg","title":"Agony in the Garden","artist":"Giovanni Bellini","year":1465,"movements":["Renaissance"],"country":"Italy","altNames":["bellini"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/3/32/Frits_Van_den_Berghe_-_Zondag.jpg","title":"Zondag - Sunday","artist":"Frits Van den Berghe","year":1924,"movements":["Expressionism","Surrealism","Modernism"],"country":"Belgium","altNames":["van den berghe"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/2/26/States_of_Mind-_The_Farewells_by_Umberto_Boccioni%2C_1911.jpeg","title":"States of Mind I: The Farewells","artist":"Umberto Boccioni","year":1911,"movements":["Futurism","Cubism","Expressionism","Modernism"],"country":"Italy","altNames":["boccioni"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/e/e4/Arnold_B%C3%B6cklin_-_Spring_Evening_-_Google_Art_Project.jpg","title":"Spring Evening","artist":"Arnold Böcklin","year":1879,"movements":["Symbolism","Romanticism"],"country":"Germany","altNames":["Arnold Bocklin","Böcklin","bocklin"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/5/54/Nu_%C3%A0_contre-jour_-_Pierre_Bonnard.jpg","title":"Nu à contre-jour (Nude Against the Light)","artist":"Pierre Bonnard","year":1908,"movements":["Post-Impressionism","Modernism"],"country":"France","altNames":["bonnard"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/6/64/Cole_Thomas_The_Course_of_Empire_Destruction_1836.jpg","title":"Destruction","artist":"Thomas Cole","year":1836,"movements":["Romanticism"],"country":"United States","altNames":["thomas"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/e/ea/Blake_jacobsladder.jpg","title":"Jacob's Ladder","artist":"William Blake","year":1805,"movements":["Romanticism","Symbolism"],"country":"United Kingdom","altNames":["blake"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/The_Garden_of_Earthly_Delights_by_Bosch_High_Resolution.jpg/1280px-The_Garden_of_Earthly_Delights_by_Bosch_High_Resolution.jpg","title":"The Garden of Earthly Delights","artist":"Hieronymus Bosch","year":1510,"movements":["Northern Renaissance","Renaissance","Surrealism","Gothic"],"country":"Netherlands","altNames":["bosch"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/0/0b/Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg","title":"The Birth of Venus","artist":"Sandro Botticelli","year":1485,"movements":["Renaissance"],"country":"Italy","altNames":["botticelli"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/d/d3/Fran%C3%A7ois_Boucher%2C_Ruhendes_M%C3%A4dchen_%281751%2C_Wallraf-Richartz_Museum%29.jpg","title":"The Blonde Odalisque, or Resting Girl","artist":"François Boucher","year":1751,"movements":["Rococo","Orientalism"],"country":"France","altNames":["boucher","Francois Boucher"]},{"image":"https://upload.wikimedia.org/wikipedia/en/6/66/Georges_Braque%2C_1913%2C_Femme_%C3%A0_la_guitare_%28Woman_with_Guitar%29%2C_oil_and_charcoal_on_canvas%2C_130_%C3%97_73_cm%2C_Mus%C3%A9e_National_d%27Art_Moderne%2C_Centre_Pompidou.jpg","title":"Femme à la guitare (Woman with Guitar)","artist":"Georges Braque","year":1913,"movements":["Cubism"],"country":"France","altNames":["braque"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Pieter_Bruegel_the_Elder_-_Landscape_with_the_Fall_of_Icarus_-_Brussels%2C_Royal_Museums_of_Fine_Arts_of_Belgium_-_Google_Arts_%26_Culture.jpg/1280px-Pieter_Bruegel_the_Elder_-_Landscape_with_the_Fall_of_Icarus_-_Brussels%2C_Royal_Museums_of_Fine_Arts_of_Belgium_-_Google_Arts_%26_Culture.jpg","title":"Landscape with the Fall of Icarus","artist":"Pieter Bruegel the Elder","year":1560,"movements":["Renaissance"],"country":"Belgium","altNames":["Pieter Bruegel","bruegel"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/The_Triumph_of_Death_by_Pieter_Bruegel_the_Elder.jpg/1280px-The_Triumph_of_Death_by_Pieter_Bruegel_the_Elder.jpg","title":"The Triumph of Death","artist":"Pieter Bruegel the Elder","year":1562,"movements":["Renaissance"],"country":"Belgium","altNames":["Pieter Bruegel","bruegel"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/d/d8/Pieter_Bruegel_the_Elder_-_Hunters_in_the_Snow_%28Winter%29_-_Google_Art_Project.jpg","title":"The Hunters in the Snow","artist":"Pieter Bruegel the Elder","year":1565,"movements":["Renaissance"],"country":"Belgium","altNames":["Pieter Bruegel","bruegel"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Gustave_Caillebotte_-_Paris_Street%3B_Rainy_Day_-_Google_Art_Project.jpg/1280px-Gustave_Caillebotte_-_Paris_Street%3B_Rainy_Day_-_Google_Art_Project.jpg","title":"Paris Street; Rainy Day","artist":"Gustave Caillebotte","year":1877,"movements":["Impressionism","Realism","Naturalism","Modernism"],"country":"France","altNames":["caillebotte"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/4/4d/1602-3_Caravaggio%2CSupper_at_Emmaus_National_Gallery%2C_London.jpg","title":"Supper at Emmaus","artist":"Caravaggio","year":1601,"movements":["Baroque","Chiaroscuro"],"country":"Italy","altNames":["Michelangelo Merisi da Caravaggio","caravaggio"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/d/d3/The_Lute_Player-Caravaggio_%28Metropolitan_Museum_of_Art%29.jpg","title":"The Lute Player","artist":"Caravaggio","year":1596,"movements":["Baroque","Chiaroscuro"],"country":"Italy","altNames":["Michelangelo Merisi da Caravaggio","caravaggio"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Accademia_-_Miracle_of_the_Holy_Cross_at_Rialto_by_Vittore_Carpaccio.jpg/1280px-Accademia_-_Miracle_of_the_Holy_Cross_at_Rialto_by_Vittore_Carpaccio.jpg","title":"Miracle of the Cross at the Ponte di Rialto (Miracolo della Croce a Rialto)","artist":"Vittore Carpaccio","year":1496,"movements":["Renaissance"],"country":"Italy","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/a/a8/Nighthawks_by_Edward_Hopper_1942.jpg","title":"Nighthawks","artist":"Edward Hopper","year":1942,"movements":["Realism","American Realism"],"country":"United States","altNames":["hopper"]},{"image":"https://galleryintell.com/wp-content/uploads/2013/03/autumn_rhythm-pollock1.jpg","title":"Autumn Rhythm (Number 30)","artist":"Jackson Pollock","year":1950,"movements":["Abstract Expressionism","Expressionism"],"country":"United States","altNames":["pollock"]},{"image":"https://www.moma.org/d/assets/W1siZiIsIjIwMTgvMTAvMzEvNGE2dzFlYWo1Yl8yMDI4Ni5qcGciXSxbInAiLCJjb252ZXJ0IiwiLXF1YWxpdHkgOTAgLXJlc2l6ZSAyMDAweDIwMDBcdTAwM2UiXV0/20286.jpg?sha=44c72e21cd08395d","title":"Woman I","artist":"Willem de Kooning","year":1952,"movements":["Abstract Expressionism","Expressionism"],"country":"United States","altNames":["de kooning","kooning"]},{"image":"https://arthive.com/res/media/img/orig/work/c42/276953@2x.webp","title":"Three Flags","artist":"Jasper Johns","year":1958,"movements":["Neo-Dada","Dada","Pop Art","Modernism"],"country":"United States","altNames":["johns"]},{"image":"https://www.mark-rothko.org/assets/img/paintings/number-14.jpg","title":"Number 14","artist":"Mark Rothko","year":1960,"movements":["Abstract Expressionism","Modernism"],"country":"United States","altNames":["rothko"]},{"image":"https://smarthistory.org/wp-content/uploads/2022/02/MarilynDip-2048x1448.jpg","title":"Marilyn Diptych","artist":"Andy Warhol","year":1962,"movements":["Pop Art"],"country":"United States","altNames":["warhol"]},{"image":"https://cdn.sanity.io/images/dqllnil6/production/56e8835d88d20dade9a1d389e4b6958270d632e2-1920x825.webp?w=1920&q=60&auto=format","title":"Whaam!","artist":"Roy Lichtenstein","year":1963,"movements":["Pop Art"],"country":"United States","altNames":["lichtenstein"]},{"image":"https://blogs-images.forbes.com/chaddscott/files/2018/10/12.-Son-of-Man-1200x1575.jpg","title":"The Son of Man (Le fils de l'homme)","artist":"René Magritte","year":1964,"movements":["Surrealism"],"country":"Belgium","altNames":["Rene Magritte","magritte","rené magritte","rene magritte"]},{"image":"https://www.edwardgildea.co.uk/sitemanager/uploads/ck_files/images/David-hockney-a-bigger-splash.jpg","title":"A Bigger Splash","artist":"David Hockney","year":1967,"movements":["Pop Art","Modernism","New Realism","Realism","Naturalism"],"country":"United Kingdom","altNames":["hockney"]},{"image":"https://mydailyartdisplay.uk/wp-content/uploads/2011/06/mr-and-mrs-clark-by-david-hockney.jpg","title":"Mr and Mrs Clark and Percy","artist":"David Hockney","year":1971,"movements":["Pop Art","Modernism","New Realism","Realism","Naturalism"],"country":"United Kingdom","altNames":["hockney"]},{"image":"https://www.christies.com/img/LotImages/2008/NYR/2008_NYR_02048_0019_000(044655).jpg?mode=max","title":"Untitled (Boxer)","artist":"Jean-Michel Basquiat","year":1982,"movements":["Neo-Expressionism","Contemporary Art","Primitivism"],"country":"United States","altNames":["basquiat","Jean Michel Basquiat"]},{"image":"https://www.moma.org/media/W1siZiIsIjQzMTIzMyJdLFsicCIsImNvbnZlcnQiLCItcXVhbGl0eSA5MCAtcmVzaXplIDIwMDB4MjAwMFx1MDAzZSJdXQ.jpg?sha=a5303206ceee4f62","title":"The Holy Virgin Mary","artist":"Chris Ofili","year":1996,"movements":["Contemporary Art","Young British Artists (YBAs)"],"country":"United Kingdom","altNames":["ofili"]},{"image":"https://static-assets.artlogic.net/w_1600,h_1600,c_limit,f_auto,fl_lossy,q_auto/artlogicstorage/victoriamiro/images/view/db45a564ab4a0a9a337146c937c7651512a3c8d4.jpg","title":"100 Years Ago (Carrera)","artist":"Peter Doig","year":2001,"movements":["Post-Modernism","Magic Realism","Surrealism"],"country":"United Kingdom","altNames":["doig"]},{"image":"https://banksyexplained.com/wp-content/uploads/2021/10/LOVE-IS-IN-THE-BIN-MAIN.jpg","title":"Love Is In The Bin","artist":"BANKSY","year":2018,"movements":["Street Art","Contemporary Art","Performance Art","Urban Art","Graffiti"],"country":"United Kingdom","altNames":["banksy"]},{"image":"https://cdn.kastatic.org/ka-content-images/30956cd2e258a937c85dcc26e78017b7d2830df2.jpg","title":"Stadia II","artist":"Julie Mehretu","year":2004,"movements":["Contemporary Art","Abstract Art","Postmodernism"],"country":"","altNames":[]},{"image":"https://res.cloudinary.com/artlogic/w_5000,h_5000,c_limit,q_85/glennbrown/GB2006-003PT_TheHinterland+Tate.jpg","title":"The Hinterland","artist":"Glenn Brown","year":2006,"movements":["Post-Modernism","Contemporary Art","Mannerism"],"country":"United Kingdom","altNames":["brown"]},{"image":"https://d2w8kbdekdi1gv.cloudfront.net/eyJidWNrZXQiOiAiYXJ0ZXJhLWltYWdlcy1idWNrZXQiLCAia2V5IjogImFydHdvcmtzLzQ1Yzk1YTc1LWMxZDQtNGVlZC04ZmUyLTZkNmIxYzM4N2JiYS80NWM5NWE3NS1jMWQ0LTRlZWQtOGZlMi02ZDZiMWMzODdiYmFfZnVsbC5qcGciLCAiZWRpdHMiOiB7InJlc2l6ZSI6IHsid2lkdGgiOiAxOTIwLCAiaGVpZ2h0IjogMTkyMCwgImZpdCI6ICJpbnNpZGUifX19","title":"I Still Face You","artist":"Njideka Akunyili Crosby","year":2020,"movements":["Post-Colonial","Postmodernism","Contemporary Art"],"country":"United States","altNames":["crosby"]},{"image":"https://i.guim.co.uk/img/media/d1df861697b94605d873dc74dc33a6bba5964209/0_80_4044_2428/master/4044.jpg?width=1200&height=1200&quality=85&auto=format&fit=crop&s=355f6eb5b8a7aa93bc478635fda58f87","title":"Comedian","artist":"Maurizio Cattelan","year":2019,"movements":["Contemporary Art"],"country":"United States","altNames":["cattelan"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/1/1d/The_Water-Lily_Pond_1899_Claude_Monet_Metropolitan.jpg","title":"Bridge over the Lily Pond","artist":"Claude Monet","year":1899,"movements":["Impressionism"],"country":"France","altNames":["monet"]},{"image":"https://npg.si.edu/sites/default/files/cr-barack2.jpg","title":"President Barack Obama","artist":"Kehinde Wiley","year":2018,"movements":["Contemporary Art","Realism","Contemporary Realism"],"country":"United States","altNames":["wiley"]},{"image":"https://www.bu.edu/sequitur/files/2016/04/ecce-homo-after-342x454.jpg","title":"Ecce Homo","artist":"Cecilia Giménez","year":2012,"movements":["Primitivism","Naïve Art","Expressionism","Pop Art"],"country":"Spain","altNames":["Cecilia Gimenez","Giménez","giménez","gimenez"]},{"image":"https://glasstire.com/wp-content/uploads/2018/07/01_JCarrey.jpg","title":"I Scream, You Scream, Will We Ever Stop Screaming","artist":"Jim Carrey","year":2018,"movements":["Pop Art"],"country":"United States","altNames":["carrey"]},{"image":"https://news.artnet.com/app/news-upload/2025/08/bob-ross-mountain-lake-clouds-1024x772.jpeg","title":"Lake Below Snow-Capped Peaks and Cloudy Sky","artist":"Bob Ross","year":1991,"movements":["Romanticism","Realism","Pop Art"],"country":"United States","altNames":["ross"]},{"image":"https://static.mfah.com/images/rockwell---freedom-from-want.3086940590090511894.jpg","title":"Freedom from Want","artist":"Norman Rockwell","year":1943,"movements":["Realism","American Realism"],"country":"United States","altNames":[]},{"image":"https://www.kennedy-center.org/globalassets/education/resources-for-educators/classroom-resources/artsedge/media/story-behind-the-picture/norman-rockwell---the-problem-we-all-live-with/rockwell-the-problem-we-all-live-with.jpg","title":"The Problem We All Live With","artist":"Norman Rockwell","year":1963,"movements":["Realism","American Realism"],"country":"United States","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/f/f3/Rembrandt_Christ_in_the_Storm_on_the_Lake_of_Galilee.jpg","title":"The Storm on the Sea of Galilee","artist":"Rembrandt","year":1633,"movements":["Chiaroscuro","Realism","Baroque"],"country":"Netherlands","altNames":[]},{"image":"https://www.shopartcenter.com/cdn/shop/products/thomas-kinkade-high-country-christmas.jpg","title":"High Country Christmas","artist":"Thomas Kinkade","year":2014,"movements":["Pop Art","Romanticism","Kitsch"],"country":"United States","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/4/4c/Vincent_van_Gogh_-_Self-Portrait_-_Google_Art_Project_%28454045%29.jpg","title":"Self-Portrait","artist":"Vincent van Gogh","year":1887,"movements":["Post-Impressionism"],"country":"Netherlands","altNames":["van gogh","vangogh"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/4/46/Vincent_Willem_van_Gogh_127.jpg","title":"Sunflowers","artist":"Vincent van Gogh","year":1888,"movements":["Post-Impressionism"],"country":"Netherlands","altNames":["van gogh","vangogh"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/f/fb/Matisse-Woman-with-a-Hat.jpg","title":"Woman with a Hat (La femme au chapeau)","artist":"Henri Matisse","year":1905,"movements":["Fauvism","Post-Impressionism"],"country":"France","altNames":[]},{"image":"https://media.nga.gov.au/1aj26tnwcZ158xnqBj9JieB4v4w=/80x89:4102x3097/2000x0/filters:format(webp):quality(60)///national-gallery-of-australia/media/dd/images/28926_-_Large_Viewing_JPEG_4200px.2e3ec9e.jpg","title":"Ned Kelly","artist":"Sidney Nolan","year":1946,"movements":["Modernism","Expressionism","Naïve Art","Surrealism"],"country":"Australia","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/a/a8/Frederick_McCubbin_-_The_pioneer_-_Google_Art_Project.jpg","title":"The Pioneer","artist":"Frederick McCubbin","year":1904,"movements":["Impressionism","Realism","Naturalism"],"country":"Australia","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/8/8c/Down_on_his_luck_Frederick_McCubbin.jpg","title":"Down on His Luck","artist":"Frederick McCubbin","year":1889,"movements":["Impressionism","Realism","Naturalism"],"country":"Australia","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/9/96/Tom_Roberts_-_Bailed_up_-_Google_Art_Project.jpg","title":"Bailed Up","artist":"Tom Roberts","year":1895,"movements":["Impressionism","Realism","Naturalism"],"country":"Australia","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/5/51/Rachel_Ruysch_-_Vase_with_Flowers_-_1700_-_Mauritshuis_151.jpg","title":"Flowers in a Vase","artist":"Rachel Ruysch","year":1685,"movements":["Baroque"],"country":"Netherlands","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Baigneurs_a_Asnieres.jpg/1280px-Baigneurs_a_Asnieres.jpg","title":"Baigneurs a Asnieres","artist":"Georges Seurat","year":1884,"movements":["Pointillism","Post-Impressionism"],"country":"France","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Fran%C3%A7ois-Hubert_DROUAIS_1763-4._London_NG._Madame_de_Pompadour_at_her_Tambour_Frame..jpg/960px-Fran%C3%A7ois-Hubert_DROUAIS_1763-4._London_NG._Madame_de_Pompadour_at_her_Tambour_Frame..jpg","title":"Madame de Pompadour at her Tambour Frame","artist":"François-Hubert Drouais","year":1764,"movements":["Rococo"],"country":"France","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Berthe_Morisot_-_Jour_d%27%C3%A9t%C3%A9%2C_1879.jpg/1280px-Berthe_Morisot_-_Jour_d%27%C3%A9t%C3%A9%2C_1879.jpg","title":"Summer's Day (Jour d'eté)","artist":"Berthe Morisot","year":1879,"movements":["Impressionism","Modernism"],"country":"France","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/9/9d/Holbein-ambassadors.jpg","title":"The Ambassadors","artist":"Hans Holbein the Younger","year":1533,"movements":["Northern Renaissance","Renaissance","Realism"],"country":"United Kingdom","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Jan_van_Eyck_001.jpg/960px-Jan_van_Eyck_001.jpg","title":"The Arnolfini Portrait","artist":"Jan van Eyck","year":1434,"movements":["Northern Renaissance","Renaissance","Realism"],"country":"Belgium","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Leonardo_da_Vinci_Virgin_of_the_Rocks_%28National_Gallery_London%29.jpg/960px-Leonardo_da_Vinci_Virgin_of_the_Rocks_%28National_Gallery_London%29.jpg","title":"The Virgin of the Rocks","artist":"Leonardo da Vinci","year":1486,"movements":["Renaissance","Chiaroscuro"],"country":"Italy","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Claude_Lorrain_-_Seaport_with_the_Embarkation_of_Saint_Ursula.jpg/3840px-Claude_Lorrain_-_Seaport_with_the_Embarkation_of_Saint_Ursula.jpg","title":"Seaport with the Embarkation of Saint Ursula","artist":"Claude Lorrain","year":1641,"movements":["Baroque"],"country":"France","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Francisco_de_Goya%2C_Saturno_devorando_a_su_hijo_%281819-1823%29.jpg/960px-Francisco_de_Goya%2C_Saturno_devorando_a_su_hijo_%281819-1823%29.jpg","title":"Saturn Devouring His Son","artist":"Francisco Goya","year":1823,"movements":["Romanticism","Expressionism"],"country":"Spain","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Sesshu_-_Haboku-Sansui.jpg/1920px-Sesshu_-_Haboku-Sansui.jpg","title":"Haboku sansui, Broken Ink Landscape","artist":"Sesshū Tōyō","year":1495,"movements":["Sumi-e","Suibokuga"],"country":"Japan","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/William_Bouguereau_-_Dante_and_Virgile_-_Google_Art_Project_2.jpg/1920px-William_Bouguereau_-_Dante_and_Virgile_-_Google_Art_Project_2.jpg","title":"Dante and Virgil","artist":"William-Adolphe Bouguereau","year":1850,"movements":["Romanticism","Chiaroscuro"],"country":"France","altNames":["William Adolphe Bouguereau"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/d/d2/Dwelling_in_the_Fuchun_Mountains_%28first_half%29.JPG","title":"Dwelling in the Fuchun Mountains","artist":"Huang Gongwang","year":1350,"movements":["Asian Traditional"],"country":"China","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Along_the_River_During_the_Qingming_Festival_%28detail_of_original%29.jpg/1280px-Along_the_River_During_the_Qingming_Festival_%28detail_of_original%29.jpg","title":"Along the River During the Qingming Festival (detail)","artist":"Zhang Zeduan","year":1085,"movements":["Asian Traditional"],"country":"China","altNames":[],"yearTo":1145},{"image":"https://upload.wikimedia.org/wikipedia/commons/3/38/Gu_Hongzhong%27s_Night_Revels_1_edit_%28cropped2%29_%28cropped%29_%28cropped%29.jpg","title":"The Night Revels of Han Xizai (detail)","artist":"Gu Hongzhong","year":937,"movements":["Asian Traditional"],"country":"China","altNames":[],"yearTo":975},{"image":"https://upload.wikimedia.org/wikipedia/commons/a/ac/Zhou_Fang._Court_Ladies_Tuning_the_Lute_%2828x75%29_Nelson-Atkins_Museum_of_Art%2C_Kansas_City.jpg","title":"Court Ladies Tuning the Lute","artist":"Zhou Fang","year":800,"movements":["Asian Traditional"],"country":"China","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/0/06/Zhou_Fang._Court_Ladies_Wearing_Flowered_Headdresses._%2846x180%29_Liaoning_Provincial_Museum%2C_Shenyang..jpg","title":"Court Ladies Wearing Flowered Headdresses","artist":"Zhou Fang","year":800,"movements":["Asian Traditional"],"country":"China","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Leonardo_da_Vinci_-_Virgin_and_Child_with_Ss_Anne_and_John_the_Baptist.jpg/960px-Leonardo_da_Vinci_-_Virgin_and_Child_with_Ss_Anne_and_John_the_Baptist.jpg","title":"The Virgin and Child with Saint Anne and Saint John the Baptist, aka: The Burlington House Cartoon","artist":"Leonardo da Vinci","year":1500,"movements":["Renaissance","Chiaroscuro"],"country":"Italy","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/en/7/74/Marcel_Duchamp%2C_1919%2C_L.H.O.O.Q.jpg","title":"L.H.O.O.Q.","artist":"Marcel Duchamp","year":1919,"movements":["Dada","Early Modernism","Conceptual Art"],"country":"France","altNames":["duchamp"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Da_Vinci_Vitruve_Luc_Viatour.jpg/960px-Da_Vinci_Vitruve_Luc_Viatour.jpg","title":"Vitruvian Man","artist":"Leonardo da Vinci","year":1490,"movements":["Renaissance"],"country":"Italy","altNames":["da vinci","leonardo"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Jan_Vermeer_van_Delft_-_Lady_Standing_at_a_Virginal_-_National_Gallery%2C_London.jpg/960px-Jan_Vermeer_van_Delft_-_Lady_Standing_at_a_Virginal_-_National_Gallery%2C_London.jpg","title":"A Young Woman standing at a Virginal","artist":"Johannes Vermeer","year":1672,"movements":["Baroque"],"country":"Netherlands","altNames":["vermeer"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Las_Meninas%2C_by_Diego_Vel%C3%A1zquez%2C_from_Prado_in_Google_Earth.jpg/1920px-Las_Meninas%2C_by_Diego_Vel%C3%A1zquez%2C_from_Prado_in_Google_Earth.jpg","title":"Las Meninas","artist":"Diego Velázquez","year":1657,"movements":["Baroque"],"country":"Spain","altNames":["velázquez","velazquez"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Peter_Paul_Rubens_-_The_Descent_from_the_Cross_%28Antwerp_Cathedral%29.%2C_c._1613.jpg/960px-Peter_Paul_Rubens_-_The_Descent_from_the_Cross_%28Antwerp_Cathedral%29.%2C_c._1613.jpg","title":"The Descent from the Cross","artist":"Peter Paul Rubens","year":1613,"movements":["Baroque","Chiaroscuro"],"country":"Netherlands","altNames":["rubens"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/2/23/Bundesarchiv_B_145_Bild-F088809-0038%2C_Berlin%2C_East_Side_Gallery.jpg","title":"My God, Help Me to Survive This Deadly Love","artist":"Dmitri Vrubel","year":1990,"movements":["Graffiti","Street Art","Pop Art"],"country":"Germany","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/The_Dream_of_the_Fisherman%27s_Wife%2C_British_Museum%2C_version_1_%28cropped%29.jpg/1280px-The_Dream_of_the_Fisherman%27s_Wife%2C_British_Museum%2C_version_1_%28cropped%29.jpg","title":"The Dream of the Fisherman's Wife","artist":"Katsushika Hokusai","year":1814,"movements":["Ukiyo-e"],"country":"Japan","altNames":["Hokusai"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Takiyasha_the_Witch_and_the_Skeleton_Spectre%2C_by_Utagawa_Kuniyoshi.jpg/3840px-Takiyasha_the_Witch_and_the_Skeleton_Spectre%2C_by_Utagawa_Kuniyoshi.jpg","title":"Takiyasha the Witch and the Skeleton Spectre","artist":"Utagawa Kuniyoshi","year":1844,"movements":["Ukiyo-e"],"country":"Japan","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/6/6f/Kagurazaka_Street_at_Night_after_Rain%2C_from_the_Series_%22Twelve_Scenes_of_Tokyo%22._Hiroshi_Yoshida.jpg","title":"Kagurazaka Street at Night after Rain","artist":"Hiroshi Yoshida","year":1929,"movements":["Shin-hanga"],"country":"Japan","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Yoshida_Hiroshi%2C_Rapids_at_the_Upper_Reaches_of_Tone_River%2C_1928.jpg/1280px-Yoshida_Hiroshi%2C_Rapids_at_the_Upper_Reaches_of_Tone_River%2C_1928.jpg","title":"Rapids at the Upper Reaches of Tone River","artist":"Hiroshi Yoshida","year":1928,"movements":["Shin-hanga"],"country":"Japan","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Yoshida_Hiroshi_Suzukawa%2C_1935.jpg/1280px-Yoshida_Hiroshi_Suzukawa%2C_1935.jpg","title":"Suzukawa River","artist":"Hiroshi Yoshida","year":1935,"movements":["Shin-hanga"],"country":"Japan","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Izanagi_and_Izanami_giving_birth_to_Japan_c1870_after_Kawanabe_Kyosai.jpg/960px-Izanagi_and_Izanami_giving_birth_to_Japan_c1870_after_Kawanabe_Kyosai.jpg","title":"Izanagi and Izanami giving birth to Japan","artist":"Kawanabe Kyōsai","year":1870,"movements":["Ukiyo-e"],"country":"Japan","altNames":["Kawanabe Kyosai","kyosai","Kyōsai"]},{"image":"https://dam.sothebys.com/dam/image/lot/c12600b1-15ce-4643-9fbc-d7824485fbdd/primary/medium","title":"True Picture of a Live Wild Tiger","artist":"Kawanabe Kyōsai","year":1860,"movements":["Ukiyo-e"],"country":"Japan","altNames":["Kawanabe Kyosai","kyosai","Kyōsai"]},{"image":"https://whitneymedia.org/assets/artwork/46387/2014_265_cropped.jpg","title":"Ignorance = Fear / Silence = Death","artist":"Keith Haring","year":1989,"movements":["Pop Art","Contemporary Art"],"country":"United States","altNames":[]},{"image":"https://smarthistory.org/wp-content/uploads/2024/04/131126152944-controversial-art-8-scaled.jpg","title":"Piss Christ","artist":"Andres Serrano","year":1987,"movements":["Contemporary Art","Postmodernism"],"country":"United States","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Wind_God_and_Thunder_God_Screens_by_Ogata_Korin.png/1280px-Wind_God_and_Thunder_God_Screens_by_Ogata_Korin.png","title":"Wind God and Thunder God","artist":"Ogata Kōrin","year":1700,"movements":["Asian Traditional"],"country":"Japan","altNames":["Ogata Korin","korin"]},{"image":"https://www.christies.com/img/LotImages/2023/HGK/2023_HGK_21389_0101_000(yayoi_kusama_pumpkin_d6430054080943).jpg","title":"Pumpkin","artist":"Yayoi Kusama","year":2000,"movements":["Contemporary Art","Abstract Art","Postmodernism"],"country":"Japan","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/en/9/90/DaliGreatMasturbator.jpg","title":"The Great Masturbator","artist":"Salvador Dalí","year":1929,"movements":["Surrealism"],"country":"Spain","altNames":[]},{"image":"https://www.mark-rothko.org/assets/img/paintings/black-in-deep-red.jpg","title":"Black in Deep Red","artist":"Mark Rothko","year":1957,"movements":["Abstract Expressionism","Modernism"],"country":"United States","altNames":["rothko"]},{"image":"https://www.pablopicasso.org/assets/img/paintings/the-weeping-woman.jpg","title":"The Weeping Woman","artist":"Pablo Picasso","year":1937,"movements":["Cubism"],"country":"Spain","altNames":["picasso"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/ALEXANDRE-FRANCOIS-DESPORTES_STILLLEBEN-MIT-KATZE_CC-BY-SA_BSTGS_1323.jpg/1280px-ALEXANDRE-FRANCOIS-DESPORTES_STILLLEBEN-MIT-KATZE_CC-BY-SA_BSTGS_1323.jpg","title":"Still Life with a Cat","artist":"Alexandre-François Desportes","year":1702,"movements":["Baroque","Chiaroscuro","Realism"],"country":"France","altNames":["Alexandre François Desportes","Alexandre-Francois Desportes","Alexandre Francois Desportes","desportes"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/John_Collier_-_Priestess_of_Delphi_-_Google_Art_Project.jpg/500px-John_Collier_-_Priestess_of_Delphi_-_Google_Art_Project.jpg","title":"Priestess of Delphi","artist":"John Collier","year":1891,"movements":["Symbolism","Pre-Raphaelite"],"country":"United Kingdom","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Joshua_Commanding_the_Sun_to_Stand_Still_upon_Gibeon_%281816%29_John_Martin_-_NGA_2004.64.1.jpg/1280px-Joshua_Commanding_the_Sun_to_Stand_Still_upon_Gibeon_%281816%29_John_Martin_-_NGA_2004.64.1.jpg","title":"Joshua Commanding the Sun to Stand Still upon Gibeon","artist":"John Martin","year":1816,"movements":["Romanticism","Chiaroscuro"],"country":"United Kingdom","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Man_Wearing_Laurels_LACMA_40.12.10.jpg/960px-Man_Wearing_Laurels_LACMA_40.12.10.jpg","title":"Man Wearing Laurels","artist":"John Singer Sargent","year":1880,"movements":["Realism","American Realism","Chiaroscuro"],"country":"United States","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Venus_of_Willendorf_-_All_sides.jpg/1280px-Venus_of_Willendorf_-_All_sides.jpg","title":"Venus von Willendorf","artist":"Unknown","year":-35000,"movements":["Prehistoric Art","Paleolithic Art"],"country":"Austria","altNames":[],"yearTo":-20000},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/SantaCruz-CuevaManos-P2210651b.jpg/1280px-SantaCruz-CuevaManos-P2210651b.jpg","title":"Cueva de las Manos (Cave of Hands)","artist":"Unknown","year":-7300,"movements":["Prehistoric Art"],"country":"Argentina","altNames":[],"yearTo":700},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Paintings_from_the_Chauvet_cave_%28museum_replica%29.jpg/1280px-Paintings_from_the_Chauvet_cave_%28museum_replica%29.jpg","title":"Chauvet-Pont-d'Arc Cave Paintings","artist":"Unknown","year":-37000,"movements":["Prehistoric Art","Paleolithic Art"],"country":"France","altNames":[],"yearTo":-28000},{"image":"https://upload.wikimedia.org/wikipedia/commons/5/51/Lascaux-IV_01.jpg","title":"Lascaux Cave Paintings","artist":"Unknown","year":-24000,"movements":["Prehistoric Art","Paleolithic Art"],"country":"France","altNames":[],"yearTo":-19000},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Gustav_Klimt_-_Death_and_Life_-_Google_Art_Project.jpg/1280px-Gustav_Klimt_-_Death_and_Life_-_Google_Art_Project.jpg","title":"Death and Life","artist":"Gustav Klimt","year":1910,"movements":["Art Nouveau","Symbolism"],"country":"Austria","altNames":[]},{"image":"https://www.fridakahlo.org/assets/img/paintings/the-wounded-deer.jpg","title":"The Wounded Deer","artist":"Frida Kahlo","year":1946,"movements":["Modernism","Surrealism"],"country":"Mexico","altNames":[]},{"image":"https://www.fridakahlo.org/assets/img/paintings/the-two-fridas.jpg","title":"The Two Fridas","artist":"Frida Kahlo","year":1939,"movements":["Modernism","Surrealism"],"country":"Mexico","altNames":[]},{"image":"https://www.fridakahlo.org/assets/img/paintings/self-portrait-with-necklace-of-thorns.jpg","title":"Self Portrait with Thorn Necklace and Hummingbird","artist":"Frida Kahlo","year":1940,"movements":["Modernism","Surrealism"],"country":"Mexico","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Creaci%C3%B3n_de_Ad%C3%A1m.jpg/1280px-Creaci%C3%B3n_de_Ad%C3%A1m.jpg","title":"The Creation of Adam","artist":"Michelangelo","year":1512,"movements":["Renaissance"],"country":"Italy","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Last_Judgement_%28Michelangelo%29.jpg/960px-Last_Judgement_%28Michelangelo%29.jpg","title":"The Last Judgment","artist":"Michelangelo","year":1536,"movements":["Renaissance"],"country":"Italy","altNames":[],"yearTo":1541},{"image":"https://upload.wikimedia.org/wikipedia/commons/8/84/Blue_and_Green_Music_by_Georgia_O%27Keeffe%2C_1921.jpg","title":"Blue and Green Music","artist":"Georgia O'Keeffe","year":1921,"movements":["Modernism"],"country":"United States","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/f/fe/Georgia_O%27Keeffe_Red_Canna_1919_HMA.jpg","title":"Red Canna","artist":"Georgia O'Keeffe","year":1919,"movements":["Modernism"],"country":"United States","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Paul_C%C3%A9zanne%2C_French_-_The_Large_Bathers_-_Google_Art_Project.jpg/1280px-Paul_C%C3%A9zanne%2C_French_-_The_Large_Bathers_-_Google_Art_Project.jpg","title":"The Bathers (Les Grandes Baigneuses)","artist":"Paul Cézanne","year":1898,"movements":["Post-Impressionism"],"country":"France","altNames":["Cézanne","Paul Cezanne","cézanne","paul cézanne","cezanne"],"yearTo":1905},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Paul_C%C3%A9zanne_-_Montagne_Saint-victoire_-_Google_Art_Project.jpg/1280px-Paul_C%C3%A9zanne_-_Montagne_Saint-victoire_-_Google_Art_Project.jpg","title":"Mont Sainte-Victoire","artist":"Paul Cézanne","year":1890,"movements":["Post-Impressionism"],"country":"France","altNames":["Cézanne","Paul Cezanne","cézanne","paul cézanne","cezanne"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/The_Fighting_Temeraire%2C_JMW_Turner%2C_National_Gallery.jpg/1280px-The_Fighting_Temeraire%2C_JMW_Turner%2C_National_Gallery.jpg","title":"The Fighting Temeraire","artist":"J. M. W. Turner","year":1939,"movements":["Impressionism"],"country":"United Kingdom","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/A_Friend_in_Need_1903_C.M.Coolidge.jpg/1280px-A_Friend_in_Need_1903_C.M.Coolidge.jpg","title":"A Friend in Need","artist":"Cassius Marcellus Coolidge","year":1903,"movements":["Kitsch"],"country":"United States","altNames":["CM Coolidge","C.M. Coolidge"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Les_Joueurs_de_cartes%2C_par_Paul_C%C3%A9zanne.jpg/1280px-Les_Joueurs_de_cartes%2C_par_Paul_C%C3%A9zanne.jpg","title":"The Card Players","artist":"Paul Cézanne","year":1895,"movements":["Post-Impressionism"],"country":"France","altNames":["Cézanne","Paul Cezanne","cézanne","paul cézanne","cezanne"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/L%27Enl%C3%A8vement%2C_par_Paul_C%C3%A9zanne%2C_FWN_590.jpg/1280px-L%27Enl%C3%A8vement%2C_par_Paul_C%C3%A9zanne%2C_FWN_590.jpg","title":"L'Enlèvement (The Abduction)","artist":"Paul Cézanne","year":1867,"movements":["Post-Impressionism"],"country":"France","altNames":["Cézanne","Paul Cezanne","cézanne","paul cézanne","cezanne"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Claude_Monet_-_Stacks_of_Wheat_%28End_of_Summer%29_-_1985.1103_-_Art_Institute_of_Chicago.jpg/1280px-Claude_Monet_-_Stacks_of_Wheat_%28End_of_Summer%29_-_1985.1103_-_Art_Institute_of_Chicago.jpg","title":"Stacks of Wheat (End of Summer)","artist":"Claude Monet","year":1897,"movements":["Impressionism"],"country":"France","altNames":["monet"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Eug%C3%A8ne_Ferdinand_Victor_Delacroix_013.jpg/1280px-Eug%C3%A8ne_Ferdinand_Victor_Delacroix_013.jpg","title":"The Murder of the Bishop of Liège","artist":"Eugène Delacroix","year":1892,"movements":["Romanticism","Chiaroscuro"],"country":"France","altNames":["Eugene Delacroix","Delacroix"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Edgar_Degas_-_Balan%C3%A7ant_danseurs.jpg/960px-Edgar_Degas_-_Balan%C3%A7ant_danseurs.jpg","title":"Swaying dancer (dancer in green)","artist":"Edgar Degas","year":1879,"movements":["Impressionism","Realism"],"country":"France","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Edgar_Degas_-_La_Classe_de_danse.jpg/960px-Edgar_Degas_-_La_Classe_de_danse.jpg","title":"The Ballet Class","artist":"Edgar Degas","year":1875,"movements":["Impressionism","Realism"],"country":"France","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Caspar_David_Friedrich_-_Wanderer_above_the_Sea_of_Fog.jpeg/960px-Caspar_David_Friedrich_-_Wanderer_above_the_Sea_of_Fog.jpeg","title":"Wanderer above the Sea of Fog","artist":"Caspar David Friedrich","year":1818,"movements":["Romanticism"],"country":"Germany","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Caspar_David_Friedrich_-_Das_Eismeer_-_Hamburger_Kunsthalle_-_02.jpg/1280px-Caspar_David_Friedrich_-_Das_Eismeer_-_Hamburger_Kunsthalle_-_02.jpg","title":"The Sea of Ice","artist":"Caspar David Friedrich","year":1824,"movements":["Romanticism"],"country":"Germany","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/en/thumb/3/33/TheFarmMiro21to22.jpg/1280px-TheFarmMiro21to22.jpg","title":"The Farm","artist":"Joan Miró","year":1922,"movements":["Surrealism"],"country":"Spain","altNames":["Joan Miro"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Kandinsky_-_Jaune_Rouge_Bleu.jpg/1280px-Kandinsky_-_Jaune_Rouge_Bleu.jpg","title":"Yellow-Red-Blue","artist":"Wassily Kandinsky","year":1925,"movements":["Abstract Art"],"country":"Russia","altNames":["Vasily Kandinsky"]},{"image":"https://www.guggenheim.org/wp-content/uploads/1923/01/37.262_ph_web-1.jpg","title":"Composition 8","artist":"Wassily Kandinsky","year":1923,"movements":["Abstract Art"],"country":"Russia","altNames":["Vasily Kandinsky"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/4/4b/Tom_of_Finland_-_Tattooed_Sailor_and_the_Hoods_2.jpg","title":"Tattooed Sailor and the Hoods","artist":"Tom of Finland","year":1962,"movements":["Pop Art","Modernism","New Realism","Realism","Naturalism"],"country":"Finland","altNames":["Touko Valio Laaksonen"]},{"image":"https://i.guim.co.uk/img/media/f0bc0214d7e0aeecd656302dca065774a0dee6f0/0_359_3420_2125/master/3420.jpg?width=1900&dpr=2&s=none&crop=none","title":"The Bond","artist":"Patricia Piccinini","year":2016,"movements":["Contemporary Art","Realism","Contemporary Realism"],"country":"Australia","altNames":[]},{"image":"https://www.christies.com/img/LotImages/2008/NYR/2008_NYR_01997_0037_000(035254).jpg","title":"Benefits Supervisor Sleeping","artist":"Lucian Freud","year":1995,"movements":["Contemporary Art","Realism","Contemporary Realism"],"country":"United Kingdom","altNames":[]},{"image":"https://uploads4.wikiart.org/images/lucian-freud/reflection-self-portrait-1985.jpg!Large.jpg","title":"Reflection (Self-Portrait)","artist":"Lucian Freud","year":1985,"movements":["Contemporary Art","Realism","Contemporary Realism"],"country":"United Kingdom","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/F0459_Louvre_Giotto_Stigmates_INV309_rwk.jpg/960px-F0459_Louvre_Giotto_Stigmates_INV309_rwk.jpg","title":"Saint Francis receiving the Stigmata","artist":"Giotto","year":1299,"movements":["Medieval"],"country":"Italy","altNames":[]},{"image":"https://www.moma.org/media/W1siZiIsIjE1MTQxMSJdLFsicCIsImNvbnZlcnQiLCItcXVhbGl0eSA5MCAtcmVzaXplIDIwMDB4MjAwMFx1MDAzZSJdXQ.jpg","title":"Leda and the Swan","artist":"Cy Twombly","year":1962,"movements":["Dada","Abstract Expressionism"],"country":"United States","altNames":[]},{"image":"https://elephant.art/wp-content/uploads/2019/04/Han-Dynasty-Urn-with-Coca-Cola-Logo-1993.jpg","title":"Han Dynasty Urn with Coca-Cola Logo","artist":"Ai Weiwei","year":1993,"movements":["Contemporary Art","Conceptual Art"],"country":"China","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Soir_Bleu.jpg/1280px-Soir_Bleu.jpg","title":"Soir Bleu","artist":"Edward Hopper","year":1914,"movements":["Realism","American Realism","Modernism","Post-Impressionism"],"country":"United States","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/JEAN_LOUIS_TH%C3%89ODORE_G%C3%89RICAULT_-_La_Balsa_de_la_Medusa_%28Museo_del_Louvre%2C_1818-19%29.jpg/1280px-JEAN_LOUIS_TH%C3%89ODORE_G%C3%89RICAULT_-_La_Balsa_de_la_Medusa_%28Museo_del_Louvre%2C_1818-19%29.jpg","title":"The Raft of the Medusa","artist":"Théodore Géricault","year":1819,"movements":["Romanticism","Neoclassicism"],"country":"France","altNames":["Theodore Gericault","gericault","theodore gericault"]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Ivan_Aivazovsky_-_Ship_on_Stormy_Seas.jpg/1280px-Ivan_Aivazovsky_-_Ship_on_Stormy_Seas.jpg","title":"Ship on Stormy Seas","artist":"Ivan Aivazovsky","year":1850,"movements":["Romanticism","Expressionism","Realism"],"country":"Russia","altNames":[],"yearTo":1959},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Picture_%22anger_of_the_seas%22_by_Aivasovsky.jpg/1280px-Picture_%22anger_of_the_seas%22_by_Aivasovsky.jpg","title":"The Wrath Of The Seas","artist":"Ivan Aivazovsky","year":1886,"movements":["Romanticism","Expressionism","Realism"],"country":"Russia","altNames":[]},{"image":"https://arthive.com/res/media/img/orig/work/1a7/609858@2x.webp","title":"Necronom IV","artist":"H. R. Giger","year":1976,"movements":["Surrealism","Neo-Expressionism","Post-Modernism"],"country":"Germany","altNames":[]},{"image":"https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/August_Friedrich_Albrecht_Schenck_-_Anguish_-_Google_Art_Project.jpg/1280px-August_Friedrich_Albrecht_Schenck_-_Anguish_-_Google_Art_Project.jpg","title":"Anguish","artist":"August Friedrich Schenck","year":1878,"movements":["Realism","Romanticism","Symbolism"],"country":"Germany","altNames":[]}];
+/* Movement config comes from the spreadsheet's Movements tab, baked in here.
+   Each row: {m: name, show: true/false (in picker), as: parent it counts as, or ''}.
+   Fallback default mirrors the built-in setup if no config was supplied. */
+const MOVEMENT_CONFIG = /*__MOVEMENTS__*/[{"m":"Prehistoric Art","show":true,"as":""},{"m":"Asian Traditional","show":true,"as":""},{"m":"Medieval","show":true,"as":""},{"m":"Gothic","show":true,"as":""},{"m":"Renaissance","show":true,"as":""},{"m":"Baroque","show":true,"as":""},{"m":"Chiaroscuro","show":true,"as":""},{"m":"Rococo","show":true,"as":""},{"m":"Neoclassicism","show":true,"as":""},{"m":"Romanticism","show":true,"as":""},{"m":"Ukiyo-e","show":true,"as":""},{"m":"Realism","show":true,"as":""},{"m":"Pre-Raphaelite","show":true,"as":""},{"m":"Impressionism","show":true,"as":""},{"m":"Post-Impressionism","show":true,"as":""},{"m":"Pointillism","show":true,"as":""},{"m":"Symbolism","show":true,"as":""},{"m":"Art Nouveau","show":true,"as":""},{"m":"Fauvism","show":true,"as":""},{"m":"Expressionism","show":true,"as":""},{"m":"Shin-hanga","show":true,"as":""},{"m":"Cubism","show":true,"as":""},{"m":"Futurism","show":true,"as":""},{"m":"Dada","show":true,"as":""},{"m":"Surrealism","show":true,"as":""},{"m":"Abstract Art","show":true,"as":""},{"m":"Constructivism","show":false,"as":""},{"m":"Bauhaus","show":true,"as":""},{"m":"New Objectivity","show":true,"as":""},{"m":"Modernism","show":true,"as":""},{"m":"Abstract Expressionism","show":true,"as":""},{"m":"Kitsch","show":true,"as":""},{"m":"Pop Art","show":true,"as":""},{"m":"Conceptual Art","show":true,"as":""},{"m":"Photorealism","show":false,"as":"Realism"},{"m":"Neo-Expressionism","show":true,"as":""},{"m":"Post-Modernism","show":true,"as":""},{"m":"Contemporary Art","show":true,"as":""},{"m":"Early Renaissance","show":false,"as":"Renaissance"},{"m":"High Renaissance","show":false,"as":"Renaissance"},{"m":"Northern Renaissance","show":false,"as":"Renaissance"},{"m":"Mannerism","show":false,"as":"Renaissance"},{"m":"Northern Mannerism","show":false,"as":"Renaissance"},{"m":"Orientalism","show":false,"as":"Romanticism"},{"m":"Naturalism","show":false,"as":"Realism"},{"m":"American Realism","show":false,"as":"Realism"},{"m":"Regionalism","show":false,"as":"Realism"},{"m":"Existential Art","show":false,"as":"Expressionism"},{"m":"Primitivism","show":false,"as":"Expressionism"},{"m":"Neo-Dada","show":false,"as":"Dada"},{"m":"Magic Realism","show":false,"as":"Surrealism"},{"m":"De Stijl","show":false,"as":"Bauhaus"},{"m":"New Realism","show":false,"as":"Pop Art"},{"m":"Performance Art","show":false,"as":"Conceptual Art"},{"m":"Postmodernism","show":false,"as":"Post-Modernism"},{"m":"Post-Colonial","show":false,"as":"Post-Modernism"},{"m":"Street Art","show":false,"as":"Contemporary Art"},{"m":"Urban Art","show":false,"as":"Contemporary Art"},{"m":"Young British Artists (YBAs)","show":false,"as":"Contemporary Art"},{"m":"Graffiti","show":true,"as":""},{"m":"Contemporary Realism","show":false,"as":"Contemporary Art"},{"m":"Naïve Art","show":false,"as":"Conceptual Art"},{"m":"Sumi-e","show":true,"as":""},{"m":"Suibokuga","show":false,"as":"Sumi-e"},{"m":"Paleolithic Art","show":false,"as":"Prehistoric Art"}];
+/* VISIBLE in dropdown & used for hint decoys: rows where show=true, in sheet order */
+const MOVEMENTS = MOVEMENT_CONFIG.filter(r=>r.show).map(r=>r.m);
+/* any term (case-insensitive) -> its canonical scoring group.
+   A row's group is its `as` (if set) else itself. */
+const MOVEMENT_CANON=(()=>{
+  const map={};
+  MOVEMENT_CONFIG.forEach(r=>{ const canon=(r.as&&r.as.trim())?r.as.trim():r.m; map[r.m.toLowerCase()]=canon; });
+  return map;
+})();
+const COUNTRIES=[["Afghanistan",33,65],["Argentina",-38,-63],["Australia",-25,133],["Austria",47.5,14.5],["Belgium",50.5,4.5],["Brazil",-14,-51],["Canada",56,-106],["China",35,103],["Czech Republic",49.8,15.5],["Denmark",56,9.5],["Egypt",26,30],["Finland",64,26],["France",46.6,2.2],["Germany",51,9],["Greece",39,22],["Hungary",47,19.5],["India",21,78],["Iran",32,53],["Ireland",53,-8],["Italy",42.8,12.8],["Japan",36,138],["Mexico",23,-102],["Netherlands",52.1,5.3],["Nigeria",9.1,8.7],["Norway",60.5,8.5],["Poland",52,19],["Portugal",39.5,-8],["Russia",61,105],["Spain",40,-3.7],["Sweden",60,18],["Switzerland",46.8,8.2],["Turkey",39,35],["United Kingdom",54,-2.5],["United States",39.8,-98.6]];
+const COUNTRY_NAMES=COUNTRIES.map(c=>c[0]);
+const COUNTRY_MAP=Object.fromEntries(COUNTRIES.map(c=>[c[0],[c[1],c[2]]]));
+let ARTIST_POOL=[...new Set(ARTWORKS.map(a=>a.artist))].sort();
+let current=null,totalScore=0,round=0,era='CE',usedIdx=[];
+let totalRounds=10, maxPerRound=4000;   // 4 fields x 1000
+/* rating ladder: cheeky at top, gentle at the bottom (no real insults).
+   `min` is the minimum fraction (0-1) of max score to earn this title. */
+const RATINGS=[
+  {min:0.90, title:"Curator At Large", blurb:"Frankly, the wall texts should be checking with you."},
+  {min:0.75, title:"Connoisseur", blurb:"An eye this good is almost showing off."},
+  {min:0.60, title:"Seasoned Gallery-Goer", blurb:"You linger at the right paintings and skip the gift shop. Mostly."},
+  {min:0.45, title:"Promising Enthusiast", blurb:"The instincts are real. The dates are aspirational."},
+  {min:0.30, title:"Sunday Painter", blurb:"You love the art. The art is not yet returning your calls."},
+  {min:0.15, title:"Gift Shop Employee", blurb:"Intimately familiar with the postcards. Less so the originals."},
+  {min:0.00, title:"Complete Philistine", blurb:"You'd guess Rembrandt painted the fire exit sign. Bless you."}
+];
+function ratingFor(frac){ for(const r of RATINGS){ if(frac>=r.min) return r; } return RATINGS[RATINGS.length-1]; }
+/* --- best score persistence: best RAW score per mode (5/10/15). Safe if storage blocked. --- */
+const BEST_KEY='provenance_best_by_mode';
+function getBests(){
+  try{ const v=localStorage.getItem(BEST_KEY); return v===null?{}:JSON.parse(v); }
+  catch(e){ return {}; }   // file:// or blocked storage
+}
+function getBest(mode){ const b=getBests(); return (b&&b[mode]!=null)?b[mode]:null; }
+function saveBest(mode,score){
+  try{ const b=getBests(); b[mode]=score; localStorage.setItem(BEST_KEY, JSON.stringify(b)); return true; }
+  catch(e){ return false; }
+}
+function pctOf(score,mode){ return Math.round(score/(mode*maxPerRound)*100); }
+/* --- theme: system / light / dark, persisted; system follows OS live --- */
+const THEME_KEY='provenance_theme';
+const mql=window.matchMedia?window.matchMedia('(prefers-color-scheme: dark)'):null;
+function getThemePref(){ try{ return localStorage.getItem(THEME_KEY)||'system'; }catch(e){ return 'system'; } }
+function applyTheme(pref){
+  let effective=pref;
+  if(pref==='system') effective=(mql&&mql.matches)?'dark':'light';
+  if(effective==='dark') document.documentElement.setAttribute('data-theme','dark');
+  else document.documentElement.removeAttribute('data-theme');
+  // highlight the active button
+  document.querySelectorAll('#themeSw button').forEach(b=>{
+    b.classList.toggle('on', b.dataset.themeChoice===pref);
+  });
+}
+function setThemePref(pref){
+  try{ localStorage.setItem(THEME_KEY,pref); }catch(e){}
+  applyTheme(pref);
+}
+// live-update if OS theme changes while on "system"
+if(mql){ const onOS=()=>{ if(getThemePref()==='system') applyTheme('system'); };
+  if(mql.addEventListener) mql.addEventListener('change',onOS); else if(mql.addListener) mql.addListener(onOS); }
+// artist hint state
+let artistCeiling=1000;      // 1000 -> 500 -> 250
+let artistMode='type';       // 'type' | 'choice'
+let artistChoiceList=[];     // current choices shown
+let artistChosen='';         // selected choice in choice mode
+// movement hint state
+let movCeiling=1000;
+let movMode='type';
+let movChoiceList=[];
+let movChosen='';
+const $=id=>document.getElementById(id);
+const stripAccents=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+
+/* ---------- artist decoy generation ----------
+   Pick 3 plausible wrong artists: prefer same movement, then same era
+   (within 40 yrs), then same country, then nearest by year. */
+function pickArtistDecoys(target,n){
+  // fully random artists (other than the real one), per design choice — keeps the hint easy
+  const pool=[...new Set(ARTWORKS.map(a=>a.artist))].filter(name=>name!==target.artist);
+  return shuffle(pool).slice(0,n);
+}
+function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+/* ---------- generic combobox ---------- */
+function setupCombo(inputId,sugId,getItems,onPick,opts){
+  opts=opts||{};
+  const input=$(inputId),box=$(sugId);
+  let active=-1;
+  function render(items,grouped){
+    if(!items.length){box.classList.add('hidden');return;}
+    box.innerHTML=items.map((it,i)=>'<div data-val="'+it.replace(/"/g,'&quot;')+'" data-i="'+i+'">'+it+'</div>').join('');
+    box.classList.remove('hidden');active=-1;
+    box.querySelectorAll('div').forEach(d=>{d.onclick=()=>{pick(d.dataset.val);};});
+  }
+  function pick(val){input.value=val;box.classList.add('hidden');if(onPick)onPick(val);}
+  function filter(){
+    const v=stripAccents(input.value.trim());
+    if(!v){box.classList.add('hidden');return;}
+    const all=getItems().filter(x=>stripAccents(x).includes(v));
+    // startswith matches first (whole string OR any word), then the rest
+    const starts=[], contains=[];
+    all.forEach(x=>{
+      const lx=stripAccents(x);
+      const wordStart=lx.split(/[\s,]+/).some(w=>w.startsWith(v));
+      (lx.startsWith(v)||wordStart) ? starts.push(x) : contains.push(x);
     });
+    const matches=starts.concat(contains).slice(0,10);
+    render(matches);
+  }
+  input.addEventListener('input',filter);
+  input.addEventListener('keydown',e=>{
+    if(box.classList.contains('hidden'))return;
+    const items=[...box.querySelectorAll('div')];
+    if(e.key==='ArrowDown'){e.preventDefault();active=Math.min(active+1,items.length-1);}
+    else if(e.key==='ArrowUp'){e.preventDefault();active=Math.max(active-1,0);}
+    else if(e.key==='Enter'&&active>=0){e.preventDefault();pick(items[active].dataset.val);return;}
+    else return;
+    items.forEach((it,i)=>it.classList.toggle('active',i===active));
+  });
+  return {
+    showAll:()=>{ render(getItems()); },
+    pick
+  };
+}
 
-    img.addEventListener('error', () => reveal(null));
+let movementCombo,countryCombo,artistTypeCombo;
 
-    // Letter mouse/touch avoidance — playful tuning
-    const RADIUS = 200;
-    const MAX_PUSH = 130;
-    let pointer = { x: -9999, y: -9999, active: false };
-    let rafPending = false;
+function initCombos(){
+  artistTypeCombo=setupCombo('artistInput','artistSug',()=>ARTIST_POOL,null);
+  movementCombo=setupCombo('movementInput','movementSug',()=>MOVEMENTS,null);
+  countryCombo=setupCombo('countryInput','countrySug',()=>COUNTRY_NAMES,null);
+  $('movementListBtn').onclick=()=>{ $('movementInput').focus(); movementCombo.showAll(); };
+  $('countryListBtn').onclick=()=>{ $('countryInput').focus(); countryCombo.showAll(); };
+}
 
-    function updateLetters() {
-      rafPending = false;
-      for (let i = 0; i < letters.length; i++) {
-        const el = letters[i];
-        const r = el.getBoundingClientRect();
-        const cx = r.left + r.width / 2;
-        const cy = r.top + r.height / 2;
-        if (!pointer.active) { el.style.transform = ''; continue; }
-        const dx = cx - pointer.x;
-        const dy = cy - pointer.y;
-        const dist = Math.hypot(dx, dy);
-        if (dist < RADIUS && dist > 0.001) {
-          const t = 1 - dist / RADIUS;
-          const force = t * t * (3 - 2 * t);
-          const push = force * MAX_PUSH;
-          const nx = (dx / dist) * push;
-          const ny = (dy / dist) * push;
-          const dir = (i % 2 === 0) ? 1 : -1;
-          const rot = dir * force * 35;
-          const scale = 1 + force * 0.35;
-          el.style.transform = `translate(${nx}px, ${ny}px) rotate(${rot}deg) scale(${scale})`;
-        } else {
-          el.style.transform = '';
-        }
-      }
+/* ---------- artist hint button ---------- */
+function narrowArtist(){
+  if(!current)return;
+  if(artistCeiling===1000){
+    // first press: 4 options, -250
+    const decoys=pickArtistDecoys(current,3);
+    artistChoiceList=shuffle([current.artist,...decoys]).slice(0,4);
+    if(!artistChoiceList.includes(current.artist)) artistChoiceList[0]=current.artist;
+    artistCeiling=750;
+    enterChoiceMode();
+    $('narrowNote').innerHTML='Narrowed to 4 (−250). Narrow again to 2 for another −250.';
+  } else if(artistCeiling===750){
+    // second press: keep real + closest decoy, another -250
+    const decoy=artistChoiceList.find(a=>a!==current.artist);
+    artistChoiceList=shuffle([current.artist,decoy]);
+    artistCeiling=500;
+    renderChoices();
+    $('narrowNote').innerHTML='Narrowed to 2. This field now scores up to 500.';
+    $('narrowBtn').disabled=true;
+  }
+  $('artistPts').textContent='up to '+artistCeiling+' pts';
+  $('artistPts').classList.add('reduced');
+}
+function enterChoiceMode(){
+  artistMode='choice';artistChosen='';
+  $('artistCombo').classList.add('hidden');
+  $('artistChoices').classList.remove('hidden');
+  renderChoices();
+}
+function renderChoices(){
+  $('artistChoices').innerHTML=artistChoiceList.map(a=>'<button type="button" class="choice'+(a===artistChosen?' sel':'')+'" data-a="'+a.replace(/"/g,'&quot;')+'">'+a+'</button>').join('');
+  $('artistChoices').querySelectorAll('.choice').forEach(b=>{b.onclick=()=>{artistChosen=b.dataset.a;renderChoices();};});
+}
+
+/* ---------- movement hint button (random decoys, per design choice) ---------- */
+function pickMovementDecoys(target,n){
+  // random VISIBLE movements whose canonical group is not one of the artwork's
+  const correctCanon=new Set(target.movements.map(canonMovement));
+  const clean=MOVEMENTS.filter(m=>!correctCanon.has(canonMovement(m)));
+  return shuffle(clean).slice(0,n);
+}
+function narrowMovement(){
+  if(!current)return;
+  // headline correct answer, shown as its VISIBLE canonical form (so it's a real dropdown option)
+  const realPick=canonMovement(current.movements[0]);
+  if(movCeiling===1000){
+    const decoys=pickMovementDecoys(current,3);
+    movChoiceList=shuffle([realPick,...decoys]).slice(0,4);
+    if(!movChoiceList.some(m=>movementMatches(m,current.movements))) movChoiceList[0]=realPick;
+    movCeiling=750;
+    movMode='choice';movChosen='';
+    $('movementCombo').classList.add('hidden');
+    $('movementChoices').classList.remove('hidden');
+    renderMovChoices();
+    $('movNarrowNote').innerHTML='Narrowed to 4 (−250). Narrow again to 2 for another −250.';
+  } else if(movCeiling===750){
+    const decoy=movChoiceList.find(m=>!movementMatches(m,current.movements));
+    movChoiceList=shuffle([realPick,decoy]);
+    movCeiling=500;
+    renderMovChoices();
+    $('movNarrowNote').innerHTML='Narrowed to 2. This field now scores up to 500.';
+    $('movNarrowBtn').disabled=true;
+  }
+  $('movementPts').textContent='up to '+movCeiling+' pts';
+  $('movementPts').classList.add('reduced');
+}
+function renderMovChoices(){
+  $('movementChoices').innerHTML=movChoiceList.map(m=>'<button type="button" class="choice'+(m===movChosen?' sel':'')+'" data-m="'+m.replace(/"/g,'&quot;')+'">'+m+'</button>').join('');
+  $('movementChoices').querySelectorAll('.choice').forEach(b=>{b.onclick=()=>{movChosen=b.dataset.m;renderMovChoices();};});
+}
+
+function nextRound(){
+  $('guessPanel').classList.remove('hidden');$('resultPanel').classList.add('hidden');
+  // reset artist
+  artistMode='type';artistCeiling=1000;artistChoiceList=[];artistChosen='';
+  $('artistCombo').classList.remove('hidden');$('artistChoices').classList.add('hidden');$('artistChoices').innerHTML='';
+  $('artistInput').value='';$('artistInput').disabled=false;
+  $('artistPts').textContent='1000 pts';$('artistPts').classList.remove('reduced');
+  $('narrowBtn').disabled=false;
+  $('narrowNote').innerHTML='Not sure? Narrow it down.';
+  // reset movement (incl. hint state)
+  movMode='type';movCeiling=1000;movChoiceList=[];movChosen='';
+  $('movementCombo').classList.remove('hidden');$('movementChoices').classList.add('hidden');$('movementChoices').innerHTML='';
+  $('movementInput').value='';$('movementInput').disabled=false;$('movementSug').classList.add('hidden');
+  $('movementPts').textContent='1000 pts';$('movementPts').classList.remove('reduced');
+  $('movNarrowBtn').disabled=false;
+  $('movNarrowNote').innerHTML='Not sure? Narrow it down.';
+  // reset others
+  $('countryInput').value='';$('countryInput').disabled=false;$('countrySug').classList.add('hidden');
+  $('movementListBtn').disabled=false;$('countryListBtn').disabled=false;
+  $('yearInput').value='';$('yearInput').disabled=false;
+  era='CE';setEra('CE');$('ceBtn').disabled=false;$('bceBtn').disabled=false;
+  $('submitBtn').disabled=false;
+  round++;$('roundNum').textContent=round;
+  if(usedIdx.length>=ARTWORKS.length)usedIdx=[];
+  let idx;do{idx=Math.floor(Math.random()*ARTWORKS.length);}while(usedIdx.includes(idx)&&ARTWORKS.length>1);
+  usedIdx.push(idx);current=ARTWORKS[idx];
+  $('titleCaption').innerHTML='<span class="tc-label">The work is titled</span>“'+current.title+'”';
+  $('titleCaption').classList.remove('hidden');
+  $('artwrap').innerHTML='<div class="loading"><div class="spinner"></div>HANGING THE WORK…</div>';
+  const im=new Image();
+  im.onload=()=>{
+    $('artwrap').innerHTML='';
+    $('artwrap').appendChild(im);
+    const cue=document.createElement('div'); cue.className='zoomcue';
+    cue.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="7"/><line x1="21" y1="21" x2="15.8" y2="15.8"/></svg>';
+    $('artwrap').appendChild(cue);
+    im.addEventListener('click',()=>openLightbox(im.src));
+  };
+  im.onerror=()=>{$('artwrap').innerHTML="<div class=\"imgerr\">This image would not load.<br>You can still guess.</div>";};
+  im.alt='artwork to identify';im.src=current.image;
+}
+function setEra(e){era=e;$('ceBtn').classList.toggle('on',e==='CE');$('bceBtn').classList.toggle('on',e==='BCE');}
+
+function haversine(la1,lo1,la2,lo2){const R=6371,t=d=>d*Math.PI/180;const dLa=t(la2-la1),dLo=t(lo2-lo1);const a=Math.sin(dLa/2)**2+Math.cos(t(la1))*Math.cos(t(la2))*Math.sin(dLo/2)**2;return 2*R*Math.asin(Math.sqrt(a));}
+function yearPoints(g,truthFrom,truthTo,prehistoric){
+  // points lost per year off. Normal works: 10/yr. Prehistoric: 10 per 100 yrs = 0.1/yr.
+  const rate=prehistoric?0.1:10;
+  if(truthTo==null||truthTo===truthFrom){
+    const d=Math.abs(g-truthFrom);return d===0?1000:Math.max(0,Math.round(1000-d*rate));
+  }
+  const lo=Math.min(truthFrom,truthTo), hi=Math.max(truthFrom,truthTo);
+  if(g>=lo&&g<=hi) return 1000;                 // anywhere in range = full marks
+  const d=(g<lo)?(lo-g):(g-hi);                  // distance from nearest edge
+  return Math.max(0,Math.round(1000-d*rate));
+}
+/* a work scores on the gentle prehistoric scale if tagged with the "Prehistoric art" movement */
+function isPrehistoric(a){ return a.movements && a.movements.some(m=>m.toLowerCase().trim()==='prehistoric art'); }
+function countryPoints(guess,truthCountry){
+  if(!guess)return 0;
+  // truthCountry may be multiple, semicolon-separated — score the BEST of either
+  const truths=String(truthCountry).split(';').map(s=>s.trim()).filter(Boolean);
+  let best=0;
+  for(const tc of truths){
+    let pts;
+    if(guess===tc){pts=1000;}
+    else{
+      const g=COUNTRY_MAP[guess],tt=COUNTRY_MAP[tc];
+      pts=(!g||!tt)?0:Math.max(0,Math.round(1000*(1-haversine(g[0],g[1],tt[0],tt[1])/8000)));
     }
-    function queue() {
-      if (!rafPending) { rafPending = true; requestAnimationFrame(updateLetters); }
+    if(pts>best)best=pts;
+  }
+  return best;
+}
+function guessMatchesArtist(guess,truth,alts){
+  if(!guess||guess.length<3)return false;
+  const g=guess.toLowerCase().trim();
+  const cands=[truth.toLowerCase(),...(alts||[]).map(a=>a.toLowerCase())];
+  for(const t of cands){if(g===t)return true;if(t.includes(g)&&g.length>=5)return true;const ts=t.replace(/\(.*?\)/g,'').trim().split(/\s+/).pop();const gs=g.split(/\s+/).pop();if(ts.length>3&&gs===ts)return true;}
+  return false;
+}
+function ptsClass(p,m){if(m===0)return 'low';const r=p/m;return r>=0.66?'good':r>=0.25?'mid':'low';}
+/* canonical form of any movement term (parent or child); falls back to the term itself */
+function canonMovement(m){ if(!m)return ''; return MOVEMENT_CANON[m.toLowerCase().trim()]||m.trim(); }
+/* a guess is correct if its canonical group matches the canonical group of ANY
+   movement the artwork is tagged with. So "Pointillism" (->Post-Impressionism),
+   "Post-Impressionism", and an artwork tagged "Pointillism" all align. */
+function movementMatches(guess,artworkMovements){
+  if(!guess)return false;
+  const gc=canonMovement(guess);
+  return artworkMovements.some(m=>canonMovement(m)===gc);
+}
+const fmtYear=y=>y<0?Math.abs(y)+' BCE':y+' CE';
+function fmtYearFull(a){ // a = current artwork
+  if(a.yearTo==null||a.yearTo===a.year) return fmtYear(a.year);
+  const lo=Math.min(a.year,a.yearTo), hi=Math.max(a.year,a.yearTo);
+  // show as "c. 30,000–25,000 BCE" style; keep eras explicit
+  return 'c. '+fmtYear(lo)+' – '+fmtYear(hi);
+}
+
+function submitGuess(){
+  if(!current)return;
+  // artist: depends on mode
+  let artistGuessLabel,artistCorrect;
+  if(artistMode==='choice'){
+    artistGuessLabel=artistChosen||'—';
+    artistCorrect=artistChosen===current.artist;
+  } else {
+    artistGuessLabel=$('artistInput').value.trim()||'—';
+    artistCorrect=guessMatchesArtist($('artistInput').value.trim(),current.artist,current.altNames);
+  }
+  const artistMax=artistCeiling;                 // 1000 / 500 / 250
+  const artistPts=artistCorrect?artistMax:0;
+
+  // movement: depends on mode
+  let movGuessLabel,movCorrect;
+  if(movMode==='choice'){
+    movGuessLabel=movChosen||'—';
+    movCorrect=movChosen?movementMatches(movChosen,current.movements):false;
+  } else {
+    movGuessLabel=$('movementInput').value.trim()||'—';
+    movCorrect=movementMatches($('movementInput').value.trim(),current.movements);
+  }
+  const movMax=movCeiling;                       // 1000 / 500 / 250
+  const movPts=movCorrect?movMax:0;
+  const rawYear=parseInt($('yearInput').value,10);
+  const yGuess=isNaN(rawYear)?null:(era==='BCE'?-rawYear:rawYear);
+  const yPts=yGuess===null?0:yearPoints(yGuess,current.year,current.yearTo,isPrehistoric(current));
+  const cGuess=$('countryInput').value.trim();
+  const cPts=countryPoints(cGuess,current.country);
+
+  let roundScore=artistPts+movPts+yPts+cPts;
+  totalScore+=roundScore;$('totalScore').textContent=totalScore.toLocaleString();
+
+  ['artistInput','movementInput','countryInput','yearInput','submitBtn','ceBtn','bceBtn','narrowBtn','movNarrowBtn','movementListBtn','countryListBtn'].forEach(id=>$(id).disabled=true);
+  $('artistChoices').querySelectorAll('.choice').forEach(b=>b.disabled=true);
+  $('movementChoices').querySelectorAll('.choice').forEach(b=>b.disabled=true);
+
+  const yourYear=yGuess===null?'—':fmtYear(yGuess);
+  let yearOff='';
+  if(yGuess!==null){
+    if(current.yearTo!=null&&current.yearTo!==current.year){
+      const lo=Math.min(current.year,current.yearTo),hi=Math.max(current.year,current.yearTo);
+      if(yGuess>=lo&&yGuess<=hi) yearOff=' · in range';
+      else yearOff=' · '+((yGuess<lo)?(lo-yGuess):(yGuess-hi))+' yrs outside';
+    } else {
+      yearOff=' · '+Math.abs(yGuess-current.year)+' yrs off';
     }
-    window.addEventListener('mousemove', (e) => {
-      pointer.x = e.clientX; pointer.y = e.clientY; pointer.active = true; queue();
-    });
-    window.addEventListener('mouseleave', () => { pointer.active = false; queue(); });
-    window.addEventListener('touchmove', (e) => {
-      const t = e.touches[0];
-      if (t) { pointer.x = t.clientX; pointer.y = t.clientY; pointer.active = true; queue(); }
-    }, { passive: true });
-    window.addEventListener('touchstart', (e) => {
-      const t = e.touches[0];
-      if (t) { pointer.x = t.clientX; pointer.y = t.clientY; pointer.active = true; queue(); }
-    }, { passive: true });
-    window.addEventListener('touchend', () => {
-      setTimeout(() => { pointer.active = false; queue(); }, 400);
-    });
-  
-    // Mobile nav toggle
-    (function(){
-      const navEl = document.getElementById('nav');
-      const toggle = navEl ? navEl.querySelector('.nav-toggle') : null;
-      if (toggle && navEl) {
-        toggle.addEventListener('click', () => navEl.classList.toggle('open'));
-        // close menu after tapping a link
-        navEl.querySelectorAll('.nav-links a').forEach(a => {
-          a.addEventListener('click', () => navEl.classList.remove('open'));
-        });
-      }
-    })();
-  </script>
+  }
+  const movLabel=current.movements.join(' / ');
+  const artistCatLabel=artistMax<1000?('Artist · hint used (max '+artistMax+')'):'Artist';
+  const movCatLabel=movMax<1000?('Movement · hint used (max '+movMax+')'):'Movement';
+
+  $('resultPanel').innerHTML='<div class="reveal"><div class="rt-title">'+current.title+'</div><div class="rt-artist">'+current.artist+'</div><div class="rt-meta">'+movLabel+' · '+fmtYearFull(current)+' · '+(current.country||'—')+'</div></div><div class="breakdown"><div class="res-row"><div><div class="res-cat">'+artistCatLabel+'</div><div class="res-detail">You said: <span class="'+(artistPts?'ok':'')+'">'+artistGuessLabel+'</span></div></div><div class="res-pts '+ptsClass(artistPts,artistMax)+'">+'+artistPts+'</div></div><div class="res-row"><div><div class="res-cat">'+movCatLabel+'</div><div class="res-detail">You said: <span class="'+(movPts?'ok':'')+'">'+movGuessLabel+'</span></div></div><div class="res-pts '+ptsClass(movPts,movMax)+'">+'+movPts+'</div></div><div class="res-row"><div><div class="res-cat">Year</div><div class="res-detail">You said: <span class="'+(yPts===1000?'ok':'')+'">'+yourYear+'</span>'+yearOff+'</div></div><div class="res-pts '+ptsClass(yPts,1000)+'">+'+yPts+'</div></div><div class="res-row"><div><div class="res-cat">Country of origin</div><div class="res-detail">You said: <span class="'+(cPts===1000?'ok':'')+'">'+(cGuess||'—')+'</span></div></div><div class="res-pts '+ptsClass(cPts,1000)+'">+'+cPts+'</div></div>'+'<div class="roundtotal"><div class="num">+'+roundScore.toLocaleString()+'</div><div class="lbl">points this round</div></div><button class="submit" id="nextBtn">'+(round>=totalRounds?'See your rating →':'Next artwork →')+'</button></div>';
+  $('guessPanel').classList.add('hidden');$('resultPanel').classList.remove('hidden');$('titleCaption').classList.add('hidden');
+  $('nextBtn').onclick=(round>=totalRounds)?endGame:nextRound;
+}
+
+document.addEventListener('click',e=>{if(!e.target.closest('.combo')){$('artistSug').classList.add('hidden');$('movementSug').classList.add('hidden');$('countrySug').classList.add('hidden');}});
+$('ceBtn').addEventListener('click',()=>setEra('CE'));
+$('bceBtn').addEventListener('click',()=>setEra('BCE'));
+$('narrowBtn').addEventListener('click',narrowArtist);
+$('movNarrowBtn').addEventListener('click',narrowMovement);
+$('submitBtn').addEventListener('click',submitGuess);
+
+function renderStartBest(){
+  const modes=[5,10,15];
+  const lines=modes.map(m=>{
+    const b=getBest(m);
+    if(b==null) return '<span class="ssb-row"><span class="ssb-mode">'+m+'-round</span><span class="ssb-val">—</span></span>';
+    return '<span class="ssb-row"><span class="ssb-mode">'+m+'-round</span><span class="ssb-val"><b>'+b.toLocaleString()+'</b> ('+pctOf(b,m)+'%)</span></span>';
+  });
+  const any=modes.some(m=>getBest(m)!=null);
+  if(!any){ $('ssBest').classList.add('hidden'); return; }
+  $('ssBest').innerHTML='<div class="ssb-head">Your best</div>'+lines.join('');
+  $('ssBest').classList.remove('hidden');
+}
+function startGame(n){
+  totalRounds=n; totalScore=0; round=0; usedIdx=[];
+  $('totalScore').textContent='0';
+  $('roundTotal').textContent=' / '+n;
+  $('startScreen').classList.add('hidden');
+  $('endScreen').classList.add('hidden');
+  $('gameArea').classList.remove('hidden');
+  $('scorebar').classList.remove('hidden');
+  nextRound();
+}
+function endGame(){
+  const maxPossible=totalRounds*maxPerRound;
+  const frac=maxPossible>0?totalScore/maxPossible:0;
+  const r=ratingFor(frac);
+  const pct=Math.round(frac*100);
+  // per-mode best check (before saving the new one)
+  const prevBest=getBest(totalRounds);
+  const isNewBest=(prevBest===null)||(totalScore>prevBest);
+  if(isNewBest) saveBest(totalRounds,totalScore);
+  const bestLine = isNewBest
+    ? '<div class="es-newbest">★ New '+totalRounds+'-round best</div>'
+    : (prevBest!==null ? '<div class="es-score" style="margin-bottom:14px">Your best '+totalRounds+'-round game · '+prevBest.toLocaleString()+'</div>' : '');
+  $('gameArea').classList.add('hidden');
+  $('scorebar').classList.add('hidden');
+  $('endScreen').classList.remove('hidden');
+  $('endScreen').innerHTML='<div class="es-eyebrow">'+totalRounds+' rounds · final verdict</div>'+
+    bestLine+
+    '<div class="es-rating">'+r.title+'</div>'+
+    '<div class="es-blurb">'+r.blurb+'</div>'+
+    '<div class="es-score">YOU SCORED</div><div class="es-score"><b>'+totalScore.toLocaleString()+'</b> / '+maxPossible.toLocaleString()+' ('+pct+'%)</div>'+
+    '<div class="es-bar"><div class="es-bar-fill" style="width:'+pct+'%"></div></div>'+
+    '<button class="es-again" id="againBtn">Play again</button>';
+  $('againBtn').onclick=goHome;
+}
+function goHome(){
+  $('endScreen').classList.add('hidden');
+  $('rulesScreen').classList.add('hidden');
+  $('gameArea').classList.add('hidden');
+  $('scorebar').classList.add('hidden');
+  closeLightbox();
+  $('startScreen').classList.remove('hidden');
+  $('roundTotal').textContent=''; $('roundNum').textContent='1'; $('totalScore').textContent='0';
+  renderStartBest();
+}
+
+// theme: apply saved preference immediately and wire the switcher
+applyTheme(getThemePref());
+document.querySelectorAll('#themeSw button').forEach(b=>{ b.onclick=()=>setThemePref(b.dataset.themeChoice); });
+
+// lightbox (closer look at the artwork)
+function openLightbox(src){ $('lightboxImg').src=src; $('lightbox').classList.add('open'); }
+function closeLightbox(){ $('lightbox').classList.remove('open'); }
+$('homeLink').addEventListener('click',goHome);
+$('rulesBtn').addEventListener('click',()=>{ $('startScreen').classList.add('hidden'); $('rulesScreen').classList.remove('hidden'); });
+$('rulesBackBtn').addEventListener('click',()=>{ $('rulesScreen').classList.add('hidden'); $('startScreen').classList.remove('hidden'); });
+$('lightbox').addEventListener('click',e=>{ if(e.target.id!=='lightboxImg') closeLightbox(); });
+$('lightboxClose').addEventListener('click',closeLightbox);
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&$('lightbox').classList.contains('open')) closeLightbox(); });
+
+initCombos();
+if(ARTWORKS.length){
+  document.querySelectorAll('.ss-round').forEach(b=>{ b.onclick=()=>startGame(parseInt(b.dataset.n,10)); });
+  renderStartBest();
+}else{
+  $('startScreen').innerHTML='<div class="imgerr" style="color:var(--muted)">No artworks baked in.<br>Rebuild from the Builder tool.</div>';
+}
+</script>
 </body>
 </html>
+
