@@ -169,6 +169,55 @@
       .works { grid-template-columns:1fr; }
       nav { gap:6px 18px; }
     }
+  
+    /* --- Mobile collapsible nav --- */
+    .nav-toggle { display:none; }
+    .nav-links { display:contents; }
+    @media (max-width:600px){
+      nav {
+        flex-direction:column;
+        gap:0;
+        padding:0;
+        width:auto;
+        max-width:calc(100% - 32px);
+        overflow:hidden;
+      }
+      .nav-toggle {
+        display:flex; align-items:center; justify-content:center; gap:9px;
+        font-family:'IBM Plex Mono',monospace;
+        font-size:0.82rem; letter-spacing:0.06em;
+        color:#f4f2ee;
+        background:none; border:none; cursor:pointer;
+        padding:13px 26px;
+        width:100%;
+        text-shadow:0 1px 8px rgba(0,0,0,0.4);
+      }
+      .nav-toggle .bars {
+        display:inline-flex; flex-direction:column; gap:3px;
+      }
+      .nav-toggle .bars span {
+        display:block; width:16px; height:1.6px; background:currentColor;
+        transition:transform 0.3s ease, opacity 0.3s ease;
+      }
+      nav.open .nav-toggle .bars span:nth-child(1){ transform:translateY(4.6px) rotate(45deg); }
+      nav.open .nav-toggle .bars span:nth-child(2){ opacity:0; }
+      nav.open .nav-toggle .bars span:nth-child(3){ transform:translateY(-4.6px) rotate(-45deg); }
+      .nav-links {
+        display:flex; flex-direction:column; align-items:center;
+        gap:0;
+        max-height:0; overflow:hidden;
+        width:100%;
+        transition:max-height 0.4s ease;
+      }
+      nav.open .nav-links { max-height:60vh; }
+      .nav-links a {
+        padding:13px 26px;
+        width:100%; text-align:center;
+        border-top:1px solid rgba(255,255,255,0.10);
+        border-bottom:none;
+      }
+      .nav-links a:hover { border-bottom:none; }
+    }
   </style>
 </head>
 <body>
@@ -182,43 +231,50 @@
 
     <div class="works" id="works">
       <!-- Each card links to its own page (to be built). Update href when ready. -->
-      <a class="work" href="/logue-lake">
+      <a class="work" href="/provenance">
         <div class="num">01</div>
+        <h2>Provenance</h2>
+        <div class="meta">An art history guessing game</div>
+        <div class="arrow">→</div>
+      </a>
+
+      <a class="work" href="/logue-lake">
+        <div class="num">02</div>
         <h2>Logue Lake</h2>
         <div class="meta">A queer cabin-in-the-woods horror</div>
         <div class="arrow">→</div>
       </a>
 
       <a class="work" href="/all-that-is-solid">
-        <div class="num">02</div>
+        <div class="num">03</div>
         <h2>All That Is Solid Melts Into Air</h2>
         <div class="meta">Would you want to live forever?</div>
         <div class="arrow">→</div>
       </a>
 
       <a class="work" href="/hive-mind">
-        <div class="num">03</div>
+        <div class="num">04</div>
         <h2>Hive Mind</h2>
         <div class="meta">A bee cult takes over</div>
         <div class="arrow">→</div>
       </a>
 
       <a class="work" href="/girl-in-the-wood">
-        <div class="num">04</div>
+        <div class="num">05</div>
         <h2>Girl in the Wood</h2>
         <div class="meta">A spooky forest fairytale</div>
         <div class="arrow">→</div>
       </a>
 
       <a class="work" href="/the-lost-tape">
-        <div class="num">05</div>
+        <div class="num">06</div>
         <h2>The Lost Tape</h2>
         <div class="meta">Micro dramas on tape</div>
         <div class="arrow">→</div>
       </a>
 
       <a class="work" href="/deadline-gang">
-        <div class="num">06</div>
+        <div class="num">07</div>
         <h2>Deadline Gang</h2>
         <div class="meta">A writing program</div>
         <div class="arrow">→</div>
@@ -227,11 +283,14 @@
   </div>
 
   <nav id="nav">
+    <button class="nav-toggle" aria-label="Menu"><span class="bars"><span></span><span></span><span></span></span>Menu</button>
+    <div class="nav-links">
     <a href="/">Home</a>
-    <a href="/game">Provenance — An Art Game</a>
+    <a href="/game">Provenance</a>
     <a href="/scripts" class="current">Creative Works</a>
     <a href="/bio">Bio</a>
     <a href="/contact">Contact</a>
+    </div>
   </nav>
 
   <script>
@@ -255,6 +314,19 @@
       img.addEventListener('load', () => { img.classList.add('loaded'); reveal(); });
       img.addEventListener('error', reveal);
     }
+  
+    // Mobile nav toggle
+    (function(){
+      const navEl = document.getElementById('nav');
+      const toggle = navEl ? navEl.querySelector('.nav-toggle') : null;
+      if (toggle && navEl) {
+        toggle.addEventListener('click', () => navEl.classList.toggle('open'));
+        // close menu after tapping a link
+        navEl.querySelectorAll('.nav-links a').forEach(a => {
+          a.addEventListener('click', () => navEl.classList.remove('open'));
+        });
+      }
+    })();
   </script>
 </body>
 </html>

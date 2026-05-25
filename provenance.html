@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Provenance — Geordie Crawley</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="6e8639e8-bf58-459d-9a37-5f0f82788902"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Spectral:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body {
+      min-height:100%;
+      font-family:'IBM Plex Mono',monospace;
+      background:#0a0a0a;
+      color:#f4f2ee;
+    }
+
+    .bg { position:fixed; inset:0; z-index:0; background:#0a0a0a; }
+    .bg img {
+      width:100%; height:100%; object-fit:cover;
+      object-position:center center;
+      opacity:0; transition:opacity 1.4s ease;
+    }
+    .bg img.loaded { opacity:1; }
+    .bg::after {
+      content:""; position:absolute; inset:0;
+      background:linear-gradient(180deg, rgba(8,9,12,0.50) 0%, rgba(8,9,12,0.42) 35%, rgba(8,9,12,0.70) 100%);
+    }
+
+    .page {
+      position:relative; z-index:1;
+      min-height:100vh;
+      display:flex; align-items:center; justify-content:center;
+      padding:clamp(80px,10vh,140px) clamp(20px,5vw,60px) clamp(120px,16vh,180px);
+    }
+
+    .wrap {
+      display:flex;
+      gap:clamp(28px,4vw,56px);
+      align-items:flex-start;
+      max-width:1100px;
+      width:100%;
+      opacity:0; transform:translateY(16px);
+      transition:opacity 0.9s ease 0.3s, transform 0.9s ease 0.3s;
+    }
+    .wrap.visible { opacity:1; transform:translateY(0); }
+
+    /* Screenshot — clickable into lightbox */
+    .shot {
+      flex:0 0 clamp(240px,34%,380px);
+      padding:0; cursor:pointer; background:none;
+      border-radius:16px; overflow:hidden;
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow:0 8px 32px rgba(0,0,0,0.32);
+    }
+    .shot img { width:100%; height:auto; display:block;
+      transition:transform 0.6s cubic-bezier(0.2,0.8,0.3,1); }
+    .shot:hover img { transform:scale(1.03); }
+
+    .info {
+      flex:1 1 auto;
+      padding:clamp(28px,3.5vw,46px);
+      border-radius:18px;
+      background:rgba(18,18,20,0.42);
+      backdrop-filter:blur(20px) saturate(1.2);
+      -webkit-backdrop-filter:blur(20px) saturate(1.2);
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow:0 8px 32px rgba(0,0,0,0.3);
+    }
+    .info .eyebrow {
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.72rem; letter-spacing:0.16em; text-transform:uppercase;
+      color:rgba(244,242,238,0.6); margin-bottom:14px;
+    }
+    .info h1 {
+      font-family:'IBM Plex Mono',monospace;
+      font-weight:700;
+      font-size:clamp(1.9rem,3.6vw,2.6rem);
+      letter-spacing:-0.02em;
+      line-height:1.05;
+      margin-bottom:8px;
+    }
+    .info .tagline {
+      font-family:'Spectral',serif; font-style:italic;
+      font-size:clamp(1.05rem,1.8vw,1.25rem);
+      color:rgba(244,242,238,0.85);
+      margin-bottom:clamp(20px,2.4vw,28px);
+    }
+    .info p {
+      font-family:'Spectral',serif;
+      font-size:clamp(1.02rem,1.5vw,1.15rem);
+      line-height:1.65;
+      margin-bottom:1em;
+      color:#ebe9e4;
+      text-shadow:0 1px 10px rgba(0,0,0,0.35);
+    }
+    .info p:last-of-type { margin-bottom:0; }
+    .info em { font-style:italic; }
+
+    .play-btn {
+      display:inline-flex; align-items:center; gap:10px;
+      margin-top:clamp(22px,2.6vw,30px);
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.92rem; font-weight:500; letter-spacing:0.04em;
+      color:#14140f;
+      background:#f4f2ee;
+      border:1px solid #f4f2ee;
+      border-radius:12px;
+      padding:14px 28px;
+      text-decoration:none;
+      transition:background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .play-btn:hover {
+      background:#fff;
+      transform:translateY(-2px);
+      box-shadow:0 8px 24px rgba(0,0,0,0.3);
+    }
+    .play-btn .arr { font-size:1.05rem; }
+
+    /* Lightbox */
+    .lightbox {
+      position:fixed; inset:0; z-index:50;
+      background:rgba(6,6,8,0.94);
+      backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+      display:flex; align-items:center; justify-content:center;
+      padding:clamp(20px,4vw,60px);
+      opacity:0; pointer-events:none;
+      transition:opacity 0.35s ease; cursor:zoom-out;
+    }
+    .lightbox.open { opacity:1; pointer-events:auto; }
+    .lightbox img {
+      max-width:100%; max-height:100%; border-radius:8px;
+      box-shadow:0 20px 60px rgba(0,0,0,0.6);
+      transform:scale(0.97); transition:transform 0.35s ease;
+    }
+    .lightbox.open img { transform:scale(1); }
+    .lightbox .close {
+      position:absolute; top:clamp(16px,3vw,28px); right:clamp(16px,3vw,28px);
+      font-family:'IBM Plex Mono',monospace; font-size:1.5rem;
+      color:rgba(244,242,238,0.8); background:none; border:none; cursor:pointer;
+      width:44px; height:44px; line-height:1; transition:color 0.3s ease;
+    }
+    .lightbox .close:hover { color:#fff; }
+
+    nav {
+      position:fixed;
+      bottom:clamp(20px,4vw,44px);
+      left:50%; transform:translateX(-50%);
+      display:flex; justify-content:center; align-items:center;
+      gap:clamp(14px,3vw,40px);
+      flex-wrap:wrap;
+      z-index:3;
+      padding:14px clamp(20px,4vw,36px);
+      border-radius:16px;
+      background:rgba(20,20,22,0.28);
+      backdrop-filter:blur(16px) saturate(1.2);
+      -webkit-backdrop-filter:blur(16px) saturate(1.2);
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow:0 8px 32px rgba(0,0,0,0.25);
+      max-width:calc(100% - 32px);
+      opacity:0;
+      transition:opacity 0.6s ease 0.6s;
+    }
+    nav.visible { opacity:1; }
+    nav a {
+      font-family:'Spectral',serif; font-style:italic; font-weight:400;
+      font-size:clamp(0.95rem,2vw,1.2rem);
+      color:#f4f2ee; text-decoration:none; letter-spacing:0.01em;
+      padding:2px 0; border-bottom:1.5px solid transparent;
+      transition:border-color 0.3s ease, opacity 0.3s ease;
+      text-shadow:0 1px 8px rgba(0,0,0,0.4); white-space:nowrap;
+    }
+    nav a:hover { border-bottom-color:currentColor; opacity:0.85; }
+
+    .nav-toggle { display:none; }
+    .nav-links { display:contents; }
+
+    @media (max-width:760px){
+      .wrap { flex-direction:column; align-items:center; }
+      .shot { flex:0 0 auto; max-width:320px; width:100%; }
+    }
+    @media (max-width:600px){
+      nav {
+        flex-direction:column; gap:0; padding:0; width:auto;
+        max-width:calc(100% - 32px); overflow:hidden;
+      }
+      .nav-toggle {
+        display:flex; align-items:center; justify-content:center; gap:9px;
+        font-family:'IBM Plex Mono',monospace; font-size:0.82rem; letter-spacing:0.06em;
+        color:#f4f2ee; background:none; border:none; cursor:pointer;
+        padding:13px 26px; width:100%; text-shadow:0 1px 8px rgba(0,0,0,0.4);
+      }
+      .nav-toggle .bars { display:inline-flex; flex-direction:column; gap:3px; }
+      .nav-toggle .bars span {
+        display:block; width:16px; height:1.6px; background:currentColor;
+        transition:transform 0.3s ease, opacity 0.3s ease;
+      }
+      nav.open .nav-toggle .bars span:nth-child(1){ transform:translateY(4.6px) rotate(45deg); }
+      nav.open .nav-toggle .bars span:nth-child(2){ opacity:0; }
+      nav.open .nav-toggle .bars span:nth-child(3){ transform:translateY(-4.6px) rotate(-45deg); }
+      .nav-links {
+        display:flex; flex-direction:column; align-items:center; gap:0;
+        max-height:0; overflow:hidden; width:100%; transition:max-height 0.4s ease;
+      }
+      nav.open .nav-links { max-height:60vh; }
+      .nav-links a {
+        padding:13px 26px; width:100%; text-align:center;
+        border-top:1px solid rgba(255,255,255,0.10); border-bottom:none;
+      }
+      .nav-links a:hover { border-bottom:none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg"><img id="bgImg" src="images/F1010025.jpg" alt=""></div>
+
+  <div class="page">
+    <div class="wrap" id="wrap">
+
+      <button class="shot" data-full="images/provenance/provenance-screenshot.jpg">
+        <img src="images/provenance/provenance-screenshot.jpg" alt="A round of Provenance showing The Raft of the Medusa" loading="lazy">
+      </button>
+
+      <div class="info">
+        <div class="eyebrow">A guessing game</div>
+        <h1>Provenance</h1>
+        <div class="tagline">No plaque? No problem.</div>
+
+        <p>Provenance is an art history guessing game for people who like their culture slightly competitive and a bit cheeky.</p>
+        <p>You're shown an artwork and its title. That's it. From there, you've got to work out the Artist, Movement, Year, and Country of Origin — or at least make a convincing argument to yourself in the moment.</p>
+        <p>Inspired by games like <em>Interior Motives</em>, <em>Wordle</em>, and talking shit in the gallery. The game is approachable, fun, and quietly humbling.</p>
+        <p>Is this a Pre-Raphaelite masterpiece, or a chiaroscuro? Pop-Art or Neo-Expressionism? Test yourself to find out! The works stretch from ancient images carved 32,000 years ago right through to contemporary pieces still warm from the studio.</p>
+        <p>There are hints if you get stuck, but learning is part of the fun. Play in rounds of five, ten, or fifteen works, and try to beat your own best score — or just enjoy the slow realisation that you've been lying to yourself about knowing art history this whole time.</p>
+        <p>Either way, I hope you have fun!</p>
+
+        <a class="play-btn" href="/game">Play the game <span class="arr">→</span></a>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="lightbox" id="lightbox">
+    <button class="close" id="lightboxClose" aria-label="Close">✕</button>
+    <img id="lightboxImg" src="" alt="">
+  </div>
+
+  <nav id="nav">
+    <button class="nav-toggle" aria-label="Menu"><span class="bars"><span></span><span></span><span></span></span>Menu</button>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/scripts">Creative Works</a>
+      <a href="/bio">Bio</a>
+      <a href="/contact">Contact</a>
+    </div>
+  </nav>
+
+  <script>
+    const img = document.getElementById('bgImg');
+    const wrap = document.getElementById('wrap');
+    const nav = document.getElementById('nav');
+    function reveal() { wrap.classList.add('visible'); nav.classList.add('visible'); }
+    if (img.complete) { img.classList.add('loaded'); reveal(); }
+    else {
+      img.addEventListener('load', () => { img.classList.add('loaded'); reveal(); });
+      img.addEventListener('error', reveal);
+    }
+
+    // Lightbox
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+    const lightboxClose = document.getElementById('lightboxClose');
+    document.querySelectorAll('[data-full]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        lightboxImg.src = btn.dataset.full; lightbox.classList.add('open');
+      });
+    });
+    function closeLightbox() {
+      lightbox.classList.remove('open');
+      setTimeout(() => { lightboxImg.src = ''; }, 350);
+    }
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox || e.target === lightboxClose) closeLightbox();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && lightbox.classList.contains('open')) closeLightbox();
+    });
+
+    // Mobile nav toggle
+    (function(){
+      const toggle = nav.querySelector('.nav-toggle');
+      if (toggle) {
+        toggle.addEventListener('click', () => nav.classList.toggle('open'));
+        nav.querySelectorAll('.nav-links a').forEach(a =>
+          a.addEventListener('click', () => nav.classList.remove('open')));
+      }
+    })();
+  </script>
+</body>
+</html>
