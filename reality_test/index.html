@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REALITY COLLAPSE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0d15;
+  --surface:#101626;
+  --surface-2:#151c30;
+  --border:#222c45;
+  --border-strong:#2f3d5e;
+  --text:#dde4f1;
+  --text-dim:#97a3bb;
+  --text-faint:#62708e;
+  --accent:#85b3ea;        /* light blue */
+  --accent-deep:#3a5687;   /* deep blue */
+  --ok:#5fc9c0;            /* cool teal */
+  --danger:#c97b74;        /* desaturated coral */
+  --noise-opacity:.04;
+}
+[data-theme="light"]{
+  --bg:#e7eaef;
+  --surface:#f2f4f8;
+  --surface-2:#eaedf3;
+  --border:#c3cad6;
+  --border-strong:#a4aebf;
+  --text:#161d2b;
+  --text-dim:#49566c;
+  --text-faint:#76829a;
+  --accent:#2e5fa8;
+  --accent-deep:#9db4d6;
+  --ok:#177d76;
+  --danger:#9c4a42;
+  --noise-opacity:.05;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'IBM Plex Sans',sans-serif;
+  font-size:17px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-height:100vh;
+  padding:20px 14px 48px;
+  transition:background .25s ease,color .25s ease;
+}
+/* Optional backdrop. Set BG_IMAGE near the top of the script to a URL
+   (e.g. a dark photograph) and it renders here under a blue wash. */
+#backdrop{
+  position:fixed;inset:0;z-index:-2;
+  background:
+    radial-gradient(ellipse at 50% -10%, rgba(60,90,150,.18), transparent 60%),
+    var(--bg);
+  transition:background .25s ease;
+}
+#backdrop.has-image{
+  background-size:cover;
+  background-position:center;
+}
+#backdrop.has-image::after{
+  content:"";position:absolute;inset:0;
+  background:rgba(10,13,21,.82);
+}
+[data-theme="light"] #backdrop.has-image::after{background:rgba(231,234,239,.88)}
+#noise{
+  position:fixed;inset:0;pointer-events:none;z-index:50;
+  opacity:var(--noise-opacity);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+/* ---------- header ---------- */
+header{
+  width:100%;max-width:560px;
+  display:flex;justify-content:space-between;align-items:baseline;
+  margin-bottom:14px;
+}
+#logoBtn{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12px;font-weight:600;letter-spacing:.18em;
+  background:none;border:none;color:var(--text);
+  cursor:pointer;padding:4px 2px;
+  display:inline-flex;align-items:center;gap:9px;
+  text-transform:uppercase;
+}
+#logoBtn:hover{color:var(--accent)}
+#logoBtn:hover .logo-mark{background:var(--accent);border-color:var(--accent)}
+#logoBtn:focus-visible{outline:1px solid var(--accent);outline-offset:2px}
+.logo-mark{
+  width:11px;height:11px;flex:none;
+  transform:rotate(45deg);
+  border:1px solid var(--accent);
+  background:var(--accent);
+}
+.header-actions{display:inline-flex;gap:14px;align-items:baseline}
+#helpBtn,#themeToggle{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;letter-spacing:.1em;
+  background:none;border:none;color:var(--text-dim);
+  cursor:pointer;padding:4px 2px;
+}
+#helpBtn:hover,#themeToggle:hover{color:var(--text)}
+#helpBtn:focus-visible,#themeToggle:focus-visible{outline:1px solid var(--accent);outline-offset:2px}
+@media (max-width:480px){
+  #logoBtn{font-size:11px;letter-spacing:.12em}
+  #helpBtn{display:none}
+}
+/* ---------- card ---------- */
+.card{
+  width:100%;max-width:560px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  transition:background .25s ease,border-color .25s ease;
+}
+.card-inner{padding:26px 26px 28px}
+@media (max-width:480px){.card-inner{padding:20px 16px 22px}}
+/* ---------- HUD ---------- */
+#hud{
+  display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid var(--border);
+  padding:12px 18px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12px;letter-spacing:.1em;color:var(--text-dim);
+}
+#hud .stat b{color:var(--text);font-weight:500}
+#lives{display:flex;gap:7px}
+.life{
+  width:14px;height:14px;
+  display:inline-block;
+  transform:rotate(45deg);
+  border:1px solid var(--accent-deep);
+  transition:background .2s ease,border-color .2s ease;
+}
+.life.full{background:var(--accent);border-color:var(--accent)}
+.life.lost{border-color:var(--border-strong);background:transparent}
+.life.just-lost{border-color:var(--danger);background:var(--danger)}
+/* ---------- typography ---------- */
+h1{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:600;font-size:30px;letter-spacing:-.01em;line-height:1.15;
+}
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;letter-spacing:.22em;color:var(--accent);
+  text-transform:uppercase;margin-bottom:14px;
+}
+.byline{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--text-dim);margin-top:10px;
+}
+.body-dim{color:var(--text-dim);font-size:16.5px}
+.manifesto-q{
+  margin-top:14px;color:var(--text);font-size:17px;font-weight:500;
+  font-family:'Space Grotesk',sans-serif;
+}
+hr.rule{border:none;border-top:1px solid var(--border);margin:20px 0}
+/* ---------- buttons ---------- */
+.btn{
+  font-family:'IBM Plex Mono',monospace;
+  text-transform:uppercase;
+  letter-spacing:.16em;
+  font-size:14px;font-weight:500;
+  width:100%;
+  padding:16px 12px;
+  background:var(--surface-2);
+  color:var(--text);
+  border:1px solid var(--border-strong);
+  border-radius:1px;
+  cursor:pointer;
+  transition:border-color .15s ease,color .15s ease;
+}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn:focus-visible{outline:1px solid var(--accent);outline-offset:2px}
+.btn:disabled{opacity:.45;cursor:default}
+.btn:disabled:hover{border-color:var(--border-strong);color:var(--text)}
+.btn-row{display:flex;gap:12px;margin-top:18px}
+.btn-row .btn{flex:1}
+.btn.primary{border-color:var(--accent);color:var(--accent)}
+.btn.primary:hover{background:var(--accent);color:var(--bg)}
+/* ---------- stage (image / song / video / text / voice) ---------- */
+.round-label{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--text-dim);
+  text-align:center;
+  padding:14px 18px 0;
+}
+.round-label .media-kind{color:var(--accent)}
+#stage{
+  width:100%;
+  background:#06080e;
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  min-height:220px;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+  margin-top:14px;
+}
+[data-theme="light"] #stage{background:#d8dde6}
+#stage.good{border-color:var(--ok)}
+#stage.bad{border-color:var(--danger)}
+#stage img{
+  display:block;width:100%;height:auto;max-height:62vh;object-fit:contain;
+  opacity:0;transition:opacity .35s ease;
+}
+#stage img.loaded{opacity:1}
+#stage video{
+  display:block;width:100%;max-height:62vh;background:#000;
+}
+.audio-shell{
+  width:100%;padding:38px 22px;
+  display:flex;flex-direction:column;gap:18px;align-items:center;
+}
+.audio-shell .audio-note{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;letter-spacing:.2em;color:var(--text-faint);text-transform:uppercase;
+}
+.audio-shell audio{width:100%;max-width:420px}
+.text-shell{
+  width:100%;padding:26px 24px;
+  max-height:58vh;overflow-y:auto;
+}
+.text-shell p{
+  font-size:17.5px;line-height:1.75;color:var(--text);
+  border-left:2px solid var(--accent-deep);
+  padding-left:18px;
+  white-space:pre-wrap;
+}
+@media (prefers-reduced-motion:reduce){
+  #stage img{transition:none}
+  body,.card{transition:none}
+}
+/* ---------- verdict ---------- */
+#verdict{
+  border-top:1px solid var(--border);
+  padding:16px 18px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:13px;letter-spacing:.1em;text-transform:uppercase;
+  display:none;
+}
+#verdict.show{display:block}
+#verdict.good{border-left:3px solid var(--ok);background:color-mix(in srgb, var(--ok) 8%, transparent)}
+#verdict.bad{border-left:3px solid var(--danger);background:color-mix(in srgb, var(--danger) 9%, transparent)}
+.v-big{font-size:17px;font-weight:600;letter-spacing:.18em}
+#verdict.good .v-big{color:var(--ok)}
+#verdict.bad .v-big{color:var(--danger)}
+.v-truth{margin-top:6px;color:var(--text);font-size:12px;letter-spacing:.12em}
+#verdict .v-line{color:var(--text-dim);margin-top:6px;font-size:11.5px}
+/* ---------- end screen ---------- */
+.bigscore{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:46px;font-weight:700;letter-spacing:0;
+  color:var(--accent);
+  margin:8px 0 2px;
+}
+.rating{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:13px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--text);
+  margin-top:18px;
+}
+.rating-blurb{color:var(--text-dim);font-style:italic;margin-top:6px}
+.kv{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11.5px;letter-spacing:.12em;color:var(--text-dim);
+  text-transform:uppercase;
+}
+/* ---------- help ---------- */
+.howto-link{margin-top:16px;text-align:center}
+.howto-link button{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;letter-spacing:.16em;
+  background:none;border:none;color:var(--text-dim);
+  cursor:pointer;padding:4px;
+}
+.howto-link button:hover{color:var(--accent)}
+.howto-link button:focus-visible{outline:1px solid var(--accent);outline-offset:2px}
+.help-section{margin:18px 0}
+.help-head{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:6px;
+}
+.help-keys{border-collapse:collapse}
+.help-keys td{padding:4px 18px 4px 0;color:var(--text-dim);font-size:16px}
+kbd{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12px;
+  border:1px solid var(--border-strong);
+  padding:2px 7px;
+  color:var(--text);
+  background:var(--surface-2);
+}
+footer{
+  margin-top:18px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;letter-spacing:.16em;color:var(--text-faint);
+  text-transform:uppercase;
+}
+.hidden{display:none !important}
+</style>
+</head>
+<body>
+<div id="backdrop" aria-hidden="true"></div>
+<div id="noise" aria-hidden="true"></div>
+
+<header>
+  <button id="logoBtn" aria-label="Return to home screen">
+    <span class="logo-mark" aria-hidden="true"></span>REALITY COLLAPSE
+  </button>
+  <span class="header-actions">
+    <button id="helpBtn" aria-label="How to play">[ HOW TO PLAY ]</button>
+    <button id="themeToggle" aria-label="Toggle light mode">[ LIGHT ]</button>
+  </span>
+</header>
+
+<!-- START SCREEN -->
+<div class="card" id="screen-start">
+  <div class="card-inner">
+    <div class="eyebrow">Form 7-C &middot; Media Assessment Instrument</div>
+    <h1>Reality Collapse</h1>
+    <p class="byline">By Geordie Crawley</p>
+    <hr class="rule">
+    <p class="body-dim">What appears before you claims to be real.<br>
+    Study it carefully. Examine the evidence. Search for the seams.<br>
+    Every answer brings you closer to certainty, and further from the truth.</p>
+    <p class="manifesto-q">Can you still tell the difference between reality and its simulation?</p>
+    <hr class="rule">
+    <p class="kv" id="bestLine">NO PRIOR RECORD ON FILE</p>
+    <div class="btn-row" id="startButtons">
+      <button class="btn primary" id="beginBtn">Begin Assessment</button>
+      <button class="btn hidden" id="freshBtn">Start Fresh</button>
+    </div>
+    <p class="howto-link"><button id="helpLink">HOW TO PLAY &rarr;</button></p>
+  </div>
+</div>
+
+<!-- HELP SCREEN -->
+<div class="card hidden" id="screen-help">
+  <div class="card-inner">
+    <div class="eyebrow">Appendix A &middot; Procedure</div>
+    <h1>How to Play</h1>
+    <hr class="rule">
+    <div class="help-section">
+      <p class="help-head">Objective</p>
+      <p class="body-dim">One exhibit at a time. Decide: was it made by a person (REAL) or generated by a machine (AI)? Each correct call is worth 100 points. Each wrong call costs a life. You begin with three; the assessment ends when none remain.</p>
+    </div>
+    <div class="help-section">
+      <p class="help-head">Special Exhibits</p>
+      <p class="body-dim">Every tenth exhibit arrives in another medium, chosen at random: a song, a video, a passage of text, or a human voice. Judge it the same way. Listen or watch as many times as you need &mdash; the exhibit waits.</p>
+    </div>
+    <div class="help-section">
+      <p class="help-head">Controls</p>
+      <table class="help-keys">
+        <tr><td><kbd>A</kbd> or <kbd>&#8592;</kbd></td><td>answer REAL</td></tr>
+        <tr><td><kbd>D</kbd> or <kbd>&#8594;</kbd></td><td>answer AI</td></tr>
+        <tr><td><kbd>Enter</kbd> or <kbd>N</kbd></td><td>next exhibit</td></tr>
+      </table>
+      <p class="body-dim" style="margin-top:8px">Clicking the buttons also works, of course.</p>
+    </div>
+    <div class="help-section">
+      <p class="help-head">The Record</p>
+      <p class="body-dim">Your best score is kept on file. An assessment in progress survives a closed tab; only death resets it.</p>
+    </div>
+    <hr class="rule">
+    <div class="btn-row">
+      <button class="btn" id="helpBackBtn">Back</button>
+    </div>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div class="card hidden" id="screen-game">
+  <div id="hud">
+    <span class="stat">SCORE <b id="hudScore">0</b></span>
+    <span class="stat">ROUND <b id="hudRound">1</b></span>
+    <span id="lives" aria-label="Lives remaining"></span>
+  </div>
+  <div class="round-label" id="roundLabel"></div>
+  <div id="stage"></div>
+  <div id="verdict" role="status" aria-live="polite">
+    <div class="v-big" id="verdictBig"></div>
+    <div class="v-truth" id="verdictTruth"></div>
+    <div class="v-line" id="verdictLine"></div>
+  </div>
+  <div class="card-inner" style="padding-top:16px">
+    <div class="btn-row" style="margin-top:0" id="answerRow">
+      <button class="btn" id="realBtn">Real</button>
+      <button class="btn" id="aiBtn">AI</button>
+    </div>
+    <div class="btn-row hidden" style="margin-top:0" id="nextRow">
+      <button class="btn primary" id="nextBtn">Next</button>
+    </div>
+  </div>
+</div>
+
+<!-- END SCREEN -->
+<div class="card hidden" id="screen-end">
+  <div class="card-inner">
+    <div class="eyebrow" style="color:var(--danger)">Assessment Terminated</div>
+    <h1>All lives expended.</h1>
+    <div class="bigscore" id="finalScore">0</div>
+    <p class="kv"><span id="finalCorrect"></span> &middot; <span id="finalBest"></span></p>
+    <div class="rating" id="ratingLabel"></div>
+    <p class="rating-blurb" id="ratingBlurb"></p>
+    <hr class="rule">
+    <div class="btn-row">
+      <button class="btn" id="shareBtn">Copy Summary</button>
+      <button class="btn primary" id="againBtn">Begin Again</button>
+    </div>
+  </div>
+</div>
+
+<footer>The record is permanent. The record is indifferent.</footer>
+
+<script>
+"use strict";
+const MEDIA = {
+  "image": [
+    {
+      "id": 1,
+      "isAI": false,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/real1.jpg"
+    },
+    {
+      "id": 2,
+      "isAI": false,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/real2.jpg"
+    },
+    {
+      "id": 3,
+      "isAI": false,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/real3.jpg"
+    },
+    {
+      "id": 4,
+      "isAI": false,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/real4.jpg"
+    },
+    {
+      "id": 5,
+      "isAI": false,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/real5.jpg"
+    },
+    {
+      "id": 6,
+      "isAI": false,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/real6.jpg"
+    },
+    {
+      "id": 7,
+      "isAI": false,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/real7.jpg"
+    },
+    {
+      "id": 8,
+      "isAI": false,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/real8.jpg"
+    },
+    {
+      "id": 9,
+      "isAI": false,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/real9.jpg"
+    },
+    {
+      "id": 10,
+      "isAI": false,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/real10.jpg"
+    },
+    {
+      "id": 11,
+      "isAI": false,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/real11.jpg"
+    },
+    {
+      "id": 12,
+      "isAI": false,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/real12.jpg"
+    },
+    {
+      "id": 13,
+      "isAI": false,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/real13.jpg"
+    },
+    {
+      "id": 14,
+      "isAI": true,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/ai1.jpg"
+    },
+    {
+      "id": 15,
+      "isAI": false,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/ai2.jpg"
+    },
+    {
+      "id": 16,
+      "isAI": true,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/ai3.jpg"
+    },
+    {
+      "id": 17,
+      "isAI": false,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/ai4.jpg"
+    },
+    {
+      "id": 18,
+      "isAI": true,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/ai5.jpg"
+    },
+    {
+      "id": 19,
+      "isAI": false,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/ai6.jpg"
+    },
+    {
+      "id": 20,
+      "isAI": true,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/ai7.jpg"
+    },
+    {
+      "id": 21,
+      "isAI": true,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/ai8.jpg"
+    },
+    {
+      "id": 22,
+      "isAI": false,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/ai9.jpg"
+    },
+    {
+      "id": 23,
+      "isAI": false,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/ai10.jpg"
+    },
+    {
+      "id": 24,
+      "isAI": true,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/ai11.jpg"
+    },
+    {
+      "id": 25,
+      "isAI": true,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/ai12.jpg"
+    }
+  ],
+  "song": [
+    {
+      "id": 1,
+      "isAI": false,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/music_real1.mp3"
+    },
+    {
+      "id": 2,
+      "isAI": true,
+      "url": "https://LonePine23.github.io/oujia-stain/reality_test/music_ai1.mp3"
+    }
+  ],
+  "video": [],
+  "text": [
+    {
+      "id": 1,
+      "isAI": false,
+      "content": "In the land of Ingary where such things as seven-league boots and cloaks of invisibility really exist, it is quite a misfortune to be born the eldest of the three. Everyone knows you are the one who will fail first, and worst, if the three of you set out to seek your fortunes."
+    },
+    {
+      "id": 2,
+      "isAI": true,
+      "content": "In today's fast-paced world, it is more important than ever to take time for ourselves. Whether it is a walk in the park, a cup of tea, or simply a moment of quiet reflection, small acts of self-care can have a profound impact on our overall wellbeing and productivity."
+    }
+  ],
+  "voice": []
+};
+
+/* Optional: set to an image URL to render a photographic backdrop
+   under the blue wash, e.g. "https://geordie.lol/img/backdrop.jpg" */
+const BG_IMAGE = "";
+
+/* ---------- constants ---------- */
+const KEY_STATE = "rc_state_v1";
+const KEY_BEST  = "rc_best_v1";
+const KEY_THEME = "rc_theme_v1";
+const START_LIVES = 3, MEDIA_EVERY = 10;
+const MEDIA_KINDS = ["song", "video", "text", "voice"];
+const KIND_LABELS = { image: "IMAGE", song: "SONG", video: "VIDEO", text: "TEXT", voice: "VOICE" };
+
+const CORRECT_LINES = [
+  "CORRECT. PROCEED.",
+  "VERIFIED.",
+  "THE FILE AGREES WITH YOU.",
+  "ACCEPTED. NEXT EXHIBIT.",
+  "NOTED WITHOUT COMMENT."
+];
+const WRONG_LINES = [
+  "YOU WERE WRONG ABOUT THIS ONE",
+  "ANOTHER LIFE LOST TO OVERCONFIDENCE",
+  "INCORRECT. THE RECORD HAS BEEN AMENDED.",
+  "THE MACHINE THANKS YOU FOR YOUR CONFUSION.",
+  "AN ERROR, DULY LOGGED."
+];
+const RATINGS = [
+  { min: 4000, label: "ORACLE",        blurb: "The committee is uneasy about you. Sight like this is not natural." },
+  { min: 2500, label: "EXAMINER",      blurb: "Few synthetic artifacts escape you. Your desk will be moved closer to the window." },
+  { min: 1500, label: "DISCERNING",    blurb: "Sharper than the median eye. The median eye is, admittedly, not well." },
+  { min: 800,  label: "ADEQUATE",      blurb: "The machines fooled you an acceptable number of times. Acceptable is not a compliment." },
+  { min: 300,  label: "PROVISIONAL",   blurb: "Further assessment required. Your certificate has been printed in pencil." },
+  { min: 0,    label: "CLERICAL ERROR",blurb: "It is possible you were not looking at the exhibits at all." }
+];
+
+/* ---------- state ---------- */
+let S = null;
+let busy = false;
+let current = null;    // { kind, item } for the exhibit on stage
+let gen = 0;
+
+function librarySig(){
+  return ["image", ...MEDIA_KINDS].map(k => (MEDIA[k] || []).length).join(",");
+}
+function freshDeck(kind){
+  return { order: shuffle((MEDIA[kind] || []).map((_, i) => i)), pos: 0 };
+}
+function freshState(){
+  const decks = { image: freshDeck("image") };
+  MEDIA_KINDS.forEach(k => decks[k] = freshDeck(k));
+  return { lives: START_LIVES, score: 0, correct: 0, round: 0, decks, sig: librarySig() };
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function save(){ try{ localStorage.setItem(KEY_STATE, JSON.stringify(S)); }catch(e){} }
+function clearSave(){ try{ localStorage.removeItem(KEY_STATE); }catch(e){} }
+function loadSave(){
+  try{
+    const raw = localStorage.getItem(KEY_STATE);
+    if (!raw) return null;
+    const st = JSON.parse(raw);
+    if (!st || st.sig !== librarySig() || st.lives <= 0) return null;
+    return st;
+  }catch(e){ return null; }
+}
+function getBest(){ try{ return parseInt(localStorage.getItem(KEY_BEST) || "0", 10) || 0; }catch(e){ return 0; } }
+function setBest(v){ try{ localStorage.setItem(KEY_BEST, String(v)); }catch(e){} }
+
+/* ---------- dom ---------- */
+const $ = id => document.getElementById(id);
+const screens = { start: $("screen-start"), game: $("screen-game"), end: $("screen-end"), help: $("screen-help") };
+function show(name){
+  for (const k in screens) screens[k].classList.toggle("hidden", k !== name);
+}
+
+/* ---------- theme & backdrop ---------- */
+function applyTheme(t){
+  document.documentElement.dataset.theme = t;
+  $("themeToggle").textContent = t === "dark" ? "[ LIGHT ]" : "[ DARK ]";
+  try{ localStorage.setItem(KEY_THEME, t); }catch(e){}
+}
+$("themeToggle").addEventListener("click", () =>
+  applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
+applyTheme((()=>{ try{ return localStorage.getItem(KEY_THEME) || "dark"; }catch(e){ return "dark"; } })());
+if (BG_IMAGE){
+  const b = $("backdrop");
+  b.classList.add("has-image");
+  b.style.backgroundImage = "url('" + BG_IMAGE + "')";
+}
+
+/* ---------- HUD ---------- */
+function renderHUD(justLostIndex){
+  $("hudScore").textContent = S.score;
+  $("hudRound").textContent = S.round + 1;
+  const wrap = $("lives");
+  wrap.innerHTML = "";
+  for (let i = 0; i < START_LIVES; i++){
+    const d = document.createElement("span");
+    d.className = "life " + (i < S.lives ? "full" : "lost");
+    if (justLostIndex !== undefined && i === justLostIndex) d.className = "life just-lost";
+    wrap.appendChild(d);
+  }
+}
+
+/* ---------- rounds ---------- */
+function deckNext(kind){
+  const deck = S.decks[kind];
+  if (!deck || !(MEDIA[kind] || []).length) return null;
+  if (deck.pos >= deck.order.length){
+    deck.order = shuffle(MEDIA[kind].map((_, i) => i));
+    deck.pos = 0;
+  }
+  return MEDIA[kind][deck.order[deck.pos]];
+}
+function availableMediaKinds(){
+  return MEDIA_KINDS.filter(k => (MEDIA[k] || []).length > 0);
+}
+function pickRoundKind(roundNum){
+  if (roundNum % MEDIA_EVERY === 0){
+    const kinds = availableMediaKinds();
+    if (kinds.length) return kinds[Math.floor(Math.random() * kinds.length)];
+  }
+  return "image";
+}
+function presentRound(){
+  const roundNum = S.round + 1;
+  const kind = pickRoundKind(roundNum);
+  const item = deckNext(kind);
+  current = item ? { kind, item } : { kind: "image", item: deckNext("image") };
+
+  const isSpecial = current.kind !== "image";
+  $("roundLabel").innerHTML = isSpecial
+    ? 'SPECIAL EXHIBIT &mdash; <span class="media-kind">' + KIND_LABELS[current.kind] + "</span> &mdash; ORGANIC OR SYNTHETIC"
+    : "EXHIBIT " + String(roundNum).padStart(2, "0") + " &mdash; ORGANIC OR SYNTHETIC";
+
+  renderStage(current);
+  $("verdict").className = "";
+  $("verdict").classList.remove("show");
+  $("stage").classList.remove("good", "bad");
+  $("answerRow").classList.remove("hidden");
+  $("nextRow").classList.add("hidden");
+  setButtons(true);
+  renderHUD();
+  save();
+}
+function renderStage(cur){
+  const stage = $("stage");
+  stage.innerHTML = "";
+  if (cur.kind === "image"){
+    const img = document.createElement("img");
+    img.alt = "Exhibit under assessment";
+    img.onload = () => img.classList.add("loaded");
+    img.onerror = () => img.classList.add("loaded");
+    img.src = cur.item.url;
+    stage.appendChild(img);
+  } else if (cur.kind === "video"){
+    const v = document.createElement("video");
+    v.controls = true;
+    v.preload = "metadata";
+    v.src = cur.item.url;
+    stage.appendChild(v);
+  } else if (cur.kind === "song" || cur.kind === "voice"){
+    const shell = document.createElement("div");
+    shell.className = "audio-shell";
+    const note = document.createElement("div");
+    note.className = "audio-note";
+    note.textContent = cur.kind === "song" ? "PRESS PLAY. LISTEN CLOSELY." : "PRESS PLAY. A VOICE.";
+    const a = document.createElement("audio");
+    a.controls = true;
+    a.preload = "metadata";
+    a.src = cur.item.url;
+    shell.appendChild(note); shell.appendChild(a);
+    stage.appendChild(shell);
+  } else if (cur.kind === "text"){
+    const shell = document.createElement("div");
+    shell.className = "text-shell";
+    const p = document.createElement("p");
+    p.textContent = cur.item.content;
+    shell.appendChild(p);
+    stage.appendChild(shell);
+  }
+}
+function setButtons(enabled){
+  $("realBtn").disabled = !enabled;
+  $("aiBtn").disabled = !enabled;
+}
+function pick(lines){ return lines[Math.floor(Math.random() * lines.length)]; }
+function stopPlayback(){
+  $("stage").querySelectorAll("audio,video").forEach(m => { try{ m.pause(); }catch(e){} });
+}
+
+function answer(saysAI){
+  if (busy || !S || !current) return;
+  const right = (saysAI === !!current.item.isAI);
+  busy = true;
+  setButtons(false);
+
+  const v = $("verdict");
+  v.classList.add("show");
+  $("verdictTruth").textContent = current.item.isAI
+    ? "THIS " + KIND_LABELS[current.kind] + " WAS AI-GENERATED"
+    : "THIS " + KIND_LABELS[current.kind] + " WAS REAL";
+  if (right){
+    S.score += 100;
+    S.correct += 1;
+    v.classList.add("good");
+    $("stage").classList.add("good");
+    $("verdictBig").textContent = "\u2713 CORRECT \u2014 +100";
+    $("verdictLine").textContent = pick(CORRECT_LINES);
+  } else {
+    S.lives -= 1;
+    v.classList.add("bad");
+    $("stage").classList.add("bad");
+    $("verdictBig").textContent = "\u2715 WRONG \u2014 \u22121 LIFE";
+    $("verdictLine").textContent = pick(WRONG_LINES);
+    renderHUD(S.lives);
+  }
+
+  S.round += 1;
+  S.decks[current.kind].pos += 1;
+  renderHUD();
+  save();
+
+  // Hand control to the player: NEXT advances (or closes the file on death)
+  $("answerRow").classList.add("hidden");
+  $("nextRow").classList.remove("hidden");
+  $("nextBtn").textContent = (!right && S.lives <= 0) ? "View Record" : "Next";
+  $("nextBtn").focus();
+  busy = false;
+}
+function nextRound(){
+  if (!S || $("nextRow").classList.contains("hidden")) return;
+  stopPlayback();
+  if (S.lives <= 0){ endGame(); return; }
+  presentRound();
+}
+$("nextBtn").addEventListener("click", nextRound);
+
+/* ---------- end ---------- */
+function ratingFor(score){
+  for (const r of RATINGS) if (score >= r.min) return r;
+  return RATINGS[RATINGS.length - 1];
+}
+function endGame(){
+  const best = Math.max(getBest(), S.score);
+  setBest(best);
+  $("finalScore").textContent = S.score;
+  $("finalCorrect").textContent = S.correct + " CORRECT";
+  $("finalBest").textContent = "BEST " + best;
+  const r = ratingFor(S.score);
+  $("ratingLabel").textContent = r.label;
+  $("ratingBlurb").textContent = r.blurb;
+  clearSave();
+  S = null;
+  current = null;
+  show("end");
+}
+function shareText(){
+  const score = $("finalScore").textContent;
+  const correct = $("finalCorrect").textContent;
+  const label = $("ratingLabel").textContent;
+  const n = parseInt(correct, 10) || 0;
+  const blocks = "\u25A0".repeat(Math.min(n, 20)) + (n > 20 ? "\u2026" : "");
+  return "REALITY COLLAPSE\nFINAL SCORE " + score + " \u00B7 " + correct +
+         "\nRATING: " + label + "\n" + blocks;
+}
+$("shareBtn").addEventListener("click", async () => {
+  const t = shareText();
+  let ok = false;
+  try{ await navigator.clipboard.writeText(t); ok = true; }catch(e){
+    const ta = document.createElement("textarea");
+    ta.value = t; document.body.appendChild(ta); ta.select();
+    try{ ok = document.execCommand("copy"); }catch(e2){}
+    ta.remove();
+  }
+  $("shareBtn").textContent = ok ? "Copied to Clipboard" : "Copy Failed";
+  setTimeout(() => $("shareBtn").textContent = "Copy Summary", 1600);
+});
+
+/* ---------- start / resume / navigation ---------- */
+function startGame(resume){
+  S = resume || freshState();
+  show("game");
+  presentRound();
+}
+function refreshStartScreen(){
+  const best = getBest();
+  const inProgress = S || loadSave();
+  let line = best > 0 ? "BEST SCORE ON FILE: " + best : "NO PRIOR RECORD ON FILE";
+  if (inProgress){
+    line = (best > 0 ? "BEST SCORE ON FILE: " + best + " \u00B7 " : "") + "AN ASSESSMENT IS IN PROGRESS";
+    $("beginBtn").textContent = "Resume Assessment";
+    $("freshBtn").classList.remove("hidden");
+  } else {
+    $("beginBtn").textContent = "Begin Assessment";
+    $("freshBtn").classList.add("hidden");
+  }
+  $("bestLine").textContent = line;
+}
+function goHome(){
+  gen++;
+  busy = false;
+  stopPlayback();
+  refreshStartScreen();
+  show("start");
+}
+$("beginBtn").addEventListener("click", () => startGame(S || loadSave()));
+$("freshBtn").addEventListener("click", () => { clearSave(); S = null; startGame(null); });
+$("againBtn").addEventListener("click", () => { clearSave(); startGame(null); });
+$("logoBtn").addEventListener("click", goHome);
+$("helpBtn").addEventListener("click", () => { stopPlayback(); show("help"); });
+$("helpLink").addEventListener("click", () => show("help"));
+$("helpBackBtn").addEventListener("click", goHome);
+
+$("realBtn").addEventListener("click", () => answer(false));
+$("aiBtn").addEventListener("click", () => answer(true));
+
+document.addEventListener("keydown", (e) => {
+  if (e.repeat) return;
+  if (screens.game.classList.contains("hidden") || !S) return;
+  const k = e.key.toLowerCase();
+  const answering = !$("answerRow").classList.contains("hidden");
+  if (answering){
+    if (k === "a" || k === "arrowleft"){ e.preventDefault(); answer(false); }
+    if (k === "d" || k === "arrowright"){ e.preventDefault(); answer(true); }
+  } else {
+    if (k === "enter" || k === "n"){ e.preventDefault(); nextRound(); }
+  }
+});
+
+/* ---------- boot ---------- */
+(function boot(){
+  refreshStartScreen();
+  show("start");
+})();
+</script>
+</body>
+</html>
