@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CONSTRAINT — a daily writing exercise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+<link href="index_files/css2.css" rel="stylesheet">
+<script src="index_files/compromise.js"></script>
+<style>
+  :root{
+    --ink:#1a1714;
+    --paper:#f4efe6;
+    --card:#fbf8f1;
+    --line:#d8cfbe;
+    --accent:#b3402d;
+    --gold:#9a7b3f;
+    --green:#4a6b3f;
+    --muted:#8a8174;
+    --shadow:rgba(40,30,20,0.12);
+    --field:#ffffff;
+  }
+  [data-theme="dark"]{
+    --ink:#e8e2d6;
+    --paper:#171411;
+    --card:#211d18;
+    --line:#3a342b;
+    --accent:#d96a54;
+    --gold:#c2a268;
+    --green:#7fa370;
+    --muted:#8a8174;
+    --shadow:rgba(0,0,0,0.4);
+    --field:#2a251f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{font-size:16px}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Fraunces',serif;
+    font-weight:400;
+    line-height:1.6;
+    min-height:100vh;
+    transition:background .3s ease,color .3s ease;
+  }
+  .wrap{
+    max-width:560px;
+    margin:0 auto;
+    padding:2.5rem 1.25rem 4rem;
+  }
+  /* ---------- chrome ---------- */
+  .mono, button, .count, .badge, .label{
+    font-family:'DM Mono',monospace;
+    font-variant-caps:all-small-caps;
+    text-transform:uppercase;
+    letter-spacing:.14em;
+  }
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:2rem;
+  }
+  .masthead{
+    font-family:'Fraunces',serif;
+    font-weight:900;
+    font-size:1.6rem;
+    letter-spacing:.04em;
+  }
+  .masthead span{color:var(--accent)}
+  #themeToggle{
+    background:none;
+    border:1px solid var(--line);
+    color:var(--muted);
+    font-size:.7rem;
+    padding:.35rem .7rem;
+    cursor:pointer;
+    border-radius:2px;
+  }
+  #themeToggle:hover{color:var(--ink);border-color:var(--muted)}
+  /* ---------- cards ---------- */
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    box-shadow:0 2px 8px var(--shadow);
+    border-radius:3px;
+    padding:1.75rem;
+    margin-bottom:1.25rem;
+  }
+  .label{
+    font-size:.72rem;
+    color:var(--muted);
+    margin-bottom:.5rem;
+    display:block;
+  }
+  .challenge-title{
+    font-weight:900;
+    font-size:1.75rem;
+    line-height:1.2;
+    margin-bottom:.5rem;
+  }
+  .flavor{
+    font-style:italic;
+    font-weight:300;
+    color:var(--muted);
+    font-size:1.05rem;
+  }
+  .prompt{
+    font-size:1.1rem;
+    line-height:1.7;
+  }
+  .prompt strong{font-weight:500;color:var(--accent)}
+  /* ---------- input ---------- */
+  textarea{
+    width:100%;
+    min-height:11rem;
+    background:var(--field);
+    color:var(--ink);
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:1rem;
+    font-family:'Fraunces',serif;
+    font-size:1.1rem;
+    line-height:1.7;
+    resize:vertical;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  textarea:focus{
+    outline:none;
+    border-color:var(--accent);
+    box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent);
+  }
+  .count{
+    font-size:.72rem;
+    color:var(--muted);
+    margin-top:.5rem;
+    text-align:right;
+  }
+  /* ---------- buttons ---------- */
+  .btn{
+    background:var(--ink);
+    color:var(--paper);
+    border:1px solid var(--ink);
+    font-size:.8rem;
+    padding:.75rem 1.75rem;
+    cursor:pointer;
+    border-radius:2px;
+    transition:opacity .15s ease;
+  }
+  .btn:hover{opacity:.85}
+  .btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .btn-ghost{
+    background:none;
+    color:var(--ink);
+    border:1px solid var(--line);
+  }
+  .btn-row{display:flex;gap:.75rem;margin-top:1.25rem;flex-wrap:wrap}
+  /* ---------- warning ---------- */
+  #warning{
+    border-color:var(--gold);
+    display:none;
+  }
+  #warning .label{color:var(--gold)}
+  /* ---------- results ---------- */
+  .score-line{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding:.6rem 0;
+    border-bottom:1px solid var(--line);
+    font-size:1rem;
+  }
+  .score-line:last-of-type{border-bottom:none}
+  .score-line .pts{
+    font-family:'DM Mono',monospace;
+    font-size:.85rem;
+    letter-spacing:.05em;
+    white-space:nowrap;
+    margin-left:1rem;
+  }
+  .pts.good{color:var(--green)}
+  .pts.bad{color:var(--accent)}
+  .pts.neutral{color:var(--muted)}
+  .total{
+    font-family:'Fraunces',serif;
+    font-weight:900;
+    font-size:3rem;
+    line-height:1;
+    color:var(--accent);
+  }
+  .total small{
+    font-size:1.1rem;
+    font-weight:300;
+    color:var(--muted);
+  }
+  .rating{
+    font-weight:900;
+    font-size:1.4rem;
+    margin-top:.25rem;
+  }
+  .blurb{
+    font-style:italic;
+    font-weight:300;
+    color:var(--muted);
+    margin-top:.25rem;
+  }
+  .your-entry{
+    white-space:pre-wrap;
+    font-size:1rem;
+    line-height:1.7;
+    border-left:2px solid var(--line);
+    padding-left:1rem;
+    margin-top:.5rem;
+    font-weight:300;
+  }
+  .badge{
+    font-size:.7rem;
+    color:var(--gold);
+    border:1px solid var(--gold);
+    padding:.2rem .55rem;
+    border-radius:2px;
+    display:inline-block;
+    margin-bottom:.75rem;
+  }
+  .screen{display:none}
+  .screen.active{display:block;animation:rise .35s ease}
+  @keyframes rise{
+    from{opacity:0;transform:translateY(8px)}
+    to{opacity:1;transform:none}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .screen.active{animation:none}
+    *{transition:none !important}
+  }
+  footer{
+    margin-top:2.5rem;
+    text-align:center;
+    font-family:'DM Mono',monospace;
+    font-size:.7rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="masthead">CONSTRAINT<span>.</span></div>
+    <button id="themeToggle" aria-label="Toggle dark mode">light</button>
+  </header>
+
+  <!-- ============ START ============ -->
+  <section id="screen-start" class="screen active">
+    <div class="card">
+      <span class="label" id="startDate">Wednesday 10 June 2026 — №20614</span>
+      <h1 class="challenge-title" id="startTitle">Seventeen</h1>
+      <p class="flavor" id="startFlavor">Look out the window. Count what you see on your fingers.</p>
+      <div class="btn-row">
+        <button class="btn" id="beginBtn">Begin</button>
+      </div>
+    </div>
+    <footer>one exercise per day · no timer · no excuses</footer>
+  </section>
+
+  <!-- ============ CHALLENGE ============ -->
+  <section id="screen-challenge" class="screen">
+    <div class="card">
+      <span class="label" id="challengeLabel">Seventeen</span>
+      <p class="prompt" id="promptText">Write a <strong>haiku</strong> about the weather outside your window, right now: three lines of <strong>5, 7 and 5 syllables</strong>. One line per row.</p>
+    </div>
+    <div class="card">
+      <textarea id="entry" spellcheck="true" aria-label="Your response"></textarea>
+      <div class="count" id="liveCount">0 words · 0 characters</div>
+      <div class="btn-row">
+        <button class="btn" id="submitBtn">Submit</button>
+      </div>
+    </div>
+    <div class="card" id="warning">
+      <span class="label">A note from the desk</span>
+      <p class="prompt" id="warningText"></p>
+      <div class="btn-row">
+        <button class="btn btn-ghost" id="editBtn">Keep editing</button>
+        <button class="btn" id="anywayBtn">Submit anyway (−10)</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ RESULT ============ -->
+  <section id="screen-result" class="screen">
+    <div class="card">
+      <span class="badge" id="resultBadge" style="display:none">already played today</span>
+      <span class="label" id="resultDate"></span>
+      <div class="total"><span id="totalScore">0</span><small> / <span id="maxScore">100</span></small></div>
+      <div class="rating" id="ratingLabel"></div>
+      <p class="blurb" id="ratingBlurb"></p>
+    </div>
+    <div class="card">
+      <span class="label">The breakdown</span>
+      <div id="breakdown"></div>
+    </div>
+    <div class="card">
+      <span class="label">Your entry</span>
+      <div class="your-entry" id="entryEcho"></div>
+      <div class="btn-row">
+        <button class="btn" id="shareBtn">Share result</button>
+      </div>
+    </div>
+    <footer>return tomorrow for a new constraint</footer>
+  </section>
+
+</div>
+
+<script>
+"use strict";
+
+/* =====================================================
+   CHALLENGE LIBRARY
+===================================================== */
+const CHALLENGES = [
+  {
+    title: "The Spy's Initials",
+    flavor: "Every message worth reading hides a second one.",
+    type: "ACROSTIC",
+    params: { word: "VESPER" },
+    prompt: "Write six lines — a fragment, a stanza, a confession, your call — in which the first letter of each line spells <strong>VESPER</strong>, read top to bottom. One line per row. The lines may be as long or as short as they need to be.",
+    max: 100
+  },
+  {
+    title: "Sibilant",
+    flavor: "The snake in the garden had excellent diction.",
+    type: "ALLITERATION_SENTENCE",
+    params: { letter: "s" },
+    prompt: "Write a single sentence in which every content word — every noun, verb, adjective and adverb — begins with the letter <strong>S</strong>. Articles, pronouns and prepositions are exempt. Eight strong words earns full marks.",
+    max: 100
+  },
+  {
+    title: "Fifty-Five",
+    flavor: "Brevity is not the absence of a story. It is the pressure of one.",
+    type: "WORD_COUNT_EXACT",
+    params: { target: 55 },
+    prompt: "Write a complete story in <strong>exactly 55 words</strong>. Not 54. Not 56. A beginning, some trouble, and an ending — all weighed to the word.",
+    max: 100
+  },
+  {
+    title: "A Void",
+    flavor: "Perec did it for three hundred pages. You only owe us a paragraph.",
+    type: "LIPOGRAM",
+    params: { letter: "e", minWords: 30 },
+    prompt: "Write a passage of at least 30 words that does not contain the letter <strong>E</strong> — anywhere, in any word. The most common letter in English is hereby confiscated.",
+    max: 100
+  },
+  {
+    title: "Seventeen",
+    flavor: "Look out the window. Count what you see on your fingers.",
+    type: "SYLLABLE_TARGET",
+    params: { lines: [5, 7, 5], form: "haiku" },
+    prompt: "Write a <strong>haiku</strong> about the weather outside your window, right now: three lines of <strong>5, 7 and 5 syllables</strong>. One line per row.",
+    max: 100
+  },
+  {
+    title: "From the Letters Of",
+    flavor: "A whole vocabulary, hiding inside one word.",
+    type: "ANAGRAM_SENTENCE",
+    params: { source: "ASTONISHMENT" },
+    prompt: "Write a sentence using only words that can be spelled from the letters of <strong>ASTONISHMENT</strong>. Each word draws from a fresh copy of those letters; no letter may be used more times than it appears. Repeated words don't count twice.",
+    max: 100
+  },
+  {
+    title: "Without A",
+    flavor: "The first letter is the first crutch.",
+    type: "LIPOGRAM",
+    params: { letter: "a", minWords: 30 },
+    prompt: "Write a passage of at least 30 words that never once uses the letter <strong>A</strong>. The alphabet's front door is locked. Find the window.",
+    max: 100
+  },
+  {
+    title: "Hidden Column",
+    flavor: "The season arrives whether or not you announce it.",
+    type: "ACROSTIC",
+    params: { word: "WINTER" },
+    prompt: "Write six lines in which the first letter of each line spells <strong>WINTER</strong>, top to bottom. One line per row. The poem need not be about winter — but it may be.",
+    max: 100
+  },
+  {
+    title: "Murmur",
+    flavor: "Say it under your breath until it means something.",
+    type: "ALLITERATION_SENTENCE",
+    params: { letter: "m" },
+    prompt: "Write a single sentence in which every content word — noun, verb, adjective, adverb — begins with the letter <strong>M</strong>. Function words are free. Eight qualifying words earns full marks.",
+    max: 100
+  },
+  {
+    title: "Thirty-One",
+    flavor: "The haiku's older, longer-winded relative.",
+    type: "SYLLABLE_TARGET",
+    params: { lines: [5, 7, 5, 7, 7], form: "tanka" },
+    prompt: "Write a <strong>tanka</strong> — five lines of <strong>5, 7, 5, 7 and 7 syllables</strong> — addressed to someone you haven't spoken to in over a year. One line per row.",
+    max: 100
+  }
+];
+
+/* =====================================================
+   DEV MODE — for testing only, invisible to players
+   ?c=N      force challenge index N (0-based), bypasses the daily lock
+   ?reset    clear today's saved result, then play normally
+   ?dev      show a challenge picker in the footer
+===================================================== */
+const urlParams = new URLSearchParams(location.search);
+const DEV_FORCED = urlParams.has("c") ? parseInt(urlParams.get("c"), 10) : null;
+const DEV_MODE = urlParams.has("dev") || DEV_FORCED !== null;
+
+const dayNumber = Math.floor(Date.now() / 86400000); // for share text
+const dayIndex = (DEV_FORCED !== null && CHALLENGES[DEV_FORCED])
+  ? DEV_FORCED
+  : dayNumber % CHALLENGES.length;
+const challenge = CHALLENGES[dayIndex];
+
+/* =====================================================
+   STORAGE (graceful when unavailable)
+===================================================== */
+const store = {
+  get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+  set(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
+};
+const SAVE_KEY = "constraint-day-" + dayNumber;
+if (urlParams.has("reset")) {
+  try { localStorage.removeItem(SAVE_KEY); } catch(e){}
+}
+
+/* =====================================================
+   TEXT UTILITIES
+===================================================== */
+function words(text){
+  return text.trim().split(/\s+/).filter(Boolean);
+}
+function lettersOnly(text){
+  return text.toLowerCase().replace(/[^a-z]/g, "");
+}
+function cleanWord(w){
+  return w.toLowerCase().replace(/[^a-z']/g, "").replace(/'/g, "");
+}
+
+/* ----- syllable counter (vowel-cluster heuristic) ----- */
+const SYLLABLE_EXCEPTIONS = {
+  the:1, a:1, i:1, every:3, different:3, evening:2, interesting:3,
+  beautiful:3, quiet:2, poem:2, poems:2, being:2, doing:2, going:2,
+  fire:1, hour:1, our:1, choir:2, prayer:1, family:3, camera:3,
+  chocolate:2, business:2, wednesday:2, orange:2, sometimes:2
+};
+function countSyllables(word){
+  let w = cleanWord(word);
+  if (!w) return 0;
+  if (SYLLABLE_EXCEPTIONS[w] !== undefined) return SYLLABLE_EXCEPTIONS[w];
+  if (w.length <= 2) return 1;
+  // remove trailing silent e (but not -le after a consonant, and not sole vowel)
+  if (/e$/.test(w) && !/le$/.test(w) && /[aeiouy].*e$/.test(w) && !/[aeiou]e$/.test(w)) {
+    w = w.slice(0, -1);
+  }
+  // -ed endings: silent unless preceded by t or d
+  if (/[^td]ed$/.test(w) && /[aeiouy]/.test(w.slice(0, -2))) {
+    w = w.slice(0, -2) + "d";
+  }
+  const clusters = w.match(/[aeiouy]+/g);
+  const n = clusters ? clusters.length : 1;
+  return Math.max(1, n);
+}
+function lineSyllables(line){
+  return words(line).reduce((sum, w) => sum + countSyllables(w), 0);
+}
+
+/* =====================================================
+   GRAMMAR / GIBBERISH CHECK (soft)
+===================================================== */
+function gibberishCheck(text){
+  const letters = lettersOnly(text);
+  if (letters.length === 0) return "There don't appear to be any words here.";
+  if (letters.length > 8) {
+    const unique = new Set(letters.split("")).size;
+    if (unique === 1) return "A single repeated character is minimalism taken slightly too far.";
+    if (unique / letters.length < 0.14 && unique < 5)
+      return "This looks less like prose and more like a struggle with the keyboard.";
+  }
+  // keyboard mash: very few vowels across a long string
+  if (letters.length > 15) {
+    const vowels = (letters.match(/[aeiou]/g) || []).length;
+    if (vowels / letters.length < 0.12)
+      return "Vowels appear to be in short supply. Was this written with an elbow?";
+  }
+  return null;
+}
+
+function grammarCheck(text, type){
+  // gibberish check always applies
+  const gib = gibberishCheck(text);
+  if (gib) return gib;
+  // skip part-of-speech checks for line-based forms (fragments are legitimate)
+  if (type === "ACROSTIC" || type === "SYLLABLE_TARGET") return null;
+  if (typeof nlp === "undefined") return null; // CDN failed; don't punish the player
+  try {
+    const doc = nlp(text);
+    const hasVerb = doc.verbs().length > 0;
+    const hasNoun = doc.nouns().length > 0;
+    if (!hasVerb && !hasNoun) return "No nouns and no verbs detected. Even the avant-garde usually keeps one of the two.";
+    if (!hasVerb) return "No verb detected. Things in your sentence exist, but nothing happens to them.";
+    if (!hasNoun) return "No noun detected. A great deal of action, performed by no one, upon nothing.";
+  } catch(e){ /* never block on parser errors */ }
+  return null;
+}
+
+/* =====================================================
+   SCORING
+===================================================== */
+function scoreAcrostic(text, params){
+  const target = params.word.toLowerCase();
+  const lines = text.split(/\n/).map(l => l.trim()).filter(Boolean);
+  const rows = [];
+  let pts = 0, correct = 0;
+  for (let i = 0; i < target.length; i++) {
+    const expected = target[i].toUpperCase();
+    const line = lines[i];
+    const first = line ? (line.match(/[a-zA-Z]/) || [""])[0].toUpperCase() : "";
+    const ok = first === expected;
+    if (ok) { pts += 12; correct++; }
+    rows.push({
+      label: line === undefined
+        ? `Line ${i+1} — missing (wanted “${expected}”)`
+        : `Line ${i+1} — opens with “${first || "?"}”, wanted “${expected}”`,
+      pts: ok ? 12 : 0,
+      ok
+    });
+  }
+  if (lines.length > target.length) {
+    rows.push({ label: `${lines.length - target.length} extra line(s) — quietly ignored`, pts: 0, ok: null });
+  }
+  if (correct === target.length) {
+    pts += 28;
+    rows.push({ label: "Full acrostic — every initial in place", pts: 28, ok: true });
+  }
+  return { pts, rows };
+}
+
+function scoreAlliteration(text, params){
+  const letter = params.letter.toLowerCase();
+  const rows = [];
+  let contentWords = [];
+  if (typeof nlp !== "undefined") {
+    try {
+      const doc = nlp(text);
+      const terms = doc.json()[0] ? doc.json().flatMap(s => s.terms) : [];
+      contentWords = terms.filter(t => {
+        const tags = t.tags || [];
+        const isContent = tags.includes("Noun") || tags.includes("Verb") ||
+                          tags.includes("Adjective") || tags.includes("Adverb");
+        const isFunction = tags.includes("Determiner") || tags.includes("Preposition") ||
+                           tags.includes("Conjunction") || tags.includes("Pronoun") ||
+                           tags.includes("Copula");
+        return isContent && !isFunction;
+      }).map(t => t.text);
+    } catch(e){ contentWords = []; }
+  }
+  // fallback: treat words of 4+ letters as content words
+  if (contentWords.length === 0) {
+    contentWords = words(text).filter(w => cleanWord(w).length >= 4);
+  }
+  const qualifying = contentWords.filter(w => cleanWord(w).startsWith(letter));
+  const offenders = contentWords.filter(w => !cleanWord(w).startsWith(letter));
+  const counted = Math.min(qualifying.length, 10);
+  let pts = counted * 8;
+  if (pts > 80) pts = 80;
+  rows.push({
+    label: `${qualifying.length} content word(s) on “${letter.toUpperCase()}” (scored up to 10): ${qualifying.slice(0,10).join(", ") || "none"}`,
+    pts, ok: pts > 0
+  });
+  if (offenders.length > 0) {
+    rows.push({ label: `Content words off-letter: ${offenders.join(", ")}`, pts: 0, ok: false });
+  }
+  if (offenders.length === 0 && qualifying.length >= 6) {
+    pts += 20;
+    rows.push({ label: "Immaculate — every content word conforms", pts: 20, ok: true });
+  }
+  const sentences = (text.match(/[.!?]+/g) || []).length;
+  if (sentences > 1) {
+    rows.push({ label: "More than one sentence detected — the brief said one. No penalty, but noted.", pts: 0, ok: null });
+  }
+  return { pts, rows };
+}
+
+function scoreWordCount(text, params){
+  const n = words(text).length;
+  const diff = Math.abs(n - params.target);
+  const pts = diff === 0 ? 100 : Math.max(0, 100 - diff * 12);
+  const rows = [{
+    label: diff === 0
+      ? `Exactly ${params.target} words. Exactly.`
+      : `${n} words — ${diff} ${n > params.target ? "over" : "under"} the mark`,
+    pts, ok: diff === 0 ? true : (pts > 0 ? null : false)
+  }];
+  return { pts, rows };
+}
+
+function scoreLipogram(text, params){
+  const letter = params.letter.toLowerCase();
+  const rows = [];
+  const wordList = words(text);
+  const offenders = wordList.filter(w => w.toLowerCase().includes(letter));
+  let base = 100;
+  if (wordList.length < params.minWords) {
+    base = Math.round(100 * wordList.length / params.minWords);
+    rows.push({ label: `Only ${wordList.length} of ${params.minWords} required words — score scaled accordingly`, pts: base - 100, ok: false });
+  } else {
+    rows.push({ label: `${wordList.length} words — length requirement met`, pts: 0, ok: true });
+  }
+  let pts = base;
+  if (offenders.length === 0) {
+    rows.push({ label: `Not a single “${letter.toUpperCase()}” in sight`, pts: 0, ok: true });
+  } else {
+    const penalty = Math.min(pts, offenders.length * 15);
+    pts -= penalty;
+    const shown = [...new Set(offenders.map(w => w.replace(/[^\w'’-]/g, "")))].slice(0, 8);
+    rows.push({
+      label: `${offenders.length} contraband word(s): ${shown.join(", ")}${offenders.length > 8 ? "…" : ""}`,
+      pts: -penalty, ok: false
+    });
+  }
+  return { pts: Math.max(0, pts), rows };
+}
+
+function scoreSyllables(text, params){
+  const targets = params.lines;
+  const perLine = targets.length === 3 ? 30 : 18;
+  const lines = text.split(/\n/).map(l => l.trim()).filter(Boolean);
+  const rows = [];
+  let pts = 0, hits = 0;
+  for (let i = 0; i < targets.length; i++) {
+    const line = lines[i];
+    if (line === undefined) {
+      rows.push({ label: `Line ${i+1} — missing (wanted ${targets[i]} syllables)`, pts: 0, ok: false });
+      continue;
+    }
+    const count = lineSyllables(line);
+    const ok = count === targets[i];
+    if (ok) { pts += perLine; hits++; }
+    rows.push({
+      label: `Line ${i+1} — counted ${count} syllable(s), wanted ${targets[i]}`,
+      pts: ok ? perLine : 0, ok
+    });
+  }
+  if (lines.length > targets.length) {
+    rows.push({ label: `${lines.length - targets.length} extra line(s) — a ${params.form} knows when to stop`, pts: 0, ok: null });
+  }
+  if (hits === targets.length) {
+    pts += 10;
+    rows.push({ label: "Every line on count", pts: 10, ok: true });
+  }
+  rows.push({ label: "Syllable counting is automated and occasionally philistine; near-misses may be its fault, not yours", pts: 0, ok: null });
+  return { pts, rows };
+}
+
+function scoreAnagram(text, params){
+  const source = lettersOnly(params.source);
+  const pool = {};
+  for (const c of source) pool[c] = (pool[c] || 0) + 1;
+  const fitsPool = (w) => {
+    const counts = {};
+    for (const c of w) {
+      counts[c] = (counts[c] || 0) + 1;
+      if (!pool[c] || counts[c] > pool[c]) return false;
+    }
+    return true;
+  };
+  const seen = new Set();
+  const valid = [], invalid = [], dupes = [];
+  for (const raw of words(text)) {
+    const w = cleanWord(raw);
+    if (!w) continue;
+    if (seen.has(w)) { dupes.push(w); continue; }
+    seen.add(w);
+    (fitsPool(w) ? valid : invalid).push(w);
+  }
+  const rows = [];
+  let pts = Math.min(valid.length * 12, 84);
+  rows.push({
+    label: `${valid.length} valid word(s) (scored up to 7): ${valid.join(", ") || "none"}`,
+    pts, ok: pts > 0
+  });
+  if (invalid.length > 0) {
+    const penalty = Math.min(pts, invalid.length * 6);
+    pts -= penalty;
+    rows.push({ label: `Words outside the letter pool: ${invalid.join(", ")}`, pts: -penalty, ok: false });
+  }
+  if (dupes.length > 0) {
+    rows.push({ label: `Repeats (counted once): ${[...new Set(dupes)].join(", ")}`, pts: 0, ok: null });
+  }
+  if (invalid.length === 0 && valid.length >= 4) {
+    pts += 16;
+    rows.push({ label: "Clean run — every word drawn from the source", pts: 16, ok: true });
+  }
+  return { pts: Math.max(0, pts), rows };
+}
+
+function scoreEntry(text, ch, grammarPenalty){
+  let result;
+  switch (ch.type) {
+    case "ACROSTIC": result = scoreAcrostic(text, ch.params); break;
+    case "ALLITERATION_SENTENCE": result = scoreAlliteration(text, ch.params); break;
+    case "WORD_COUNT_EXACT": result = scoreWordCount(text, ch.params); break;
+    case "LIPOGRAM": result = scoreLipogram(text, ch.params); break;
+    case "SYLLABLE_TARGET": result = scoreSyllables(text, ch.params); break;
+    case "ANAGRAM_SENTENCE": result = scoreAnagram(text, ch.params); break;
+    default: result = { pts: 0, rows: [] };
+  }
+  if (grammarPenalty) {
+    result.pts = Math.max(0, result.pts - 10);
+    result.rows.push({ label: "Submitted over the grammarian's objection", pts: -10, ok: false });
+  }
+  result.pts = Math.max(0, Math.min(result.pts, ch.max));
+  return result;
+}
+
+/* =====================================================
+   RATINGS
+===================================================== */
+const RATINGS = [
+  { min: 95, label: "Oulipian", blurb: "Queneau looks up from his exercises and nods, once." },
+  { min: 80, label: "Constraint, mastered", blurb: "The cage held, and you sang in it anyway." },
+  { min: 60, label: "Workshopped", blurb: "Solid bones. The seminar has notes, but they're respectful notes." },
+  { min: 40, label: "A promising draft", blurb: "The constraint won a few rounds. So did you." },
+  { min: 20, label: "Juvenilia", blurb: "Future biographers will call this an 'early period'." },
+  { min: 0,  label: "The censor wins", blurb: "The constraint remains undefeated. There is always tomorrow." }
+];
+function getRating(pts, max){
+  const pct = (pts / max) * 100;
+  return RATINGS.find(r => pct >= r.min);
+}
+
+/* =====================================================
+   UI
+===================================================== */
+const $ = id => document.getElementById(id);
+const screens = ["screen-start", "screen-challenge", "screen-result"];
+function show(id){
+  screens.forEach(s => $(s).classList.toggle("active", s === id));
+  window.scrollTo({ top: 0 });
+}
+
+function fmtDate(){
+  return new Date().toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+}
+
+function renderResult(saved, alreadyPlayed){
+  $("resultDate").textContent = fmtDate() + " — №" + dayNumber;
+  $("totalScore").textContent = saved.pts;
+  $("maxScore").textContent = challenge.max;
+  const rating = getRating(saved.pts, challenge.max);
+  $("ratingLabel").textContent = rating.label;
+  $("ratingBlurb").textContent = rating.blurb;
+  $("resultBadge").style.display = alreadyPlayed ? "inline-block" : "none";
+  const bd = $("breakdown");
+  bd.innerHTML = "";
+  saved.rows.forEach(r => {
+    const div = document.createElement("div");
+    div.className = "score-line";
+    const label = document.createElement("span");
+    label.textContent = r.label;
+    const pts = document.createElement("span");
+    pts.className = "pts " + (r.ok === true ? "good" : r.ok === false ? "bad" : "neutral");
+    pts.textContent = (r.pts > 0 ? "+" : "") + r.pts;
+    div.appendChild(label); div.appendChild(pts);
+    bd.appendChild(div);
+  });
+  $("entryEcho").textContent = saved.text;
+  show("screen-result");
+}
+
+function shareText(saved){
+  const filled = Math.round((saved.pts / challenge.max) * 5);
+  const bar = "⬛".repeat(filled) + "⬜".repeat(5 - filled);
+  const rating = getRating(saved.pts, challenge.max);
+  return `CONSTRAINT №${dayNumber}\n✒️ ${saved.pts}/${challenge.max} — ${rating.label}\n${bar}`;
+}
+
+/* ----- wire up ----- */
+let pendingText = null;
+let lastResult = null;
+
+function init(){
+  // theme
+  const savedTheme = store.get("constraint-theme");
+  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const theme = savedTheme || (prefersDark ? "dark" : "light");
+  document.documentElement.setAttribute("data-theme", theme);
+  $("themeToggle").textContent = theme === "dark" ? "light" : "dark";
+  $("themeToggle").addEventListener("click", () => {
+    const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    $("themeToggle").textContent = next === "dark" ? "light" : "dark";
+    store.set("constraint-theme", next);
+  });
+
+  // start screen
+  $("startDate").textContent = fmtDate() + " — №" + dayNumber;
+  $("startTitle").textContent = challenge.title;
+  $("startFlavor").textContent = challenge.flavor;
+  $("challengeLabel").textContent = challenge.title;
+  $("promptText").innerHTML = challenge.prompt;
+
+  $("beginBtn").addEventListener("click", () => {
+    show("screen-challenge");
+    $("entry").focus();
+  });
+
+  // live counter
+  $("entry").addEventListener("input", () => {
+    const t = $("entry").value;
+    $("liveCount").textContent = `${words(t).length} words · ${t.length} characters`;
+  });
+
+  // submit flow
+  $("submitBtn").addEventListener("click", () => {
+    const text = $("entry").value;
+    if (!text.trim()) return;
+    const warning = grammarCheck(text, challenge.type);
+    if (warning) {
+      pendingText = text;
+      $("warningText").textContent = warning;
+      $("warning").style.display = "block";
+      $("warning").scrollIntoView({ behavior: "smooth", block: "nearest" });
+      return;
+    }
+    finalize(text, false);
+  });
+  $("editBtn").addEventListener("click", () => {
+    $("warning").style.display = "none";
+    pendingText = null;
+    $("entry").focus();
+  });
+  $("anywayBtn").addEventListener("click", () => {
+    $("warning").style.display = "none";
+    if (pendingText !== null) finalize(pendingText, true);
+  });
+
+  // share
+  $("shareBtn").addEventListener("click", async () => {
+    if (!lastResult) return;
+    const txt = shareText(lastResult);
+    try {
+      await navigator.clipboard.writeText(txt);
+      $("shareBtn").textContent = "Copied";
+    } catch(e) {
+      window.prompt("Copy your result:", txt);
+    }
+    setTimeout(() => { $("shareBtn").textContent = "Share result"; }, 1800);
+  });
+
+  // already played? (forced dev runs always start fresh)
+  const saved = DEV_FORCED === null ? JSON.parse(store.get(SAVE_KEY) || "null") : null;
+  if (saved) {
+    lastResult = saved;
+    renderResult(saved, true);
+  } else {
+    show("screen-start");
+  }
+
+  // dev picker
+  if (DEV_MODE) {
+    document.querySelectorAll("footer").forEach(f => {
+      const nav = document.createElement("div");
+      nav.style.marginTop = ".75rem";
+      CHALLENGES.forEach((c, i) => {
+        const a = document.createElement("a");
+        a.href = "?c=" + i;
+        a.textContent = "[" + i + " " + c.type.slice(0, 4) + "]";
+        a.title = c.title;
+        a.style.cssText = "color:" + (i === dayIndex ? "var(--accent)" : "var(--muted)") + ";text-decoration:none;margin:0 .25rem;";
+        nav.appendChild(a);
+      });
+      f.appendChild(nav);
+    });
+  }
+}
+
+function finalize(text, grammarPenalty){
+  const result = scoreEntry(text, challenge, grammarPenalty);
+  const saved = { pts: result.pts, rows: result.rows, text: text, day: dayNumber };
+  if (DEV_FORCED === null) {
+    store.set(SAVE_KEY, JSON.stringify(saved)); // dev runs never burn the real day
+  }
+  lastResult = saved;
+  renderResult(saved, false);
+}
+
+document.addEventListener("DOMContentLoaded", init);
+</script>
+
+
+</body></html>
