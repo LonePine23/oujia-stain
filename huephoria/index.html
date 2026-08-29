@@ -292,7 +292,7 @@ td.num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
       <p>You're given a colour — a swatch, its name and its hex. Somewhere in the photograph is a point that matches it.</p>
       <ul>
         <li>Tap or click anywhere to drop a marker.</li>
-        <li>Drag it to move. Drag <em>slowly</em> and it travels at a fraction of your hand, which is how you do fine work on a phone. On a keyboard, arrow keys move one pixel and Shift-arrow moves ten.</li>
+        <li>Drag to move it. On a keyboard, arrow keys move one pixel and Shift-arrow moves ten.</li>
         <li>The loupe follows the marker. In <b>Photo</b> mode it magnifies the image inside a ring of the target colour. In <b>Split</b> mode it shows the target against the exact colour under your marker, edge to edge — when the join between the two halves disappears, you're on it.</li>
         <li>Lock in when you're satisfied. There's no clock.</li>
       </ul>
@@ -634,7 +634,7 @@ const S = {
   queue: [], roundIndex: 0, results: [],
   level: null, targetLab: null, targetName: '',
   img: null, work: null, workData: null,
-  marker: null, dragging: false, dragLast: null, pointerType: 'mouse', liveHex: null,
+  marker: null, dragging: false, liveHex: null,
   zoom: 8, zoomOptions: [4, 8, 16], assist: false,
   locked: false, lastResult: null,
   fit: {scale:1, ox:0, oy:0, w:0, h:0}
@@ -954,39 +954,20 @@ view.addEventListener('pointerdown', ev => {
   ev.preventDefault();
   view.setPointerCapture(ev.pointerId);
   S.dragging = true;
-  S.pointerType = ev.pointerType;
-  S.dragLast = stagePoint(ev);
-  setMarker(toImage(S.dragLast));
+  setMarker(toImage(stagePoint(ev)));
 });
 
-/* A mouse gets exact 1:1 tracking — the marker stays under the cursor,
-   because anything else reads as broken when you can see both. Fine work
-   on a mouse is what the arrow keys are for.
-
-   Touch is the opposite case: your finger covers the very thing you're
-   aiming at, and a fingertip is forty pixels wide. So on touch the drag
-   is relative, and slowing your hand drops the gain to a quarter, which
-   is the only way to land on a specific pixel. Same idiom as dragging a
-   text cursor on a phone. */
+/* The marker goes exactly where the pointer is, on every input type.
+   An earlier version scaled the movement down during slow drags to buy
+   sub-pixel precision; it worked, and it felt broken, because a marker
+   that isn't under your finger reads as a bug no matter how useful the
+   offset is. Predictable beats clever. Fine adjustment lives in the
+   arrow keys, and on touch the loupe is the instrument — you don't need
+   to see the marker if you can see the colour it's sitting on. */
 view.addEventListener('pointermove', ev => {
-  if (!S.dragging || S.locked || !S.marker) return;
+  if (!S.dragging || S.locked) return;
   ev.preventDefault();
-  const p = stagePoint(ev);
-
-  if (S.pointerType !== 'touch'){
-    S.dragLast = p;
-    setMarker(toImage(p));
-    return;
-  }
-
-  const dx = p.x - S.dragLast.x, dy = p.y - S.dragLast.y;
-  S.dragLast = p;
-  const speed = Math.hypot(dx, dy);
-  const gain = speed < 3.5 ? 0.25 : speed < 11 ? 0.55 : 1;
-  setMarker({
-    x: S.marker.x + dx * gain / S.fit.scale,
-    y: S.marker.y + dy * gain / S.fit.scale
-  });
+  setMarker(toImage(stagePoint(ev)));
 });
 const endDrag = () => { S.dragging = false; };
 view.addEventListener('pointerup', endDrag);
