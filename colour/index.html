@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Huephoria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+/* ---------------------------------------------------------------
+   HUEPHORIA — name to swatch
+
+   The playing interface carries no colour of its own. The only hues
+   inside the frame are the swatch you mixed and the swatch you were
+   chasing; a tinted UI would shift your reading of both through
+   simultaneous contrast, and the whole game is that reading. The
+   swatches sit on a neutral mid-grey mat for the same reason a
+   proofing bench does. The title card is the one place the rule
+   doesn't apply, because nothing is being judged there.
+   --------------------------------------------------------------- */
+:root{
+  --ink:      #0c0c0d;
+  --surround: #08080a;
+  --surface:  #141416;
+  --raise:    #1c1c1f;
+  --rule:     #2b2b2f;
+  --dim:      #74747a;
+  --text:     #dcdcd8;
+  --mat:      #7d7d7d;
+  --matink:   #17171a;
+
+  --sans:  "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --serif: "IBM Plex Serif", Iowan Old Style, Georgia, serif;
+  --mono:  "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --display: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+}
+
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{height:100%; margin:0;}
+body{
+  background:var(--surround); color:var(--text);
+  font-family:var(--sans); font-size:13px; line-height:1.45;
+  overscroll-behavior:none; touch-action:manipulation;
+  display:flex; align-items:center; justify-content:center;
+}
+
+.frame{
+  width:100%; height:100%; background:var(--ink);
+  display:flex; flex-direction:column; overflow:hidden; position:relative;
+}
+@media (min-width:820px) and (min-height:700px){
+  body{padding:clamp(16px, 3vmin, 34px);}
+  .frame{
+    width:min(720px, 100%); height:min(780px, 100%);
+    border:1px solid var(--rule);
+    box-shadow:0 0 0 1px #000, 0 24px 64px rgba(0,0,0,.6);
+  }
+}
+
+button{font:inherit; color:inherit; background:none; border:none; cursor:pointer;}
+a{color:var(--dim);}
+a:hover{color:var(--text);}
+:focus-visible{outline:1px solid var(--text); outline-offset:2px;}
+.hidden{display:none !important;}
+
+.eyebrow{
+  font-family:var(--mono); font-size:10px; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--dim);
+}
+.btn{
+  font-family:var(--mono);
+  border:1px solid var(--rule); background:var(--raise);
+  padding:11px 16px; letter-spacing:.06em; font-size:12px;
+  text-transform:uppercase; transition:border-color .15s, background .15s, color .15s;
+}
+.btn:hover:not(:disabled){border-color:var(--dim);}
+.btn:disabled{opacity:.35; cursor:default;}
+.btn.primary{background:var(--text); color:var(--ink); border-color:var(--text); font-weight:500;}
+.btn.primary:hover:not(:disabled){background:#fff; border-color:#fff;}
+.linkbtn{
+  font-family:var(--mono); font-size:11px; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--dim); padding:8px 2px;
+  text-decoration:underline; text-underline-offset:3px;
+}
+.linkbtn:hover{color:var(--text);}
+
+/* ===================== TITLE CARD ===================== */
+#menu, #rules{flex:1; min-height:0; padding:14px; display:flex;}
+.card{
+  flex:1; min-height:0; overflow-y:auto;
+  border:1px solid var(--rule); background:var(--surface);
+  padding:22px 24px 18px; display:flex; flex-direction:column;
+}
+.card-top{
+  display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+  padding-bottom:14px; border-bottom:1px solid var(--rule);
+}
+/* The stack sits centred in whatever room the frame has, so a tall
+   window doesn't leave the card top-heavy with a pit underneath.
+   `safe` keeps the top reachable if the content ever outgrows the card. */
+.card-body{
+  flex:1; min-height:0; display:flex; flex-direction:column;
+  justify-content:center;
+  justify-content:safe center;
+}
+.wordmark{
+  font-family:var(--display); font-weight:400;
+  font-size:clamp(52px, 13vw, 86px); line-height:.92;
+  letter-spacing:-.015em; margin:0; user-select:none; cursor:default;
+}
+.wordmark span{display:inline-block;}
+.tagline{
+  font-family:var(--display); font-style:italic;
+  font-size:clamp(21px, 5.4vw, 28px); line-height:1.2;
+  color:var(--text); margin:12px 0 0;
+}
+.instruction{color:var(--dim); margin:18px 0 24px; max-width:46ch; line-height:1.6;}
+
+.field{margin-bottom:18px;}
+.field > .eyebrow{display:block; margin-bottom:9px;}
+.choices{display:flex; flex-wrap:wrap; gap:8px;}
+.chip-btn{
+  font-family:var(--mono);
+  border:1px solid var(--rule); background:var(--raise);
+  padding:9px 15px; font-size:12px; letter-spacing:.04em;
+  transition:border-color .15s, background .15s, color .15s;
+}
+.chip-btn:hover[aria-pressed="false"]{border-color:var(--dim);}
+.chip-btn[aria-pressed="true"]{background:var(--text); color:var(--ink); border-color:var(--text);}
+.chip-btn:disabled{opacity:.35; cursor:default;}
+
+/* Daily and completionist are the modes worth coming back for, so they
+   get the weight; the fixed-length games sit underneath as a quick go. */
+.modeprimary{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+.mode-card{
+  border:1px solid var(--rule); background:var(--raise);
+  padding:13px 15px 14px; text-align:left;
+  display:flex; flex-direction:column; gap:4px; min-width:0;
+  transition:border-color .15s, background .15s, color .15s;
+}
+.mode-card:hover[aria-pressed="false"]{border-color:var(--dim);}
+.mode-card .mc-name{font-family:var(--serif); font-size:20px; line-height:1.05;}
+.mode-card .mc-sub{
+  font-family:var(--mono); font-size:9px; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--dim); line-height:1.35;
+}
+.mode-card[aria-pressed="true"]{background:var(--text); color:var(--ink); border-color:var(--text);}
+.mode-card[aria-pressed="true"] .mc-sub{color:rgba(12,12,13,.62);}
+.mode-card:disabled{opacity:.35; cursor:default;}
+@media (max-width:430px){ .modeprimary{grid-template-columns:1fr;} }
+
+.byline{
+  margin-left:auto; font-family:var(--mono); font-size:10px;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--dim);
+}
+.byline a{text-decoration:underline; text-underline-offset:3px;}
+.card-top a{text-decoration:underline; text-underline-offset:3px;}
+@media (max-width:460px){ .byline{margin-left:0; width:100%;} }
+
+/* the panel under the mode chips changes with the mode you picked */
+#modePanel{
+  border:1px solid var(--rule); background:var(--raise);
+  padding:13px 15px; margin-bottom:18px; min-height:64px;
+}
+#modePanel.empty{display:none;}
+.panelNote{color:var(--dim); font-size:12.5px; line-height:1.55;}
+.panelNote b{color:var(--text); font-weight:500;}
+.statgrid{
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(148px, 1fr));
+  gap:12px 16px;
+}
+.statgrid .k{
+  display:block; font-family:var(--mono); font-size:9px; letter-spacing:.15em;
+  text-transform:uppercase; color:var(--dim);
+}
+.statgrid .v{
+  display:block; font-family:var(--mono); font-size:15px; font-weight:500;
+  font-variant-numeric:tabular-nums; margin-top:2px;
+}
+.progline{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:8px;}
+.progline .n{font-family:var(--mono); font-size:12px; font-variant-numeric:tabular-nums;}
+.specbar{
+  height:10px; width:100%; background:var(--ink);
+  border:1px solid var(--rule); display:block;
+}
+.specbar canvas{display:block; width:100%; height:100%;}
+
+.card-foot{
+  margin-top:auto; padding-top:16px; border-top:1px solid var(--rule);
+  display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+}
+
+/* ===================== RULES ===================== */
+.rulesHead{
+  font-family:var(--display); font-size:clamp(30px,7vw,42px);
+  font-weight:400; line-height:1.05; margin:6px 0 20px;
+}
+#rules h3{
+  font-family:var(--mono); font-size:10px; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--dim); font-weight:400;
+  margin:26px 0 9px; padding-top:14px; border-top:1px solid var(--rule);
+}
+#rules h3:first-of-type{margin-top:0; padding-top:0; border-top:0;}
+#rules p{margin:0 0 11px; max-width:60ch; line-height:1.65; color:var(--text);}
+#rules ul{margin:0 0 11px; padding-left:18px; max-width:60ch;}
+#rules li{margin-bottom:7px; line-height:1.6;}
+#rules b{font-weight:500;}
+.scoretable{border-collapse:collapse; font-family:var(--mono); font-size:11.5px; margin:4px 0 12px;}
+.scoretable td{padding:5px 0; color:var(--dim);}
+.scoretable td:first-child{
+  color:var(--text); font-variant-numeric:tabular-nums;
+  width:52px; text-align:right; padding-right:16px;
+}
+.rules-credit{
+  font-family:var(--mono); font-size:10.5px; line-height:1.65;
+  color:var(--dim); letter-spacing:.02em;
+}
+.rules-credit p{font-family:var(--mono); font-size:10.5px; color:var(--dim); margin:0 0 7px; max-width:none;}
+.rules-credit a{text-decoration:underline; text-underline-offset:3px;}
+
+/* ===================== PLAY ===================== */
+#play{flex:1; display:flex; flex-direction:column; min-height:0;}
+
+.topbar{
+  flex:0 0 auto; display:flex; align-items:center; gap:12px;
+  padding:7px 14px; border-bottom:1px solid var(--rule);
+}
+#homeBtn{
+  font-family:var(--display); font-size:20px; line-height:1;
+  padding:2px 1px; border-bottom:1px solid transparent;
+}
+#homeBtn:hover{border-bottom-color:var(--dim);}
+.topbar .spacer{flex:1;}
+.running{
+  font-family:var(--mono); font-size:11px; color:var(--dim);
+  font-variant-numeric:tabular-nums; white-space:nowrap; letter-spacing:.04em;
+}
+.running b{color:var(--text); font-weight:500;}
+#modeTag{
+  font-family:var(--mono); font-size:9px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--dim);
+  border:1px solid var(--rule); padding:3px 7px;
+}
+
+/* the run bar: one thin column per colour cleared, left to right */
+#runbar{
+  flex:0 0 auto; height:9px; background:var(--ink);
+  border-bottom:1px solid var(--rule);
+}
+#runbar canvas{display:block; width:100%; height:100%;}
+
+.namecard{
+  flex:0 0 auto; height:96px; padding:0 16px;
+  display:flex; flex-direction:column; justify-content:center; align-items:center;
+  text-align:center; border-bottom:1px solid var(--rule); overflow:hidden;
+}
+.namecard .eyebrow{margin-bottom:7px;}
+#targetName{
+  font-family:var(--serif); font-weight:400;
+  font-size:clamp(23px, 6.4vw, 34px); line-height:1.14;
+  margin:0; text-wrap:balance;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+
+#stage{flex:1; min-height:120px; background:var(--mat); display:flex; overflow:hidden;}
+.panel{
+  width:100%; min-width:0; overflow:hidden;
+  display:flex; flex-direction:column;
+  transition:width .46s cubic-bezier(.4,0,.1,1);
+}
+.panel + .panel{width:0;}
+#stage.split .panel{width:50%;}
+/* The swatches float on the mat rather than running to the edge: a
+   neutral gap between two samples is how you compare them without each
+   one dragging the other's reading around. */
+.swatch{
+  flex:1; min-height:0; margin:14px 14px 0;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.22);
+}
+.cap{
+  flex:0 0 auto; padding:8px 14px 12px; min-width:0;
+  opacity:0; transition:opacity .3s ease .16s;
+}
+.panel.on .cap{opacity:1;}
+.cap .capLabel{
+  display:block; font-family:var(--mono); font-size:9px; letter-spacing:.16em;
+  text-transform:uppercase; color:rgba(23,23,26,.62);
+}
+.cap .capHex{
+  display:block; font-family:var(--mono); font-size:12px; font-weight:500;
+  letter-spacing:.06em; color:var(--matink); margin-top:2px;
+}
+.cap .capHsl{
+  display:block; font-family:var(--mono); font-size:10px;
+  color:rgba(23,23,26,.62); margin-top:1px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+.rail{
+  flex:0 0 auto; height:74px; padding:0 14px;
+  border-top:1px solid var(--rule); background:var(--surface);
+  display:flex; align-items:center; gap:14px;
+}
+.railmain{flex:1; min-width:0;}
+.railmain .eyebrow{display:block;}
+#verdictText{
+  font-family:var(--serif); font-size:19px; line-height:1.2; margin-top:3px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+#deltaText{
+  font-family:var(--mono); font-size:10.5px; color:var(--dim);
+  letter-spacing:.05em; margin-top:3px; font-variant-numeric:tabular-nums;
+}
+#hintText{font-family:var(--sans); font-size:12.5px; color:var(--dim); line-height:1.45; margin-top:4px;}
+.railstat{
+  flex:0 0 auto; text-align:right; padding-left:14px;
+  border-left:1px solid var(--rule); align-self:stretch;
+  display:flex; flex-direction:column; justify-content:center; min-width:74px;
+}
+.railstat b{
+  display:block; font-family:var(--mono); font-weight:500; font-size:19px;
+  font-variant-numeric:tabular-nums; margin-top:3px;
+}
+.railstat b.long{font-size:13.5px;}
+
+/* ===================== SLIDERS ===================== */
+.dock{flex:0 0 auto; border-top:1px solid var(--rule); padding:14px 16px 4px;}
+.sl + .sl{margin-top:13px;}
+.sl label{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:7px;}
+.sl output{
+  font-family:var(--mono); font-size:12px; font-weight:500;
+  font-variant-numeric:tabular-nums; color:var(--text); letter-spacing:.04em;
+}
+input[type=range]{
+  -webkit-appearance:none; appearance:none;
+  width:100%; height:24px; background:transparent; cursor:pointer;
+  margin:0; display:block;
+}
+input[type=range]::-webkit-slider-runnable-track{
+  height:8px; background:var(--trk, var(--rule)); border:1px solid rgba(0,0,0,.5);
+}
+input[type=range]::-moz-range-track{
+  height:8px; background:var(--trk, var(--rule)); border:1px solid rgba(0,0,0,.5);
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; appearance:none;
+  width:11px; height:24px; margin-top:-9px;
+  background:var(--text); border:1px solid var(--ink);
+  box-shadow:0 1px 3px rgba(0,0,0,.6);
+  transition:background .12s, transform .12s;
+}
+input[type=range]::-moz-range-thumb{
+  width:11px; height:24px; border-radius:0;
+  background:var(--text); border:1px solid var(--ink);
+  box-shadow:0 1px 3px rgba(0,0,0,.6);
+}
+input[type=range]:hover:not(:disabled)::-webkit-slider-thumb{background:#fff;}
+input[type=range]:active:not(:disabled)::-webkit-slider-thumb{background:#fff; transform:scaleY(1.08);}
+input[type=range]:hover:not(:disabled)::-moz-range-thumb{background:#fff;}
+input[type=range]:disabled{opacity:.4; cursor:default;}
+
+.actions{flex:0 0 auto; padding:10px 16px 14px; display:flex; gap:10px;}
+#lockBtn{flex:1;}
+
+/* ===================== SUMMARY ===================== */
+#summary{flex:1; min-height:0; padding:14px; display:flex;}
+.sheet{
+  flex:1; min-height:0; overflow-y:auto;
+  border:1px solid var(--rule); background:var(--surface);
+  padding:22px 24px 18px;
+}
+.grade{display:flex; gap:18px; align-items:stretch; margin:18px 0 16px;}
+.gradeSw{
+  flex:0 0 auto; width:96px; align-self:stretch; min-height:96px;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.35);
+}
+.gradeText{display:flex; flex-direction:column; justify-content:center; min-width:0;}
+.gradeNum{
+  font-family:var(--serif); font-weight:400;
+  font-size:clamp(48px, 14vw, 72px); line-height:.96;
+  font-variant-numeric:tabular-nums; margin-top:5px;
+}
+.gradePct{font-size:.4em; color:var(--dim); margin-left:2px;}
+.gradeMeta{font-family:var(--mono); font-size:11px; color:var(--dim); letter-spacing:.05em; margin-top:8px;}
+.gradeMeta b{color:var(--text); font-weight:500;}
+.youare{
+  font-family:var(--sans); font-size:14px; line-height:1.6; color:var(--dim);
+  margin:0 0 14px; padding-bottom:14px; border-bottom:1px solid var(--rule);
+}
+.youare b{font-family:var(--serif); font-size:17px; color:var(--text); font-weight:400;}
+.youare code{font-family:var(--mono); font-size:11.5px; letter-spacing:.06em;}
+.quip{
+  font-family:var(--sans); font-style:italic; font-size:15px; line-height:1.55;
+  margin:0 0 4px; max-width:48ch; color:var(--text);
+}
+#sumStats{margin:18px 0 4px; padding-top:16px; border-top:1px solid var(--rule);}
+#sumStats > .eyebrow{display:block; margin-bottom:11px;}
+table{width:100%; border-collapse:collapse; margin:20px 0 4px; font-size:12px;}
+th{
+  text-align:left; font-family:var(--mono); font-weight:400; font-size:9.5px;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--dim);
+  padding:0 0 7px; border-bottom:1px solid var(--rule);
+}
+td{padding:8px 0; border-bottom:1px solid var(--rule); vertical-align:middle;}
+td.name{font-family:var(--serif); font-size:14px;}
+td.num{text-align:right; font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; padding-left:10px;}
+td.num.dim{color:var(--dim); font-size:11px;}
+.pair{display:inline-flex; vertical-align:middle; margin-right:9px; border:1px solid rgba(0,0,0,.5);}
+.pair i{display:block; width:15px; height:15px;}
+.sheet-actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:18px;}
+.tablenote{font-family:var(--mono); font-size:10.5px; color:var(--dim); margin:10px 0 0; letter-spacing:.04em;}
+#tableWrap{max-height:none;}
+
+#loading{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  background:var(--ink); z-index:20; font-family:var(--mono); font-size:11px;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--dim);
+}
+
+@media (max-width:430px){ .running .rc{display:none;} }
+@media (max-width:460px){
+  .card,.sheet{border:0; padding:18px 16px;}
+  #menu,#summary,#rules{padding:0;}
+  .namecard{height:84px;}
+  .rail{height:70px;}
+  .dock{padding:12px 14px 2px;}
+  .sl + .sl{margin-top:11px;}
+  .grade{gap:14px;}
+  .gradeSw{width:76px; min-height:76px;}
+}
+@media (max-height:620px){
+  .wordmark{font-size:44px; margin-top:12px;}
+  .instruction{margin:14px 0 16px;}
+  .namecard{height:76px;}
+}
+@media (prefers-reduced-motion:reduce){ *{animation:none !important; transition:none !important;} }
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <!-- ===================== TITLE CARD ===================== -->
+  <section id="menu">
+    <div class="card" id="card">
+      <div class="card-top">
+        <span class="eyebrow">A colour game</span>
+        <a class="eyebrow" href="https://geordie.lol" target="_blank" rel="noopener">geordie.lol</a>
+      </div>
+
+      <div class="card-body">
+      <h1 class="wordmark" id="wordmark" aria-label="Huephoria"></h1>
+      <p class="tagline">A Game of Hueristics</p>
+      <p class="instruction">
+        Mix a colour from nothing but its name. The closer your mix, the
+        higher you score.
+      </p>
+
+      <div id="modeChoices">
+        <div class="field">
+          <div class="modeprimary">
+            <button type="button" class="mode-card" data-mode="daily" aria-pressed="true">
+              <span class="mc-name">Daily</span>
+              <span class="mc-sub">A new five each day</span>
+            </button>
+            <button type="button" class="mode-card" data-mode="comp" aria-pressed="false">
+              <span class="mc-name">Completionist</span>
+              <span class="mc-sub" id="compSub">The whole list</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="eyebrow">Challenge</span>
+          <div class="choices">
+            <button type="button" class="chip-btn" data-mode="rounds" data-rounds="5"  aria-pressed="false">5 rounds</button>
+            <button type="button" class="chip-btn" data-mode="rounds" data-rounds="10" aria-pressed="false">10 rounds</button>
+            <button type="button" class="chip-btn" data-mode="rounds" data-rounds="15" aria-pressed="false">15 rounds</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="modePanel" class="empty"></div>
+      </div>
+
+      <div class="card-foot">
+        <button type="button" class="btn primary" id="startBtn" disabled>Begin</button>
+        <button type="button" class="linkbtn" id="rulesBtn">How to play &amp; scoring →</button>
+        <span class="byline">By <a href="https://geordie.lol" target="_blank" rel="noopener">Geordie Crawley</a></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== RULES ===================== -->
+  <section id="rules" class="hidden">
+    <div class="card">
+      <div class="card-top">
+        <span class="eyebrow">Reference</span>
+        <span class="eyebrow">Huephoria</span>
+      </div>
+
+      <h2 class="rulesHead">Three faders, one name, no clues.</h2>
+
+      <h3>How to play</h3>
+      <p>Each round hands you the <b>name</b> of a real colour and nothing else. No swatch, no hex, no multiple choice. Your job is to mix it from memory and instinct using three faders — <b>hue</b> (which colour, 0–360° around the wheel), <b>saturation</b> (how vivid, 0–100%) and <b>lightness</b> (how pale or dark, 0–100%).</p>
+      <p>The mat shows your mix live as you drag. When you're happy, <b>lock it in</b> — your swatch slides aside and the real colour appears next to it, on neutral grey so neither one skews how you read the other.</p>
+      <p>The hue fader carries a fixed spectrum because 0–360 is an arbitrary scale that needs a legend. Saturation and lightness don't get one: everybody already knows which end is grey and which end is white.</p>
+      <p>Colour names are taken from an open-source database of nearly five thousand of them, so expect anything from <b>Oxblood</b> to <b>Hello Darkness My Old Friend</b>.</p>
+
+      <h3>Modes</h3>
+      <ul>
+        <li><b>Challenge</b> — 5, 10 or 15 rounds, drawn at random from the whole list.</li>
+        <li><b>Daily</b> — five colours chosen by the date, so every player gets the same five on the same day. Your first run each day is recorded; play again as much as you like, but only that first one counts toward your stats and streak.</li>
+        <li><b>Completionist</b> — every colour in the list, one at a time, in a fixed order. Progress is saved on this device, so you can stop whenever and pick it up later. The bar along the top fills in left to right with the actual colours you've cleared.</li>
+      </ul>
+
+      <h3>Scoring</h3>
+      <p>Scoring happens in <b>CIE Lab</b>, not in the numbers on the faders. Raw slider distance would be badly misleading: hue wraps around, so 359° and 1° are neighbours rather than opposites, and a 30° hue miss is glaring on a vivid red but almost invisible on a near-grey. Lab handles both, because it's built to track how different two colours actually <i>look</i>.</p>
+      <p>The distance between your mix and the target is <b>ΔE</b> — 0 is a perfect match, and anything past about 80 is a different colour entirely. That gets curved into a match percentage:</p>
+      <table class="scoretable">
+        <tr><td>96</td><td>Indistinguishable</td></tr>
+        <tr><td>87</td><td>Within a whisker</td></tr>
+        <tr><td>76</td><td>A very good match</td></tr>
+        <tr><td>60</td><td>Close</td></tr>
+        <tr><td>44</td><td>Off by a shade</td></tr>
+        <tr><td>28</td><td>Wrong neighbourhood</td></tr>
+        <tr><td>16</td><td>Not this time</td></tr>
+        <tr><td>0</td><td>A different colour entirely</td></tr>
+      </table>
+      <p>A session is scored on the <b>average</b> of its rounds, not the total, so a long game isn't automatically a better one.</p>
+
+      <h3>Your colour</h3>
+      <p>At the end of a session your rounds are boiled down into a single colour. The hue comes from the average of everything <i>you</i> actually mixed, weighted so the vivid guesses count for more than the muddy ones — so it belongs to your run and nobody else's. How well you scored drives the rest: play sharply and it arrives clear and bright, play badly and it comes out murky. Then the name list tells you what you are.</p>
+
+      <h3>Acknowledgements</h3>
+      <div class="rules-credit">
+        <p>Colour names and values from <a href="https://github.com/meodai/color-names" target="_blank" rel="noopener">meodai/color-names</a> (the curated &ldquo;best of&rdquo; list), used under the MIT licence. <span id="dataNote"></span></p>
+        <p>Built with Claude by Anthropic. More info can be found <a href="https://geordie.lol/provenance" target="_blank" rel="noopener">here</a>.</p>
+      </div>
+
+      <div class="card-foot">
+        <button type="button" class="btn" id="rulesBackBtn">← Back</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PLAY ===================== -->
+  <section id="play" class="hidden">
+    <div class="topbar">
+      <button type="button" id="homeBtn" title="Back to the title card">Huephoria</button>
+      <span class="spacer"></span>
+      <span class="running" id="running"><b>—</b> average</span>
+      <span id="modeTag" class="hidden">Daily</span>
+    </div>
+
+    <div id="runbar" class="hidden"><canvas id="runCanvas"></canvas></div>
+
+    <div class="namecard">
+      <span class="eyebrow">The colour is called</span>
+      <h2 id="targetName">&nbsp;</h2>
+    </div>
+
+    <div id="stage">
+      <div class="panel on" id="panelGuess">
+        <div class="swatch" id="swGuess"></div>
+        <div class="cap">
+          <span class="capLabel" id="capGuessLabel">Your mix</span>
+          <span class="capHex" id="guessHex">#40BFBF</span>
+          <span class="capHsl" id="guessHsl">hsl(180, 50%, 50%)</span>
+        </div>
+      </div>
+      <div class="panel" id="panelActual">
+        <div class="swatch" id="swActual"></div>
+        <div class="cap">
+          <span class="capLabel">Actual</span>
+          <span class="capHex" id="actualHex">&nbsp;</span>
+          <span class="capHsl" id="actualHsl">&nbsp;</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="rail">
+      <div class="railmain">
+        <span class="eyebrow" id="railLabel">Mixing</span>
+        <div id="hintText">Read the name. Trust the first instinct.</div>
+        <div id="verdictText" class="hidden">&nbsp;</div>
+        <div id="deltaText" class="hidden">&nbsp;</div>
+      </div>
+      <div class="railstat">
+        <span class="eyebrow" id="statLabel">Round</span>
+        <b id="statVal">1/10</b>
+      </div>
+    </div>
+
+    <div class="dock">
+      <div class="sl">
+        <label for="hueSlider"><span class="eyebrow">Hue</span><output id="hueOut">180&deg;</output></label>
+        <input type="range" id="hueSlider" min="0" max="360" step="1" value="180">
+      </div>
+      <div class="sl">
+        <label for="satSlider"><span class="eyebrow">Saturation</span><output id="satOut">50%</output></label>
+        <input type="range" id="satSlider" min="0" max="100" step="1" value="50">
+      </div>
+      <div class="sl">
+        <label for="lightSlider"><span class="eyebrow">Lightness</span><output id="lightOut">50%</output></label>
+        <input type="range" id="lightSlider" min="0" max="100" step="1" value="50">
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn primary" id="lockBtn">Lock it in</button>
+      <button type="button" class="btn hidden" id="stopBtn">Finish</button>
+    </div>
+  </section>
+
+  <!-- ===================== SUMMARY ===================== -->
+  <section id="summary" class="hidden">
+    <div class="sheet">
+      <div class="card-top">
+        <span class="eyebrow" id="sumEyebrow">Session complete</span>
+        <span class="eyebrow">Huephoria</span>
+      </div>
+
+      <div class="grade">
+        <div class="gradeSw" id="sumSwatch"></div>
+        <div class="gradeText">
+          <span class="eyebrow">Average match</span>
+          <div class="gradeNum"><span id="sumAvg">0</span><span class="gradePct">%</span></div>
+          <div class="gradeMeta" id="sumMeta"></div>
+        </div>
+      </div>
+
+      <p class="youare" id="sumYouAre"></p>
+      <p class="quip" id="sumQuip"></p>
+
+      <div id="sumStats" class="hidden">
+        <span class="eyebrow" id="sumStatsLabel">Your record</span>
+        <div class="statgrid" id="sumStatGrid"></div>
+      </div>
+
+      <!-- actions sit above the round table: a completionist sitting can run
+           to hundreds of rows, and the buttons must never be a scroll away -->
+      <div class="sheet-actions">
+        <button type="button" class="btn primary" id="againBtn">Play again</button>
+        <button type="button" class="btn" id="menuBtn">Home</button>
+      </div>
+
+      <div id="tableWrap">
+        <table>
+          <thead>
+            <tr><th>Colour</th><th style="text-align:right">&Delta;E</th><th style="text-align:right">Match</th></tr>
+          </thead>
+          <tbody id="sumRows"></tbody>
+        </table>
+        <p class="tablenote hidden" id="tableNote"></p>
+      </div>
+    </div>
+  </section>
+
+  <div id="loading">Loading colours</div>
+</div>
+
+<script>
+"use strict";
+/* =====================================================================
+   HUEPHORIA — name to swatch
+   ===================================================================== */
+
+/* ---------- 1. colour data ---------------------------------------- */
+
+var FALLBACK_COLORS = [
+  {name:"Oxblood", hex:"#4a0404"},
+  {name:"Screamin' Green", hex:"#66ff66"},
+  {name:"Drunk-Tank Pink", hex:"#f2b6c0"},
+  {name:"Electric Lettuce", hex:"#a4c400"},
+  {name:"Illicit Pink", hex:"#fe6f9d"},
+  {name:"Atomic Tangerine", hex:"#ff9966"},
+  {name:"Blurple", hex:"#5865f2"},
+  {name:"Baby Puke Green", hex:"#b7c384"},
+  {name:"Kinda Coral", hex:"#ff8b7d"},
+  {name:"Purple Mountain Majesty", hex:"#9678b6"},
+  {name:"Radical Red", hex:"#ff355e"},
+  {name:"Big Dip O'Ruby", hex:"#9c2542"},
+  {name:"Toxic Waste", hex:"#61a13b"},
+  {name:"Booger Buster", hex:"#dde26a"},
+  {name:"Fun Blue", hex:"#1959a8"},
+  {name:"Slimy Green", hex:"#299617"},
+  {name:"Cheeky Salmon", hex:"#ff8c82"},
+  {name:"Manatee", hex:"#979aaa"},
+  {name:"Barney Purple", hex:"#9c51b6"},
+  {name:"Vivid Tangerine", hex:"#ffa089"}
+];
+
+/* The "best of" list — 4,959 curated names, not the 30k exhaustive one.
+   Two things about this URL are deliberate:
+
+   The path is dist/colornames.bestof.json. There is no bestOf.json at the
+   package root; that path 404s, and because the fetch fails quietly into
+   the sample below, the game would look like it worked while running on
+   twenty colours.
+
+   The version is pinned rather than @latest. Daily mode promises every
+   player the same five colours for a given date, and that only holds if
+   every player is drawing from an identical list — one player on a newer
+   release would silently get a different daily. Pinning also keeps
+   completionist progress meaningful, since a saved position is an index
+   into an order derived from the list's length. Bump it deliberately when
+   you want the new colours, knowing it reshuffles completionist order. */
+var COLOR_LIST_URL = "https://cdn.jsdelivr.net/npm/color-name-list@14.48.0/dist/colornames.bestof.json";
+var COLORS = [];
+var COMP_ORDER = [];          // stable shuffled index list for completionist
+var USING_FALLBACK = false;
+
+/* ---------- 2. colour maths ---------------------------------------
+   Scoring runs in CIE Lab, not HSL. Hue is circular and the three HSL
+   axes don't carry equal perceptual weight, so a raw HSL distance would
+   punish a 30-degree miss on a near-grey as hard as on a vivid red.
+   Lab handles both of those for free.
+   ------------------------------------------------------------------ */
+
+function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
+
+function hexToRgb(hex){
+  hex = hex.replace("#", "");
+  if (hex.length === 3) hex = hex.split("").map(function(c){ return c + c; }).join("");
+  var n = parseInt(hex, 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function rgbToHex(r, g, b){
+  function h(v){ return clamp(Math.round(v), 0, 255).toString(16).padStart(2, "0"); }
+  return "#" + h(r) + h(g) + h(b);
+}
+
+function rgbToHsl(r, g, b){
+  r /= 255; g /= 255; b /= 255;
+  var max = Math.max(r, g, b), min = Math.min(r, g, b);
+  var h, s, l = (max + min) / 2;
+  if (max === min){ h = s = 0; }
+  else {
+    var d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    if (max === r)      h = (g - b) / d + (g < b ? 6 : 0);
+    else if (max === g) h = (b - r) / d + 2;
+    else                h = (r - g) / d + 4;
+    h *= 60;
+  }
+  return [Math.round(h), Math.round(s * 100), Math.round(l * 100)];
+}
+
+function hslToRgb(h, s, l){
+  s /= 100; l /= 100;
+  var k = function(n){ return (n + h / 30) % 12; };
+  var a = s * Math.min(l, 1 - l);
+  var f = function(n){ return l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1))); };
+  return [f(0) * 255, f(8) * 255, f(4) * 255];
+}
+
+function srgbToLinear(c){
+  c /= 255;
+  return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+}
+
+function rgbToLab(r, g, b){
+  r = srgbToLinear(r); g = srgbToLinear(g); b = srgbToLinear(b);
+  var x = (r * 0.4124564 + g * 0.3575761 + b * 0.1804375) / 0.95047;
+  var y = (r * 0.2126729 + g * 0.7151522 + b * 0.0721750) / 1.0;
+  var z = (r * 0.0193339 + g * 0.1191920 + b * 0.9503041) / 1.08883;
+  var f = function(t){ return t > 0.008856 ? Math.cbrt(t) : (7.787 * t + 16 / 116); };
+  var fx = f(x), fy = f(y), fz = f(z);
+  return [116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)];
+}
+
+function hslToLab(h, s, l){
+  var rgb = hslToRgb(h, s, l);
+  return rgbToLab(rgb[0], rgb[1], rgb[2]);
+}
+
+function deltaE(a, b){
+  var dl = a[0] - b[0], da = a[1] - b[1], db = a[2] - b[2];
+  return Math.sqrt(dl * dl + da * da + db * db);
+}
+
+/* 100 at a dead match, decaying as perceptual distance grows. k = 42 was
+   fitted against 200k random colour pairs so a blind guess lands well
+   under half marks while a near miss still reads as a near miss. */
+function scoreFor(dE){ return clamp(Math.round(100 * Math.exp(-dE / 42)), 0, 100); }
+
+/* ---------- 3. seeded randomness -----------------------------------
+   The daily set has to be identical for every player on a given date,
+   so it can't come from Math.random. A hash of the date string seeds a
+   small deterministic generator instead.
+   ------------------------------------------------------------------ */
+
+/* The trailing avalanche matters more than it looks. Without it, two
+   dates one day apart hash to seeds a near-constant distance apart —
+   the day digit's contribution stays almost linear — and a daily puzzle
+   built on near-neighbour seeds risks feeling repetitive. This is the
+   murmur3 finaliser; it scatters them properly. */
+function hashStr(s){
+  var h = 1779033703 ^ s.length;
+  for (var i = 0; i < s.length; i++){
+    h = Math.imul(h ^ s.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
+  }
+  h ^= h >>> 16; h = Math.imul(h, 2246822507);
+  h ^= h >>> 13; h = Math.imul(h, 3266489909);
+  h ^= h >>> 16;
+  return h >>> 0;
+}
+
+function mulberry32(a){
+  return function(){
+    a = (a + 0x6D2B79F5) | 0;
+    var t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/* Local date, so a "daily" rolls over at the player's own midnight and
+   everyone playing on the 30th gets the same five colours. */
+function todayKey(d){
+  d = d || new Date();
+  return d.getFullYear() + "-" +
+    String(d.getMonth() + 1).padStart(2, "0") + "-" +
+    String(d.getDate()).padStart(2, "0");
+}
+
+function prevKey(key){
+  var p = key.split("-");
+  var d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+  d.setDate(d.getDate() - 1);
+  return todayKey(d);
+}
+
+function seededShuffle(n, seed){
+  var rnd = mulberry32(seed);
+  var a = [];
+  for (var i = 0; i < n; i++) a.push(i);
+  for (var j = n - 1; j > 0; j--){
+    var k = Math.floor(rnd() * (j + 1));
+    var t = a[j]; a[j] = a[k]; a[k] = t;
+  }
+  return a;
+}
+
+var DAILY_ROUNDS = 5;
+
+function dailySet(dateKey){
+  var order = seededShuffle(COLORS.length, hashStr("huephoria/" + dateKey));
+  return order.slice(0, Math.min(DAILY_ROUNDS, COLORS.length)).map(function(i){ return COLORS[i]; });
+}
+
+/* ---------- 4. colour groups ---------------------------------------- */
+
+var GROUPS = ["Reds","Oranges","Yellows","Greens","Teals","Blues","Violets","Pinks","Neutrals"];
+
+function groupOf(c){
+  if (c.s < 12 || c.l < 8 || c.l > 92) return "Neutrals";
+  var h = c.h;
+  if (h < 15 || h >= 345) return "Reds";
+  if (h < 45)  return "Oranges";
+  if (h < 70)  return "Yellows";
+  if (h < 160) return "Greens";
+  if (h < 200) return "Teals";
+  if (h < 255) return "Blues";
+  if (h < 290) return "Violets";
+  return "Pinks";
+}
+
+/* ---------- 5. storage ----------------------------------------------- */
+
+var STORE_KEY = "huephoria.v1";
+
+function loadDB(){
+  try {
+    var raw = localStorage.getItem(STORE_KEY);
+    var db = raw ? JSON.parse(raw) : {};
+    if (!db.comp)   db.comp   = { pos: 0, len: 0, sum: 0, n: 0 };
+    if (db.comp.sum == null) db.comp.sum = 0;
+    if (db.comp.n == null)   db.comp.n = 0;
+    if (!db.daily)  db.daily  = { days: {}, streak: 0, longest: 0, last: null };
+    if (!db.groups) db.groups = {};
+    if (!db.bests)  db.bests  = {};      // best completed average, per challenge length
+    return db;
+  } catch (e){
+    return { comp:{pos:0,len:0,sum:0,n:0}, daily:{days:{},streak:0,longest:0,last:null}, groups:{}, bests:{} };
+  }
+}
+
+function saveDB(){
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(DB)); } catch (e){ /* private mode */ }
+}
+
+var DB = loadDB();
+
+function recordGroups(results){
+  results.forEach(function(r){
+    var g = r.group;
+    if (!DB.groups[g]) DB.groups[g] = { sum: 0, n: 0 };
+    DB.groups[g].sum += r.score;
+    DB.groups[g].n += 1;
+  });
+}
+
+function strongestGroup(){
+  var best = null;
+  GROUPS.forEach(function(g){
+    var e = DB.groups[g];
+    if (!e || e.n < 3) return;
+    var avg = e.sum / e.n;
+    if (!best || avg > best.avg) best = { g: g, avg: avg, n: e.n };
+  });
+  return best;
+}
+
+function dailyStats(){
+  var days = DB.daily.days || {};
+  var keys = Object.keys(days);
+  if (!keys.length) return null;
+  var sum = 0, best = 0, bestKey = null;
+  keys.forEach(function(k){
+    sum += days[k].avg;
+    if (days[k].avg > best){ best = days[k].avg; bestKey = k; }
+  });
+  return {
+    played: keys.length,
+    avg: Math.round(sum / keys.length),
+    best: best,
+    bestKey: bestKey,
+    streak: DB.daily.streak || 0,
+    longest: DB.daily.longest || 0
+  };
+}
+
+function recordDaily(dateKey, avg, n){
+  var d = DB.daily;
+  if (d.days[dateKey]) return false;          // first run of the day only
+  d.days[dateKey] = { avg: avg, n: n };
+  d.streak = (d.last && prevKey(dateKey) === d.last) ? (d.streak || 0) + 1 : 1;
+  d.longest = Math.max(d.longest || 0, d.streak);
+  d.last = dateKey;
+  // keep the history from growing without bound
+  var keys = Object.keys(d.days).sort();
+  while (keys.length > 400) delete d.days[keys.shift()];
+  return true;
+}
+
+/* ---------- 6. copy --------------------------------------------------
+   The per-round line states what happened and gets out of the way. The
+   jokes wait for the summary, where they land once instead of thirteen
+   times.
+   ------------------------------------------------------------------ */
+
+function verdictFor(dE){
+  if (dE < 2)  return "Indistinguishable";
+  if (dE < 6)  return "Within a whisker";
+  if (dE < 12) return "A very good match";
+  if (dE < 22) return "Close";
+  if (dE < 35) return "Off by a shade";
+  if (dE < 55) return "Wrong neighbourhood";
+  if (dE < 80) return "Not this time";
+  return "A different colour entirely";
+}
+
+var QUIPS = [
+  [92, [
+    "Either you own a colourimeter or you have no life. Both are impressive.",
+    "Nothing left to teach you. Please leave.",
+    "The sort of accuracy that makes other people quietly close the tab."
+  ]],
+  [80, [
+    "Excellent, in the mildly irritating way that suggests you've done this before.",
+    "You would be a menace in the paint chip aisle.",
+    "Very good. Not perfect. You'll think about that later tonight."
+  ]],
+  [65, [
+    "Solid. The kind of result nobody writes home about, including you.",
+    "You know exactly what colour it is. You just can't quite point at it.",
+    "Competent — a word doing an enormous amount of work here."
+  ]],
+  [50, [
+    "Right postcode. Wrong house.",
+    "Close enough for house paint. Not close enough for anything else.",
+    "Your eyes are fine. It's the commitment that's letting you down."
+  ]],
+  [35, [
+    "You have successfully located the general vibe of the colour.",
+    "Roughly correct, in the way a long-range weather forecast is roughly correct.",
+    "This is what trusting your first instinct looks like."
+  ]],
+  [20, [
+    "You've invented several new colours today. Nobody asked for any of them.",
+    "Bold choices throughout. Uniformly wrong, but bold.",
+    "Somewhere a colourist felt a chill and couldn't say why."
+  ]],
+  [0, [
+    "Extraordinary. Statistically you should have hit something by accident.",
+    "The names were right there, in English, the whole time.",
+    "You may be playing a different game. We would genuinely love to know which."
+  ]]
+];
+
+function quipFor(avg){
+  for (var i = 0; i < QUIPS.length; i++){
+    if (avg >= QUIPS[i][0]){
+      var band = QUIPS[i][1];
+      return band[Math.floor(Math.random() * band.length)];
+    }
+  }
+  return "";
+}
+
+/* ---------- 7. state --------------------------------------------------- */
+
+var S = {
+  mode: "daily",         // rounds | daily | comp — daily is the default draw
+  rounds: 10,
+  index: 0,              // position within the queue
+  startIndex: 0,         // where this sitting began (completionist resumes)
+  results: [],
+  queue: [],
+  target: null,
+  locked: false,
+  dateKey: null,
+  dailyCounts: true
+};
+
+/* ---------- 8. dom ------------------------------------------------------ */
+
+function $(id){ return document.getElementById(id); }
+
+var els = {
+  menu: $("menu"), rules: $("rules"), play: $("play"), summary: $("summary"), loading: $("loading"),
+  card: $("card"), wordmark: $("wordmark"),
+  modeChoices: $("modeChoices"), modePanel: $("modePanel"),
+  startBtn: $("startBtn"), rulesBtn: $("rulesBtn"), rulesBackBtn: $("rulesBackBtn"), dataNote: $("dataNote"),
+  homeBtn: $("homeBtn"), running: $("running"), modeTag: $("modeTag"),
+  runbar: $("runbar"), runCanvas: $("runCanvas"),
+  targetName: $("targetName"),
+  stage: $("stage"), panelActual: $("panelActual"),
+  swGuess: $("swGuess"), swActual: $("swActual"),
+  capGuessLabel: $("capGuessLabel"),
+  guessHex: $("guessHex"), guessHsl: $("guessHsl"),
+  actualHex: $("actualHex"), actualHsl: $("actualHsl"),
+  railLabel: $("railLabel"), hintText: $("hintText"),
+  verdictText: $("verdictText"), deltaText: $("deltaText"),
+  statLabel: $("statLabel"), statVal: $("statVal"),
+  hueSlider: $("hueSlider"), satSlider: $("satSlider"), lightSlider: $("lightSlider"),
+  hueOut: $("hueOut"), satOut: $("satOut"), lightOut: $("lightOut"),
+  lockBtn: $("lockBtn"), stopBtn: $("stopBtn"),
+  sumEyebrow: $("sumEyebrow"), sumSwatch: $("sumSwatch"), sumAvg: $("sumAvg"),
+  sumMeta: $("sumMeta"), sumYouAre: $("sumYouAre"), sumQuip: $("sumQuip"),
+  sumStats: $("sumStats"), sumStatsLabel: $("sumStatsLabel"), sumStatGrid: $("sumStatGrid"),
+  sumRows: $("sumRows"), tableNote: $("tableNote"),
+  againBtn: $("againBtn"), menuBtn: $("menuBtn")
+};
+
+function show(section){
+  [els.menu, els.rules, els.play, els.summary].forEach(function(s){
+    s.classList.toggle("hidden", s !== section);
+  });
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"]/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];
+  });
+}
+
+/* ---------- 9. the living wordmark -------------------------------------
+   Nine letters, nine slightly different easing rates, each chasing its
+   own target colour derived from where your pointer is. They never move
+   as a block, and they drift slowly when the card is left alone.
+   ---------------------------------------------------------------------- */
+
+var WORD = "Huephoria";
+var MAX_HUE_STEP = 0.8;
+var MAX_SL_STEP  = 1.2;
+var glyphs = [];
+var wordRaf = null;
+var lastPointer = -9999;
+
+function clampStep(v, m){ return v > m ? m : (v < -m ? -m : v); }
+
+function buildWordmark(){
+  var el = els.wordmark;
+  el.innerHTML = "";
+  glyphs = WORD.split("").map(function(ch, i){
+    var span = document.createElement("span");
+    span.textContent = ch;
+    span.setAttribute("aria-hidden", "true");
+    el.appendChild(span);
+    return {
+      el: span, i: i,
+      h: 40 + i * 12, s: 0, l: 86,      // starts neutral, blooms on first move
+      th: 40 + i * 12, ts: 0, tl: 86,
+      k: 0.021 + (i % 4) * 0.012        // per-letter easing rate
+    };
+  });
+  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches){
+    glyphs.forEach(function(g){ g.el.style.color = "var(--text)"; });
+    return;
+  }
+  if (!wordRaf) wordRaf = requestAnimationFrame(tickWordmark);
+}
+
+function aimWordmark(px, py){
+  lastPointer = performance.now();
+  var n = glyphs.length;
+  glyphs.forEach(function(g){
+    var spread = (g.i - (n - 1) / 2) / n;
+    g.th = px * 300 + spread * 200 + g.i * 9;
+    g.ts = 34 + py * 44 + Math.abs(spread) * 24;
+    g.tl = 78 - py * 26 + spread * 6;
+  });
+}
+
+function tickWordmark(t){
+  wordRaf = requestAnimationFrame(tickWordmark);
+  if (els.menu.classList.contains("hidden")) return;
+  if (t - lastPointer > 2600){
+    // slow idle drift, so the card is never quite still
+    glyphs.forEach(function(g){
+      g.th = (t / 110 + g.i * 26) % 360;
+      g.ts = 26 + 12 * Math.sin(t / 2400 + g.i);
+      g.tl = 74 + 8 * Math.sin(t / 3100 + g.i * 0.7);
+    });
+  }
+  for (var i = 0; i < glyphs.length; i++){
+    var g = glyphs[i];
+    // Shortest way round the wheel, then a hard speed limit. Without the
+    // limit a big jump in target sends the letters sprinting through the
+    // whole spectrum in a few frames.
+    var dh = ((g.th - g.h + 540) % 360) - 180;
+    g.h = (g.h + clampStep(dh * g.k, MAX_HUE_STEP) + 360) % 360;
+    g.s += clampStep((g.ts - g.s) * g.k, MAX_SL_STEP);
+    g.l += clampStep((g.tl - g.l) * g.k, MAX_SL_STEP);
+    g.el.style.color = "hsl(" + g.h.toFixed(1) + " " + g.s.toFixed(1) + "% " + g.l.toFixed(1) + "%)";
+  }
+}
+
+function attachWordmarkPointer(){
+  var handler = function(ev){
+    var r = els.card.getBoundingClientRect();
+    aimWordmark(
+      clamp((ev.clientX - r.left) / r.width, 0, 1),
+      clamp((ev.clientY - r.top) / r.height, 0, 1)
+    );
+  };
+  els.menu.addEventListener("pointermove", handler);
+  els.menu.addEventListener("pointerdown", handler);
+}
+
+/* ---------- 10. loading -------------------------------------------------- */
+
+function normalize(entry){
+  var hex = entry.hex.charAt(0) === "#" ? entry.hex : "#" + entry.hex;
+  var rgb = hexToRgb(hex);
+  var hsl = rgbToHsl(rgb[0], rgb[1], rgb[2]);
+  return {
+    name: entry.name, hex: hex.toLowerCase(),
+    h: hsl[0], s: hsl[1], l: hsl[2],
+    lab: rgbToLab(rgb[0], rgb[1], rgb[2])
+  };
+}
+
+function loadColors(){
+  return fetch(COLOR_LIST_URL, { cache: "force-cache" })
+    .then(function(r){ if (!r.ok) throw new Error("http"); return r.json(); })
+    .then(function(data){
+      if (!Array.isArray(data) || !data.length) throw new Error("empty");
+      COLORS = data.filter(function(e){ return e && e.name && e.hex; }).map(normalize);
+      if (!COLORS.length) throw new Error("unusable");
+    })
+    .catch(function(){
+      USING_FALLBACK = true;
+      COLORS = FALLBACK_COLORS.map(normalize);
+    })
+    .then(function(){
+      // One fixed shuffle, so completionist progress means the same thing
+      // every time you come back to it.
+      COMP_ORDER = seededShuffle(COLORS.length, 0x48554521);
+      if (DB.comp.len !== COLORS.length){
+        DB.comp.len = COLORS.length;
+        if (DB.comp.pos > COLORS.length) DB.comp.pos = 0;
+        saveDB();
+      }
+    });
+}
+
+/* ---------- 11. menu ------------------------------------------------------ */
+
+function modeButtons(){
+  return els.modeChoices.querySelectorAll(".chip-btn, .mode-card");
+}
+
+Array.prototype.forEach.call(modeButtons(), function(btn){
+  btn.addEventListener("click", function(){
+    Array.prototype.forEach.call(modeButtons(), function(b){
+      b.setAttribute("aria-pressed", String(b === btn));
+    });
+    S.mode = btn.dataset.mode;
+    if (S.mode === "rounds") S.rounds = parseInt(btn.dataset.rounds, 10);
+    paintModePanel();
+  });
+});
+
+function paintModePanel(){
+  var p = els.modePanel;
+  p.classList.remove("empty");
+
+  if (S.mode === "rounds"){
+    if (USING_FALLBACK){
+      p.innerHTML = "<div class=\"panelNote\"><b>Offline.</b> The colour list couldn't be reached, so this is running " +
+        "on a built-in sample of " + COLORS.length + ". Daily and completionist need the full list — " +
+        "a daily drawn from the sample wouldn't match anyone else's.</div>";
+    } else {
+      p.innerHTML =
+        "<div class=\"panelNote\" style=\"margin-bottom:12px\"><b>" + S.rounds + " colours</b> drawn at random from all " +
+          COLORS.length.toLocaleString() + ".</div>" +
+        "<div class=\"statgrid\">" +
+          [5, 10, 15].map(function(r){
+            return stat("Best of " + r, DB.bests[r] ? DB.bests[r] + "%" : "—");
+          }).join("") +
+        "</div>";
+    }
+    els.startBtn.textContent = "Begin";
+    return;
+  }
+
+  if (S.mode === "daily"){
+    var key = todayKey();
+    var today = DB.daily.days[key];
+    var st = dailyStats();
+    var sg = strongestGroup();
+    p.innerHTML =
+      (today
+        ? "<div class=\"panelNote\" style=\"margin-bottom:12px\">Today's five are done — you averaged <b>" +
+          today.avg + "%</b>. Play again for fun; it won't be recorded.</div>"
+        : "<div class=\"panelNote\" style=\"margin-bottom:12px\">Five colours, the same five for everyone playing today.</div>") +
+      "<div class=\"statgrid\">" +
+        stat("Daily average", st ? st.avg + "%" : "—") +
+        stat("Best day", st ? st.best + "%" : "—") +
+        stat("Streak", st ? st.streak + (st.streak === 1 ? " day" : " days") : "—") +
+        stat("Strongest", sg ? sg.g : "—") +
+      "</div>";
+    els.startBtn.textContent = today ? "Play again" : "Begin";
+    return;
+  }
+
+  // completionist
+  var pos = DB.comp.pos, total = COLORS.length;
+  var doneAll = pos >= total;
+  var pct = total ? (pos / total * 100) : 0;
+  // one decimal is meaningful at this scale — whole percent would sit on 0%
+  // for the first fifty colours and look broken
+  var pctText = (pct > 0 && pct < 10) ? pct.toFixed(1) + "%" : Math.round(pct) + "%";
+  var avg = DB.comp.n ? Math.round(DB.comp.sum / DB.comp.n) + "%" : "—";
+
+  p.innerHTML =
+    "<div class=\"progline\">" +
+      "<span class=\"eyebrow\">" + (doneAll ? "Complete" : "Progress") + "</span>" +
+      "<span class=\"n\">" + pos.toLocaleString() + " / " + total.toLocaleString() + "</span>" +
+    "</div>" +
+    "<span class=\"specbar\"><canvas id=\"menuSpec\"></canvas></span>" +
+    "<div class=\"statgrid\" style=\"margin-top:12px\">" +
+      stat("Complete", pctText) +
+      stat("Average score", avg) +
+      stat("Remaining", Math.max(0, total - pos).toLocaleString()) +
+    "</div>" +
+    "<div class=\"panelNote\" style=\"margin-top:12px\">" +
+      (doneAll
+        ? "Every colour in the list, done. "
+        : "Every colour in the list, one at a time. Saved on this device. ") +
+      (pos > 0 ? "<button type=\"button\" class=\"linkbtn\" id=\"resetComp\">Start over</button>" : "") +
+    "</div>";
+  els.startBtn.textContent = doneAll ? "Start over" : (pos > 0 ? "Resume" : "Begin");
+  requestAnimationFrame(function(){ paintSpectrum($("menuSpec"), pos); });
+  var rc = $("resetComp");
+  if (rc) rc.addEventListener("click", function(){
+    // the average belongs to the run, so it resets with it
+    DB.comp.pos = 0; DB.comp.sum = 0; DB.comp.n = 0;
+    saveDB(); paintModePanel();
+  });
+}
+
+function stat(k, v){
+  return "<div><span class=\"k\">" + k + "</span><span class=\"v\">" + v + "</span></div>";
+}
+
+/* Both of the persistent modes depend on everyone holding the same list.
+   On the fallback sample a "daily" would be five colours nobody else is
+   playing, and completionist would be a twenty-colour lap — so neither is
+   offered rather than quietly lying about what it is. */
+function applyOfflineLimits(){
+  if (!USING_FALLBACK) return;
+  ["daily", "comp"].forEach(function(m){
+    var btn = els.modeChoices.querySelector('[data-mode="' + m + '"]');
+    if (!btn) return;
+    btn.disabled = true;
+    btn.setAttribute("aria-pressed", "false");
+    btn.title = "Needs the full colour list";
+  });
+  if (S.mode !== "rounds"){
+    S.mode = "rounds";
+    S.rounds = 10;
+    var d = els.modeChoices.querySelector('.chip-btn[data-rounds="10"]');
+    if (d) d.setAttribute("aria-pressed", "true");
+  }
+}
+
+/* The run bar: one thin column per colour cleared, painted with that
+   colour's real hex, filling left to right. */
+function paintSpectrum(canvas, upto){
+  if (!canvas) return;
+  var w = canvas.clientWidth, h = canvas.clientHeight;
+  if (!w || !h) return;
+  var dpr = Math.min(2, window.devicePixelRatio || 1);
+  canvas.width = Math.max(1, Math.round(w * dpr));
+  canvas.height = Math.max(1, Math.round(h * dpr));
+  var ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  var total = COLORS.length;
+  if (!total) return;
+  for (var x = 0; x < canvas.width; x++){
+    var idx = Math.floor(x / canvas.width * total);
+    if (idx >= upto) break;
+    ctx.fillStyle = COLORS[COMP_ORDER[idx]].hex;
+    ctx.fillRect(x, 0, 1, canvas.height);
+  }
+}
+
+els.startBtn.addEventListener("click", startSession);
+els.rulesBtn.addEventListener("click", function(){ show(els.rules); });
+els.rulesBackBtn.addEventListener("click", function(){ show(els.menu); });
+els.homeBtn.addEventListener("click", function(){ show(els.menu); paintModePanel(); });
+els.menuBtn.addEventListener("click", function(){ show(els.menu); paintModePanel(); });
+els.againBtn.addEventListener("click", startSession);
+els.stopBtn.addEventListener("click", function(){ finish(); });
+
+/* ---------- 12. session ---------------------------------------------------- */
+
+function startSession(){
+  if (S.mode === "comp" && DB.comp.pos >= COLORS.length){ DB.comp.pos = 0; saveDB(); }
+
+  S.results = [];
+  S.dateKey = todayKey();
+  S.dailyCounts = true;
+
+  if (S.mode === "daily"){
+    S.queue = dailySet(S.dateKey);
+    S.index = 0;
+    S.startIndex = 0;
+    S.dailyCounts = !DB.daily.days[S.dateKey];
+    els.modeTag.textContent = S.dailyCounts ? "Daily" : "Practice";
+    els.modeTag.classList.remove("hidden");
+    els.runbar.classList.add("hidden");
+    els.stopBtn.classList.add("hidden");
+  } else if (S.mode === "comp"){
+    S.queue = COMP_ORDER.map(function(i){ return COLORS[i]; });
+    S.index = DB.comp.pos;
+    S.startIndex = S.index;
+    els.modeTag.textContent = "Completionist";
+    els.modeTag.classList.remove("hidden");
+    els.runbar.classList.remove("hidden");
+    els.stopBtn.classList.remove("hidden");
+  } else {
+    var order = seededShuffle(COLORS.length, (Math.random() * 0xffffffff) >>> 0);
+    S.queue = order.slice(0, Math.min(S.rounds, COLORS.length)).map(function(i){ return COLORS[i]; });
+    S.index = 0;
+    S.startIndex = 0;
+    els.modeTag.classList.add("hidden");
+    els.runbar.classList.add("hidden");
+    els.stopBtn.classList.add("hidden");
+  }
+
+  show(els.play);
+  updateRunning();
+  nextRound();
+}
+
+function totalRounds(){
+  if (S.mode === "daily") return S.queue.length;
+  if (S.mode === "comp")  return COLORS.length;
+  return S.rounds;
+}
+
+function lastRound(){
+  return S.index >= totalRounds() - 1;
+}
+
+function nextRound(){
+  S.target = S.queue[S.index];
+  S.locked = false;
+
+  els.targetName.textContent = S.target.name;
+
+  els.hueSlider.value = 180;
+  els.satSlider.value = 50;
+  els.lightSlider.value = 50;
+  [els.hueSlider, els.satSlider, els.lightSlider].forEach(function(sl){ sl.disabled = false; });
+
+  els.stage.classList.remove("split");
+  els.panelActual.classList.remove("on");
+  els.capGuessLabel.textContent = "Your mix";
+  els.actualHex.innerHTML = "&nbsp;";
+  els.actualHsl.innerHTML = "&nbsp;";
+
+  els.railLabel.textContent = "Mixing";
+  els.hintText.classList.remove("hidden");
+  els.verdictText.classList.add("hidden");
+  els.deltaText.classList.add("hidden");
+
+  els.statLabel.textContent = S.mode === "comp" ? "Cleared" : "Round";
+  var txt = S.mode === "comp"
+    ? (S.index).toLocaleString() + "/" + COLORS.length.toLocaleString()
+    : (S.index + 1) + "/" + totalRounds();
+  els.statVal.textContent = txt;
+  els.statVal.classList.toggle("long", txt.length > 6);
+
+  els.lockBtn.textContent = "Lock it in";
+  els.lockBtn.disabled = false;
+
+  if (S.mode === "comp") paintSpectrum(els.runCanvas, S.index);
+  paintGuess();
+}
+
+/* ---------- 13. sliders ----------------------------------------------------- */
+
+function currentHsl(){
+  return [
+    parseInt(els.hueSlider.value, 10),
+    parseInt(els.satSlider.value, 10),
+    parseInt(els.lightSlider.value, 10)
+  ];
+}
+
+/* A constant spectrum for hue — a legend for an arbitrary 0–360 scale,
+   not a preview of the mix. Saturation and lightness need no legend, so
+   they stay neutral and keep colour out of the chrome. */
+var HUE_RULER = (function(){
+  var stops = [];
+  for (var d = 0; d <= 360; d += 30) stops.push("hsl(" + d + " 62% 50%)");
+  return "linear-gradient(90deg," + stops.join(",") + ")";
+})();
+
+function paintGuess(){
+  var hsl = currentHsl(), h = hsl[0], s = hsl[1], l = hsl[2];
+
+  els.hueOut.textContent = h + "°";
+  els.satOut.textContent = s + "%";
+  els.lightOut.textContent = l + "%";
+
+  els.swGuess.style.background = "hsl(" + h + " " + s + "% " + l + "%)";
+
+  var rgb = hslToRgb(h, s, l);
+  els.guessHex.textContent = rgbToHex(rgb[0], rgb[1], rgb[2]).toUpperCase();
+  els.guessHsl.textContent = "hsl(" + h + ", " + s + "%, " + l + "%)";
+
+  els.hueSlider.style.setProperty("--trk", HUE_RULER);
+  els.satSlider.style.setProperty("--trk",
+    "linear-gradient(90deg, var(--dim) " + s + "%, var(--rule) " + s + "%)");
+  els.lightSlider.style.setProperty("--trk",
+    "linear-gradient(90deg, var(--dim) " + l + "%, var(--rule) " + l + "%)");
+}
+
+[els.hueSlider, els.satSlider, els.lightSlider].forEach(function(sl){
+  sl.addEventListener("input", paintGuess);
+});
+
+/* ---------- 14. lock and reveal --------------------------------------------- */
+
+els.lockBtn.addEventListener("click", function(){
+  if (S.locked) advance(); else lockIn();
+});
+
+function lockIn(){
+  S.locked = true;
+
+  var hsl = currentHsl(), h = hsl[0], s = hsl[1], l = hsl[2];
+  var rgb = hslToRgb(h, s, l);
+  var pickHex = rgbToHex(rgb[0], rgb[1], rgb[2]);
+  var dE = deltaE(hslToLab(h, s, l), S.target.lab);
+  var score = scoreFor(dE);
+
+  S.results.push({
+    name: S.target.name,
+    targetHex: S.target.hex,
+    pickHex: pickHex,
+    dE: dE,
+    score: score,
+    group: groupOf(S.target)
+  });
+
+  [els.hueSlider, els.satSlider, els.lightSlider].forEach(function(sl){ sl.disabled = true; });
+
+  // The panels split; nothing new appears and nothing is covered.
+  els.swActual.style.background = S.target.hex;
+  els.actualHex.textContent = S.target.hex.toUpperCase();
+  els.actualHsl.textContent = "hsl(" + S.target.h + ", " + S.target.s + "%, " + S.target.l + "%)";
+  els.capGuessLabel.textContent = "Yours";
+  els.stage.classList.add("split");
+  els.panelActual.classList.add("on");
+
+  els.railLabel.textContent = "Verdict";
+  els.hintText.classList.add("hidden");
+  els.verdictText.textContent = verdictFor(dE);
+  els.verdictText.classList.remove("hidden");
+  els.deltaText.textContent = score + " of 100 · ΔE " + dE.toFixed(1);
+  els.deltaText.classList.remove("hidden");
+
+  els.statLabel.textContent = "Match";
+  els.statVal.textContent = score + "%";
+  els.statVal.classList.remove("long");
+
+  if (S.mode === "comp"){
+    DB.comp.pos = Math.max(DB.comp.pos, S.index + 1);
+    DB.comp.sum += score;          // lifetime completionist average, across sittings
+    DB.comp.n += 1;
+    saveDB();
+    paintSpectrum(els.runCanvas, S.index + 1);
+  }
+
+  els.lockBtn.textContent = lastRound() ? "See results" : "Next round";
+  updateRunning();
+}
+
+function advance(){
+  S.index++;
+  if (S.index >= totalRounds()){ finish(); return; }
+  nextRound();
+}
+
+function updateRunning(){
+  if (!S.results.length){ els.running.innerHTML = "<b>—</b> average"; return; }
+  var avg = Math.round(S.results.reduce(function(a, r){ return a + r.score; }, 0) / S.results.length);
+  var n = S.results.length;
+  els.running.innerHTML = "<b>" + avg + "%</b> average" +
+    "<span class=\"rc\"> · " + n + " round" + (n === 1 ? "" : "s") + "</span>";
+}
+
+/* ---------- 15. the session's colour -----------------------------------------
+   The hue is the chroma-weighted circular mean of everything you mixed, so
+   it belongs to your run. Accuracy drives the rest: play well and it comes
+   out clear and bright, play badly and it comes out murky. Then the name
+   list says what you are.
+   --------------------------------------------------------------------------- */
+
+function sessionColour(results, avg){
+  var sx = 0, sy = 0;
+  results.forEach(function(r){
+    var lab = rgbToLab.apply(null, hexToRgb(r.pickHex));
+    var c = Math.hypot(lab[1], lab[2]);
+    var hr = Math.atan2(lab[2], lab[1]);
+    sx += Math.cos(hr) * c;
+    sy += Math.sin(hr) * c;
+  });
+  var hue = (sx || sy) ? (Math.atan2(sy, sx) * 180 / Math.PI + 360) % 360 : 30;
+  var t = clamp(avg / 100, 0, 1);
+  return [
+    Math.round(hue),
+    Math.round(14 + Math.pow(t, 1.4) * 74),
+    Math.round(30 + t * 32)
+  ];
+}
+
+function nearestNamed(h, s, l){
+  var lab = hslToLab(h, s, l);
+  var best = null, bd = Infinity;
+  for (var i = 0; i < COLORS.length; i++){
+    var d = deltaE(lab, COLORS[i].lab);
+    if (d < bd){ bd = d; best = COLORS[i]; }
+  }
+  return best;
+}
+
+/* ---------- 16. summary ------------------------------------------------------ */
+
+function finish(){
+  var n = S.results.length;
+  if (!n){ show(els.menu); paintModePanel(); return; }
+
+  var avg = Math.round(S.results.reduce(function(a, r){ return a + r.score; }, 0) / n);
+  var best = S.results.reduce(function(a, r){ return r.score > a.score ? r : a; });
+
+  recordGroups(S.results);
+  var recorded = false;
+  if (S.mode === "daily" && S.dailyCounts && n === S.queue.length){
+    recorded = recordDaily(S.dateKey, avg, n);
+  }
+  // a challenge best only counts if the session was actually finished
+  var newBest = false;
+  if (S.mode === "rounds" && n === S.rounds){
+    if (avg > (DB.bests[S.rounds] || 0)){ DB.bests[S.rounds] = avg; newBest = true; }
+  }
+  saveDB();
+
+  els.sumEyebrow.textContent =
+    S.mode === "daily" ? (recorded ? "Daily · " + S.dateKey : "Practice run · not recorded")
+    : S.mode === "comp" ? "Sitting complete"
+    : "Session complete";
+
+  els.sumAvg.textContent = avg;
+
+  var meta = "across <b>" + n + "</b> round" + (n === 1 ? "" : "s");
+  if (n > 1) meta += " · best was <b>" + best.score + "%</b> on " + escapeHtml(best.name);
+  if (S.mode === "comp"){
+    meta += "<br>cleared <b>" + DB.comp.pos.toLocaleString() + "</b> of " +
+            COLORS.length.toLocaleString() + " colours in all";
+  }
+  els.sumMeta.innerHTML = meta;
+
+  // your colour
+  var sc = sessionColour(S.results, avg);
+  var named = nearestNamed(sc[0], sc[1], sc[2]);
+  els.sumSwatch.style.background = named ? named.hex : "hsl(" + sc[0] + " " + sc[1] + "% " + sc[2] + "%)";
+  els.sumYouAre.innerHTML = named
+    ? "This session came out as <b>" + escapeHtml(named.name) + "</b> <code>" + named.hex.toUpperCase() + "</code>"
+    : "";
+
+  els.sumQuip.textContent = quipFor(avg);
+
+  // stats block
+  var st = dailyStats();
+  var sg = strongestGroup();
+  if (S.mode === "daily" && st){
+    els.sumStatsLabel.textContent = "Your daily record";
+    els.sumStatGrid.innerHTML =
+      stat("Days played", String(st.played)) +
+      stat("Daily average", st.avg + "%") +
+      stat("Best day", st.best + "%") +
+      stat("Current streak", st.streak + (st.streak === 1 ? " day" : " days")) +
+      stat("Longest streak", st.longest + (st.longest === 1 ? " day" : " days")) +
+      stat("Strongest", sg ? sg.g + " · " + Math.round(sg.avg) + "%" : "—");
+    els.sumStats.classList.remove("hidden");
+  } else if (S.mode === "rounds"){
+    els.sumStatsLabel.textContent = newBest ? "Your best runs · new best" : "Your best runs";
+    els.sumStatGrid.innerHTML =
+      [5, 10, 15].map(function(r){
+        return stat("Best of " + r, DB.bests[r] ? DB.bests[r] + "%" : "—");
+      }).join("") +
+      stat("Strongest", sg ? sg.g : "—");
+    els.sumStats.classList.remove("hidden");
+  } else if (S.mode === "comp"){
+    var cpct = COLORS.length ? (DB.comp.pos / COLORS.length * 100) : 0;
+    els.sumStatsLabel.textContent = "Completionist";
+    els.sumStatGrid.innerHTML =
+      stat("Complete", (cpct > 0 && cpct < 10 ? cpct.toFixed(1) : Math.round(cpct)) + "%") +
+      stat("Average score", DB.comp.n ? Math.round(DB.comp.sum / DB.comp.n) + "%" : "—") +
+      stat("Remaining", Math.max(0, COLORS.length - DB.comp.pos).toLocaleString()) +
+      stat("Strongest", sg ? sg.g : "—");
+    els.sumStats.classList.remove("hidden");
+  } else {
+    els.sumStats.classList.add("hidden");
+  }
+
+  var TABLE_CAP = 24;
+  var shown = S.results.length > TABLE_CAP ? S.results.slice(-TABLE_CAP) : S.results;
+  if (S.results.length > TABLE_CAP){
+    els.tableNote.textContent = "Showing the last " + TABLE_CAP + " of " + S.results.length + " rounds.";
+    els.tableNote.classList.remove("hidden");
+  } else {
+    els.tableNote.classList.add("hidden");
+  }
+
+  els.sumRows.innerHTML = shown.map(function(r){
+    return "<tr>" +
+      "<td class=\"name\">" +
+        "<span class=\"pair\"><i style=\"background:" + r.pickHex + "\"></i>" +
+        "<i style=\"background:" + r.targetHex + "\"></i></span>" +
+        escapeHtml(r.name) +
+      "</td>" +
+      "<td class=\"num dim\">" + r.dE.toFixed(1) + "</td>" +
+      "<td class=\"num\">" + r.score + "%</td>" +
+    "</tr>";
+  }).join("");
+
+  els.againBtn.textContent = S.mode === "comp" ? "Keep going" : "Play again";
+  show(els.summary);
+}
+
+/* ---------- 17. boot ---------------------------------------------------------- */
+
+buildWordmark();
+attachWordmarkPointer();
+paintGuess();
+
+loadColors().then(function(){
+  els.loading.classList.add("hidden");
+  els.startBtn.disabled = false;
+  els.dataNote.textContent = USING_FALLBACK
+    ? "The list could not be reached, so this session is running on a built-in sample of " +
+      COLORS.length + " colours; daily and completionist are unavailable until it loads."
+    : COLORS.length.toLocaleString() + " names loaded.";
+  var cs = $("compSub");
+  if (cs) cs.textContent = USING_FALLBACK
+    ? "Needs the full list"
+    : "All " + COLORS.length.toLocaleString() + " colours";
+  applyOfflineLimits();
+  paintModePanel();
+});
+
+window.addEventListener("resize", function(){
+  if (S.mode === "comp" && !els.play.classList.contains("hidden")){
+    paintSpectrum(els.runCanvas, S.index);
+  }
+  var ms = $("menuSpec");
+  if (ms) paintSpectrum(ms, DB.comp.pos);
+});
+</script>
+</body>
+</html>
