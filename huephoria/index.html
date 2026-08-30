@@ -131,8 +131,15 @@ button{font:inherit; color:inherit; background:none; border:none; cursor:pointer
 .chipstat{flex:0 0 auto; padding:9px 14px; text-align:right; border-left:1px solid var(--rule); display:flex; flex-direction:column; justify-content:center;}
 .chipstat b{font-weight:500; font-size:16px; display:block; font-variant-numeric:tabular-nums;}
 
-#stage{flex:1; position:relative; min-height:0; background:var(--mat); touch-action:none;}
-#view{display:block; width:100%; height:100%;}
+#stage{
+  flex:1; position:relative; min-height:0; background:var(--mat); touch-action:none;
+  user-select:none; -webkit-user-select:none; -webkit-touch-callout:none;
+}
+#view{
+  display:block; width:100%; height:100%;
+  user-select:none; -webkit-user-select:none; -webkit-touch-callout:none;
+  -webkit-user-drag:none;
+}
 #hint{
   position:absolute; left:50%; bottom:14px; transform:translateX(-50%);
   background:rgba(12,12,13,.82); padding:7px 13px; font-size:11px;
@@ -229,6 +236,15 @@ td.num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
       </div>
 
       <div class="field">
+        <span class="eyebrow">How close you have to be</span>
+        <div class="choices" id="tolChoices">
+          <button class="chip-btn" data-tol="easy" aria-pressed="false">Easy</button>
+          <button class="chip-btn" data-tol="medium" aria-pressed="true">Medium</button>
+          <button class="chip-btn" data-tol="hard" aria-pressed="false">Hard</button>
+        </div>
+      </div>
+
+      <div class="field">
         <span class="eyebrow">Your best</span>
         <div class="bests" id="bests"></div>
       </div>
@@ -299,19 +315,24 @@ td.num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
 
       <h3>How it's scored</h3>
       <p>Your colour is compared to the target with CIEDE2000, the international standard for colour difference. It's measured in ΔE, which is roughly the number of just-noticeable differences between two colours. It isn't a distance in RGB — it's tuned to how an eye actually reads a gap, so two dark browns can be far apart and two bright yellows can be almost the same.</p>
+      <p>Easy, Medium and Hard change nothing about the photographs. They change how much slack you get: how far off you can be before the points fall away. Easy gives you credit for finding the right colour; Hard makes you find the right <em>shade</em> of it.</p>
       <table class="scoretable">
-        <thead><tr><th>ΔE</th><th>Means</th><th class="num">Score</th></tr></thead>
+        <thead><tr><th>ΔE</th><th>Means</th><th class="num">Easy · Med · Hard</th></tr></thead>
         <tbody>
-          <tr><td>1</td><td>Invisible side by side</td><td class="num">97</td></tr>
-          <tr><td>2.3</td><td>The tolerance most print and paint work accepts</td><td class="num">91</td></tr>
-          <tr><td>5</td><td>A difference you'd notice if you looked</td><td class="num">76</td></tr>
-          <tr><td>12</td><td>Clearly not the same colour</td><td class="num">41</td></tr>
-          <tr><td>20</td><td>A different colour</td><td class="num">17</td></tr>
-          <tr><td>35+</td><td>A different colour entirely</td><td class="num">2</td></tr>
+          <tr><td>1</td><td>Invisible side by side</td><td class="num">99 · 97 · 94</td></tr>
+          <tr><td>2.3</td><td>What print and paint work accepts</td><td class="num">96 · 91 · 83</td></tr>
+          <tr><td>5</td><td>You'd notice if you looked</td><td class="num">88 · 76 · 62</td></tr>
+          <tr><td>12</td><td>Clearly not the same colour</td><td class="num">59 · 41 · 24</td></tr>
+          <tr><td>20</td><td>A different colour</td><td class="num">31 · 17 · 7</td></tr>
+          <tr><td>35+</td><td>A different colour entirely</td><td class="num">6 · 2 · 0</td></tr>
         </tbody>
       </table>
       <p><b>Where you clicked doesn't matter — only the colour you landed on.</b> If the target colour appears in three places in the photograph, all three are equally right. The marked target point is just one place it's known to be.</p>
       <p>Colours are averaged over a small disc rather than read from a single pixel, so one stray speck of JPEG noise can't decide a round.</p>
+      <p>When you lock in, the photograph drains to grey except for the colour you were hunting, which stays at full strength everywhere it occurs. The width of that band is the tolerance you're playing at, so the reveal shows you exactly how much room you had.</p>
+
+      <h3>The colours themselves</h3>
+      <p>Nothing is pre-set. Each round the photograph is analysed and a colour is drawn from it at random, weighted towards regions that are vivid and big enough to find without being the entire background. The same photograph will hand you something different next time.</p>
 
       <h3>Your colour</h3>
       <p>At the end, the session resolves into a single colour and you're told what it's called. Its hue comes from the average of everything you actually picked, so it belongs to that run. Its lightness and saturation come from your accuracy: play well and it arrives clear and vivid, play badly and it comes out murky.</p>
@@ -630,13 +651,13 @@ function csvToLevels(text, base){
    ===================================================================== */
 const S = {
   levels: [], packName: '',
-  rounds: 5,
+  rounds: 5, tolerance: 'medium',
   queue: [], roundIndex: 0, results: [],
   level: null, targetLab: null, targetName: '',
   img: null, work: null, workData: null,
   marker: null, dragging: false, liveHex: null,
   zoom: 8, zoomOptions: [4, 8, 16], assist: false,
-  locked: false, lastResult: null,
+  locked: false, lastResult: null, highlight: null,
   fit: {scale:1, ox:0, oy:0, w:0, h:0}
 };
 
@@ -804,7 +825,196 @@ function sampleDisc(x, y, radius = 2){
 }
 
 /* =====================================================================
-   7. RENDER
+   6b. CHOOSING A TARGET
+   Rather than the same stored colour every time, each round pulls a
+   fresh one out of the photograph. The image is clustered in Lab, the
+   clusters are weighted by vividness and by occupying a sensible slice
+   of the frame — not the whole sky, not four stray pixels — and one is
+   drawn at random. So the same photograph is a different round each
+   time you meet it, and a pack needs nothing from you but filenames.
+   ===================================================================== */
+const RANDOM_TARGETS = true;   // a fresh colour from the photo each round
+const TARGET_CLUSTERS = 9;
+
+function chooseTarget(work){
+  const long = Math.max(work.width, work.height);
+  const k = Math.min(1, 120 / long);
+  const w = Math.max(8, Math.round(work.width * k));
+  const h = Math.max(8, Math.round(work.height * k));
+  const cv = document.createElement('canvas');
+  cv.width = w; cv.height = h;
+  const c = cv.getContext('2d', {willReadFrequently:true});
+  c.drawImage(work, 0, 0, w, h);
+  const px = c.getImageData(0, 0, w, h).data;
+  const n = w * h;
+
+  const labs = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++){
+    const lab = rgbToLab(px[i*4], px[i*4+1], px[i*4+2]);
+    labs[i*3] = lab[0]; labs[i*3+1] = lab[1]; labs[i*3+2] = lab[2];
+  }
+
+  // k-means++ seeding, then a dozen passes — plenty at this resolution
+  const K = TARGET_CLUSTERS;
+  const cen = new Float64Array(K * 3);
+  let seed = Math.floor(Math.random() * n);
+  cen[0] = labs[seed*3]; cen[1] = labs[seed*3+1]; cen[2] = labs[seed*3+2];
+  const near = new Float64Array(n).fill(Infinity);
+  for (let j = 1; j < K; j++){
+    let total = 0;
+    for (let i = 0; i < n; i++){
+      const dl = labs[i*3] - cen[(j-1)*3], da = labs[i*3+1] - cen[(j-1)*3+1], db = labs[i*3+2] - cen[(j-1)*3+2];
+      const dd = dl*dl + da*da + db*db;
+      if (dd < near[i]) near[i] = dd;
+      total += near[i];
+    }
+    let t = Math.random() * total, pick = 0;
+    for (let i = 0; i < n; i++){ t -= near[i]; if (t <= 0){ pick = i; break; } }
+    cen[j*3] = labs[pick*3]; cen[j*3+1] = labs[pick*3+1]; cen[j*3+2] = labs[pick*3+2];
+  }
+
+  const assign = new Int16Array(n);
+  const counts = new Int32Array(K);
+  for (let iter = 0; iter < 12; iter++){
+    counts.fill(0);
+    const sums = new Float64Array(K * 3);
+    for (let i = 0; i < n; i++){
+      let bi = 0, bd = Infinity;
+      for (let j = 0; j < K; j++){
+        const dl = labs[i*3] - cen[j*3], da = labs[i*3+1] - cen[j*3+1], db = labs[i*3+2] - cen[j*3+2];
+        const dd = dl*dl + da*da + db*db;
+        if (dd < bd){ bd = dd; bi = j; }
+      }
+      assign[i] = bi; counts[bi]++;
+      sums[bi*3] += labs[i*3]; sums[bi*3+1] += labs[i*3+1]; sums[bi*3+2] += labs[i*3+2];
+    }
+    for (let j = 0; j < K; j++){
+      if (!counts[j]) continue;
+      cen[j*3] = sums[j*3]/counts[j];
+      cen[j*3+1] = sums[j*3+1]/counts[j];
+      cen[j*3+2] = sums[j*3+2]/counts[j];
+    }
+  }
+
+  // Weight the draw: vivid is more interesting than grey, and a region
+  // wants to be findable without being the entire background.
+  const pool = [];
+  for (let j = 0; j < K; j++){
+    const area = counts[j] / n;
+    if (area < 0.008 || area > 0.42) continue;
+    const chroma = Math.hypot(cen[j*3+1], cen[j*3+2]);
+    pool.push({j, weight: (0.25 + chroma / 55) * Math.pow(area, 0.35)});
+  }
+  if (!pool.length){
+    for (let j = 0; j < K; j++) if (counts[j]) pool.push({j, weight: counts[j] / n});
+  }
+  if (!pool.length) return {x: 0.5, y: 0.5};
+
+  let roll = Math.random() * pool.reduce((a, p) => a + p.weight, 0);
+  let chosen = pool[pool.length - 1];
+  for (const p of pool){ roll -= p.weight; if (roll <= 0){ chosen = p; break; } }
+  const j = chosen.j;
+
+  // Representative point: the member pixel nearest the cluster's centre of mass
+  let sx = 0, sy = 0;
+  for (let i = 0; i < n; i++) if (assign[i] === j){ sx += i % w; sy += (i / w) | 0; }
+  const cx = sx / counts[j], cy = sy / counts[j];
+  let bx = cx, by = cy, bd = Infinity;
+  for (let i = 0; i < n; i++){
+    if (assign[i] !== j) continue;
+    const x = i % w, y = (i / w) | 0;
+    const dd = (x - cx)*(x - cx) + (y - cy)*(y - cy);
+    if (dd < bd){ bd = dd; bx = x; by = y; }
+  }
+  return refinePoint(work, (bx + 0.5) / w, (by + 0.5) / h);
+}
+
+/** Nudge onto the flattest spot nearby, so the target isn't a lone edge
+ *  pixel that exists in exactly one place and can't be hit twice. */
+function refinePoint(work, nx, ny){
+  const W = work.width, H = work.height;
+  const span = Math.round(Math.min(W, H) * 0.03);
+  let bestX = nx * W, bestY = ny * H, bestVar = Infinity;
+  for (let dy = -2; dy <= 2; dy++){
+    for (let dx = -2; dx <= 2; dx++){
+      const x = Math.max(3, Math.min(W - 4, nx * W + dx * span / 2));
+      const y = Math.max(3, Math.min(H - 4, ny * H + dy * span / 2));
+      const centre = sampleDisc(x, y, 2);
+      let variance = 0;
+      for (const [ox, oy] of [[-3,0],[3,0],[0,-3],[0,3]]){
+        const s = sampleDisc(x + ox, y + oy, 1);
+        variance += Math.abs(s[0]-centre[0]) + Math.abs(s[1]-centre[1]) + Math.abs(s[2]-centre[2]);
+      }
+      if (variance < bestVar){ bestVar = variance; bestX = x; bestY = y; }
+    }
+  }
+  return {x: bestX / W, y: bestY / H};
+}
+/* =====================================================================
+   7b. THE REVEAL
+   On lock-in the photograph drains to grey except for the colour you
+   were hunting, which stays in full strength wherever it occurs. It
+   answers the question the marker can't: not "where was it" but "where
+   was it all". The band shown is the tolerance of the mode you're
+   playing — on Easy it blooms across half the frame, on Hard it narrows
+   to the few places that would actually have scored.
+   ===================================================================== */
+function buildHighlight(){
+  const thr = deltaEForScore(80);
+  const fade = thr * 0.8;
+  const long = Math.max(S.work.width, S.work.height);
+  const k = Math.min(1, 340 / long);
+  const mw = Math.max(8, Math.round(S.work.width * k));
+  const mh = Math.max(8, Math.round(S.work.height * k));
+
+  const small = document.createElement('canvas');
+  small.width = mw; small.height = mh;
+  const sc = small.getContext('2d', {willReadFrequently:true});
+  sc.drawImage(S.work, 0, 0, mw, mh);
+  const im = sc.getImageData(0, 0, mw, mh);
+  const p = im.data;
+  for (let i = 0; i < mw * mh; i++){
+    const dE = deltaE00(rgbToLab(p[i*4], p[i*4+1], p[i*4+2]), S.targetLab);
+    let a;
+    if (dE <= thr) a = 255;
+    else if (dE >= thr + fade) a = 0;
+    else a = Math.round(255 * (1 - (dE - thr) / fade));
+    p[i*4] = 255; p[i*4+1] = 255; p[i*4+2] = 255; p[i*4+3] = a;
+  }
+  sc.putImageData(im, 0, 0);
+
+  // Full-resolution colour, soft low-resolution edges.
+  const hi = document.createElement('canvas');
+  hi.width = S.work.width; hi.height = S.work.height;
+  const hc = hi.getContext('2d');
+  hc.drawImage(S.work, 0, 0);
+  hc.globalCompositeOperation = 'destination-in';
+  hc.imageSmoothingEnabled = true;
+  hc.imageSmoothingQuality = 'high';
+  hc.drawImage(small, 0, 0, hi.width, hi.height);
+  return hi;
+}
+
+function drawPhoto(){
+  const {ox, oy, w, h} = {ox:S.fit.ox, oy:S.fit.oy, w:S.fit.w, h:S.fit.h};
+  if (S.locked && S.highlight){
+    if (typeof ctx.filter === 'string'){
+      ctx.filter = 'grayscale(1) brightness(0.42)';
+      ctx.drawImage(S.work, ox, oy, w, h);
+      ctx.filter = 'none';
+    } else {                       // older Safari: dim without desaturating
+      ctx.drawImage(S.work, ox, oy, w, h);
+      ctx.fillStyle = 'rgba(10,10,11,.68)';
+      ctx.fillRect(ox, oy, w, h);
+    }
+    ctx.drawImage(S.highlight, ox, oy, w, h);
+  } else {
+    ctx.drawImage(S.work, ox, oy, w, h);
+  }
+}
+
+/* =====================================================================
+   7c. RENDER
    ===================================================================== */
 function resizeCanvas(){
   const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
@@ -834,7 +1044,7 @@ function draw(){
   ctx.clearRect(0, 0, r.width, r.height);
   ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--mat').trim() || '#7d7d7d';
   ctx.fillRect(0, 0, r.width, r.height);
-  ctx.drawImage(S.work, S.fit.ox, S.fit.oy, S.fit.w, S.fit.h);
+  drawPhoto();
 
   if (S.locked && S.lastResult){
     drawMarker(toScreen(S.lastResult.truth), 'truth');
@@ -969,6 +1179,7 @@ view.addEventListener('pointermove', ev => {
   ev.preventDefault();
   setMarker(toImage(stagePoint(ev)));
 });
+view.addEventListener('contextmenu', ev => ev.preventDefault());
 const endDrag = () => { S.dragging = false; };
 view.addEventListener('pointerup', endDrag);
 view.addEventListener('pointercancel', endDrag);
@@ -1003,24 +1214,41 @@ $('assistBtn').addEventListener('click', () => {
 
 /* =====================================================================
    9. SCORING
-   Between the original curve, which handed out 88 for a visible
-   mismatch, and the tightened one, which was miserly about anything
-   short of perfect. This sits in the middle: getting into the right
-   colour is worth something, but the last few ΔE are where the points
-   actually live.
-       ΔE   1 → 97    ΔE   5 → 76    ΔE  20 → 17
-       ΔE   2 → 92    ΔE   8 → 59    ΔE  35 →  2
-       ΔE   3 → 87    ΔE  12 → 41
+   The difficulty of a round is no longer about the picture — it's about
+   how tight the tolerance is. Same curve, three widths. On Easy you get
+   credit for being in the right colour; on Hard the points live in the
+   last few ΔE, around where a trained eye and a print shop actually
+   argue about matches.
+              ΔE 1    ΔE 5    ΔE 12   ΔE 20
+      Easy      99      88       59      31
+      Medium    97      76       41      17
+      Hard      94      62       24       7
    ===================================================================== */
-function scoreFor(dE){ return Math.round(100 * Math.exp(-Math.pow(dE / 13, 1.35))); }
+const TOLERANCE = {
+  easy:   {k:18, p:1.60},
+  medium: {k:13, p:1.35},
+  hard:   {k:9,  p:1.25}
+};
+
+function scoreFor(dE){
+  const t = TOLERANCE[S.tolerance];
+  return Math.round(100 * Math.exp(-Math.pow(dE / t.k, t.p)));
+}
+
+/** The ΔE at which the current mode would award a given score. */
+function deltaEForScore(score){
+  const t = TOLERANCE[S.tolerance];
+  return t.k * Math.pow(-Math.log(score / 100), 1 / t.p);
+}
 
 function verdictFor(dE){
-  if (dE < 1.2)  return 'Indistinguishable';
-  if (dE < 2.6)  return 'Within a whisker';
-  if (dE < 5)    return 'A very good match';
-  if (dE < 9)    return 'Close';
-  if (dE < 16)   return 'Off by a shade';
-  if (dE < 28)   return 'Wrong neighbourhood';
+  const s = TOLERANCE[S.tolerance].k / 13;   // bands widen and tighten with the mode
+  if (dE < 1.2 * s)  return 'Indistinguishable';
+  if (dE < 2.6 * s)  return 'Within a whisker';
+  if (dE < 5   * s)  return 'A very good match';
+  if (dE < 9   * s)  return 'Close';
+  if (dE < 16  * s)  return 'Off by a shade';
+  if (dE < 28  * s)  return 'Wrong neighbourhood';
   return 'A different colour entirely';
 }
 
@@ -1065,7 +1293,7 @@ async function startSession(){
 
 async function nextRound(){
   $('reveal').classList.add('hidden');
-  S.locked = false; S.marker = null; S.lastResult = null; S.liveHex = null;
+  S.locked = false; S.marker = null; S.lastResult = null; S.liveHex = null; S.highlight = null;
   $('lockBtn').disabled = true;
   $('lockBtn').textContent = 'Lock in';
   $('hint').style.opacity = '1';
@@ -1094,14 +1322,17 @@ async function nextRound(){
     return;
   }
 
-  let hex = level.hex;
-  if (!hex){
-    const rgb = sampleDisc(level.x * S.work.width, level.y * S.work.height, 2);
-    hex = rgb2hex(rgb[0], rgb[1], rgb[2]);
-  }
-  S.level = Object.assign({}, level, {hex});
+  // A fresh colour out of this photograph, every time it comes up.
+  const point = RANDOM_TARGETS || !isFinite(level.x) || !isFinite(level.y)
+    ? chooseTarget(S.work)
+    : {x: level.x, y: level.y};
+  const rgb = sampleDisc(point.x * S.work.width, point.y * S.work.height, 2);
+  const hex = (!RANDOM_TARGETS && level.hex) ? level.hex : rgb2hex(rgb[0], rgb[1], rgb[2]);
+
+  S.level = Object.assign({}, level, {hex, x: point.x, y: point.y});
   S.targetLab = rgbToLab(...hex2rgb(hex));
   S.targetName = nameOf(S.targetLab);
+  S.highlight = null;
 
   $('targetSwatch').style.background = hex;
   $('targetName').textContent = S.targetName;
@@ -1128,6 +1359,8 @@ function lockIn(){
     level: S.level, dE, score, pickHex, pickName,
     targetHex: S.level.hex, targetName: S.targetName
   });
+
+  try { S.highlight = buildHighlight(); } catch(e){ S.highlight = null; }
 
   draw();
   showReveal();
@@ -1252,7 +1485,7 @@ function gradeColour(avg, results){
 /* =====================================================================
    10c. PERSONAL BESTS — one per session length
    ===================================================================== */
-const BEST_KEY = 'huephoria.bests.v1';
+const BEST_KEY = 'huephoria.bests.v2';
 function loadBests(){
   try { return JSON.parse(localStorage.getItem(BEST_KEY)) || {}; }
   catch(e){ return {}; }
@@ -1260,13 +1493,16 @@ function loadBests(){
 function saveBests(b){
   try { localStorage.setItem(BEST_KEY, JSON.stringify(b)); } catch(e){ /* private mode, never mind */ }
 }
+const bestKey = (rounds, tol) => rounds + ':' + tol;
 function renderBests(){
   const b = loadBests();
-  $('bests').innerHTML = [5,10,15].map(n => `
-    <div class="best">
+  $('bests').innerHTML = [5,10,15].map(n => {
+    const v = b[bestKey(n, S.tolerance)];
+    return `<div class="best">
       <span class="eyebrow">${n} rounds</span>
-      <b>${b[n] != null ? b[n] + '%' : '—'}</b>
-    </div>`).join('');
+      <b>${v != null ? v + '%' : '—'}</b>
+    </div>`;
+  }).join('');
 }
 
 function endSession(){
@@ -1283,12 +1519,14 @@ function endSession(){
   $('quip').textContent = quipFor(avg);
 
   const bests = loadBests();
-  const prior = bests[S.rounds];
+  const key = bestKey(S.rounds, S.tolerance);
+  const prior = bests[key];
   const isRecord = S.results.length === S.rounds && (prior == null || avg > prior);
-  if (isRecord){ bests[S.rounds] = avg; saveBests(bests); }
+  if (isRecord){ bests[key] = avg; saveBests(bests); }
+  const modeName = S.tolerance[0].toUpperCase() + S.tolerance.slice(1);
   $('recordFlag').textContent = isRecord
-    ? (prior == null ? 'First run at this length' : `New best — up from ${prior}%`)
-    : (prior != null ? `Your best at ${S.rounds} rounds is ${prior}%` : '');
+    ? (prior == null ? `First run at ${S.rounds} rounds on ${modeName}` : `New best on ${modeName} — up from ${prior}%`)
+    : (prior != null ? `Your best at ${S.rounds} rounds on ${modeName} is ${prior}%` : '');
 
   $('summarySub').textContent =
     `${total} of ${S.results.length * 100} points · best round ${bestScore}% · closest ΔE ${isFinite(best) ? best.toFixed(2) : '—'}`;
@@ -1326,6 +1564,15 @@ document.querySelectorAll('#modeChoices .chip-btn').forEach(b => {
     document.querySelectorAll('#modeChoices .chip-btn').forEach(o => o.setAttribute('aria-pressed', 'false'));
     b.setAttribute('aria-pressed', 'true');
     S.rounds = parseInt(b.dataset.mode, 10);
+  });
+});
+
+document.querySelectorAll('#tolChoices .chip-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('#tolChoices .chip-btn').forEach(o => o.setAttribute('aria-pressed', 'false'));
+    b.setAttribute('aria-pressed', 'true');
+    S.tolerance = b.dataset.tol;
+    renderBests();
   });
 });
 
