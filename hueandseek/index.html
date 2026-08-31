@@ -1,0 +1,1697 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>Hue and Seek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+/* ---------------------------------------------------------------
+   HUE AND SEEK
+   The playing interface carries no colour of its own. Every hue
+   inside the frame is either the target chip, the photograph, or
+   your own selection — a coloured UI would shift your reading of
+   the swatch through simultaneous contrast. The title card is the
+   one place that rule doesn't apply, because nothing is being
+   judged there.
+   --------------------------------------------------------------- */
+:root{
+  --ink:      #0c0c0d;
+  --surround: #08080a;
+  --surface:  #141416;
+  --raise:    #1c1c1f;
+  --rule:     #2b2b2f;
+  --dim:      #74747a;
+  --text:     #dcdcd8;
+  --mat:      #7d7d7d;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{height:100%; margin:0;}
+body{
+  background:var(--surround); color:var(--text);
+  font-family:var(--mono); font-size:13px; line-height:1.45;
+  overscroll-behavior:none; touch-action:manipulation;
+  display:flex; align-items:center; justify-content:center; padding:0;
+}
+.frame{
+  width:100%; height:100%; background:var(--ink);
+  display:flex; flex-direction:column; overflow:hidden; position:relative;
+}
+/* Once there's room, the game stops being a page and becomes an object
+   sitting on a surface: a near-square window, not a widescreen band. */
+@media (min-width:900px) and (min-height:680px){
+  body{padding:clamp(16px, 3vmin, 34px);}
+  .frame{
+    width:min(880px, 100%); height:min(760px, 100%);
+    border:1px solid var(--rule);
+    box-shadow:0 0 0 1px #000, 0 24px 64px rgba(0,0,0,.6);
+  }
+}
+
+button{font:inherit; color:inherit; background:none; border:none; cursor:pointer;}
+:focus-visible{outline:1px solid var(--text); outline-offset:2px;}
+.hidden{display:none !important;}
+.eyebrow{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--dim);}
+.btn{
+  border:1px solid var(--rule); background:var(--raise);
+  padding:11px 16px; letter-spacing:.06em; font-size:12px;
+  text-transform:uppercase; transition:border-color .15s, background .15s;
+}
+.btn:hover:not(:disabled){border-color:var(--dim);}
+.btn:disabled{opacity:.35; cursor:default;}
+.btn.primary{background:var(--text); color:var(--ink); border-color:var(--text); font-weight:600;}
+.btn.primary:hover{background:#fff; border-color:#fff;}
+.note{color:var(--dim); font-size:11px; line-height:1.5;}
+
+/* ===================== TITLE CARD ===================== */
+#menu{flex:1; min-height:0; padding:14px; display:flex;}
+.card{
+  flex:1; min-height:0; overflow-y:auto;
+  border:1px solid var(--rule); background:var(--surface);
+  padding:20px 24px 18px; display:flex; flex-direction:column;
+}
+.card-top{
+  display:flex; justify-content:space-between; gap:12px;
+  padding-bottom:14px; border-bottom:1px solid var(--rule);
+}
+.wordmark{
+  font-family:var(--serif); font-size:clamp(38px, 9.6vw, 74px); line-height:.96;
+  letter-spacing:-.015em; margin:24px 0 12px; user-select:none; cursor:default;
+}
+.wordmark span{display:inline-block;}
+.tagline{
+  font-family:var(--serif); font-style:italic;
+  font-size:clamp(21px,5.4vw,27px); line-height:1.2;
+  margin:14px 0 6px;
+}
+.instruction{color:var(--dim); margin:0 0 26px;}
+
+/* ===================== RULES ===================== */
+#rules{flex:1; min-height:0; padding:14px; display:flex;}
+.rulesHead{font-family:var(--serif); font-size:clamp(28px,7vw,40px); font-weight:400; line-height:1.05; margin:8px 0 22px;}
+#rules h3{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--dim); font-weight:400; margin:24px 0 8px; padding-top:14px; border-top:1px solid var(--rule);}
+#rules p{margin:0 0 12px; max-width:62ch; line-height:1.6;}
+#rules ul{margin:0 0 12px; padding-left:18px; max-width:62ch;}
+#rules li{margin-bottom:8px; line-height:1.6;}
+#rules b{font-weight:500;}
+#rules em{font-style:italic; color:#fff;}
+.scoretable{margin:14px 0 16px; max-width:62ch;}
+.scoretable td{padding:7px 0; color:var(--dim);}
+.scoretable td:first-child{color:var(--text); font-variant-numeric:tabular-nums; width:56px;}
+.scoretable td.num{color:var(--text);}
+.field{margin-bottom:20px;}
+.field > .eyebrow{display:block; margin-bottom:9px;}
+.choices{display:flex; flex-wrap:wrap; gap:8px;}
+.chip-btn{border:1px solid var(--rule); background:var(--raise); padding:9px 14px; font-size:12px; letter-spacing:.04em;}
+.chip-btn[aria-pressed="true"]{background:var(--text); color:var(--ink); border-color:var(--text);}
+.card-foot{
+  margin-top:auto; padding-top:16px; border-top:1px solid var(--rule);
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+}
+#credits{width:100%; margin:0; font-size:11px; color:var(--dim);}
+
+/* ===================== PLAY ===================== */
+#play{flex:1; display:flex; flex-direction:column; min-height:0;}
+.topbar{flex:0 0 auto; display:flex; align-items:center; gap:12px; padding:6px 12px; border-bottom:1px solid var(--rule);}
+#homeBtn{font-family:var(--serif); font-size:19px; line-height:1; padding:3px 1px; border-bottom:1px solid transparent;}
+#homeBtn:hover{border-bottom-color:var(--dim);}
+.topbar .spacer{flex:1;}
+.running{font-size:11px; color:var(--dim); font-variant-numeric:tabular-nums; white-space:nowrap;}
+.running b{color:var(--text); font-weight:500; font-size:13px;}
+
+/* The header is a scoreboard: target on the left, yours on the right, the
+   two chips meeting at a butt joint in the centre like the split loupe.
+   Both sides hold their place for the whole round — your half is simply
+   empty until you answer, blending into the rail so the target chip reads
+   alone while the layout stays balanced. Nothing moves when the answer
+   arrives; the blank half just fills in.
+   The rail and the dock are fixed height, so the photograph keeps exactly
+   the same dimensions from the first round to the last. */
+.chiprail{
+  display:flex; align-items:center; height:88px; flex:0 0 auto;
+  border-bottom:1px solid var(--rule); background:var(--surface);
+}
+.railSide{flex:1 1 0; min-width:0; padding:0 18px;}
+.railSide.left{text-align:right;}
+.railSide.right{text-align:left;}
+.railSide .tag{font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--dim);}
+.railSide .nm{
+  font-family:var(--serif); font-size:clamp(20px,5.4vw,31px); line-height:1.08;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;
+}
+.railSide .hx{font-size:10.5px; letter-spacing:.12em; color:var(--dim); margin-top:2px;}
+/* your side stays quiet until there's something in it */
+.chiprail:not(.revealed) .railSide.right .nm,
+.chiprail:not(.revealed) .railSide.right .hx{color:#3a3a3e;}
+.swatchPair{flex:0 0 auto; width:180px; height:100%; display:flex;}
+.swatchPair > div{flex:1 1 0; height:100%;}
+#swTarget{background:#888; transition:background .3s ease;}
+#swPick{background:var(--surface); transition:background .3s ease;}
+/* Hard mode: no chip, no hex — the name is all you get until you answer.
+   !important because the round sets the swatch colour as an inline style,
+   and an inline style beats an ordinary rule. Both chips fill on reveal. */
+.chiprail.blind:not(.revealed) #swTarget{background:var(--surface) !important;}
+.chiprail.blind:not(.revealed) .railSide.left .hx{visibility:hidden;}
+
+#dockVerdict{flex:0 0 auto; display:flex; flex-direction:column; justify-content:center; min-width:0;}
+#dockVerdict .vd{font-family:var(--serif); font-size:20px; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+#dockVerdict .de{font-size:10.5px; color:var(--dim); letter-spacing:.06em; margin-top:2px;}
+
+#stage{
+  flex:1; position:relative; min-height:0; background:var(--mat); touch-action:none;
+  user-select:none; -webkit-user-select:none; -webkit-touch-callout:none;
+}
+#view{
+  display:block; width:100%; height:100%;
+  user-select:none; -webkit-user-select:none; -webkit-touch-callout:none;
+  -webkit-user-drag:none;
+}
+/* The prompt lives in the dock's dead space rather than floating over the
+   photograph — the one thing the player is meant to be studying. */
+.dockspace{flex:1; min-width:0; padding:0 14px; overflow:hidden;}
+#hint{font-size:11px; color:var(--dim); letter-spacing:.03em; white-space:nowrap; transition:opacity .3s;}
+
+#stageLoading{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  background:var(--mat); color:#2e2e2e; font-size:11px; letter-spacing:.16em;
+  text-transform:uppercase; z-index:5;
+}
+.zoomwrap{flex:0 0 auto; display:flex; flex-direction:column; gap:3px; align-items:flex-start;}
+.dock{flex:0 0 auto; border-top:1px solid var(--rule); background:var(--surface); padding:0 14px; height:64px; display:flex; align-items:center; gap:12px;}
+#zoomBtn,#assistBtn{border:1px solid var(--rule); background:var(--raise); padding:7px 10px; font-size:11px; min-width:46px;}
+#zoomBtn:disabled{opacity:.35; cursor:default;}
+#assistBtn[aria-pressed="true"]{background:var(--text); color:var(--ink); border-color:var(--text);}
+#lockBtn{min-width:130px;}
+
+
+/* ===================== SUMMARY ===================== */
+#summary{flex:1; min-height:0; padding:14px; display:flex;}
+.sheet{flex:1; min-height:0; overflow-y:auto; border:1px solid var(--rule); background:var(--surface); padding:20px 24px 18px;}
+.bests{display:flex; gap:8px;}
+.best{flex:0 0 auto; min-width:88px; border:1px solid var(--rule); background:var(--raise); padding:7px 10px 8px;}
+.best b{display:block; font-weight:500; font-size:17px; font-variant-numeric:tabular-nums; margin-top:2px;}
+
+.grade{display:flex; gap:16px; align-items:stretch; margin:14px 0 16px;}
+.gradeSw{flex:0 0 auto; width:96px; align-self:stretch; min-height:96px; border:1px solid var(--rule);}
+.gradeText{display:flex; flex-direction:column; justify-content:center; min-width:0;}
+.gradeName{font-family:var(--serif); font-size:clamp(34px,9vw,54px); line-height:1; margin:4px 0 6px;}
+.gradeMeta{font-size:11px; color:var(--dim); letter-spacing:.06em;}
+.gradeMeta b{color:var(--text); font-weight:500; font-size:13px;}
+.quip{font-size:14px; line-height:1.5; margin:0 0 14px; max-width:52ch;}
+.record{font-size:11px; letter-spacing:.06em; color:var(--dim); margin-bottom:4px;}
+table{width:100%; border-collapse:collapse; margin:20px 0; font-size:12px;}
+th{text-align:left; font-weight:400; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); padding:0 0 7px; border-bottom:1px solid var(--rule);}
+td{padding:8px 0; border-bottom:1px solid var(--rule); vertical-align:middle;}
+td.num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
+.pair{display:inline-flex; vertical-align:middle; margin-right:8px; border:1px solid var(--rule);}
+.pair i{display:block; width:16px; height:16px;}
+.sheet-actions{display:flex; gap:10px; flex-wrap:wrap;}
+
+#loading{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:var(--ink); z-index:20; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--dim);}
+#toast{position:absolute; left:50%; bottom:20px; transform:translateX(-50%); background:var(--raise); border:1px solid var(--rule); padding:10px 16px; font-size:11.5px; max-width:88%; z-index:30;}
+
+@media (max-width:460px){
+  .chiprail{height:76px;}
+  .swatchPair{width:112px;}
+  .railSide{padding:0 11px;}
+  .railSide .hx{display:none;}
+  #hint{display:none;}
+  #dockVerdict .vd{font-size:17px;}
+  #menu,#summary{padding:0;}
+  .card,.sheet{border:0; padding:18px 16px;}
+  #lockBtn{min-width:0; padding:11px 12px;}
+  #zoomBtn,#assistBtn{min-width:0; padding:6px 7px;}
+  .dock{gap:7px; padding-left:10px; padding-right:10px;}
+}
+@media (prefers-reduced-motion:reduce){ *{animation:none !important; transition:none !important;} }
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <div id="loading">Mixing pigments…</div>
+
+  <!-- ===================== TITLE CARD ===================== -->
+  <section id="menu" class="hidden">
+    <div class="card" id="card">
+      <div class="card-top">
+        <span class="eyebrow">A colour matching game</span>
+        <span class="eyebrow">Melbourne</span>
+      </div>
+
+      <h1 class="wordmark" id="wordmark" aria-label="Hue and Seek"></h1>
+
+      <p class="tagline">A game of hueristics.</p>
+      <p class="instruction">Find the colour in the photo.</p>
+
+      <div class="field">
+        <span class="eyebrow">Session length</span>
+        <div class="choices" id="modeChoices">
+          <button class="chip-btn" data-mode="5" aria-pressed="true">5 rounds</button>
+          <button class="chip-btn" data-mode="10" aria-pressed="false">10 rounds</button>
+          <button class="chip-btn" data-mode="15" aria-pressed="false">15 rounds</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="eyebrow">How much help you get</span>
+        <div class="choices" id="tolChoices">
+          <button class="chip-btn" data-tol="easy" aria-pressed="false">Easy</button>
+          <button class="chip-btn" data-tol="medium" aria-pressed="true">Medium</button>
+          <button class="chip-btn" data-tol="hard" aria-pressed="false">Hard</button>
+        </div>
+        <p class="note" id="modeNote"></p>
+      </div>
+
+      <div class="field">
+        <span class="eyebrow">Your best</span>
+        <div class="bests" id="bests"></div>
+      </div>
+
+      <div class="card-foot">
+        <button class="btn primary" id="startBtn">Begin</button>
+        <button class="btn" id="rulesBtn">How it works</button>
+        <p class="note" id="credits"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PLAY ===================== -->
+  <section id="play" class="hidden">
+    <div class="topbar">
+      <button id="homeBtn" title="Back to the title card">Hue and Seek</button>
+      <span class="spacer"></span>
+      <span class="running" id="running">—</span>
+    </div>
+
+    <div class="chiprail" id="chiprail">
+      <div class="railSide left">
+        <div class="tag">Target</div>
+        <div class="nm" id="targetName">—</div>
+        <div class="hx" id="targetHex">#000000</div>
+      </div>
+      <div class="swatchPair">
+        <div id="swTarget"></div>
+        <div id="swPick"></div>
+      </div>
+      <div class="railSide right">
+        <div class="tag">Yours</div>
+        <div class="nm" id="rvPickName">—</div>
+        <div class="hx" id="rvPickHex">—</div>
+      </div>
+    </div>
+
+    <div id="stage">
+      <canvas id="view"></canvas>
+      <div id="stageLoading" class="hidden">Fetching the photograph…</div>
+    </div>
+
+    <div class="dock">
+      <div class="zoomwrap" id="zoomWrap">
+        <span class="eyebrow">Zoom</span>
+        <button id="zoomBtn">8×</button>
+      </div>
+      <div class="zoomwrap" id="loupeWrap">
+        <span class="eyebrow">Loupe</span>
+        <button id="assistBtn" aria-pressed="false">Photo</button>
+      </div>
+      <div id="dockVerdict" class="hidden">
+        <div class="vd" id="verdictText"></div>
+        <div class="de" id="deltaText"></div>
+      </div>
+      <div class="dockspace"><span id="hint">Tap the photo to drop a marker</span></div>
+      <button class="btn primary" id="lockBtn" disabled>Lock in</button>
+    </div>
+  </section>
+
+  <!-- ===================== RULES ===================== -->
+  <section id="rules" class="hidden">
+    <div class="sheet">
+      <span class="eyebrow">How it works</span>
+      <h2 class="rulesHead">Find the colour in the photo.</h2>
+
+      <h3>The three modes</h3>
+      <p>Difficulty is about what you're given, not how you're marked.</p>
+      <ul>
+        <li><b>Easy</b> — the colour chip, its name, and a loupe split down the middle: the target on one side, the pixel under your marker on the other, meeting at a straight edge. When the join disappears you're on it. This is the most sensitive comparison there is, which is why it's the easy one.</li>
+        <li><b>Medium</b> — the chip, its name, and a magnifier ringed in the target colour. You judge your pixel against the photograph itself rather than against a flat field, and you can change the magnification.</li>
+        <li><b>Hard</b> — the name and nothing else. No chip, no hex code, and the loupe barrel is plain grey so it gives nothing away. You have to already know what Glaucous looks like. The chip appears once you've locked in, so you find out either way.</li>
+      </ul>
+
+      <h3>Playing a round</h3>
+      <p>You're given a colour — a swatch, its name and its hex. Somewhere in the photograph is a point that matches it.</p>
+      <ul>
+        <li>Tap or click anywhere to drop a marker.</li>
+        <li>Drag to move it. On a keyboard, arrow keys move one pixel and Shift-arrow moves ten.</li>
+        <li>The loupe follows the marker, in whichever form your mode allows. On Medium you can switch between the two.</li>
+        <li>Lock in when you're satisfied. There's no clock.</li>
+      </ul>
+
+      <h3>How it's scored</h3>
+      <p>Your colour is compared to the target with CIEDE2000, the international standard for colour difference. It's measured in ΔE, which is roughly the number of just-noticeable differences between two colours. It isn't a distance in RGB — it's tuned to how an eye actually reads a gap, so two dark browns can be far apart and two bright yellows can be almost the same.</p>
+      <p>Every mode is marked on the same curve, so a score means the same thing whoever you're playing against.</p>
+      <table class="scoretable">
+        <thead><tr><th>ΔE</th><th>Means</th><th class="num">Score</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Invisible side by side</td><td class="num">97</td></tr>
+          <tr><td>2.3</td><td>What print and paint work accepts</td><td class="num">91</td></tr>
+          <tr><td>5</td><td>You'd notice if you looked</td><td class="num">76</td></tr>
+          <tr><td>12</td><td>Clearly not the same colour</td><td class="num">41</td></tr>
+          <tr><td>20</td><td>A different colour</td><td class="num">17</td></tr>
+          <tr><td>35+</td><td>A different colour entirely</td><td class="num">2</td></tr>
+        </tbody>
+      </table>
+      <p><b>Where you clicked doesn't matter — only the colour you landed on.</b> If the target colour appears in three places in the photograph, all three are equally right. The marked target point is just one place it's known to be.</p>
+      <p>Colours are averaged over a small disc rather than read from a single pixel, so one stray speck of JPEG noise can't decide a round.</p>
+      <p>When you lock in, the photograph drains to grey except for the colour you were hunting, which stays at full strength everywhere it occurs — every place that would have scored 80 or better. It answers the question the marker can't: not where it was, but where it all was.</p>
+
+      <h3>The colours themselves</h3>
+      <p>Nothing is pre-set. Each round the photograph is analysed and a colour is drawn from it at random, weighted towards regions that are vivid and big enough to find without being the entire background. The same photograph will hand you something different next time.</p>
+
+      <h3>Your colour</h3>
+      <p>At the end, the session resolves into a single colour and you're told what it's called. Its hue comes from the average of everything you actually picked, so it belongs to that run. Its lightness and saturation come from your accuracy: play well and it arrives clear and vivid, play badly and it comes out murky.</p>
+
+      <div class="sheet-actions">
+        <button class="btn primary" id="rulesBackBtn">Back</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SUMMARY ===================== -->
+  <section id="summary" class="hidden">
+    <div class="sheet">
+      <span class="eyebrow">Session complete</span>
+      <div class="grade">
+        <div class="gradeSw" id="gradeSw"></div>
+        <div class="gradeText">
+          <span class="eyebrow">You came out</span>
+          <div class="gradeName" id="gradeName">—</div>
+          <div class="gradeMeta"><b id="summaryScore">0%</b> average match · <span id="gradeHex"></span></div>
+        </div>
+      </div>
+      <p class="quip" id="quip"></p>
+      <div id="recordFlag" class="record"></div>
+      <div id="summarySub" class="note"></div>
+      <table>
+        <thead><tr><th>Round</th><th>Picked / target</th><th class="num">ΔE</th><th class="num">Match</th></tr></thead>
+        <tbody id="summaryRows"></tbody>
+      </table>
+      <div class="sheet-actions">
+        <button class="btn primary" id="againBtn">Play again</button>
+        <button class="btn" id="menuBtn">Home</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="toast" class="hidden"></div>
+</div>
+
+<!-- Optional level pack exported by the setup tool. A missing file is fine. -->
+<script src="levels.js" onerror="void 0"></script>
+
+<script>
+"use strict";
+
+/* =====================================================================
+   1. COLOUR SCIENCE
+   sRGB → linear → XYZ (D65) → CIE L*a*b*, and CIEDE2000 for distance.
+   Verified against all ten of Sharma et al.'s reference pairs.
+   ===================================================================== */
+const RAD = Math.PI / 180;
+
+function srgbToLinear(c){ c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
+
+function rgbToLab(r, g, b){
+  const R = srgbToLinear(r), G = srgbToLinear(g), B = srgbToLinear(b);
+  let X = R*0.4124564 + G*0.3575761 + B*0.1804375;
+  let Y = R*0.2126729 + G*0.7151522 + B*0.0721750;
+  let Z = R*0.0193339 + G*0.1191920 + B*0.9503041;
+  X /= 0.95047; Y /= 1.00000; Z /= 1.08883;
+  const f = t => t > 0.008856451679 ? Math.cbrt(t) : (903.2962962 * t + 16) / 116;
+  const fx = f(X), fy = f(Y), fz = f(Z);
+  return [116*fy - 16, 500*(fx - fy), 200*(fy - fz)];
+}
+
+function hueDeg(b, ap){
+  if (b === 0 && ap === 0) return 0;
+  const h = Math.atan2(b, ap) / RAD;
+  return h < 0 ? h + 360 : h;
+}
+
+function deltaE00(lab1, lab2){
+  const [L1,a1,b1] = lab1, [L2,a2,b2] = lab2;
+  const C1 = Math.hypot(a1,b1), C2 = Math.hypot(a2,b2);
+  const Cbar = (C1 + C2) / 2;
+  const Cb7 = Math.pow(Cbar, 7);
+  const G = 0.5 * (1 - Math.sqrt(Cb7 / (Cb7 + 6103515625)));
+  const a1p = (1+G)*a1, a2p = (1+G)*a2;
+  const C1p = Math.hypot(a1p,b1), C2p = Math.hypot(a2p,b2);
+  const h1p = hueDeg(b1,a1p), h2p = hueDeg(b2,a2p);
+  const dLp = L2 - L1, dCp = C2p - C1p;
+  let dhp = 0;
+  if (C1p * C2p !== 0){
+    dhp = h2p - h1p;
+    if (dhp > 180) dhp -= 360; else if (dhp < -180) dhp += 360;
+  }
+  const dHp = 2 * Math.sqrt(C1p*C2p) * Math.sin(dhp * RAD / 2);
+  const Lbp = (L1 + L2) / 2, Cbp = (C1p + C2p) / 2;
+  let hbp;
+  if (C1p * C2p === 0) hbp = h1p + h2p;
+  else {
+    const d = Math.abs(h1p - h2p);
+    if (d <= 180) hbp = (h1p + h2p) / 2;
+    else if (h1p + h2p < 360) hbp = (h1p + h2p + 360) / 2;
+    else hbp = (h1p + h2p - 360) / 2;
+  }
+  const T = 1 - 0.17*Math.cos((hbp-30)*RAD) + 0.24*Math.cos((2*hbp)*RAD)
+              + 0.32*Math.cos((3*hbp+6)*RAD) - 0.20*Math.cos((4*hbp-63)*RAD);
+  const dTheta = 30 * Math.exp(-Math.pow((hbp - 275) / 25, 2));
+  const Cbp7 = Math.pow(Cbp, 7);
+  const Rc = 2 * Math.sqrt(Cbp7 / (Cbp7 + 6103515625));
+  const Sl = 1 + (0.015 * Math.pow(Lbp - 50, 2)) / Math.sqrt(20 + Math.pow(Lbp - 50, 2));
+  const Sc = 1 + 0.045 * Cbp;
+  const Sh = 1 + 0.015 * Cbp * T;
+  const Rt = -Math.sin(2 * dTheta * RAD) * Rc;
+  const tL = dLp / Sl, tC = dCp / Sc, tH = dHp / Sh;
+  return Math.sqrt(tL*tL + tC*tC + tH*tH + Rt*tC*tH);
+}
+
+const hex2rgb = h => { const n = parseInt(h.slice(1), 16); return [n>>16 & 255, n>>8 & 255, n & 255]; };
+const rgb2hex = (r,g,b) => '#' + [r,g,b].map(v => Math.round(v).toString(16).padStart(2,'0')).join('');
+
+function labToRgb(L, a, b){
+  const fy = (L + 16) / 116, fx = fy + a / 500, fz = fy - b / 200;
+  const inv = t => { const t3 = t*t*t; return t3 > 0.008856451679 ? t3 : (116*t - 16) / 903.2962962; };
+  const X = inv(fx) * 0.95047;
+  const Y = (L > 8 ? Math.pow((L + 16) / 116, 3) : L / 903.2962962);
+  const Z = inv(fz) * 1.08883;
+  const R = X*3.2404542 + Y*-1.5371385 + Z*-0.4985314;
+  const G = X*-0.9692660 + Y*1.8760108 + Z*0.0415560;
+  const B = X*0.0556434 + Y*-0.2040259 + Z*1.0572252;
+  const g = c => c <= 0.0031308 ? 12.92*c : 1.055*Math.pow(Math.max(0,c), 1/2.4) - 0.055;
+  return [g(R)*255, g(G)*255, g(B)*255];
+}
+
+/** Lab polar → the nearest in-gamut sRGB, by walking chroma down. */
+function lchToHex(L, C, h){
+  for (let i = 0; i < 40; i++){
+    const c = C * Math.pow(0.95, i);
+    const rgb = labToRgb(L, c * Math.cos(h * RAD), c * Math.sin(h * RAD));
+    if (rgb.every(v => v >= -0.5 && v <= 255.5)){
+      return rgb2hex(Math.max(0,Math.min(255,rgb[0])), Math.max(0,Math.min(255,rgb[1])), Math.max(0,Math.min(255,rgb[2])));
+    }
+  }
+  return '#7d7d7d';
+}
+
+/* =====================================================================
+   2. NAMED-COLOUR REFERENCE
+   ===================================================================== */
+const NAME_SOURCES = [
+  'https://cdn.jsdelivr.net/npm/color-name-list/dist/colornames.bestof.json',
+  'https://unpkg.com/color-name-list/dist/colornames.bestof.json',
+  'https://cdnjs.cloudflare.com/ajax/libs/color-name-list/14.47.0/colornames.bestof.json'
+];
+const FALLBACK_NAMES = [
+  ["Oxblood","#4a0c0c"],["Glaucous","#6082b6"],["Bone","#e0d7c6"],["Rust","#a83c09"],
+  ["Verdigris","#43b3ae"],["Ochre","#cc7722"],["Aubergine","#372528"],["Celadon","#ace1af"],
+  ["Payne's Grey","#536878"],["Vermilion","#e34234"],["Sap Green","#507d2a"],["Puce","#a95c68"],
+  ["Cerulean","#2a52be"],["Gamboge","#e49b0f"],["Isabelline","#f4f0ec"],["Wenge","#645452"],
+  ["Fulvous","#e48400"],["Smalt","#003399"],["Falu Red","#801818"],["Eigengrau","#16161d"],
+  ["Liver","#674c47"],["Mikado","#ffc40c"],["Xanadu","#738678"],["Wisteria","#c9a0dc"],
+  ["Sarcoline","#f0c8a0"],["Coquelicot","#ff3800"],["Amaranth","#e52b50"],["Fallow","#c19a6b"],
+  ["Cinnabar","#e34234"],["Malachite","#0bda51"],["Feldgrau","#4d5d53"],["Bistre","#3d2b1f"],
+  ["Skobeloff","#007474"],["Zaffre","#0014a8"],["Titian","#b94e48"],["Mummy Brown","#824b35"],
+  ["Drab","#967117"],["Alabaster","#edeae0"],["Pearl","#eae0c8"],["Charcoal","#343837"],
+  ["Ash","#bebaa7"],["Jet","#343434"],["Ivory","#fffff0"],["Sable","#060606"],
+  ["Absinthe","#b7c98f"],["Nattier Blue","#8fa9d8"],["Heliotrope","#df73ff"],["Terracotta","#e2725b"]
+];
+
+let NAMES = [];
+
+async function loadNames(){
+  for (const url of NAME_SOURCES){
+    try {
+      const res = await fetch(url, {cache:'force-cache'});
+      if (!res.ok) continue;
+      const raw = await res.json();
+      if (!Array.isArray(raw) || raw.length < 1000) continue;   // bestOf is ~4,959
+      NAMES = raw.map(c => {
+        const [r,g,b] = hex2rgb(c.hex);
+        return {name:c.name, hex:c.hex, lab:rgbToLab(r,g,b)};
+      });
+      return `${NAMES.length.toLocaleString()} names loaded`;
+    } catch(e){ /* try next */ }
+  }
+  NAMES = FALLBACK_NAMES.map(([name,hex]) => {
+    const [r,g,b] = hex2rgb(hex);
+    return {name, hex, lab:rgbToLab(r,g,b)};
+  });
+  return 'offline — using the built-in shortlist';
+}
+
+function nameOf(lab){
+  let best = null, bestD = Infinity;
+  for (let i = 0; i < NAMES.length; i++){
+    const d = deltaE00(lab, NAMES[i].lab);
+    if (d < bestD){ bestD = d; best = NAMES[i]; }
+  }
+  return best ? best.name : '—';
+}
+
+/* =====================================================================
+   3. FALLBACK LEVELS — playable before you've run the setup tool
+   ===================================================================== */
+function mulberry32(a){ return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a>>>15, 1 | a); t = t + Math.imul(t ^ t>>>7, 61 | t) ^ t; return ((t ^ t>>>14) >>> 0) / 4294967296; }; }
+
+function buildFallbackLevels(){
+  const specs = [
+    {seed:11, kind:'blocks', title:'Calibration — flat fields',    difficulty:1},
+    {seed:29, kind:'blooms', title:'Calibration — soft blooms',    difficulty:2},
+    {seed:47, kind:'mosaic', title:'Calibration — narrow palette', difficulty:4}
+  ];
+  return specs.map(spec => {
+    const W = 900, H = 640;
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const c = cv.getContext('2d');
+    const rnd = mulberry32(spec.seed);
+    const baseHue = rnd() * 360;
+    let target = null;
+
+    if (spec.kind === 'blocks'){
+      const cols = 3, rows = 2, picks = [];
+      for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++){
+        const h = (baseHue + (x + y*cols) * 57 + rnd()*14) % 360;
+        c.fillStyle = `hsl(${h} ${48 + rnd()*26}% ${34 + rnd()*30}%)`;
+        c.fillRect(x*W/cols, y*H/rows, W/cols + 1, H/rows + 1);
+        picks.push([x*W/cols + W/cols/2, y*H/rows + H/rows/2]);
+      }
+      target = picks[Math.floor(rnd()*picks.length)];
+    } else if (spec.kind === 'blooms'){
+      c.fillStyle = `hsl(${baseHue} 18% 16%)`; c.fillRect(0,0,W,H);
+      const pts = [];
+      for (let i = 0; i < 7; i++){
+        const cx = 90 + rnd()*(W-180), cy = 80 + rnd()*(H-160), r = 110 + rnd()*180;
+        const h = (baseHue + 40 + rnd()*280) % 360;
+        const g = c.createRadialGradient(cx,cy,0,cx,cy,r);
+        g.addColorStop(0, `hsla(${h} 72% 58% / .95)`);
+        g.addColorStop(1, `hsla(${h} 72% 58% / 0)`);
+        c.fillStyle = g; c.fillRect(0,0,W,H);
+        pts.push([cx,cy]);
+      }
+      target = pts[Math.floor(rnd()*pts.length)];
+    } else {
+      c.fillStyle = `hsl(${baseHue} 22% 30%)`; c.fillRect(0,0,W,H);
+      const cells = [], cw = 60, ch = 60;
+      for (let y = 0; y < H; y += ch) for (let x = 0; x < W; x += cw){
+        const h = (baseHue + (rnd()-0.5)*26) % 360;
+        c.fillStyle = `hsl(${h} ${26 + rnd()*20}% ${24 + rnd()*34}%)`;
+        c.fillRect(x, y, cw+1, ch+1);
+        cells.push([x + cw/2, y + ch/2]);
+      }
+      target = cells[Math.floor(rnd()*cells.length)];
+    }
+
+    const d = c.getImageData(Math.round(target[0]), Math.round(target[1]), 1, 1).data;
+    return {
+      id: 'gen-' + spec.seed, title: spec.title, src: cv.toDataURL('image/png'),
+      x: target[0] / W, y: target[1] / H,
+      hex: rgb2hex(d[0], d[1], d[2]), difficulty: spec.difficulty
+    };
+  });
+}
+
+/* =====================================================================
+   3b. THE MANIFEST
+   The pack is a spreadsheet. Columns are matched by name, so you can
+   reorder them, add your own, and leave out anything optional:
+
+       file       image filename, resolved against IMAGE_BASE
+       url        full URL instead, if the images live elsewhere
+       x, y       target point, 0–1 across the frame
+       hex        target colour (optional — read off the image if absent)
+       tier       1–5, easy to hard (optional, defaults to 3)
+       title      your name for it (optional)
+
+   Because the game fetches this at load rather than having it compiled
+   in, editing the sheet and committing is the whole publishing step.
+   ===================================================================== */
+const PACK_CSV   = 'levels.csv';
+const IMAGE_BASE = 'images/';
+
+function parseCSV(text){
+  const rows = []; let row = [], field = '', quoted = false;
+  for (let i = 0; i < text.length; i++){
+    const c = text[i];
+    if (quoted){
+      if (c === '"'){
+        if (text[i+1] === '"'){ field += '"'; i++; } else quoted = false;
+      } else field += c;
+    } else if (c === '"') quoted = true;
+    else if (c === ','){ row.push(field); field = ''; }
+    else if (c === '\n'){ row.push(field); rows.push(row); row = []; field = ''; }
+    else if (c !== '\r') field += c;
+  }
+  if (field.length || row.length){ row.push(field); rows.push(row); }
+  return rows.filter(r => r.some(c => c.trim() !== ''));
+}
+
+function csvToLevels(text, base){
+  const rows = parseCSV(text);
+  if (rows.length < 2) throw new Error('the sheet has no rows under its header');
+  const head = rows[0].map(h => h.trim().toLowerCase());
+  const at = n => head.indexOf(n);
+  const iFile = at('file'), iUrl = at('url'), iX = at('x'), iY = at('y'),
+        iHex = at('hex'), iTier = at('tier'), iTitle = at('title');
+  if (iX < 0 || iY < 0) throw new Error('the sheet needs x and y columns');
+  if (iFile < 0 && iUrl < 0) throw new Error('the sheet needs a file or url column');
+
+  return rows.slice(1).map((r, n) => {
+    const cell = i => (i >= 0 && r[i] != null ? r[i].trim() : '');
+    const file = cell(iFile), url = cell(iUrl), hex = cell(iHex).replace('#','');
+    return {
+      id: 'csv' + n,
+      title: cell(iTitle) || file.replace(/\.[^.]+$/, ''),
+      src: url || (file ? base + file : ''),
+      x: parseFloat(cell(iX)),
+      y: parseFloat(cell(iY)),
+      hex: /^[0-9a-f]{6}$/i.test(hex) ? '#' + hex.toLowerCase() : null,
+      difficulty: Math.max(1, Math.min(5, parseInt(cell(iTier), 10) || 3))
+    };
+  }).filter(l => l.src && isFinite(l.x) && isFinite(l.y));
+}
+/* =====================================================================
+   4. STATE
+   ===================================================================== */
+const S = {
+  levels: [], packName: '',
+  rounds: 5, mode: 'medium',
+  queue: [], roundIndex: 0, results: [],
+  level: null, targetLab: null, targetName: '',
+  img: null, work: null, workData: null,
+  marker: null, dragging: false, liveHex: null,
+  zoom: 8, zoomOptions: [4, 8, 16], assist: false,
+  locked: false, lastResult: null, highlight: null,
+  fit: {scale:1, ox:0, oy:0, w:0, h:0}
+};
+
+const $ = id => document.getElementById(id);
+const view = $('view'), stage = $('stage');
+const ctx = view.getContext('2d');
+
+/* =====================================================================
+   5. THE LIVING WORDMARK
+   Nine letters, nine slightly different easing rates, each chasing its
+   own target colour derived from where your pointer is. They never move
+   as a block, and they drift slowly when the card is left alone.
+   ===================================================================== */
+const WORD = 'Hue and Seek';
+const MAX_HUE_STEP = 0.8;    // degrees per frame — about half a turn per second
+const MAX_SL_STEP  = 1.2;    // percentage points per frame
+const clampStep = (v, m) => v > m ? m : (v < -m ? -m : v);
+let glyphs = [];
+let wordRaf = null;
+let lastPointer = -9999;
+
+function buildWordmark(){
+  const el = $('wordmark');
+  el.innerHTML = '';
+  glyphs = [...WORD].map((ch, i) => {
+    const span = document.createElement('span');
+    span.textContent = ch === ' ' ? '\u00A0' : ch;   // spaces collapse inside inline-block
+    span.setAttribute('aria-hidden', 'true');
+    el.appendChild(span);
+    return {
+      el: span, i,
+      h: 40 + i * 12, s: 0, l: 86,       // starts neutral, blooms on first move
+      th: 40 + i * 12, ts: 0, tl: 86,
+      k: 0.021 + (i % 4) * 0.012         // per-letter easing rate
+    };
+  });
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches){
+    glyphs.forEach(g => { g.el.style.color = 'var(--text)'; });
+    return;
+  }
+  if (!wordRaf) wordRaf = requestAnimationFrame(tickWordmark);
+}
+
+function aimWordmark(px, py){
+  lastPointer = performance.now();
+  const n = glyphs.length;
+  glyphs.forEach(g => {
+    const spread = (g.i - (n - 1) / 2) / n;
+    g.th = px * 300 + spread * 200 + g.i * 9;
+    g.ts = 34 + py * 44 + Math.abs(spread) * 24;
+    g.tl = 78 - py * 26 + spread * 6;
+  });
+}
+
+function tickWordmark(t){
+  wordRaf = requestAnimationFrame(tickWordmark);
+  if ($('menu').classList.contains('hidden')) return;
+  if (t - lastPointer > 2600){
+    // slow idle drift, so the card is never quite still
+    glyphs.forEach(g => {
+      g.th = (t / 110 + g.i * 26) % 360;
+      g.ts = 26 + 12 * Math.sin(t / 2400 + g.i);
+      g.tl = 74 + 8 * Math.sin(t / 3100 + g.i * 0.7);
+    });
+  }
+  for (const g of glyphs){
+    // Shortest way round the wheel, then a hard speed limit. Without the
+    // limit a big jump in target (first pointer move, or a long page load
+    // leaving the idle clock far ahead) sends the letters sprinting through
+    // the whole spectrum in a few frames.
+    let dh = ((g.th - g.h + 540) % 360) - 180;
+    g.h = (g.h + clampStep(dh * g.k, MAX_HUE_STEP) + 360) % 360;
+    g.s += clampStep((g.ts - g.s) * g.k, MAX_SL_STEP);
+    g.l += clampStep((g.tl - g.l) * g.k, MAX_SL_STEP);
+    g.el.style.color = `hsl(${g.h.toFixed(1)} ${g.s.toFixed(1)}% ${g.l.toFixed(1)}%)`;
+  }
+}
+
+function attachWordmarkPointer(){
+  const handler = ev => {
+    const r = $('card').getBoundingClientRect();
+    aimWordmark(
+      Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width)),
+      Math.max(0, Math.min(1, (ev.clientY - r.top) / r.height))
+    );
+  };
+  $('menu').addEventListener('pointermove', handler);
+  $('menu').addEventListener('pointerdown', handler);
+}
+
+/* =====================================================================
+   6. IMAGE PLUMBING
+   ===================================================================== */
+function loadImage(src){
+  return new Promise((resolve, reject) => {
+    const im = new Image();
+    if (/^https?:/i.test(src)) im.crossOrigin = 'anonymous';
+    im.onload = () => resolve(im);
+    im.onerror = () => reject(new Error('Could not load ' + src));
+    im.src = src;
+  });
+}
+
+const MAX_WORK = 2000;
+
+/* ---------------------------------------------------------------------
+   With a manifest-based pack the images are fetched one at a time, so
+   the wait has to be hidden rather than endured. The queue for the whole
+   session is known the moment you press Begin, so while you're working on
+   one photograph the next two are already coming down the wire. The cache
+   is small on purpose: a decoded 1600px image is several megabytes of
+   browser memory and phones are unforgiving about that.
+   --------------------------------------------------------------------- */
+const IMG_CACHE_MAX = 4;
+const imgCache = new Map();   // src → Promise<Image>, insertion-ordered = LRU
+
+function acquireImage(src){
+  if (imgCache.has(src)){
+    const p = imgCache.get(src);
+    imgCache.delete(src); imgCache.set(src, p);   // touch
+    return p;
+  }
+  const p = loadImage(src);
+  p.catch(() => imgCache.delete(src));            // don't cache a failure
+  imgCache.set(src, p);
+  while (imgCache.size > IMG_CACHE_MAX) imgCache.delete(imgCache.keys().next().value);
+  return p;
+}
+
+function prefetchAhead(){
+  for (let k = 1; k <= 2; k++){
+    const nx = S.queue[S.roundIndex + k];
+    if (nx) acquireImage(nx.src).catch(() => {});
+  }
+}
+
+function makeWorkCanvas(img){
+  const long = Math.max(img.naturalWidth, img.naturalHeight);
+  const k = long > MAX_WORK ? MAX_WORK / long : 1;
+  const w = Math.max(1, Math.round(img.naturalWidth * k));
+  const h = Math.max(1, Math.round(img.naturalHeight * k));
+  const cv = document.createElement('canvas');
+  cv.width = w; cv.height = h;
+  const c = cv.getContext('2d', {willReadFrequently:true});
+  c.imageSmoothingQuality = 'high';
+  c.drawImage(img, 0, 0, w, h);
+  return cv;
+}
+
+/** Average sRGB over a small disc, so one noisy JPEG pixel can't decide a round. */
+function sampleDisc(x, y, radius = 2){
+  const d = S.workData, W = S.work.width, H = S.work.height;
+  let r = 0, g = 0, b = 0, n = 0;
+  const x0 = Math.round(x), y0 = Math.round(y);
+  for (let dy = -radius; dy <= radius; dy++){
+    for (let dx = -radius; dx <= radius; dx++){
+      if (dx*dx + dy*dy > radius*radius) continue;
+      const px = x0 + dx, py = y0 + dy;
+      if (px < 0 || py < 0 || px >= W || py >= H) continue;
+      const i = (py * W + px) * 4;
+      r += d[i]; g += d[i+1]; b += d[i+2]; n++;
+    }
+  }
+  return n ? [r/n, g/n, b/n] : [0,0,0];
+}
+
+/* =====================================================================
+   6b. CHOOSING A TARGET
+   Rather than the same stored colour every time, each round pulls a
+   fresh one out of the photograph. The image is clustered in Lab, the
+   clusters are weighted by vividness and by occupying a sensible slice
+   of the frame — not the whole sky, not four stray pixels — and one is
+   drawn at random. So the same photograph is a different round each
+   time you meet it, and a pack needs nothing from you but filenames.
+   ===================================================================== */
+const RANDOM_TARGETS = true;   // a fresh colour from the photo each round
+const TARGET_CLUSTERS = 9;
+
+function chooseTarget(work){
+  const long = Math.max(work.width, work.height);
+  const k = Math.min(1, 120 / long);
+  const w = Math.max(8, Math.round(work.width * k));
+  const h = Math.max(8, Math.round(work.height * k));
+  const cv = document.createElement('canvas');
+  cv.width = w; cv.height = h;
+  const c = cv.getContext('2d', {willReadFrequently:true});
+  c.drawImage(work, 0, 0, w, h);
+  const px = c.getImageData(0, 0, w, h).data;
+  const n = w * h;
+
+  const labs = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++){
+    const lab = rgbToLab(px[i*4], px[i*4+1], px[i*4+2]);
+    labs[i*3] = lab[0]; labs[i*3+1] = lab[1]; labs[i*3+2] = lab[2];
+  }
+
+  // k-means++ seeding, then a dozen passes — plenty at this resolution
+  const K = TARGET_CLUSTERS;
+  const cen = new Float64Array(K * 3);
+  let seed = Math.floor(Math.random() * n);
+  cen[0] = labs[seed*3]; cen[1] = labs[seed*3+1]; cen[2] = labs[seed*3+2];
+  const near = new Float64Array(n).fill(Infinity);
+  for (let j = 1; j < K; j++){
+    let total = 0;
+    for (let i = 0; i < n; i++){
+      const dl = labs[i*3] - cen[(j-1)*3], da = labs[i*3+1] - cen[(j-1)*3+1], db = labs[i*3+2] - cen[(j-1)*3+2];
+      const dd = dl*dl + da*da + db*db;
+      if (dd < near[i]) near[i] = dd;
+      total += near[i];
+    }
+    let t = Math.random() * total, pick = 0;
+    for (let i = 0; i < n; i++){ t -= near[i]; if (t <= 0){ pick = i; break; } }
+    cen[j*3] = labs[pick*3]; cen[j*3+1] = labs[pick*3+1]; cen[j*3+2] = labs[pick*3+2];
+  }
+
+  const assign = new Int16Array(n);
+  const counts = new Int32Array(K);
+  for (let iter = 0; iter < 12; iter++){
+    counts.fill(0);
+    const sums = new Float64Array(K * 3);
+    for (let i = 0; i < n; i++){
+      let bi = 0, bd = Infinity;
+      for (let j = 0; j < K; j++){
+        const dl = labs[i*3] - cen[j*3], da = labs[i*3+1] - cen[j*3+1], db = labs[i*3+2] - cen[j*3+2];
+        const dd = dl*dl + da*da + db*db;
+        if (dd < bd){ bd = dd; bi = j; }
+      }
+      assign[i] = bi; counts[bi]++;
+      sums[bi*3] += labs[i*3]; sums[bi*3+1] += labs[i*3+1]; sums[bi*3+2] += labs[i*3+2];
+    }
+    for (let j = 0; j < K; j++){
+      if (!counts[j]) continue;
+      cen[j*3] = sums[j*3]/counts[j];
+      cen[j*3+1] = sums[j*3+1]/counts[j];
+      cen[j*3+2] = sums[j*3+2]/counts[j];
+    }
+  }
+
+  // Weight the draw: vivid is more interesting than grey, and a region
+  // wants to be findable without being the entire background.
+  const pool = [];
+  for (let j = 0; j < K; j++){
+    const area = counts[j] / n;
+    if (area < 0.008 || area > 0.42) continue;
+    const chroma = Math.hypot(cen[j*3+1], cen[j*3+2]);
+    pool.push({j, weight: (0.25 + chroma / 55) * Math.pow(area, 0.35)});
+  }
+  if (!pool.length){
+    for (let j = 0; j < K; j++) if (counts[j]) pool.push({j, weight: counts[j] / n});
+  }
+  if (!pool.length) return {x: 0.5, y: 0.5};
+
+  let roll = Math.random() * pool.reduce((a, p) => a + p.weight, 0);
+  let chosen = pool[pool.length - 1];
+  for (const p of pool){ roll -= p.weight; if (roll <= 0){ chosen = p; break; } }
+  const j = chosen.j;
+
+  // Representative point: the member pixel nearest the cluster's centre of mass
+  let sx = 0, sy = 0;
+  for (let i = 0; i < n; i++) if (assign[i] === j){ sx += i % w; sy += (i / w) | 0; }
+  const cx = sx / counts[j], cy = sy / counts[j];
+  let bx = cx, by = cy, bd = Infinity;
+  for (let i = 0; i < n; i++){
+    if (assign[i] !== j) continue;
+    const x = i % w, y = (i / w) | 0;
+    const dd = (x - cx)*(x - cx) + (y - cy)*(y - cy);
+    if (dd < bd){ bd = dd; bx = x; by = y; }
+  }
+  return refinePoint(work, (bx + 0.5) / w, (by + 0.5) / h);
+}
+
+/** Nudge onto the flattest spot nearby, so the target isn't a lone edge
+ *  pixel that exists in exactly one place and can't be hit twice. */
+function refinePoint(work, nx, ny){
+  const W = work.width, H = work.height;
+  const span = Math.round(Math.min(W, H) * 0.03);
+  let bestX = nx * W, bestY = ny * H, bestVar = Infinity;
+  for (let dy = -2; dy <= 2; dy++){
+    for (let dx = -2; dx <= 2; dx++){
+      const x = Math.max(3, Math.min(W - 4, nx * W + dx * span / 2));
+      const y = Math.max(3, Math.min(H - 4, ny * H + dy * span / 2));
+      const centre = sampleDisc(x, y, 2);
+      let variance = 0;
+      for (const [ox, oy] of [[-3,0],[3,0],[0,-3],[0,3]]){
+        const s = sampleDisc(x + ox, y + oy, 1);
+        variance += Math.abs(s[0]-centre[0]) + Math.abs(s[1]-centre[1]) + Math.abs(s[2]-centre[2]);
+      }
+      if (variance < bestVar){ bestVar = variance; bestX = x; bestY = y; }
+    }
+  }
+  return {x: bestX / W, y: bestY / H};
+}
+/* =====================================================================
+   7b. THE REVEAL
+   On lock-in the photograph drains to grey except for the colour you
+   were hunting, which stays in full strength wherever it occurs. It
+   answers the question the marker can't: not "where was it" but "where
+   was it all". The band shown is everything that would have scored 80
+   or better, so it doubles as a picture of how much room you had.
+   ===================================================================== */
+function buildHighlight(){
+  const thr = deltaEForScore(80);
+  const fade = thr * 0.8;
+  const long = Math.max(S.work.width, S.work.height);
+  const k = Math.min(1, 340 / long);
+  const mw = Math.max(8, Math.round(S.work.width * k));
+  const mh = Math.max(8, Math.round(S.work.height * k));
+
+  const small = document.createElement('canvas');
+  small.width = mw; small.height = mh;
+  const sc = small.getContext('2d', {willReadFrequently:true});
+  sc.drawImage(S.work, 0, 0, mw, mh);
+  const im = sc.getImageData(0, 0, mw, mh);
+  const p = im.data;
+  for (let i = 0; i < mw * mh; i++){
+    const dE = deltaE00(rgbToLab(p[i*4], p[i*4+1], p[i*4+2]), S.targetLab);
+    let a;
+    if (dE <= thr) a = 255;
+    else if (dE >= thr + fade) a = 0;
+    else a = Math.round(255 * (1 - (dE - thr) / fade));
+    p[i*4] = 255; p[i*4+1] = 255; p[i*4+2] = 255; p[i*4+3] = a;
+  }
+  sc.putImageData(im, 0, 0);
+
+  // Full-resolution colour, soft low-resolution edges.
+  const hi = document.createElement('canvas');
+  hi.width = S.work.width; hi.height = S.work.height;
+  const hc = hi.getContext('2d');
+  hc.drawImage(S.work, 0, 0);
+  hc.globalCompositeOperation = 'destination-in';
+  hc.imageSmoothingEnabled = true;
+  hc.imageSmoothingQuality = 'high';
+  hc.drawImage(small, 0, 0, hi.width, hi.height);
+  return hi;
+}
+
+function drawPhoto(){
+  const {ox, oy, w, h} = {ox:S.fit.ox, oy:S.fit.oy, w:S.fit.w, h:S.fit.h};
+  if (S.locked && S.highlight){
+    if (typeof ctx.filter === 'string'){
+      ctx.filter = 'grayscale(1) brightness(0.42)';
+      ctx.drawImage(S.work, ox, oy, w, h);
+      ctx.filter = 'none';
+    } else {                       // older Safari: dim without desaturating
+      ctx.drawImage(S.work, ox, oy, w, h);
+      ctx.fillStyle = 'rgba(10,10,11,.68)';
+      ctx.fillRect(ox, oy, w, h);
+    }
+    ctx.drawImage(S.highlight, ox, oy, w, h);
+  } else {
+    ctx.drawImage(S.work, ox, oy, w, h);
+  }
+}
+
+/* =====================================================================
+   7c. RENDER
+   ===================================================================== */
+function resizeCanvas(){
+  const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+  const r = stage.getBoundingClientRect();
+  view.width = Math.max(1, Math.round(r.width * dpr));
+  view.height = Math.max(1, Math.round(r.height * dpr));
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  computeFit(r.width, r.height);
+  draw();
+}
+
+function computeFit(cw, ch){
+  if (!S.work) return;
+  const s = Math.min(cw / S.work.width, ch / S.work.height);
+  S.fit = {
+    scale: s, w: S.work.width * s, h: S.work.height * s,
+    ox: (cw - S.work.width * s) / 2, oy: (ch - S.work.height * s) / 2
+  };
+}
+
+const toScreen = p => ({ x: S.fit.ox + p.x * S.fit.scale, y: S.fit.oy + p.y * S.fit.scale });
+const toImage  = p => ({ x: (p.x - S.fit.ox) / S.fit.scale, y: (p.y - S.fit.oy) / S.fit.scale });
+
+function draw(){
+  if (!S.work) return;
+  const r = stage.getBoundingClientRect();
+  ctx.clearRect(0, 0, r.width, r.height);
+  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--mat').trim() || '#7d7d7d';
+  ctx.fillRect(0, 0, r.width, r.height);
+  drawPhoto();
+
+  if (S.locked && S.lastResult){
+    drawMarker(toScreen(S.lastResult.truth), 'truth');
+    drawMarker(toScreen(S.lastResult.pick), 'pick');
+    const a = toScreen(S.lastResult.pick), b = toScreen(S.lastResult.truth);
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.setLineDash([3,4]); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+    ctx.restore();
+    return;
+  }
+
+  if (S.marker){
+    const sp = toScreen(S.marker);
+    drawMarker(sp, 'pick');
+    drawLoupe(sp, r);
+  }
+}
+
+function drawMarker(p, kind){
+  ctx.save();
+  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = kind === 'truth' ? '#ffffff' : '#101010';
+  ctx.beginPath(); ctx.arc(p.x, p.y, 9, 0, Math.PI*2); ctx.stroke();
+  ctx.strokeStyle = kind === 'truth' ? '#101010' : '#ffffff';
+  ctx.beginPath(); ctx.arc(p.x, p.y, 10.5, 0, Math.PI*2); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(p.x - 15, p.y); ctx.lineTo(p.x - 4, p.y);
+  ctx.moveTo(p.x + 4, p.y);  ctx.lineTo(p.x + 15, p.y);
+  ctx.moveTo(p.x, p.y - 15); ctx.lineTo(p.x, p.y - 4);
+  ctx.moveTo(p.x, p.y + 4);  ctx.lineTo(p.x, p.y + 15);
+  ctx.stroke();
+  if (kind === 'truth'){
+    ctx.fillStyle = '#fff';
+    ctx.font = '500 10px ' + getComputedStyle(document.body).fontFamily;
+    ctx.fillText('TARGET', p.x + 14, p.y - 12);
+  }
+  ctx.restore();
+}
+
+function drawLoupe(sp, rect){
+  const R = Math.min(64, Math.max(46, rect.width * 0.13));
+  const ring = R * 0.30;
+
+  let cx = sp.x - R - 26, cy = sp.y - R - 34;
+  if (cx - R < 6) cx = sp.x + R + 26;
+  if (cx + R > rect.width - 6) cx = sp.x - R - 26;
+  if (cy - R < 6) cy = sp.y + R + 34;
+  cx = Math.max(R + 6, Math.min(rect.width - R - 6, cx));
+  cy = Math.max(R + 6, Math.min(rect.height - R - 6, cy));
+
+  ctx.save();
+
+  if (S.assist){
+    // SPLIT FIELD. Target left, your pixel right, meeting at a butt joint —
+    // no ring around either one to induce a contrast shift. When the join
+    // disappears the disc reads as one colour and you're on it.
+    ctx.beginPath(); ctx.arc(cx, cy, R, Math.PI/2, Math.PI*1.5);
+    ctx.closePath(); ctx.fillStyle = S.level.hex; ctx.fill();
+    ctx.beginPath(); ctx.arc(cx, cy, R, Math.PI*1.5, Math.PI/2);
+    ctx.closePath(); ctx.fillStyle = S.liveHex || '#000'; ctx.fill();
+  } else {
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI*2);
+    // On Hard the barrel is neutral — a coloured ring would hand you the
+    // answer the header is deliberately withholding.
+    ctx.fillStyle = MODES[S.mode].swatch ? S.level.hex : '#6c6c70';
+    ctx.fill();
+
+    ctx.save();
+    ctx.beginPath(); ctx.arc(cx, cy, R - ring, 0, Math.PI*2); ctx.clip();
+    const span = (R - ring) * 2 / S.zoom / S.fit.scale;
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(
+      S.work,
+      S.marker.x - span/2, S.marker.y - span/2, span, span,
+      cx - (R - ring), cy - (R - ring), (R - ring)*2, (R - ring)*2
+    );
+    ctx.restore();
+
+    ctx.strokeStyle = 'rgba(128,128,128,.65)'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(cx - 7, cy); ctx.lineTo(cx - 2, cy);
+    ctx.moveTo(cx + 2, cy); ctx.lineTo(cx + 7, cy);
+    ctx.moveTo(cx, cy - 7); ctx.lineTo(cx, cy - 2);
+    ctx.moveTo(cx, cy + 2); ctx.lineTo(cx, cy + 7);
+    ctx.stroke();
+  }
+
+  ctx.strokeStyle = 'rgba(20,20,20,.75)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(cx, cy, R + 0.5, 0, Math.PI*2); ctx.stroke();
+  ctx.strokeStyle = 'rgba(20,20,20,.5)';
+  ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(sp.x, sp.y); ctx.stroke();
+  ctx.restore();
+}
+
+/* =====================================================================
+   8. REFINEMENT
+   Coarse to fine: tap to place · drag 1:1 · nudge one pixel at a time.
+   ===================================================================== */
+function stagePoint(ev){
+  const r = stage.getBoundingClientRect();
+  return {x: ev.clientX - r.left, y: ev.clientY - r.top};
+}
+
+function setMarker(p){
+  if (!S.work) return;
+  S.marker = {
+    x: Math.max(0, Math.min(S.work.width  - 1, p.x)),
+    y: Math.max(0, Math.min(S.work.height - 1, p.y))
+  };
+  const rgb = sampleDisc(S.marker.x, S.marker.y, 2);
+  S.liveHex = rgb2hex(rgb[0], rgb[1], rgb[2]);
+  $('lockBtn').disabled = false;
+  $('hint').style.opacity = '0';
+  draw();
+}
+
+view.addEventListener('pointerdown', ev => {
+  if (S.locked) return;
+  ev.preventDefault();
+  view.setPointerCapture(ev.pointerId);
+  S.dragging = true;
+  setMarker(toImage(stagePoint(ev)));
+});
+
+/* The marker goes exactly where the pointer is, on every input type.
+   An earlier version scaled the movement down during slow drags to buy
+   sub-pixel precision; it worked, and it felt broken, because a marker
+   that isn't under your finger reads as a bug no matter how useful the
+   offset is. Predictable beats clever. Fine adjustment lives in the
+   arrow keys, and on touch the loupe is the instrument — you don't need
+   to see the marker if you can see the colour it's sitting on. */
+view.addEventListener('pointermove', ev => {
+  if (!S.dragging || S.locked) return;
+  ev.preventDefault();
+  setMarker(toImage(stagePoint(ev)));
+});
+view.addEventListener('contextmenu', ev => ev.preventDefault());
+const endDrag = () => { S.dragging = false; };
+view.addEventListener('pointerup', endDrag);
+view.addEventListener('pointercancel', endDrag);
+
+window.addEventListener('keydown', ev => {
+  if ($('play').classList.contains('hidden')) return;
+  if (ev.key === 'Enter' && !$('lockBtn').disabled){ ev.preventDefault(); dockAction(); return; }
+  if (S.locked || !S.marker) return;
+  const step = ev.shiftKey ? 10 : 1;
+  const map = {ArrowLeft:[-1,0], ArrowRight:[1,0], ArrowUp:[0,-1], ArrowDown:[0,1]};
+  if (map[ev.key]){
+    ev.preventDefault();
+    setMarker({x: S.marker.x + map[ev.key][0]*step, y: S.marker.y + map[ev.key][1]*step});
+  }
+});
+
+$('zoomBtn').addEventListener('click', () => {
+  const i = S.zoomOptions.indexOf(S.zoom);
+  S.zoom = S.zoomOptions[(i + 1) % S.zoomOptions.length];
+  $('zoomBtn').textContent = S.zoom + '×';
+  draw();
+});
+
+$('assistBtn').addEventListener('click', () => {
+  S.assist = !S.assist;
+  const b = $('assistBtn');
+  b.textContent = S.assist ? 'Split' : 'Photo';
+  b.setAttribute('aria-pressed', String(S.assist));
+  $('zoomBtn').disabled = S.assist;
+  draw();
+});
+
+/* =====================================================================
+   9. MODES AND SCORING
+   Difficulty is about what you're given, not how the answer is marked.
+   Every mode scores on the same curve, so a 78% means the same thing
+   whoever you're playing against.
+     Easy    the chip, its name, and the split loupe — you compare two
+             flat fields and watch for the seam to vanish
+     Medium  the chip, its name, and the magnifier — you judge the
+             colour against the photograph itself
+     Hard    the name alone. No chip, no hex, and the loupe barrel is
+             neutral, so nothing on screen tells you what Glaucous
+             looks like except your own memory of the word.
+       ΔE   1 → 97    ΔE   5 → 76    ΔE  20 → 17
+       ΔE   2 → 92    ΔE   8 → 59    ΔE  35 →  2
+       ΔE   3 → 87    ΔE  12 → 41
+   ===================================================================== */
+const MODES = {
+  easy:   {swatch:true,  loupe:'split', lockLoupe:true,  zoom:false},
+  medium: {swatch:true,  loupe:'photo', lockLoupe:false, zoom:true},
+  hard:   {swatch:false, loupe:'photo', lockLoupe:true,  zoom:true}
+};
+const CURVE = {k:13, p:1.35};
+
+function scoreFor(dE){ return Math.round(100 * Math.exp(-Math.pow(dE / CURVE.k, CURVE.p))); }
+
+/** The ΔE at which a given score is awarded — used to size the reveal. */
+function deltaEForScore(score){ return CURVE.k * Math.pow(-Math.log(score / 100), 1 / CURVE.p); }
+
+function verdictFor(dE){
+  if (dE < 1.2)  return 'Indistinguishable';
+  if (dE < 2.6)  return 'Within a whisker';
+  if (dE < 5)    return 'A very good match';
+  if (dE < 9)    return 'Close';
+  if (dE < 16)   return 'Off by a shade';
+  if (dE < 28)   return 'Wrong neighbourhood';
+  return 'A different colour entirely';
+}
+
+/** Set the chrome for the chosen mode. Called once a session begins. */
+function applyMode(){
+  const m = MODES[S.mode];
+  S.assist = m.loupe === 'split';
+  $('assistBtn').textContent = S.assist ? 'Split' : 'Photo';
+  $('assistBtn').setAttribute('aria-pressed', String(S.assist));
+  $('zoomWrap').classList.toggle('hidden', !m.zoom);
+  $('loupeWrap').classList.toggle('hidden', m.lockLoupe);
+  $('chiprail').classList.toggle('blind', !m.swatch);
+}
+/* =====================================================================
+   10. ROUND FLOW
+   Levels still carry a tier from the setup tool and a session still
+   walks from the easy end to the hard end. There's just nothing to
+   choose about it any more.
+   ===================================================================== */
+function pickQueue(){
+  const byDiff = d => S.levels.filter(l => (l.difficulty || 3) === d);
+  const n = S.rounds, q = [];
+  for (let i = 0; i < n; i++){
+    const p = n <= 1 ? 0 : i / (n - 1);
+    const tier = Math.max(1, Math.min(5, Math.round(1 + p * 4)));
+    q.push(drawFromTier(byDiff, tier, q));
+  }
+  return q.filter(Boolean);
+}
+
+function drawFromTier(byDiff, tier, already){
+  const seen = new Set(already.map(l => l && l.id));
+  for (let spread = 0; spread <= 4; spread++){
+    for (const t of [tier - spread, tier + spread]){
+      if (t < 1 || t > 5) continue;
+      const fresh = byDiff(t).filter(l => !seen.has(l.id));
+      if (fresh.length) return fresh[Math.floor(Math.random() * fresh.length)];
+    }
+  }
+  return S.levels[Math.floor(Math.random() * S.levels.length)];
+}
+
+async function startSession(){
+  S.roundIndex = 0; S.results = [];
+  updateRunning();
+  S.queue = pickQueue();
+  if (!S.queue.length){ toast('No levels available.'); return; }
+  applyMode();
+  show('play');
+  prefetchAhead();
+  await nextRound();
+}
+
+async function nextRound(){
+  restorePlayChrome();
+  S.locked = false; S.marker = null; S.lastResult = null; S.liveHex = null; S.highlight = null;
+  $('lockBtn').disabled = true;
+  $('lockBtn').textContent = 'Lock in';
+  $('hint').style.opacity = '1';
+
+  const level = S.queue[S.roundIndex % S.queue.length];
+  S.level = level;
+  updateRunning();
+
+  try {
+    $('stageLoading').classList.remove('hidden');
+    S.img = await acquireImage(level.src);
+    $('stageLoading').classList.add('hidden');
+  } catch(e){
+    $('stageLoading').classList.add('hidden');
+    toast('Image missing: ' + level.src);
+    S.roundIndex++;
+    if (S.roundIndex < S.queue.length) return nextRound();
+    return endSession();
+  }
+  S.work = makeWorkCanvas(S.img);
+  const wc = S.work.getContext('2d', {willReadFrequently:true});
+  try {
+    S.workData = wc.getImageData(0, 0, S.work.width, S.work.height).data;
+  } catch(err){
+    toast('This browser blocked reading pixels from a file:// image. Serve the folder, or re-export the pack with images embedded.');
+    return;
+  }
+
+  // A fresh colour out of this photograph, every time it comes up.
+  const point = RANDOM_TARGETS || !isFinite(level.x) || !isFinite(level.y)
+    ? chooseTarget(S.work)
+    : {x: level.x, y: level.y};
+  const rgb = sampleDisc(point.x * S.work.width, point.y * S.work.height, 2);
+  const hex = (!RANDOM_TARGETS && level.hex) ? level.hex : rgb2hex(rgb[0], rgb[1], rgb[2]);
+
+  S.level = Object.assign({}, level, {hex, x: point.x, y: point.y});
+  S.targetLab = rgbToLab(...hex2rgb(hex));
+  S.targetName = nameOf(S.targetLab);
+  S.highlight = null;
+
+  $('swTarget').style.background = hex;
+  $('targetName').textContent = S.targetName;
+  $('targetHex').textContent = hex.toUpperCase();
+
+  resizeCanvas();
+  prefetchAhead();
+}
+
+function lockIn(){
+  if (!S.marker || S.locked) return;
+  S.locked = true;
+
+  const rgb = sampleDisc(S.marker.x, S.marker.y, 2);
+  const pickHex = rgb2hex(rgb[0], rgb[1], rgb[2]);
+  const pickLab = rgbToLab(rgb[0], rgb[1], rgb[2]);
+  const dE = deltaE00(pickLab, S.targetLab);
+  const score = scoreFor(dE);
+  const pickName = nameOf(pickLab);
+
+  const truth = {x: S.level.x * S.work.width, y: S.level.y * S.work.height};
+  S.lastResult = {pick: {...S.marker}, truth, dE, score, pickHex, pickName};
+  S.results.push({
+    level: S.level, dE, score, pickHex, pickName,
+    targetHex: S.level.hex, targetName: S.targetName
+  });
+
+  try { S.highlight = buildHighlight(); } catch(e){ S.highlight = null; }
+
+  draw();
+  showReveal();
+}
+
+function showReveal(){
+  const r = S.lastResult;
+
+  // The rail already holds the target. On reveal it splits: your colour
+  // beside it, both named. The dock's zoom and loupe controls are inert
+  // now, so the verdict takes their place. Nothing new appears on screen.
+  $('swPick').style.background = r.pickHex;
+  $('rvPickName').textContent = r.pickName;
+  $('rvPickHex').textContent = r.pickHex.toUpperCase();
+  $('chiprail').classList.add('revealed');
+
+  $('verdictText').textContent = verdictFor(r.dE);
+  $('deltaText').textContent = `${r.score}% match · ΔE₀₀ ${r.dE.toFixed(2)}`;
+  $('zoomWrap').classList.add('hidden');
+  $('loupeWrap').classList.add('hidden');
+  $('dockVerdict').classList.remove('hidden');
+  $('hint').style.opacity = '0';
+
+  const lock = $('lockBtn');
+  lock.textContent = lastRound() ? 'See results' : 'Next round';
+  lock.disabled = false;
+  lock.focus({preventScroll:true});
+  updateRunning();
+}
+
+function restorePlayChrome(){
+  $('chiprail').classList.remove('revealed');
+  applyMode();
+  $('swPick').style.background = '';
+  $('rvPickName').textContent = '—';
+  $('rvPickHex').textContent = '—';
+  $('zoomWrap').classList.remove('hidden');
+  $('loupeWrap').classList.remove('hidden');
+  $('dockVerdict').classList.add('hidden');
+}
+
+function lastRound(){ return S.roundIndex >= S.queue.length - 1; }
+
+function advance(){
+  S.roundIndex++;
+  if (S.roundIndex >= S.queue.length) endSession();
+  else nextRound();
+}
+
+/* One button, two jobs — it never moves and it never changes place. */
+function dockAction(){ if (S.locked) advance(); else lockIn(); }
+
+function updateRunning(){
+  const round = `Round <b>${Math.min(S.roundIndex + 1, S.queue.length)}/${S.queue.length}</b>`;
+  if (!S.results.length){ $('running').innerHTML = round; return; }
+  const avg = Math.round(S.results.reduce((a,r) => a + r.score, 0) / S.results.length);
+  $('running').innerHTML = `${round} · <b>${avg}%</b> average`;
+}
+
+function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* =====================================================================
+   10b. THE GRADE
+   Your session becomes a colour. Hue comes from the average of what you
+   actually picked, weighted by chroma — so it belongs to this pack and
+   this run. Accuracy drives lightness and saturation: play well and it
+   arrives clear and vivid, play badly and it comes out murky. Then the
+   name list tells you what you are.
+   ===================================================================== */
+const QUIPS = [
+  [95, [
+    "Either you own a colourimeter or you have no life. Both are impressive.",
+    "Nothing left to teach you. Please leave.",
+    "The sort of accuracy that makes other people quietly close the tab."
+  ]],
+  [85, [
+    "Excellent, in the mildly irritating way that suggests you've done this before.",
+    "You would be a menace in the paint chip aisle.",
+    "Very good. Not perfect. You'll think about that later tonight."
+  ]],
+  [72, [
+    "Solid. The kind of result nobody writes home about, including you.",
+    "You know exactly what colour it is. You just can't quite point at it.",
+    "Competent — a word doing an enormous amount of work here."
+  ]],
+  [58, [
+    "Right postcode. Wrong house.",
+    "Close enough for house paint. Not close enough for anything else.",
+    "Your eyes are fine. It's the commitment that's letting you down."
+  ]],
+  [42, [
+    "You have successfully located the general vibe of the colour.",
+    "Roughly correct, in the way a long-range weather forecast is roughly correct.",
+    "This is what trusting your first instinct looks like."
+  ]],
+  [25, [
+    "You've invented several new colours today. Nobody asked for any of them.",
+    "Bold choices throughout. Uniformly wrong, but bold.",
+    "Somewhere a colourist felt a chill and couldn't say why."
+  ]],
+  [0, [
+    "Extraordinary. Statistically you should have hit something by accident.",
+    "Have you considered that the swatch was right there the whole time?",
+    "You may be playing a different game. We would genuinely love to know which."
+  ]]
+];
+
+function quipFor(avg){
+  const band = QUIPS.find(([floor]) => avg >= floor)[1];
+  return band[Math.floor(Math.random() * band.length)];
+}
+
+function gradeColour(avg, results){
+  let sx = 0, sy = 0;
+  for (const r of results){
+    const lab = rgbToLab(...hex2rgb(r.pickHex));
+    const c = Math.hypot(lab[1], lab[2]);
+    const h = hueDeg(lab[2], lab[1]) * RAD;
+    sx += Math.cos(h) * c; sy += Math.sin(h) * c;
+  }
+  const hue = (sx || sy) ? (Math.atan2(sy, sx) / RAD + 360) % 360 : 30;
+  const t = Math.max(0, Math.min(1, avg / 100));
+  return lchToHex(30 + t * 36, 2 + Math.pow(t, 1.7) * 78, hue);
+}
+
+/* =====================================================================
+   10c. PERSONAL BESTS — one per session length
+   ===================================================================== */
+const BEST_KEY = 'hueandseek.bests.v1';
+function loadBests(){
+  try { return JSON.parse(localStorage.getItem(BEST_KEY)) || {}; }
+  catch(e){ return {}; }
+}
+function saveBests(b){
+  try { localStorage.setItem(BEST_KEY, JSON.stringify(b)); } catch(e){ /* private mode, never mind */ }
+}
+const bestKey = (rounds, mode) => rounds + ':' + mode;
+function renderBests(){
+  const b = loadBests();
+  $('bests').innerHTML = [5,10,15].map(n => {
+    const v = b[bestKey(n, S.mode)];
+    return `<div class="best">
+      <span class="eyebrow">${n} rounds</span>
+      <b>${v != null ? v + '%' : '—'}</b>
+    </div>`;
+  }).join('');
+}
+
+function endSession(){
+  const total = S.results.reduce((a,r) => a + r.score, 0);
+  const avg = S.results.length ? Math.round(total / S.results.length) : 0;
+  const best = S.results.reduce((a,r) => Math.min(a, r.dE), Infinity);
+  const bestScore = S.results.reduce((a,r) => Math.max(a, r.score), 0);
+
+  const hex = gradeColour(avg, S.results);
+  $('gradeSw').style.background = hex;
+  $('gradeName').textContent = NAMES.length ? nameOf(rgbToLab(...hex2rgb(hex))) : '—';
+  $('gradeHex').textContent = hex.toUpperCase();
+  $('summaryScore').textContent = avg + '%';
+  $('quip').textContent = quipFor(avg);
+
+  const bests = loadBests();
+  const key = bestKey(S.rounds, S.mode);
+  const prior = bests[key];
+  const isRecord = S.results.length === S.rounds && (prior == null || avg > prior);
+  if (isRecord){ bests[key] = avg; saveBests(bests); }
+  const modeName = S.mode[0].toUpperCase() + S.mode.slice(1);
+  $('recordFlag').textContent = isRecord
+    ? (prior == null ? `First run at ${S.rounds} rounds on ${modeName}` : `New best on ${modeName} — up from ${prior}%`)
+    : (prior != null ? `Your best at ${S.rounds} rounds on ${modeName} is ${prior}%` : '');
+
+  $('summarySub').textContent =
+    `${total} of ${S.results.length * 100} points · best round ${bestScore}% · closest ΔE ${isFinite(best) ? best.toFixed(2) : '—'}`;
+
+  $('summaryRows').innerHTML = S.results.map((r,i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td><span class="pair"><i style="background:${r.pickHex}"></i><i style="background:${r.targetHex}"></i></span>${escapeHtml(r.pickName)} → ${escapeHtml(r.targetName)}</td>
+      <td class="num">${r.dE.toFixed(1)}</td>
+      <td class="num">${r.score}%</td>
+    </tr>`).join('');
+  show('summary');
+}
+
+/* =====================================================================
+   11. SHELL
+   ===================================================================== */
+function show(which){
+  ['menu','play','rules','summary'].forEach(id => $(id).classList.toggle('hidden', id !== which));
+  if (which === 'menu'){ lastPointer = performance.now(); renderBests(); }
+  if (which === 'play') requestAnimationFrame(resizeCanvas);
+  if (which === 'rules') $('rules').querySelector('.sheet').scrollTop = 0;
+}
+
+let toastTimer;
+function toast(msg){
+  const t = $('toast');
+  t.textContent = msg; t.classList.remove('hidden');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.add('hidden'), 6000);
+}
+
+document.querySelectorAll('#modeChoices .chip-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('#modeChoices .chip-btn').forEach(o => o.setAttribute('aria-pressed', 'false'));
+    b.setAttribute('aria-pressed', 'true');
+    S.rounds = parseInt(b.dataset.mode, 10);
+  });
+});
+
+document.querySelectorAll('#tolChoices .chip-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('#tolChoices .chip-btn').forEach(o => o.setAttribute('aria-pressed', 'false'));
+    b.setAttribute('aria-pressed', 'true');
+    S.mode = b.dataset.tol;
+    $('modeNote').textContent = MODE_NOTES[S.mode];
+    renderBests();
+  });
+});
+
+const MODE_NOTES = {
+  easy:   'The colour, its name, and a loupe split down the middle: target on one side, your pixel on the other. When the join disappears you are on it.',
+  medium: 'The colour, its name, and a magnifier ringed in the target. You judge it against the photograph rather than against a flat field.',
+  hard:   'The name and nothing else. No swatch, no hex, a plain loupe. You have to already know what Glaucous looks like.'
+};
+
+$('startBtn').addEventListener('click', startSession);
+$('rulesBtn').addEventListener('click', () => show('rules'));
+$('rulesBackBtn').addEventListener('click', () => show('menu'));
+$('lockBtn').addEventListener('click', dockAction);
+$('homeBtn').addEventListener('click', () => show('menu'));
+$('againBtn').addEventListener('click', startSession);
+$('menuBtn').addEventListener('click', () => show('menu'));
+
+function adoptLevels(data, label){
+  const clean = data.filter(l => l && l.src && typeof l.x === 'number' && typeof l.y === 'number');
+  if (!clean.length) throw new Error('No usable levels in the pack.');
+  S.levels = clean.map((l,i) => Object.assign({id:'lv'+i, difficulty:3}, l));
+  S.packName = label || '';
+}
+
+window.addEventListener('resize', () => { if (!$('play').classList.contains('hidden')) resizeCanvas(); });
+window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 260));
+
+(async function boot(){
+  buildWordmark();
+  attachWordmarkPointer();
+  await loadNames();
+
+  let source = null;
+
+  // 1. the spreadsheet, fetched fresh so an edit shows up on a refresh
+  try {
+    const res = await fetch(PACK_CSV, {cache:'no-cache'});
+    if (res.ok){
+      adoptLevels(csvToLevels(await res.text(), IMAGE_BASE), PACK_CSV);
+      source = PACK_CSV;
+    }
+  } catch(e){ /* no sheet, or opened from file:// — fall through */ }
+
+  // 2. a baked-in pack from the setup tool
+  if (!source){
+    try {
+      const baked = window.HUE_AND_SEEK_LEVELS || window.HUEPHORIA_LEVELS;
+      if (Array.isArray(baked) && baked.length){
+        adoptLevels(baked, 'levels.js');
+        source = 'levels.js';
+      }
+    } catch(e){ /* fall through */ }
+  }
+
+  // 3. nothing to play yet — generate something rather than show a dead card
+  if (!source) S.levels = buildFallbackLevels();
+
+  const photos = S.levels.length;
+  $('credits').textContent =
+    `${photos} photograph${photos === 1 ? '' : 's'} · ${NAMES.length.toLocaleString()} colour names`;
+
+  $('modeNote').textContent = MODE_NOTES[S.mode];
+  $('loading').classList.add('hidden');
+  show('menu');
+})();
+</script>
+</body>
+</html>
