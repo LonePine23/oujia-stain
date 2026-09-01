@@ -29,7 +29,10 @@
   --rule:     #2b2b2f;
   --dim:      #74747a;
   --text:     #dcdcd8;
-  --mat:      #7d7d7d;
+  /* The mat the photograph sits on. Dark enough to stay out of the way —
+     a bright surround competes with the picture and drags your eye off
+     the thing you're meant to be reading. Neutral, never tinted. */
+  --mat:      #131315;
   --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
   --serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
 }
@@ -82,6 +85,8 @@ button{font:inherit; color:inherit; background:none; border:none; cursor:pointer
   display:flex; justify-content:space-between; gap:12px;
   padding-bottom:14px; border-bottom:1px solid var(--rule);
 }
+.card-top a{color:var(--dim); text-decoration:none; border-bottom:1px solid transparent;}
+.card-top a:hover{color:var(--text); border-bottom-color:var(--dim);}
 .wordmark{
   font-family:var(--serif); font-size:clamp(38px, 9.6vw, 74px); line-height:.96;
   letter-spacing:-.015em; margin:20px 0 10px; user-select:none; cursor:default;
@@ -118,7 +123,6 @@ button{font:inherit; color:inherit; background:none; border:none; cursor:pointer
   margin-top:auto; padding-top:16px; border-top:1px solid var(--rule);
   display:flex; align-items:center; gap:10px; flex-wrap:wrap;
 }
-#credits{width:100%; margin:0; font-size:11px; color:var(--dim);}
 
 /* ===================== RULES ===================== */
 #rules{flex:1; min-height:0; padding:14px; display:flex;}
@@ -129,6 +133,9 @@ button{font:inherit; color:inherit; background:none; border:none; cursor:pointer
 #rules li{margin-bottom:8px; line-height:1.6;}
 #rules b{font-weight:500;}
 #rules em{font-style:italic; color:#fff;}
+/* Links carry no hue of their own either — underline, not blue. */
+#rules a{color:var(--text); text-decoration:none; border-bottom:1px solid var(--rule);}
+#rules a:hover{border-bottom-color:var(--dim);}
 .scoretable{margin:14px 0 16px; max-width:62ch;}
 .scoretable td{padding:7px 0; color:var(--dim);}
 .scoretable td:first-child{color:var(--text); font-variant-numeric:tabular-nums; width:56px;}
@@ -195,7 +202,7 @@ button{font:inherit; color:inherit; background:none; border:none; cursor:pointer
 
 #stageLoading{
   position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  background:var(--mat); color:#2e2e2e; font-size:11px; letter-spacing:.16em;
+  background:var(--mat); color:var(--dim); font-size:11px; letter-spacing:.16em;
   text-transform:uppercase; z-index:5;
 }
 /* Five pips: which colour you're on, and how the earlier ones went. */
@@ -258,19 +265,19 @@ h4.sub{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var
     <div class="card" id="card">
       <div class="card-top">
         <span class="eyebrow" id="todayLine">A colour matching game</span>
-        <span class="eyebrow">Melbourne</span>
+        <a class="eyebrow" href="https://geordie.lol" target="_blank" rel="noopener">geordie.lol</a>
       </div>
 
       <h1 class="wordmark" id="wordmark" aria-label="Hue and Seek"></h1>
 
       <p class="tagline">A game of hueristics.</p>
-      <p class="instruction">Five colours. One photograph. Same for everyone.</p>
+      <p class="instruction">Five colours. One photograph. A daily colour puzzle.</p>
 
       <div class="field" id="modeField">
         <span class="eyebrow">How much help you get</span>
         <div class="choices" id="tolChoices">
-          <button class="chip-btn" data-tol="standard" aria-pressed="true">Standard</button>
           <button class="chip-btn" data-tol="easy" aria-pressed="false">Easy</button>
+          <button class="chip-btn" data-tol="standard" aria-pressed="true">Standard</button>
         </div>
         <p class="note" id="modeNote"></p>
       </div>
@@ -301,7 +308,6 @@ h4.sub{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var
         <button class="btn primary" id="startBtn">Begin</button>
         <button class="btn" id="challengeBtn">Archive</button>
         <button class="btn" id="rulesBtn">How it works</button>
-        <p class="note" id="credits"></p>
       </div>
     </div>
   </section>
@@ -360,45 +366,50 @@ h4.sub{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var
       <span class="eyebrow">How it works</span>
       <h2 class="rulesHead">Find the colour in the photo.</h2>
 
-      <p>One photograph a day, and five colours hidden somewhere inside it. Everyone playing today gets the same photograph and the same five colours, so a score is worth comparing.</p>
+      <p>One photograph a day, five colours hidden in it. Everyone gets the same five.</p>
+
+      <h3>Playing</h3>
+      <ul>
+        <li>Tap anywhere to drop a marker. Drag to move it.</li>
+        <li>Arrow keys nudge it a pixel. Hold Shift for ten.</li>
+        <li>Lock in when you're happy. There's no clock.</li>
+        <li>Five colours, then you're done for the day. Your progress is saved, so you can close the tab and come back.</li>
+      </ul>
+      <p><b>Where you click doesn't matter. Only the colour you land on.</b> If it turns up in five places, all five are right.</p>
 
       <h3>The two modes</h3>
-      <p>Difficulty is about what you're given, not how you're marked. Both score on the same curve.</p>
       <ul>
-        <li><b>Standard</b> — the colour's name, and nothing else. No chip, no hex. The loupe magnifies the photograph, and its barrel carries <em>your</em> colour, not the target's, so you can see what you're holding but never what you're hunting. The chip appears the moment you lock in, so you find out either way.</li>
-        <li><b>Easy</b> — the chip, its hex, its name, and a loupe split down the middle: the target on one side, the pixel under your marker on the other, meeting at a straight edge. When the join disappears you're on it. This is the most sensitive comparison there is, which is why it's the easy one.</li>
+        <li><b>Easy</b> — you get the swatch, its name and its hex. The loupe splits down the middle: the colour you're after on one side, the pixel under your marker on the other. When the seam vanishes, you've got it.</li>
+        <li><b>Standard</b> — you get the name. That's the lot. The loupe magnifies the photo and wears your colour on its rim, so you can see what you've picked but not what you're chasing. The swatch turns up when you lock in.</li>
       </ul>
 
-      <h3>Playing a colour</h3>
-      <ul>
-        <li>Tap or click anywhere to drop a marker.</li>
-        <li>Drag to move it. On a keyboard, arrow keys move one pixel and Shift-arrow moves ten.</li>
-        <li>Lock in when you're satisfied. There's no clock.</li>
-        <li>Five colours, in order, and then the day is done. One attempt — your progress is kept, so you can close the tab and come back to it.</li>
-      </ul>
-
-      <h3>How it's scored</h3>
-      <p>Your colour is compared to the target with CIEDE2000, the international standard for colour difference. It's measured in ΔE, which is roughly the number of just-noticeable differences between two colours. It isn't a distance in RGB — it's tuned to how an eye actually reads a gap, so two dark browns can be far apart and two bright yellows can be almost the same.</p>
+      <h3>Scoring</h3>
+      <p>Your colour and the target are compared with CIEDE2000 — a measure tuned to how an eye reads a gap rather than how far apart two numbers are. Both modes are marked on the same curve.</p>
       <table class="scoretable">
         <thead><tr><th>ΔE</th><th>Means</th><th class="num">Score</th></tr></thead>
         <tbody>
           <tr><td>1</td><td>Invisible side by side</td><td class="num">97</td></tr>
-          <tr><td>2.3</td><td>What print and paint work accepts</td><td class="num">91</td></tr>
           <tr><td>5</td><td>You'd notice if you looked</td><td class="num">76</td></tr>
           <tr><td>12</td><td>Clearly not the same colour</td><td class="num">41</td></tr>
           <tr><td>20</td><td>A different colour</td><td class="num">17</td></tr>
-          <tr><td>35+</td><td>A different colour entirely</td><td class="num">2</td></tr>
+          <tr><td>35+</td><td>Not even close</td><td class="num">2</td></tr>
         </tbody>
       </table>
-      <p><b>Where you clicked doesn't matter — only the colour you landed on.</b> If the target colour appears in three places in the photograph, all three are equally right.</p>
-      <p>Colours are averaged over a small disc rather than read from a single pixel, so one stray speck of JPEG noise can't decide a round.</p>
-      <p>When you lock in, the photograph drains to grey except for the colour you were hunting, which stays at full strength everywhere it occurs — every place that would have scored 80 or better. It answers the question the marker can't: not where it was, but where it all was.</p>
+
+      <h3>The reveal</h3>
+      <p>Lock in and the photo drains to grey except your colour, wherever it turns up — every spot that would have scored 80 or better. Not where it was. Where it all was.</p>
 
       <h3>The archive</h3>
-      <p>Every photograph that has had its day goes into the archive. Play one at random, five fresh colours drawn out of it — a different set every time, so a photograph you've already seen is still a game. Archive rounds don't touch your daily record.</p>
+      <p>Every photograph that's had its day goes into the archive. Play one at random with five fresh colours — a new set each time, so a picture you've already seen is still a game. Archive rounds don't touch your record.</p>
 
       <h3>Your record</h3>
-      <p>Standard and Easy keep separate records, because an Easy 90 and a Standard 90 are not the same achievement. Your streak counts consecutive days finished. The strongest group is whichever family of hues you're most accurate with, once you've met it a few times.</p>
+      <p>Easy and Standard are kept apart: an Easy 90 and a Standard 90 aren't the same achievement. Your streak counts days finished. Your strongest group is the family of hues you're best at, once you've met it a few times.</p>
+
+      <h3>Credits</h3>
+      <p>Colour names come from the <a href="https://github.com/meodai/color-names" target="_blank" rel="noopener">Color Name List</a> by David Aerne and contributors — a human-curated set of 4,959 names, MIT licensed. It's the reason a near miss reads as <em>Caramel Macchiato</em> rather than Medium Brown 3.</p>
+      <p>Public-domain paintings are credited by artist in the puzzle's title.</p>
+      <p>Made with Claude by Anthropic.</p>
+      <p><a href="https://geordie.lol/hueandseek" target="_blank" rel="noopener">geordie.lol/hueandseek</a></p>
 
       <div class="sheet-actions">
         <button class="btn primary" id="rulesBackBtn">Back</button>
@@ -1068,34 +1079,46 @@ function refinePoint(work, nx, ny){
 function deriveTargets(work, count, rnd){
   const A = clusterImage(work, rnd);
 
-  const raw = [];
+  /* Every candidate is resolved to the colour it would actually serve
+     BEFORE anything is compared. Comparing cluster centroids instead is
+     subtly wrong twice over: k-means asked for twelve clusters on a
+     photograph holding seven colours returns near-duplicates, and two
+     clusters that are genuinely apart in Lab can still be interleaved in
+     the frame and resolve onto the same pixel. Either way the day serves
+     the same colour twice. Judge what will be served. */
+  const cands = [];
   for (let j = 0; j < A.K; j++){
     if (!A.counts[j]) continue;
     const area = A.counts[j] / A.n;
     if (area > 0.45) continue;
-    raw.push({j, area, lab: [A.cen[j*3], A.cen[j*3+1], A.cen[j*3+2]], small: area < 0.006});
+    const centroid = [A.cen[j*3], A.cen[j*3+1], A.cen[j*3+2]];
+    const seed = clusterPoint(A, j);
+    let pt = refinePoint(work, seed.x, seed.y);
+    let rgb = sampleDisc(pt.x * work.width, pt.y * work.height, 2);
+    /* Refinement nudges off a lone edge pixel; it isn't licence to go for
+       a walk. If the flattest neighbour within 3% of the frame isn't the
+       colour we came for, it has left its own region — keep the seed. */
+    if (deltaE00(rgbToLab(rgb[0], rgb[1], rgb[2]), centroid) > 6){
+      rgb = sampleDisc(seed.x * work.width, seed.y * work.height, 2);
+    }
+    const lab = rgbToLab(rgb[0], rgb[1], rgb[2]);
+    const chroma = Math.hypot(lab[1], lab[2]);
+    cands.push({area, lab, hex: rgb2hex(rgb[0], rgb[1], rgb[2]),
+                weight: (area < 0.006 ? 0.4 : 1) * (0.25 + chroma / 55) * Math.pow(area, 0.35)});
   }
 
-  /* Asking k-means for twelve clusters on a photograph that only has
-     seven colours in it hands back duplicates — two centroids sitting on
-     the same region, which the draw then serves as two "different"
-     targets that are the same colour. Merge them first, keeping the
-     larger and adding the smaller's area to it. */
+  // Candidates that landed on the same colour are one candidate.
   const pool = [];
-  for (const p of raw.slice().sort((a,b) => b.area - a.area)){
+  for (const p of cands.slice().sort((a,b) => b.area - a.area)){
     const twin = pool.find(m => deltaE00(m.lab, p.lab) < 4);
     if (twin) twin.area += p.area;
     else pool.push(p);
   }
-  for (const p of pool){
-    const chroma = Math.hypot(p.lab[1], p.lab[2]);
-    p.weight = (p.small ? 0.4 : 1) * (0.25 + chroma / 55) * Math.pow(p.area, 0.35);
-  }
 
   // Draw without replacement, relaxing the separation rule only if a
-  // photograph genuinely hasn't got five distinguishable regions in it.
+  // photograph genuinely hasn't got five distinguishable colours in it.
   const chosen = [];
-  for (const sep of [MIN_SEPARATION, 11, 7, 0]){
+  for (const sep of [MIN_SEPARATION, 11, 7, 4]){
     let guard = 0;
     while (chosen.length < count && guard++ < 200){
       const ok = pool.filter(p => !chosen.includes(p) &&
@@ -1108,28 +1131,13 @@ function deriveTargets(work, count, rnd){
     }
     if (chosen.length >= count) break;
   }
-  // Last resort, so an archive round can never dead-end: pad from the
-  // unmerged clusters even though they repeat a colour.
-  for (const p of raw){ if (chosen.length >= count) break; if (!chosen.includes(p)) chosen.push(p); }
+  // Last resort, so an archive round can never dead-end on a photograph
+  // with almost nothing in it: repeat rather than serve fewer than five.
+  for (const p of cands){ if (chosen.length >= count) break; if (!chosen.includes(p)) chosen.push(p); }
   if (!chosen.length) return [];
 
   chosen.sort((a,b) => b.area - a.area);
-  return chosen.slice(0, count).map(p => {
-    const seed = clusterPoint(A, p.j);
-    let pt = refinePoint(work, seed.x, seed.y);
-    let rgb = sampleDisc(pt.x * work.width, pt.y * work.height, 2);
-    /* Refinement is meant to nudge off an edge pixel, not go for a walk.
-       It searches 3% of the frame for the flattest spot, and next to a
-       big flat region that search will happily leave the cluster it came
-       from — which is how two different clusters end up on the same
-       block and the day serves the same colour twice. If the flattest
-       neighbour isn't the colour we came for, keep the original point. */
-    if (deltaE00(rgbToLab(rgb[0], rgb[1], rgb[2]), p.lab) > 6){
-      pt = seed;
-      rgb = sampleDisc(seed.x * work.width, seed.y * work.height, 2);
-    }
-    return rgb2hex(rgb[0], rgb[1], rgb[2]);
-  });
+  return chosen.slice(0, count).map(p => p.hex);
 }
 
 /* =====================================================================
@@ -1217,6 +1225,14 @@ function drawPhoto(){
   } else {
     ctx.drawImage(S.work, ox, oy, w, h);
   }
+  /* On a dark mat a dark photograph loses its edge and the frame stops
+     reading as a mounted object. One hairline, achromatic, faint enough
+     that it can't be mistaken for part of the picture. */
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255,255,255,.10)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(ox + 0.5, oy + 0.5, w - 1, h - 1);
+  ctx.restore();
 }
 
 function draw(){
@@ -1395,8 +1411,8 @@ const MODES = {
 };
 const MODE_LABEL = {standard:'Standard', easy:'Easy'};
 const MODE_NOTES = {
-  standard: 'The name and nothing else. No swatch, no hex — the loupe magnifies the photograph and wears your own colour around the rim. The swatch appears once you lock in, so you find out either way.',
-  easy:     'The colour, its hex, its name, and a loupe split down the middle: target on one side, your pixel on the other. When the join disappears you are on it.'
+  standard: 'You get the name. That is the lot. Find Glaucous from memory.',
+  easy:     'You get the swatch, and a loupe split down the middle. Match the two halves until the seam vanishes.'
 };
 const CURVE = {k:13, p:1.35};
 
@@ -1800,7 +1816,7 @@ function shareText(sess, avg){
   const head = sess.kind === 'daily'
     ? `Hue and Seek #${sess.puzzleNo} · ${MODE_LABEL[sess.mode]}`
     : `Hue and Seek · Archive · ${MODE_LABEL[sess.mode]}`;
-  return `${head}\n${avg}% average\n${blocksFor(sess.results)}\ngeordie.lol/hue-and-seek`;
+  return `${head}\n${avg}% average\n${blocksFor(sess.results)}\ngeordie.lol/hueandseek`;
 }
 
 async function copyShare(text){
@@ -2019,12 +2035,10 @@ window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 260)
   S.todayPuzzle = puzzleFor(S.today);
   S.archive = S.puzzles.filter(p => p.date < S.today);
 
-  const dated = S.puzzles.filter(p => p.date >= S.today).length;
+  /* Nothing about the size of the pack goes on the title card — it's
+     bookkeeping for whoever maintains the sheet, not for the player. The
+     one exception is a sheet that isn't finished, which is a warning. */
   const unbaked = S.puzzles.filter(p => !p.hexes).length;
-  $('credits').textContent =
-    `${S.puzzles.length} photograph${S.puzzles.length === 1 ? '' : 's'} · ${S.archive.length} in the archive · ` +
-    `${dated} day${dated === 1 ? '' : 's'} of runway` +
-    (source ? '' : ' · no manifest, using generated fields');
   if (source && unbaked){
     toast(`${unbaked} row${unbaked === 1 ? ' has' : 's have'} no colours in the sheet — those days fall back to colours drawn in the browser, which can differ between players. Run the setup tool.`);
   }
