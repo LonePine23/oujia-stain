@@ -1,26 +1,25 @@
 date,file,title,hex1,hex2,hex3,hex4,hex5
-2026-08-22,Deep Sunset.jpg,Deep Sunset,,,,,
-2026-08-23,edward-hopper_soir-bleu.jpg,Soir Bleu — Hopper,,,,,
-2026-08-24,F1000018.JPG,F1000018,,,,,
-2026-08-25,hiroshi-yoshida_kagurazaka-street-at-night-after-rain.jpg,Kagurazaka Street at Night After Rain — Yoshida,,,,,
-2026-08-26,Hiking.jpg,Hiking,,,,,
-2026-08-27,johannes-vermeer_the-milkmaid.png,The Milkmaid — Vermeer,,,,,
-2026-08-28,F1010002.JPG,F1010002,,,,,
-2026-08-29,ivan-aivazovsky_ship-on-stormy-seas.jpg,Ship on Stormy Seas — Aivazovsky,,,,,
-2026-08-30,Mountains.jpg,Mountains,,,,,
-2026-08-31,vincent-van-gogh_skull-of-a-skeleton-with-burning-cigarette.jpg,Skull of a Skeleton with Burning Cigarette — Van Gogh,,,,,
-2026-09-01,JP-SK - 23.jpg,JP-SK 23,,,,,
-2026-09-02,edvard-munch_vampire.jpg,Vampire — Munch,,,,,
-2026-09-03,New.jpg,New,,,,,
-2026-09-04,rembrandt_the-storm-on-the-sea-of-galilee.jpg,The Storm on the Sea of Galilee — Rembrandt,,,,,
-2026-09-05,F1000006.JPG,F1000006,,,,,
-2026-09-06,grant-wood_american-gothic.jpg,American Gothic — Wood,,,,,
-2026-09-07,I See You.jpg,I See You,,,,,
-2026-09-08,ivan-aivazovsky_the-wrath-of-the-seas.jpg,The Wrath of the Seas — Aivazovsky,,,,,
-2026-09-09,F1000037.JPG,F1000037,,,,,
-2026-09-10,5515aa9367097b109a0890b303f67091--classic-cartoon-characters-classic-cartoons.jpg,Classic Cartoon Characters,,,,,
-2026-09-11,Run Girl Run.jpg,Run Girl Run,,,,,
-2026-09-12,10.jpg,10,,,,,
-2026-09-13,F1000008.JPG,F1000008,,,,,
-2026-09-14,Jonathan.jpg,Jonathan,,,,,
-2026-09-15,New2.jpg,New2,,,,,
+2026-08-25,JP-SK - 23.jpg,JP-SK - 23,#21150a,#e0bd70,#7e6946,#a9a9ab,#788386
+2026-09-01,F1000018.JPG,F1000018,#e3a34c,#824d4e,#d07b3f,#2a1408,#f5dc86
+2026-09-02,5515aa9367097b109a0890b303f67091--classic-cartoon-characters-classic-cartoons.jpg,5515aa9367097b109a0890b303f67091--classic-cartoon-characters-classic-cartoons,#bc9e7c,#9aacc6,#414753,#676f7e,#e54e47
+2026-09-03,Deep Sunset.jpg,Deep Sunset,#fb0303,#2b0220,#090307,#5f0346,#960343
+2026-09-04,edvard-munch_vampire.jpg,edvard-munch_vampire,#402c36,#9b5d49,#85564e,#453321,#1c124e
+2026-09-05,edward-hopper_soir-bleu.jpg,edward-hopper_soir-bleu,#4b8c97,#8f9e9d,#6b775e,#24404f,#aa4439
+2026-09-06,F1000006.JPG,F1000006,#011107,#5d7e94,#cdbdb0,#94adbc,#6a756d
+2026-09-07,F1000008.JPG,F1000008,#f1e3e0,#697377,#183036,#8d9299,#a9a2a4
+2026-09-09,F1000037.JPG,F1000037,#efe3d4,#7a4e32,#9c6a33,#38534e,#231811
+2026-09-10,F1010002.JPG,F1010002,#eeeaeb,#110b0c,#27474d,#5b7577,#b7b891
+2026-09-11,grant-wood_american-gothic.jpg,grant-wood_american-gothic,#342310,#d5c895,#afbdab,#252624,#a59265
+2026-09-12,Hiking.jpg,Hiking,#0b250a,#0b1926,#27452d,#16323d,#213f3d
+2026-09-13,hiroshi-yoshida_kagurazaka-street-at-night-after-rain.jpg,hiroshi-yoshida_kagurazaka-street-at-night-after-rain,#292429,#395d70,#f7d5b5,#65282d,#d8ab86
+2026-09-14,I See You.jpg,I See You,#07071c,#f10a80,#e6b6b1,#e41426,#681022
+2026-09-15,ivan-aivazovsky_ship-on-stormy-seas.jpg,ivan-aivazovsky_ship-on-stormy-seas,#8c8b89,#0a2d43,#445e6d,#f6e7d2,#0b191b
+2026-09-16,ivan-aivazovsky_the-wrath-of-the-seas.jpg,ivan-aivazovsky_the-wrath-of-the-seas,#2a2823,#74848b,#3b4952,#343f42,#b7b7b1
+2026-09-17,johannes-vermeer_the-milkmaid.png,johannes-vermeer_the-milkmaid,#3c3221,#96917d,#03182c,#301a1b,#755d3d
+2026-09-18,Jonathan.jpg,Jonathan,#060d33,#fbfa93,#090f9b,#8a35d7,#f2c3b0
+2026-09-20,Mountains.jpg,Mountains,#160337,#d10cb6,#f8dfa6,#560362,#eea8aa
+2026-09-21,New.jpg,New,#220233,#666192,#730349,#1caebc,#388faa
+2026-09-22,New2.jpg,New2,#040410,#030639,#b905df,#fa0384,#fb0214
+2026-09-23,rembrandt_the-storm-on-the-sea-of-galilee.jpg,rembrandt_the-storm-on-the-sea-of-galilee,#1a1e29,#616a65,#97816b,#d7ab77,#3e2624
+2026-09-24,Run Girl Run.jpg,Run Girl Run,#10020f,#41003a,#fe000a,#970025,#3c00b3
+2026-09-25,vincent-van-gogh_skull-of-a-skeleton-with-burning-cigarette.jpg,vincent-van-gogh_skull-of-a-skeleton-with-burning-cigarette,#0f0f05,#393214,#ae9d65,#d3cb8b,#6a7154
