@@ -388,16 +388,17 @@ h4.sub{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var
       <table class="scoretable">
         <thead><tr><th>ΔE</th><th>Means</th><th class="num">Score</th></tr></thead>
         <tbody>
-          <tr><td>1</td><td>Invisible side by side</td><td class="num">97</td></tr>
-          <tr><td>5</td><td>You'd notice if you looked</td><td class="num">76</td></tr>
-          <tr><td>12</td><td>Clearly not the same colour</td><td class="num">41</td></tr>
-          <tr><td>20</td><td>A different colour</td><td class="num">17</td></tr>
-          <tr><td>35+</td><td>Not even close</td><td class="num">2</td></tr>
+          <tr><td>1</td><td>Invisible side by side</td><td class="num">99</td></tr>
+          <tr><td>2.3</td><td>What print and paint work accepts</td><td class="num">97</td></tr>
+          <tr><td>5</td><td>You'd notice if you looked</td><td class="num">90</td></tr>
+          <tr><td>12</td><td>Clearly not the same colour</td><td class="num">67</td></tr>
+          <tr><td>20</td><td>A different colour</td><td class="num">42</td></tr>
+          <tr><td>35+</td><td>Not even close</td><td class="num">13</td></tr>
         </tbody>
       </table>
 
       <h3>The reveal</h3>
-      <p>Lock in and the photo drains to grey except your colour, wherever it turns up — every spot that would have scored 80 or better. Not where it was. Where it all was.</p>
+      <p>Lock in and the photo drains to grey except your colour, wherever it turns up. Not where it was. Where it all was.</p>
 
       <h3>The archive</h3>
       <p>Every photograph that's had its day goes into the archive. Play one at random with five fresh colours — a new set each time, so a picture you've already seen is still a game. Archive rounds don't touch your record.</p>
@@ -1191,7 +1192,7 @@ function deriveTargets(work, count, rnd){
    or better, so it doubles as a picture of how much room you had.
    ===================================================================== */
 function buildHighlight(){
-  const thr = deltaEForScore(80);
+  const thr = REVEAL_DE;
   const fade = thr * 0.8;
   const long = Math.max(S.work.width, S.work.height);
   const k = Math.min(1, 340 / long);
@@ -1443,9 +1444,9 @@ $('zoomBtn').addEventListener('click', () => {
                photograph and its barrel carries your own colour.
      Easy      the chip, its hex, its name, and the split loupe — two
                flat fields meeting at a seam you watch for.
-       ΔE   1 → 97    ΔE   5 → 76    ΔE  20 → 17
-       ΔE   2 → 92    ΔE   8 → 59    ΔE  35 →  2
-       ΔE   3 → 87    ΔE  12 → 41
+       ΔE   1 → 99    ΔE   5 → 90    ΔE  20 → 42
+       ΔE   2 → 97    ΔE   8 → 80    ΔE  35 → 13
+       ΔE   3 → 95    ΔE  12 → 67    ΔE  45 →  5
    ===================================================================== */
 const MODES = {
   standard: {swatch:false, loupe:'photo', ringLive:true,  zoom:true},
@@ -1456,11 +1457,27 @@ const MODE_NOTES = {
   standard: 'You get the name. That is the lot. Find Glaucous from memory.',
   easy:     'You get the swatch, and a loupe split down the middle. Match the two halves until the seam vanishes.'
 };
-const CURVE = {k:13, p:1.35};
+/* The marking curve. k stretches it sideways — bigger is kinder at every
+   distance. p sets the shape: above about 1.4 the top flattens, so being
+   within a couple of ΔE reads as essentially perfect, while the tail
+   still falls away hard enough that a genuinely wrong colour can't look
+   respectable. The pair below is deliberate, not arbitrary: ΔE 2.3 is the
+   tolerance print and paint work accepts, so it scores 97 rather than
+   being nickel-and-dimed, and ΔE 35 is a different colour entirely, so it
+   scores 13. Retuning is this one line. */
+const CURVE = {k:22, p:1.5};
+const CURVE_V1 = {k:13, p:1.35};   // the first curve, kept only to migrate old records
 
-function scoreFor(dE){ return Math.round(100 * Math.exp(-Math.pow(dE / CURVE.k, CURVE.p))); }
-/** The ΔE at which a given score is awarded — used to size the reveal. */
-function deltaEForScore(score){ return CURVE.k * Math.pow(-Math.log(score / 100), 1 / CURVE.p); }
+function scoreFor(dE, c = CURVE){ return Math.round(100 * Math.exp(-Math.pow(dE / c.k, c.p))); }
+/** Inverse of the curve: the ΔE that earns a given score. */
+function deltaEForScore(score, c = CURVE){ return c.k * Math.pow(-Math.log(score / 100), 1 / c.p); }
+
+/* The reveal is NOT tied to the marking curve. It answers "where is this
+   colour in the photograph", which is a fact about the picture and does
+   not change because the marking got kinder — pinning it to a score meant
+   a gentler curve silently doubled the highlighted area. This is a plain
+   perceptual threshold: about where two colours stop being the same one. */
+const REVEAL_DE = 4.5;
 
 function verdictFor(dE){
   if (dE < 1.2)  return 'Indistinguishable';
@@ -1487,7 +1504,8 @@ function applyMode(){
    rather than stored, so a stat can be added later without migrating
    anyone's saved data.
    ===================================================================== */
-const STATS_KEY = 'hueandseek.stats.v2';
+const STATS_KEY = 'hueandseek.stats.v3';
+const STATS_KEY_V1 = 'hueandseek.stats.v2';   // scored on the first curve
 const PROG_KEY  = 'hueandseek.progress.v2';
 const MODE_KEY  = 'hueandseek.mode.v2';
 
@@ -1499,8 +1517,45 @@ function writeJSON(key, value){
   try { localStorage.setItem(key, JSON.stringify(value)); } catch(e){ /* private mode, never mind */ }
 }
 
+/* Days now carry the ΔE they were played at, not just the score, so the
+   curve can be retuned again without either wiping anyone's record or
+   averaging two different marking schemes together as though they meant
+   the same thing. Records from before that change hold scores only, so
+   they are migrated once by running the old curve backwards to recover
+   roughly what was actually achieved, then marking it again. Integer
+   scores make the inversion approximate — worth a few tenths of a ΔE in
+   the middle, and nothing at all compared to leaving them wrong. */
+function rescore(score){
+  const clamped = Math.min(99.4, Math.max(0.6, score));
+  return scoreFor(deltaEForScore(clamped, CURVE_V1));
+}
+
+function migrateStats(){
+  const old = readJSON(STATS_KEY_V1, null);
+  if (!old) return null;
+  const out = {};
+  for (const mode of ['standard','easy']){
+    out[mode] = {days:{}};
+    const days = (old[mode] && old[mode].days) || {};
+    for (const date in days){
+      const d = days[date];
+      const scores = (d.scores || []).map(rescore);
+      const groups = (d.groups || []).map(([g, sc]) => [g, rescore(sc)]);
+      out[mode].days[date] = {
+        avg: scores.length ? Math.round(scores.reduce((a,v) => a + v, 0) / scores.length) : d.avg,
+        scores, groups,
+        dEs: (d.scores || []).map(sc => +deltaEForScore(Math.min(99.4, Math.max(0.6, sc)), CURVE_V1).toFixed(2)),
+        recurved: true
+      };
+    }
+  }
+  writeJSON(STATS_KEY, out);
+  return out;
+}
+
 function loadStats(){
-  const s = readJSON(STATS_KEY, {});
+  let s = readJSON(STATS_KEY, null);
+  if (s == null) s = migrateStats() || {};
   for (const m of ['standard','easy']) if (!s[m]) s[m] = {days:{}};
   return s;
 }
@@ -1511,6 +1566,7 @@ function recordDay(mode, date, results){
   s[mode].days[date] = {
     avg: Math.round(results.reduce((a,r) => a + r.score, 0) / results.length),
     scores: results.map(r => r.score),
+    dEs: results.map(r => +r.dE.toFixed(2)),
     groups: results.map(r => [r.group, r.score])
   };
   writeJSON(STATS_KEY, s);
