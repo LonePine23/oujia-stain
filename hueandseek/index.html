@@ -9,7 +9,11 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
 /* ---------------------------------------------------------------
-   HUE AND SEEK
+   HUE AND SEEK — a daily puzzle
+   One photograph a day. Five colours hidden in it. Everyone gets
+   the same photograph and the same five colours, because both are
+   nominated in the manifest rather than drawn at runtime.
+
    The playing interface carries no colour of its own. Every hue
    inside the frame is either the target chip, the photograph, or
    your own selection — a coloured UI would shift your reading of
@@ -80,15 +84,41 @@ button{font:inherit; color:inherit; background:none; border:none; cursor:pointer
 }
 .wordmark{
   font-family:var(--serif); font-size:clamp(38px, 9.6vw, 74px); line-height:.96;
-  letter-spacing:-.015em; margin:24px 0 12px; user-select:none; cursor:default;
+  letter-spacing:-.015em; margin:20px 0 10px; user-select:none; cursor:default;
 }
 .wordmark span{display:inline-block;}
 .tagline{
   font-family:var(--serif); font-style:italic;
   font-size:clamp(21px,5.4vw,27px); line-height:1.2;
-  margin:14px 0 6px;
+  margin:12px 0 4px;
 }
-.instruction{color:var(--dim); margin:0 0 26px;}
+.instruction{color:var(--dim); margin:0 0 22px;}
+
+.field{margin-bottom:20px;}
+.field > .eyebrow{display:block; margin-bottom:9px;}
+.choices{display:flex; flex-wrap:wrap; gap:8px;}
+.chip-btn{border:1px solid var(--rule); background:var(--raise); padding:9px 14px; font-size:12px; letter-spacing:.04em;}
+.chip-btn[aria-pressed="true"]{background:var(--text); color:var(--ink); border-color:var(--text);}
+
+/* The stat rail. Dashes until there's something to say — an empty
+   frame reads as "not yet", where a hidden one reads as "never". */
+.stats{display:flex; gap:8px; flex-wrap:wrap;}
+.stat{flex:1 1 92px; min-width:92px; border:1px solid var(--rule); background:var(--raise); padding:7px 10px 8px;}
+.stat b{display:block; font-weight:500; font-size:17px; font-variant-numeric:tabular-nums; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.stat b.sm{font-size:13px; line-height:1.5;}
+
+/* Today, already played. */
+#dailyDone{border:1px solid var(--rule); background:var(--raise); padding:13px 15px 14px;}
+.blocks{font-size:20px; letter-spacing:.14em; line-height:1.3; margin:5px 0 3px;}
+.doneAvg{font-family:var(--serif); font-size:30px; line-height:1.1;}
+.doneRow{display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; justify-content:space-between;}
+#nextIn{font-size:11px; color:var(--dim); letter-spacing:.06em; margin-top:9px;}
+
+.card-foot{
+  margin-top:auto; padding-top:16px; border-top:1px solid var(--rule);
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+}
+#credits{width:100%; margin:0; font-size:11px; color:var(--dim);}
 
 /* ===================== RULES ===================== */
 #rules{flex:1; min-height:0; padding:14px; display:flex;}
@@ -103,16 +133,6 @@ button{font:inherit; color:inherit; background:none; border:none; cursor:pointer
 .scoretable td{padding:7px 0; color:var(--dim);}
 .scoretable td:first-child{color:var(--text); font-variant-numeric:tabular-nums; width:56px;}
 .scoretable td.num{color:var(--text);}
-.field{margin-bottom:20px;}
-.field > .eyebrow{display:block; margin-bottom:9px;}
-.choices{display:flex; flex-wrap:wrap; gap:8px;}
-.chip-btn{border:1px solid var(--rule); background:var(--raise); padding:9px 14px; font-size:12px; letter-spacing:.04em;}
-.chip-btn[aria-pressed="true"]{background:var(--text); color:var(--ink); border-color:var(--text);}
-.card-foot{
-  margin-top:auto; padding-top:16px; border-top:1px solid var(--rule);
-  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
-}
-#credits{width:100%; margin:0; font-size:11px; color:var(--dim);}
 
 /* ===================== PLAY ===================== */
 #play{flex:1; display:flex; flex-direction:column; min-height:0;}
@@ -126,11 +146,10 @@ button{font:inherit; color:inherit; background:none; border:none; cursor:pointer
 /* The header is a scoreboard: target on the left, yours on the right, the
    two chips meeting at a butt joint in the centre like the split loupe.
    Both sides hold their place for the whole round — your half is simply
-   empty until you answer, blending into the rail so the target chip reads
-   alone while the layout stays balanced. Nothing moves when the answer
-   arrives; the blank half just fills in.
-   The rail and the dock are fixed height, so the photograph keeps exactly
-   the same dimensions from the first round to the last. */
+   empty until you answer, so the layout never moves when the answer
+   arrives; the blank half just fills in. The rail and the dock are fixed
+   height, so the photograph keeps exactly the same dimensions from the
+   first colour to the fifth. */
 .chiprail{
   display:flex; align-items:center; height:88px; flex:0 0 auto;
   border-bottom:1px solid var(--rule); background:var(--surface);
@@ -144,14 +163,13 @@ button{font:inherit; color:inherit; background:none; border:none; cursor:pointer
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;
 }
 .railSide .hx{font-size:10.5px; letter-spacing:.12em; color:var(--dim); margin-top:2px;}
-/* your side stays quiet until there's something in it */
 .chiprail:not(.revealed) .railSide.right .nm,
 .chiprail:not(.revealed) .railSide.right .hx{color:#3a3a3e;}
 .swatchPair{flex:0 0 auto; width:180px; height:100%; display:flex;}
 .swatchPair > div{flex:1 1 0; height:100%;}
 #swTarget{background:#888; transition:background .3s ease;}
 #swPick{background:var(--surface); transition:background .3s ease;}
-/* Hard mode: no chip, no hex — the name is all you get until you answer.
+/* Standard: no chip, no hex — the name is all you get until you answer.
    !important because the round sets the swatch colour as an inline style,
    and an inline style beats an ordinary rule. Both chips fill on reveal. */
 .chiprail.blind:not(.revealed) #swTarget{background:var(--surface) !important;}
@@ -180,20 +198,18 @@ button{font:inherit; color:inherit; background:none; border:none; cursor:pointer
   background:var(--mat); color:#2e2e2e; font-size:11px; letter-spacing:.16em;
   text-transform:uppercase; z-index:5;
 }
+/* Five pips: which colour you're on, and how the earlier ones went. */
+.pips{display:flex; gap:4px; align-items:center;}
+.pip{width:16px; height:4px; background:#303035;}
+.pip.now{background:var(--text);}
 .zoomwrap{flex:0 0 auto; display:flex; flex-direction:column; gap:3px; align-items:flex-start;}
 .dock{flex:0 0 auto; border-top:1px solid var(--rule); background:var(--surface); padding:0 14px; height:64px; display:flex; align-items:center; gap:12px;}
-#zoomBtn,#assistBtn{border:1px solid var(--rule); background:var(--raise); padding:7px 10px; font-size:11px; min-width:46px;}
-#zoomBtn:disabled{opacity:.35; cursor:default;}
-#assistBtn[aria-pressed="true"]{background:var(--text); color:var(--ink); border-color:var(--text);}
+#zoomBtn{border:1px solid var(--rule); background:var(--raise); padding:7px 10px; font-size:11px; min-width:46px;}
 #lockBtn{min-width:130px;}
-
 
 /* ===================== SUMMARY ===================== */
 #summary{flex:1; min-height:0; padding:14px; display:flex;}
 .sheet{flex:1; min-height:0; overflow-y:auto; border:1px solid var(--rule); background:var(--surface); padding:20px 24px 18px;}
-.bests{display:flex; gap:8px;}
-.best{flex:0 0 auto; min-width:88px; border:1px solid var(--rule); background:var(--raise); padding:7px 10px 8px;}
-.best b{display:block; font-weight:500; font-size:17px; font-variant-numeric:tabular-nums; margin-top:2px;}
 
 .grade{display:flex; gap:16px; align-items:stretch; margin:14px 0 16px;}
 .gradeSw{flex:0 0 auto; width:96px; align-self:stretch; min-height:96px; border:1px solid var(--rule);}
@@ -202,17 +218,18 @@ button{font:inherit; color:inherit; background:none; border:none; cursor:pointer
 .gradeMeta{font-size:11px; color:var(--dim); letter-spacing:.06em;}
 .gradeMeta b{color:var(--text); font-weight:500; font-size:13px;}
 .quip{font-size:14px; line-height:1.5; margin:0 0 14px; max-width:52ch;}
-.record{font-size:11px; letter-spacing:.06em; color:var(--dim); margin-bottom:4px;}
-table{width:100%; border-collapse:collapse; margin:20px 0; font-size:12px;}
+.record{font-size:11px; letter-spacing:.06em; color:var(--dim); margin-bottom:10px;}
+table{width:100%; border-collapse:collapse; margin:18px 0; font-size:12px;}
 th{text-align:left; font-weight:400; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); padding:0 0 7px; border-bottom:1px solid var(--rule);}
 td{padding:8px 0; border-bottom:1px solid var(--rule); vertical-align:middle;}
 td.num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
 .pair{display:inline-flex; vertical-align:middle; margin-right:8px; border:1px solid var(--rule);}
 .pair i{display:block; width:16px; height:16px;}
-.sheet-actions{display:flex; gap:10px; flex-wrap:wrap;}
+.sheet-actions{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+h4.sub{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--dim); font-weight:400; margin:22px 0 9px; padding-top:14px; border-top:1px solid var(--rule);}
 
 #loading{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:var(--ink); z-index:20; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--dim);}
-#toast{position:absolute; left:50%; bottom:20px; transform:translateX(-50%); background:var(--raise); border:1px solid var(--rule); padding:10px 16px; font-size:11.5px; max-width:88%; z-index:30;}
+#toast{position:absolute; left:50%; bottom:20px; transform:translateX(-50%); background:var(--raise); border:1px solid var(--rule); padding:10px 16px; font-size:11.5px; max-width:88%; z-index:30; text-align:center;}
 
 @media (max-width:460px){
   .chiprail{height:76px;}
@@ -224,8 +241,9 @@ td.num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
   #menu,#summary{padding:0;}
   .card,.sheet{border:0; padding:18px 16px;}
   #lockBtn{min-width:0; padding:11px 12px;}
-  #zoomBtn,#assistBtn{min-width:0; padding:6px 7px;}
-  .dock{gap:7px; padding-left:10px; padding-right:10px;}
+  #zoomBtn{min-width:0; padding:6px 7px;}
+  .dock{gap:9px; padding-left:10px; padding-right:10px;}
+  .stat{flex:1 1 44%; min-width:0;}
 }
 @media (prefers-reduced-motion:reduce){ *{animation:none !important; transition:none !important;} }
 </style>
@@ -239,41 +257,49 @@ td.num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
   <section id="menu" class="hidden">
     <div class="card" id="card">
       <div class="card-top">
-        <span class="eyebrow">A colour matching game</span>
+        <span class="eyebrow" id="todayLine">A colour matching game</span>
         <span class="eyebrow">Melbourne</span>
       </div>
 
       <h1 class="wordmark" id="wordmark" aria-label="Hue and Seek"></h1>
 
       <p class="tagline">A game of hueristics.</p>
-      <p class="instruction">Find the colour in the photo.</p>
+      <p class="instruction">Five colours. One photograph. Same for everyone.</p>
 
-      <div class="field">
-        <span class="eyebrow">Session length</span>
-        <div class="choices" id="modeChoices">
-          <button class="chip-btn" data-mode="5" aria-pressed="true">5 rounds</button>
-          <button class="chip-btn" data-mode="10" aria-pressed="false">10 rounds</button>
-          <button class="chip-btn" data-mode="15" aria-pressed="false">15 rounds</button>
-        </div>
-      </div>
-
-      <div class="field">
+      <div class="field" id="modeField">
         <span class="eyebrow">How much help you get</span>
         <div class="choices" id="tolChoices">
+          <button class="chip-btn" data-tol="standard" aria-pressed="true">Standard</button>
           <button class="chip-btn" data-tol="easy" aria-pressed="false">Easy</button>
-          <button class="chip-btn" data-tol="medium" aria-pressed="true">Medium</button>
-          <button class="chip-btn" data-tol="hard" aria-pressed="false">Hard</button>
         </div>
         <p class="note" id="modeNote"></p>
       </div>
 
+      <div class="field hidden" id="doneField">
+        <span class="eyebrow">Today's Hue and Seek</span>
+        <div id="dailyDone">
+          <div class="doneRow">
+            <div>
+              <div class="blocks" id="doneBlocks"></div>
+              <span class="eyebrow" id="doneMode"></span>
+            </div>
+            <div style="text-align:right">
+              <span class="eyebrow">Average</span>
+              <div class="doneAvg" id="doneAvg">—</div>
+            </div>
+          </div>
+          <div id="nextIn"></div>
+        </div>
+      </div>
+
       <div class="field">
-        <span class="eyebrow">Your best</span>
-        <div class="bests" id="bests"></div>
+        <span class="eyebrow" id="statsLabel">Your record — Standard</span>
+        <div class="stats" id="stats"></div>
       </div>
 
       <div class="card-foot">
         <button class="btn primary" id="startBtn">Begin</button>
+        <button class="btn" id="challengeBtn">Archive</button>
         <button class="btn" id="rulesBtn">How it works</button>
         <p class="note" id="credits"></p>
       </div>
@@ -311,13 +337,13 @@ td.num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
     </div>
 
     <div class="dock">
+      <div class="zoomwrap" id="pipWrap">
+        <span class="eyebrow">Colour</span>
+        <div class="pips" id="pips"></div>
+      </div>
       <div class="zoomwrap" id="zoomWrap">
         <span class="eyebrow">Zoom</span>
         <button id="zoomBtn">8×</button>
-      </div>
-      <div class="zoomwrap" id="loupeWrap">
-        <span class="eyebrow">Loupe</span>
-        <button id="assistBtn" aria-pressed="false">Photo</button>
       </div>
       <div id="dockVerdict" class="hidden">
         <div class="vd" id="verdictText"></div>
@@ -334,26 +360,25 @@ td.num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
       <span class="eyebrow">How it works</span>
       <h2 class="rulesHead">Find the colour in the photo.</h2>
 
-      <h3>The three modes</h3>
-      <p>Difficulty is about what you're given, not how you're marked.</p>
+      <p>One photograph a day, and five colours hidden somewhere inside it. Everyone playing today gets the same photograph and the same five colours, so a score is worth comparing.</p>
+
+      <h3>The two modes</h3>
+      <p>Difficulty is about what you're given, not how you're marked. Both score on the same curve.</p>
       <ul>
-        <li><b>Easy</b> — the colour chip, its name, and a loupe split down the middle: the target on one side, the pixel under your marker on the other, meeting at a straight edge. When the join disappears you're on it. This is the most sensitive comparison there is, which is why it's the easy one.</li>
-        <li><b>Medium</b> — the chip, its name, and a magnifier ringed in the target colour. You judge your pixel against the photograph itself rather than against a flat field, and you can change the magnification.</li>
-        <li><b>Hard</b> — the name and nothing else. No chip, no hex code, and the loupe barrel is plain grey so it gives nothing away. You have to already know what Glaucous looks like. The chip appears once you've locked in, so you find out either way.</li>
+        <li><b>Standard</b> — the colour's name, and nothing else. No chip, no hex. The loupe magnifies the photograph, and its barrel carries <em>your</em> colour, not the target's, so you can see what you're holding but never what you're hunting. The chip appears the moment you lock in, so you find out either way.</li>
+        <li><b>Easy</b> — the chip, its hex, its name, and a loupe split down the middle: the target on one side, the pixel under your marker on the other, meeting at a straight edge. When the join disappears you're on it. This is the most sensitive comparison there is, which is why it's the easy one.</li>
       </ul>
 
-      <h3>Playing a round</h3>
-      <p>You're given a colour — a swatch, its name and its hex. Somewhere in the photograph is a point that matches it.</p>
+      <h3>Playing a colour</h3>
       <ul>
         <li>Tap or click anywhere to drop a marker.</li>
         <li>Drag to move it. On a keyboard, arrow keys move one pixel and Shift-arrow moves ten.</li>
-        <li>The loupe follows the marker, in whichever form your mode allows. On Medium you can switch between the two.</li>
         <li>Lock in when you're satisfied. There's no clock.</li>
+        <li>Five colours, in order, and then the day is done. One attempt — your progress is kept, so you can close the tab and come back to it.</li>
       </ul>
 
       <h3>How it's scored</h3>
       <p>Your colour is compared to the target with CIEDE2000, the international standard for colour difference. It's measured in ΔE, which is roughly the number of just-noticeable differences between two colours. It isn't a distance in RGB — it's tuned to how an eye actually reads a gap, so two dark browns can be far apart and two bright yellows can be almost the same.</p>
-      <p>Every mode is marked on the same curve, so a score means the same thing whoever you're playing against.</p>
       <table class="scoretable">
         <thead><tr><th>ΔE</th><th>Means</th><th class="num">Score</th></tr></thead>
         <tbody>
@@ -365,15 +390,15 @@ td.num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
           <tr><td>35+</td><td>A different colour entirely</td><td class="num">2</td></tr>
         </tbody>
       </table>
-      <p><b>Where you clicked doesn't matter — only the colour you landed on.</b> If the target colour appears in three places in the photograph, all three are equally right. The marked target point is just one place it's known to be.</p>
+      <p><b>Where you clicked doesn't matter — only the colour you landed on.</b> If the target colour appears in three places in the photograph, all three are equally right.</p>
       <p>Colours are averaged over a small disc rather than read from a single pixel, so one stray speck of JPEG noise can't decide a round.</p>
       <p>When you lock in, the photograph drains to grey except for the colour you were hunting, which stays at full strength everywhere it occurs — every place that would have scored 80 or better. It answers the question the marker can't: not where it was, but where it all was.</p>
 
-      <h3>The colours themselves</h3>
-      <p>Nothing is pre-set. Each round the photograph is analysed and a colour is drawn from it at random, weighted towards regions that are vivid and big enough to find without being the entire background. The same photograph will hand you something different next time.</p>
+      <h3>The archive</h3>
+      <p>Every photograph that has had its day goes into the archive. Play one at random, five fresh colours drawn out of it — a different set every time, so a photograph you've already seen is still a game. Archive rounds don't touch your daily record.</p>
 
-      <h3>Your colour</h3>
-      <p>At the end, the session resolves into a single colour and you're told what it's called. Its hue comes from the average of everything you actually picked, so it belongs to that run. Its lightness and saturation come from your accuracy: play well and it arrives clear and vivid, play badly and it comes out murky.</p>
+      <h3>Your record</h3>
+      <p>Standard and Easy keep separate records, because an Easy 90 and a Standard 90 are not the same achievement. Your streak counts consecutive days finished. The strongest group is whichever family of hues you're most accurate with, once you've met it a few times.</p>
 
       <div class="sheet-actions">
         <button class="btn primary" id="rulesBackBtn">Back</button>
@@ -384,7 +409,7 @@ td.num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
   <!-- ===================== SUMMARY ===================== -->
   <section id="summary" class="hidden">
     <div class="sheet">
-      <span class="eyebrow">Session complete</span>
+      <span class="eyebrow" id="sumEyebrow">Today's Hue and Seek</span>
       <div class="grade">
         <div class="gradeSw" id="gradeSw"></div>
         <div class="gradeText">
@@ -395,13 +420,19 @@ td.num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
       </div>
       <p class="quip" id="quip"></p>
       <div id="recordFlag" class="record"></div>
-      <div id="summarySub" class="note"></div>
       <table>
-        <thead><tr><th>Round</th><th>Picked / target</th><th class="num">ΔE</th><th class="num">Match</th></tr></thead>
+        <thead><tr><th>Colour</th><th>Picked / target</th><th class="num">ΔE</th><th class="num">Match</th></tr></thead>
         <tbody id="summaryRows"></tbody>
       </table>
-      <div class="sheet-actions">
-        <button class="btn primary" id="againBtn">Play again</button>
+
+      <div id="statsBlock">
+        <h4 class="sub" id="sumStatsLabel">Your record</h4>
+        <div class="stats" id="sumStats"></div>
+      </div>
+
+      <div class="sheet-actions" style="margin-top:20px">
+        <button class="btn primary" id="shareBtn">Copy result</button>
+        <button class="btn" id="againBtn">Play another</button>
         <button class="btn" id="menuBtn">Home</button>
       </div>
     </div>
@@ -409,9 +440,6 @@ td.num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
 
   <div id="toast" class="hidden"></div>
 </div>
-
-<!-- Optional level pack exported by the setup tool. A missing file is fine. -->
-<script src="levels.js" onerror="void 0"></script>
 
 <script>
 "use strict";
@@ -509,6 +537,40 @@ function lchToHex(L, C, h){
 }
 
 /* =====================================================================
+   1b. HUE FAMILIES
+   Nine bands around the Lab hue circle, plus a neutral bucket for
+   anything with almost no chroma. Greys and near-blacks behave nothing
+   like a hue and would otherwise pollute whichever band they happen to
+   lean towards — a dark brown is not a weak red.
+   ===================================================================== */
+const NEUTRAL_CHROMA = 12;
+
+/* Bands are set by nearest anchor rather than by hand-written ranges,
+   because Lab hue is nothing like the colour wheel people picture: red
+   sits at 36°, yellow at 90°, and the whole blue family sprawls from
+   242° to 299° while red through green is crammed into 130°. Written as
+   ranges by eye it puts a clear red in "Oranges" and magenta in "Reds",
+   which is what the first version did. These are measured. */
+const HUE_ANCHORS = [
+  ['Reds',      36.1], ['Oranges', 59.9], ['Yellows',  90.3],
+  ['Limes',    119.4], ['Greens', 144.3], ['Teals',   196.4],
+  ['Blues',    288.5], ['Violets',310.1], ['Magentas',345.4]
+];
+
+function hueGroup(lab){
+  const chroma = Math.hypot(lab[1], lab[2]);
+  if (chroma < NEUTRAL_CHROMA) return 'Neutrals';
+  const h = hueDeg(lab[2], lab[1]);
+  let best = 'Reds', bestD = Infinity;
+  for (const [name, anchor] of HUE_ANCHORS){
+    let d = Math.abs(h - anchor);
+    if (d > 180) d = 360 - d;
+    if (d < bestD){ bestD = d; best = name; }
+  }
+  return best;
+}
+
+/* =====================================================================
    2. NAMED-COLOUR REFERENCE
    ===================================================================== */
 const NAME_SOURCES = [
@@ -544,14 +606,13 @@ async function loadNames(){
         const [r,g,b] = hex2rgb(c.hex);
         return {name:c.name, hex:c.hex, lab:rgbToLab(r,g,b)};
       });
-      return `${NAMES.length.toLocaleString()} names loaded`;
+      return;
     } catch(e){ /* try next */ }
   }
   NAMES = FALLBACK_NAMES.map(([name,hex]) => {
     const [r,g,b] = hex2rgb(hex);
     return {name, hex, lab:rgbToLab(r,g,b)};
   });
-  return 'offline — using the built-in shortlist';
 }
 
 function nameOf(lab){
@@ -564,84 +625,72 @@ function nameOf(lab){
 }
 
 /* =====================================================================
-   3. FALLBACK LEVELS — playable before you've run the setup tool
+   3. SEEDS AND DATES
+   The daily puzzle turns over at local midnight, so your date is your
+   puzzle — the same way Wordle does it. Everything that has to be the
+   same for every player is either written in the manifest or derived
+   from the date string, never from Math.random().
    ===================================================================== */
-function mulberry32(a){ return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a>>>15, 1 | a); t = t + Math.imul(t ^ t>>>7, 61 | t) ^ t; return ((t ^ t>>>14) >>> 0) / 4294967296; }; }
+function mulberry32(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a>>>15, 1 | a);
+    t = t + Math.imul(t ^ t>>>7, 61 | t) ^ t;
+    return ((t ^ t>>>14) >>> 0) / 4294967296;
+  };
+}
+function hashStr(str){
+  let h = 1779033703 ^ str.length;
+  for (let i = 0; i < str.length; i++){
+    h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+    h = h << 13 | h >>> 19;
+  }
+  h = Math.imul(h ^ h>>>16, 2246822507);
+  h = Math.imul(h ^ h>>>13, 3266489909);
+  return (h ^= h>>>16) >>> 0;
+}
+const seededRng = str => mulberry32(hashStr(str));
 
-function buildFallbackLevels(){
-  const specs = [
-    {seed:11, kind:'blocks', title:'Calibration — flat fields',    difficulty:1},
-    {seed:29, kind:'blooms', title:'Calibration — soft blooms',    difficulty:2},
-    {seed:47, kind:'mosaic', title:'Calibration — narrow palette', difficulty:4}
-  ];
-  return specs.map(spec => {
-    const W = 900, H = 640;
-    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
-    const c = cv.getContext('2d');
-    const rnd = mulberry32(spec.seed);
-    const baseHue = rnd() * 360;
-    let target = null;
-
-    if (spec.kind === 'blocks'){
-      const cols = 3, rows = 2, picks = [];
-      for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++){
-        const h = (baseHue + (x + y*cols) * 57 + rnd()*14) % 360;
-        c.fillStyle = `hsl(${h} ${48 + rnd()*26}% ${34 + rnd()*30}%)`;
-        c.fillRect(x*W/cols, y*H/rows, W/cols + 1, H/rows + 1);
-        picks.push([x*W/cols + W/cols/2, y*H/rows + H/rows/2]);
-      }
-      target = picks[Math.floor(rnd()*picks.length)];
-    } else if (spec.kind === 'blooms'){
-      c.fillStyle = `hsl(${baseHue} 18% 16%)`; c.fillRect(0,0,W,H);
-      const pts = [];
-      for (let i = 0; i < 7; i++){
-        const cx = 90 + rnd()*(W-180), cy = 80 + rnd()*(H-160), r = 110 + rnd()*180;
-        const h = (baseHue + 40 + rnd()*280) % 360;
-        const g = c.createRadialGradient(cx,cy,0,cx,cy,r);
-        g.addColorStop(0, `hsla(${h} 72% 58% / .95)`);
-        g.addColorStop(1, `hsla(${h} 72% 58% / 0)`);
-        c.fillStyle = g; c.fillRect(0,0,W,H);
-        pts.push([cx,cy]);
-      }
-      target = pts[Math.floor(rnd()*pts.length)];
-    } else {
-      c.fillStyle = `hsl(${baseHue} 22% 30%)`; c.fillRect(0,0,W,H);
-      const cells = [], cw = 60, ch = 60;
-      for (let y = 0; y < H; y += ch) for (let x = 0; x < W; x += cw){
-        const h = (baseHue + (rnd()-0.5)*26) % 360;
-        c.fillStyle = `hsl(${h} ${26 + rnd()*20}% ${24 + rnd()*34}%)`;
-        c.fillRect(x, y, cw+1, ch+1);
-        cells.push([x + cw/2, y + ch/2]);
-      }
-      target = cells[Math.floor(rnd()*cells.length)];
-    }
-
-    const d = c.getImageData(Math.round(target[0]), Math.round(target[1]), 1, 1).data;
-    return {
-      id: 'gen-' + spec.seed, title: spec.title, src: cv.toDataURL('image/png'),
-      x: target[0] / W, y: target[1] / H,
-      hex: rgb2hex(d[0], d[1], d[2]), difficulty: spec.difficulty
-    };
-  });
+const pad2 = n => String(n).padStart(2, '0');
+function localDateStr(d = new Date()){
+  return d.getFullYear() + '-' + pad2(d.getMonth()+1) + '-' + pad2(d.getDate());
+}
+function dateFromStr(s){
+  const [y,m,d] = s.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+/** Whole days from a to b. Rounded, so a DST shift can't produce 0.96. */
+function daysBetween(a, b){ return Math.round((dateFromStr(b) - dateFromStr(a)) / 86400000); }
+function shiftDate(s, days){
+  const d = dateFromStr(s); d.setDate(d.getDate() + days); return localDateStr(d);
+}
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+function prettyDate(s){
+  const d = dateFromStr(s);
+  return `${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`;
 }
 
 /* =====================================================================
-   3b. THE MANIFEST
-   The pack is a spreadsheet. Columns are matched by name, so you can
-   reorder them, add your own, and leave out anything optional:
+   4. THE MANIFEST
+   A plain spreadsheet, fetched at load. One row per day:
 
+       date       YYYY-MM-DD — the day this photograph is the puzzle
        file       image filename, resolved against IMAGE_BASE
-       url        full URL instead, if the images live elsewhere
-       x, y       target point, 0–1 across the frame
-       hex        target colour (optional — read off the image if absent)
-       tier       1–5, easy to hard (optional, defaults to 3)
+       url        a full URL instead, if the images live elsewhere
        title      your name for it (optional)
+       hex1..5    the five target colours, in playing order
 
-   Because the game fetches this at load rather than having it compiled
-   in, editing the sheet and committing is the whole publishing step.
+   The hexes are written into the sheet rather than derived at runtime
+   on purpose. Browsers do not decode JPEGs or downscale canvases
+   identically, so clustering the photograph in the player's browser
+   would hand different people slightly different colours and quietly
+   break the one promise the daily makes. Editing the sheet and
+   committing is still the whole publishing step.
    ===================================================================== */
 const PACK_CSV   = 'levels.csv';
 const IMAGE_BASE = 'images/';
+const TARGETS_PER_DAY = 5;
 
 function parseCSV(text){
   const rows = []; let row = [], field = '', quoted = false;
@@ -660,41 +709,117 @@ function parseCSV(text){
   return rows.filter(r => r.some(c => c.trim() !== ''));
 }
 
-function csvToLevels(text, base){
+const normHex = s => {
+  const h = String(s || '').trim().replace('#','');
+  return /^[0-9a-f]{6}$/i.test(h) ? '#' + h.toLowerCase() : null;
+};
+
+function csvToPuzzles(text, base){
   const rows = parseCSV(text);
   if (rows.length < 2) throw new Error('the sheet has no rows under its header');
   const head = rows[0].map(h => h.trim().toLowerCase());
   const at = n => head.indexOf(n);
-  const iFile = at('file'), iUrl = at('url'), iX = at('x'), iY = at('y'),
-        iHex = at('hex'), iTier = at('tier'), iTitle = at('title');
-  if (iX < 0 || iY < 0) throw new Error('the sheet needs x and y columns');
+  const iDate = at('date'), iFile = at('file'), iUrl = at('url'), iTitle = at('title');
+  const iHex = [];
+  for (let k = 1; k <= TARGETS_PER_DAY; k++) iHex.push(at('hex' + k));
+  if (iDate < 0) throw new Error('the sheet needs a date column');
   if (iFile < 0 && iUrl < 0) throw new Error('the sheet needs a file or url column');
 
-  return rows.slice(1).map((r, n) => {
+  const out = [];
+  rows.slice(1).forEach(r => {
     const cell = i => (i >= 0 && r[i] != null ? r[i].trim() : '');
-    const file = cell(iFile), url = cell(iUrl), hex = cell(iHex).replace('#','');
-    return {
-      id: 'csv' + n,
+    const date = cell(iDate), file = cell(iFile), url = cell(iUrl);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
+    const src = url || (file ? base + file : '');
+    if (!src) return;
+    const hexes = iHex.map(cell).map(normHex).filter(Boolean);
+    out.push({
+      date, file, src,
       title: cell(iTitle) || file.replace(/\.[^.]+$/, ''),
-      src: url || (file ? base + file : ''),
-      x: parseFloat(cell(iX)),
-      y: parseFloat(cell(iY)),
-      hex: /^[0-9a-f]{6}$/i.test(hex) ? '#' + hex.toLowerCase() : null,
-      difficulty: Math.max(1, Math.min(5, parseInt(cell(iTier), 10) || 3))
-    };
-  }).filter(l => l.src && isFinite(l.x) && isFinite(l.y));
+      hexes: hexes.length === TARGETS_PER_DAY ? hexes : null
+    });
+  });
+  out.sort((a,b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+  return out;
 }
+
+/* Playable before there's a sheet, and the only thing that works from
+   file://. Six generated fields, dated backwards from today, so both
+   the daily and the archive have something in them. */
+function buildFallbackPuzzles(){
+  const today = localDateStr();
+  const kinds = ['blocks','blooms','mosaic','blocks','blooms','mosaic'];
+  return kinds.map((kind, n) => {
+    const date = shiftDate(today, n - kinds.length + 1);
+    const rnd = seededRng('fallback:' + date);
+    const W = 900, H = 640;
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const c = cv.getContext('2d', {willReadFrequently:true});
+    const baseHue = rnd() * 360;
+    const pts = [];
+
+    if (kind === 'blocks'){
+      const cols = 3, rows = 2;
+      for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++){
+        const h = (baseHue + (x + y*cols) * 57 + rnd()*14) % 360;
+        c.fillStyle = `hsl(${h} ${48 + rnd()*26}% ${34 + rnd()*30}%)`;
+        c.fillRect(x*W/cols, y*H/rows, W/cols + 1, H/rows + 1);
+        pts.push([x*W/cols + W/cols/2, y*H/rows + H/rows/2]);
+      }
+    } else if (kind === 'blooms'){
+      c.fillStyle = `hsl(${baseHue} 18% 16%)`; c.fillRect(0,0,W,H);
+      for (let i = 0; i < 7; i++){
+        const cx = 90 + rnd()*(W-180), cy = 80 + rnd()*(H-160), r = 110 + rnd()*180;
+        const h = (baseHue + 40 + rnd()*280) % 360;
+        const g = c.createRadialGradient(cx,cy,0,cx,cy,r);
+        g.addColorStop(0, `hsla(${h} 72% 58% / .95)`);
+        g.addColorStop(1, `hsla(${h} 72% 58% / 0)`);
+        c.fillStyle = g; c.fillRect(0,0,W,H);
+        pts.push([cx,cy]);
+      }
+    } else {
+      c.fillStyle = `hsl(${baseHue} 22% 30%)`; c.fillRect(0,0,W,H);
+      const cw = 90, ch = 90;
+      for (let y = 0; y < H; y += ch) for (let x = 0; x < W; x += cw){
+        const h = (baseHue + (rnd()-0.5)*70) % 360;
+        c.fillStyle = `hsl(${h} ${26 + rnd()*34}% ${24 + rnd()*44}%)`;
+        c.fillRect(x, y, cw+1, ch+1);
+        pts.push([x + cw/2, y + ch/2]);
+      }
+    }
+
+    // Five well-separated colours, read straight off the generated canvas.
+    const hexes = [];
+    const labs = [];
+    for (let guard = 0; guard < 400 && hexes.length < TARGETS_PER_DAY; guard++){
+      const p = pts[Math.floor(rnd()*pts.length)];
+      const d = c.getImageData(Math.round(p[0]), Math.round(p[1]), 1, 1).data;
+      const lab = rgbToLab(d[0], d[1], d[2]);
+      const sep = guard < 200 ? 15 : 6;
+      if (labs.every(l => deltaE00(l, lab) >= sep)){
+        labs.push(lab); hexes.push(rgb2hex(d[0], d[1], d[2]));
+      }
+    }
+    while (hexes.length < TARGETS_PER_DAY) hexes.push('#7d7d7d');
+
+    return {
+      date, file: 'generated-' + n, src: cv.toDataURL('image/png'),
+      title: 'Calibration field ' + (n + 1), hexes
+    };
+  });
+}
+
 /* =====================================================================
-   4. STATE
+   5. STATE
    ===================================================================== */
 const S = {
-  levels: [], packName: '',
-  rounds: 5, mode: 'medium',
-  queue: [], roundIndex: 0, results: [],
-  level: null, targetLab: null, targetName: '',
+  puzzles: [], firstDate: null, today: null, todayPuzzle: null, archive: [],
+  mode: 'standard',
+  session: null,          // {kind, date, puzzleNo, level, targets, index, results}
+  target: null,           // the colour currently being hunted
   img: null, work: null, workData: null,
   marker: null, dragging: false, liveHex: null,
-  zoom: 8, zoomOptions: [4, 8, 16], assist: false,
+  zoom: 8, zoomOptions: [4, 8, 16],
   locked: false, lastResult: null, highlight: null,
   fit: {scale:1, ox:0, oy:0, w:0, h:0}
 };
@@ -704,14 +829,14 @@ const view = $('view'), stage = $('stage');
 const ctx = view.getContext('2d');
 
 /* =====================================================================
-   5. THE LIVING WORDMARK
-   Nine letters, nine slightly different easing rates, each chasing its
-   own target colour derived from where your pointer is. They never move
-   as a block, and they drift slowly when the card is left alone.
+   6. THE LIVING WORDMARK
+   Twelve glyphs, each chasing its own target colour derived from where
+   your pointer is, at its own easing rate. They never move as a block,
+   and they drift slowly when the card is left alone.
    ===================================================================== */
 const WORD = 'Hue and Seek';
-const MAX_HUE_STEP = 0.8;    // degrees per frame — about half a turn per second
-const MAX_SL_STEP  = 1.2;    // percentage points per frame
+const MAX_HUE_STEP = 0.8;
+const MAX_SL_STEP  = 1.2;
 const clampStep = (v, m) => v > m ? m : (v < -m ? -m : v);
 let glyphs = [];
 let wordRaf = null;
@@ -722,14 +847,14 @@ function buildWordmark(){
   el.innerHTML = '';
   glyphs = [...WORD].map((ch, i) => {
     const span = document.createElement('span');
-    span.textContent = ch === ' ' ? '\u00A0' : ch;   // spaces collapse inside inline-block
+    span.textContent = ch === ' ' ? ' ' : ch;
     span.setAttribute('aria-hidden', 'true');
     el.appendChild(span);
     return {
       el: span, i,
-      h: 40 + i * 12, s: 0, l: 86,       // starts neutral, blooms on first move
+      h: 40 + i * 12, s: 0, l: 86,
       th: 40 + i * 12, ts: 0, tl: 86,
-      k: 0.021 + (i % 4) * 0.012         // per-letter easing rate
+      k: 0.021 + (i % 4) * 0.012
     };
   });
   if (matchMedia('(prefers-reduced-motion: reduce)').matches){
@@ -754,7 +879,6 @@ function tickWordmark(t){
   wordRaf = requestAnimationFrame(tickWordmark);
   if ($('menu').classList.contains('hidden')) return;
   if (t - lastPointer > 2600){
-    // slow idle drift, so the card is never quite still
     glyphs.forEach(g => {
       g.th = (t / 110 + g.i * 26) % 360;
       g.ts = 26 + 12 * Math.sin(t / 2400 + g.i);
@@ -762,10 +886,6 @@ function tickWordmark(t){
     });
   }
   for (const g of glyphs){
-    // Shortest way round the wheel, then a hard speed limit. Without the
-    // limit a big jump in target (first pointer move, or a long page load
-    // leaving the idle clock far ahead) sends the letters sprinting through
-    // the whole spectrum in a few frames.
     let dh = ((g.th - g.h + 540) % 360) - 180;
     g.h = (g.h + clampStep(dh * g.k, MAX_HUE_STEP) + 360) % 360;
     g.s += clampStep((g.ts - g.s) * g.k, MAX_SL_STEP);
@@ -787,7 +907,9 @@ function attachWordmarkPointer(){
 }
 
 /* =====================================================================
-   6. IMAGE PLUMBING
+   7. IMAGE PLUMBING
+   One photograph per session now, so there is nothing to prefetch and
+   no cache to keep warm. The whole session hangs on a single decode.
    ===================================================================== */
 function loadImage(src){
   return new Promise((resolve, reject) => {
@@ -800,37 +922,6 @@ function loadImage(src){
 }
 
 const MAX_WORK = 2000;
-
-/* ---------------------------------------------------------------------
-   With a manifest-based pack the images are fetched one at a time, so
-   the wait has to be hidden rather than endured. The queue for the whole
-   session is known the moment you press Begin, so while you're working on
-   one photograph the next two are already coming down the wire. The cache
-   is small on purpose: a decoded 1600px image is several megabytes of
-   browser memory and phones are unforgiving about that.
-   --------------------------------------------------------------------- */
-const IMG_CACHE_MAX = 4;
-const imgCache = new Map();   // src → Promise<Image>, insertion-ordered = LRU
-
-function acquireImage(src){
-  if (imgCache.has(src)){
-    const p = imgCache.get(src);
-    imgCache.delete(src); imgCache.set(src, p);   // touch
-    return p;
-  }
-  const p = loadImage(src);
-  p.catch(() => imgCache.delete(src));            // don't cache a failure
-  imgCache.set(src, p);
-  while (imgCache.size > IMG_CACHE_MAX) imgCache.delete(imgCache.keys().next().value);
-  return p;
-}
-
-function prefetchAhead(){
-  for (let k = 1; k <= 2; k++){
-    const nx = S.queue[S.roundIndex + k];
-    if (nx) acquireImage(nx.src).catch(() => {});
-  }
-}
 
 function makeWorkCanvas(img){
   const long = Math.max(img.naturalWidth, img.naturalHeight);
@@ -863,20 +954,20 @@ function sampleDisc(x, y, radius = 2){
 }
 
 /* =====================================================================
-   6b. CHOOSING A TARGET
-   Rather than the same stored colour every time, each round pulls a
-   fresh one out of the photograph. The image is clustered in Lab, the
-   clusters are weighted by vividness and by occupying a sensible slice
-   of the frame — not the whole sky, not four stray pixels — and one is
-   drawn at random. So the same photograph is a different round each
-   time you meet it, and a pack needs nothing from you but filenames.
+   8. DRAWING COLOURS OUT OF A PHOTOGRAPH
+   Used by the archive, and by the fallback when a date has no row. The
+   daily proper reads its colours from the sheet — see the manifest note.
+   Twelve clusters in Lab, weighted towards vivid regions that occupy a
+   findable slice of the frame, drawn without replacement and held apart
+   by a minimum perceptual distance so you get five distinct hunts
+   rather than three browns and two other browns.
    ===================================================================== */
-const RANDOM_TARGETS = true;   // a fresh colour from the photo each round
-const TARGET_CLUSTERS = 9;
+const TARGET_CLUSTERS = 12;
+const MIN_SEPARATION = 15;
 
-function chooseTarget(work){
+function clusterImage(work, rnd){
   const long = Math.max(work.width, work.height);
-  const k = Math.min(1, 120 / long);
+  const k = Math.min(1, 140 / long);
   const w = Math.max(8, Math.round(work.width * k));
   const h = Math.max(8, Math.round(work.height * k));
   const cv = document.createElement('canvas');
@@ -892,10 +983,9 @@ function chooseTarget(work){
     labs[i*3] = lab[0]; labs[i*3+1] = lab[1]; labs[i*3+2] = lab[2];
   }
 
-  // k-means++ seeding, then a dozen passes — plenty at this resolution
   const K = TARGET_CLUSTERS;
   const cen = new Float64Array(K * 3);
-  let seed = Math.floor(Math.random() * n);
+  let seed = Math.floor(rnd() * n);
   cen[0] = labs[seed*3]; cen[1] = labs[seed*3+1]; cen[2] = labs[seed*3+2];
   const near = new Float64Array(n).fill(Infinity);
   for (let j = 1; j < K; j++){
@@ -906,7 +996,7 @@ function chooseTarget(work){
       if (dd < near[i]) near[i] = dd;
       total += near[i];
     }
-    let t = Math.random() * total, pick = 0;
+    let t = rnd() * total, pick = 0;
     for (let i = 0; i < n; i++){ t -= near[i]; if (t <= 0){ pick = i; break; } }
     cen[j*3] = labs[pick*3]; cen[j*3+1] = labs[pick*3+1]; cen[j*3+2] = labs[pick*3+2];
   }
@@ -933,38 +1023,22 @@ function chooseTarget(work){
       cen[j*3+2] = sums[j*3+2]/counts[j];
     }
   }
+  return {w, h, n, K, labs, assign, cen, counts};
+}
 
-  // Weight the draw: vivid is more interesting than grey, and a region
-  // wants to be findable without being the entire background.
-  const pool = [];
-  for (let j = 0; j < K; j++){
-    const area = counts[j] / n;
-    if (area < 0.008 || area > 0.42) continue;
-    const chroma = Math.hypot(cen[j*3+1], cen[j*3+2]);
-    pool.push({j, weight: (0.25 + chroma / 55) * Math.pow(area, 0.35)});
-  }
-  if (!pool.length){
-    for (let j = 0; j < K; j++) if (counts[j]) pool.push({j, weight: counts[j] / n});
-  }
-  if (!pool.length) return {x: 0.5, y: 0.5};
-
-  let roll = Math.random() * pool.reduce((a, p) => a + p.weight, 0);
-  let chosen = pool[pool.length - 1];
-  for (const p of pool){ roll -= p.weight; if (roll <= 0){ chosen = p; break; } }
-  const j = chosen.j;
-
-  // Representative point: the member pixel nearest the cluster's centre of mass
+/** The member pixel nearest a cluster's centre of mass, in 0–1 coordinates. */
+function clusterPoint(A, j){
   let sx = 0, sy = 0;
-  for (let i = 0; i < n; i++) if (assign[i] === j){ sx += i % w; sy += (i / w) | 0; }
-  const cx = sx / counts[j], cy = sy / counts[j];
+  for (let i = 0; i < A.n; i++) if (A.assign[i] === j){ sx += i % A.w; sy += (i / A.w) | 0; }
+  const cx = sx / A.counts[j], cy = sy / A.counts[j];
   let bx = cx, by = cy, bd = Infinity;
-  for (let i = 0; i < n; i++){
-    if (assign[i] !== j) continue;
-    const x = i % w, y = (i / w) | 0;
+  for (let i = 0; i < A.n; i++){
+    if (A.assign[i] !== j) continue;
+    const x = i % A.w, y = (i / A.w) | 0;
     const dd = (x - cx)*(x - cx) + (y - cy)*(y - cy);
     if (dd < bd){ bd = dd; bx = x; by = y; }
   }
-  return refinePoint(work, (bx + 0.5) / w, (by + 0.5) / h);
+  return {x: (bx + 0.5) / A.w, y: (by + 0.5) / A.h};
 }
 
 /** Nudge onto the flattest spot nearby, so the target isn't a lone edge
@@ -988,8 +1062,78 @@ function refinePoint(work, nx, ny){
   }
   return {x: bestX / W, y: bestY / H};
 }
+
+/** Five hexes out of a photograph. Prominent first, so the set walks
+ *  from the obvious towards the buried. */
+function deriveTargets(work, count, rnd){
+  const A = clusterImage(work, rnd);
+
+  const raw = [];
+  for (let j = 0; j < A.K; j++){
+    if (!A.counts[j]) continue;
+    const area = A.counts[j] / A.n;
+    if (area > 0.45) continue;
+    raw.push({j, area, lab: [A.cen[j*3], A.cen[j*3+1], A.cen[j*3+2]], small: area < 0.006});
+  }
+
+  /* Asking k-means for twelve clusters on a photograph that only has
+     seven colours in it hands back duplicates — two centroids sitting on
+     the same region, which the draw then serves as two "different"
+     targets that are the same colour. Merge them first, keeping the
+     larger and adding the smaller's area to it. */
+  const pool = [];
+  for (const p of raw.slice().sort((a,b) => b.area - a.area)){
+    const twin = pool.find(m => deltaE00(m.lab, p.lab) < 4);
+    if (twin) twin.area += p.area;
+    else pool.push(p);
+  }
+  for (const p of pool){
+    const chroma = Math.hypot(p.lab[1], p.lab[2]);
+    p.weight = (p.small ? 0.4 : 1) * (0.25 + chroma / 55) * Math.pow(p.area, 0.35);
+  }
+
+  // Draw without replacement, relaxing the separation rule only if a
+  // photograph genuinely hasn't got five distinguishable regions in it.
+  const chosen = [];
+  for (const sep of [MIN_SEPARATION, 11, 7, 0]){
+    let guard = 0;
+    while (chosen.length < count && guard++ < 200){
+      const ok = pool.filter(p => !chosen.includes(p) &&
+                 chosen.every(q => deltaE00(q.lab, p.lab) >= sep));
+      if (!ok.length) break;
+      let roll = rnd() * ok.reduce((a,p) => a + p.weight, 0);
+      let pick = ok[ok.length - 1];
+      for (const p of ok){ roll -= p.weight; if (roll <= 0){ pick = p; break; } }
+      chosen.push(pick);
+    }
+    if (chosen.length >= count) break;
+  }
+  // Last resort, so an archive round can never dead-end: pad from the
+  // unmerged clusters even though they repeat a colour.
+  for (const p of raw){ if (chosen.length >= count) break; if (!chosen.includes(p)) chosen.push(p); }
+  if (!chosen.length) return [];
+
+  chosen.sort((a,b) => b.area - a.area);
+  return chosen.slice(0, count).map(p => {
+    const seed = clusterPoint(A, p.j);
+    let pt = refinePoint(work, seed.x, seed.y);
+    let rgb = sampleDisc(pt.x * work.width, pt.y * work.height, 2);
+    /* Refinement is meant to nudge off an edge pixel, not go for a walk.
+       It searches 3% of the frame for the flattest spot, and next to a
+       big flat region that search will happily leave the cluster it came
+       from — which is how two different clusters end up on the same
+       block and the day serves the same colour twice. If the flattest
+       neighbour isn't the colour we came for, keep the original point. */
+    if (deltaE00(rgbToLab(rgb[0], rgb[1], rgb[2]), p.lab) > 6){
+      pt = seed;
+      rgb = sampleDisc(seed.x * work.width, seed.y * work.height, 2);
+    }
+    return rgb2hex(rgb[0], rgb[1], rgb[2]);
+  });
+}
+
 /* =====================================================================
-   7b. THE REVEAL
+   9. THE REVEAL
    On lock-in the photograph drains to grey except for the colour you
    were hunting, which stays in full strength wherever it occurs. It
    answers the question the marker can't: not "where was it" but "where
@@ -1011,7 +1155,7 @@ function buildHighlight(){
   const im = sc.getImageData(0, 0, mw, mh);
   const p = im.data;
   for (let i = 0; i < mw * mh; i++){
-    const dE = deltaE00(rgbToLab(p[i*4], p[i*4+1], p[i*4+2]), S.targetLab);
+    const dE = deltaE00(rgbToLab(p[i*4], p[i*4+1], p[i*4+2]), S.target.lab);
     let a;
     if (dE <= thr) a = 255;
     else if (dE >= thr + fade) a = 0;
@@ -1032,26 +1176,8 @@ function buildHighlight(){
   return hi;
 }
 
-function drawPhoto(){
-  const {ox, oy, w, h} = {ox:S.fit.ox, oy:S.fit.oy, w:S.fit.w, h:S.fit.h};
-  if (S.locked && S.highlight){
-    if (typeof ctx.filter === 'string'){
-      ctx.filter = 'grayscale(1) brightness(0.42)';
-      ctx.drawImage(S.work, ox, oy, w, h);
-      ctx.filter = 'none';
-    } else {                       // older Safari: dim without desaturating
-      ctx.drawImage(S.work, ox, oy, w, h);
-      ctx.fillStyle = 'rgba(10,10,11,.68)';
-      ctx.fillRect(ox, oy, w, h);
-    }
-    ctx.drawImage(S.highlight, ox, oy, w, h);
-  } else {
-    ctx.drawImage(S.work, ox, oy, w, h);
-  }
-}
-
 /* =====================================================================
-   7c. RENDER
+   10. RENDER
    ===================================================================== */
 function resizeCanvas(){
   const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
@@ -1075,6 +1201,24 @@ function computeFit(cw, ch){
 const toScreen = p => ({ x: S.fit.ox + p.x * S.fit.scale, y: S.fit.oy + p.y * S.fit.scale });
 const toImage  = p => ({ x: (p.x - S.fit.ox) / S.fit.scale, y: (p.y - S.fit.oy) / S.fit.scale });
 
+function drawPhoto(){
+  const {ox, oy, w, h} = S.fit;
+  if (S.locked && S.highlight){
+    if (typeof ctx.filter === 'string'){
+      ctx.filter = 'grayscale(1) brightness(0.42)';
+      ctx.drawImage(S.work, ox, oy, w, h);
+      ctx.filter = 'none';
+    } else {                       // older Safari: dim without desaturating
+      ctx.drawImage(S.work, ox, oy, w, h);
+      ctx.fillStyle = 'rgba(10,10,11,.68)';
+      ctx.fillRect(ox, oy, w, h);
+    }
+    ctx.drawImage(S.highlight, ox, oy, w, h);
+  } else {
+    ctx.drawImage(S.work, ox, oy, w, h);
+  }
+}
+
 function draw(){
   if (!S.work) return;
   const r = stage.getBoundingClientRect();
@@ -1083,30 +1227,23 @@ function draw(){
   ctx.fillRect(0, 0, r.width, r.height);
   drawPhoto();
 
-  if (S.locked && S.lastResult){
-    drawMarker(toScreen(S.lastResult.truth), 'truth');
-    drawMarker(toScreen(S.lastResult.pick), 'pick');
-    const a = toScreen(S.lastResult.pick), b = toScreen(S.lastResult.truth);
-    ctx.save();
-    ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.setLineDash([3,4]); ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-    ctx.restore();
-    return;
-  }
-
+  /* On reveal only your own marker stays. There is deliberately no
+     "the target was here" crosshair: the highlight shows every place
+     the colour occurs, and pointing at one of them would contradict
+     the rule that position never scored. */
   if (S.marker){
     const sp = toScreen(S.marker);
-    drawMarker(sp, 'pick');
-    drawLoupe(sp, r);
+    drawMarker(sp);
+    if (!S.locked) drawLoupe(sp, r);
   }
 }
 
-function drawMarker(p, kind){
+function drawMarker(p){
   ctx.save();
   ctx.lineWidth = 1.5;
-  ctx.strokeStyle = kind === 'truth' ? '#ffffff' : '#101010';
+  ctx.strokeStyle = '#101010';
   ctx.beginPath(); ctx.arc(p.x, p.y, 9, 0, Math.PI*2); ctx.stroke();
-  ctx.strokeStyle = kind === 'truth' ? '#101010' : '#ffffff';
+  ctx.strokeStyle = '#ffffff';
   ctx.beginPath(); ctx.arc(p.x, p.y, 10.5, 0, Math.PI*2); ctx.stroke();
   ctx.beginPath();
   ctx.moveTo(p.x - 15, p.y); ctx.lineTo(p.x - 4, p.y);
@@ -1114,11 +1251,6 @@ function drawMarker(p, kind){
   ctx.moveTo(p.x, p.y - 15); ctx.lineTo(p.x, p.y - 4);
   ctx.moveTo(p.x, p.y + 4);  ctx.lineTo(p.x, p.y + 15);
   ctx.stroke();
-  if (kind === 'truth'){
-    ctx.fillStyle = '#fff';
-    ctx.font = '500 10px ' + getComputedStyle(document.body).fontFamily;
-    ctx.fillText('TARGET', p.x + 14, p.y - 12);
-  }
   ctx.restore();
 }
 
@@ -1133,21 +1265,23 @@ function drawLoupe(sp, rect){
   cx = Math.max(R + 6, Math.min(rect.width - R - 6, cx));
   cy = Math.max(R + 6, Math.min(rect.height - R - 6, cy));
 
+  const M = MODES[S.mode];
   ctx.save();
 
-  if (S.assist){
+  if (M.loupe === 'split'){
     // SPLIT FIELD. Target left, your pixel right, meeting at a butt joint —
     // no ring around either one to induce a contrast shift. When the join
     // disappears the disc reads as one colour and you're on it.
     ctx.beginPath(); ctx.arc(cx, cy, R, Math.PI/2, Math.PI*1.5);
-    ctx.closePath(); ctx.fillStyle = S.level.hex; ctx.fill();
+    ctx.closePath(); ctx.fillStyle = S.target.hex; ctx.fill();
     ctx.beginPath(); ctx.arc(cx, cy, R, Math.PI*1.5, Math.PI/2);
     ctx.closePath(); ctx.fillStyle = S.liveHex || '#000'; ctx.fill();
   } else {
     ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI*2);
-    // On Hard the barrel is neutral — a coloured ring would hand you the
-    // answer the header is deliberately withholding.
-    ctx.fillStyle = MODES[S.mode].swatch ? S.level.hex : '#6c6c70';
+    /* Standard: the barrel wears YOUR colour, not the target's. It tells
+       you what you're holding, which is information you already have,
+       and never what you're hunting, which is the whole game. */
+    ctx.fillStyle = M.ringLive ? (S.liveHex || '#6c6c70') : S.target.hex;
     ctx.fill();
 
     ctx.save();
@@ -1178,7 +1312,7 @@ function drawLoupe(sp, rect){
 }
 
 /* =====================================================================
-   8. REFINEMENT
+   11. REFINEMENT
    Coarse to fine: tap to place · drag 1:1 · nudge one pixel at a time.
    ===================================================================== */
 function stagePoint(ev){
@@ -1211,9 +1345,7 @@ view.addEventListener('pointerdown', ev => {
    An earlier version scaled the movement down during slow drags to buy
    sub-pixel precision; it worked, and it felt broken, because a marker
    that isn't under your finger reads as a bug no matter how useful the
-   offset is. Predictable beats clever. Fine adjustment lives in the
-   arrow keys, and on touch the loupe is the instrument — you don't need
-   to see the marker if you can see the colour it's sitting on. */
+   offset is. Predictable beats clever. */
 view.addEventListener('pointermove', ev => {
   if (!S.dragging || S.locked) return;
   ev.preventDefault();
@@ -1243,40 +1375,32 @@ $('zoomBtn').addEventListener('click', () => {
   draw();
 });
 
-$('assistBtn').addEventListener('click', () => {
-  S.assist = !S.assist;
-  const b = $('assistBtn');
-  b.textContent = S.assist ? 'Split' : 'Photo';
-  b.setAttribute('aria-pressed', String(S.assist));
-  $('zoomBtn').disabled = S.assist;
-  draw();
-});
-
 /* =====================================================================
-   9. MODES AND SCORING
+   12. MODES AND SCORING
    Difficulty is about what you're given, not how the answer is marked.
-   Every mode scores on the same curve, so a 78% means the same thing
-   whoever you're playing against.
-     Easy    the chip, its name, and the split loupe — you compare two
-             flat fields and watch for the seam to vanish
-     Medium  the chip, its name, and the magnifier — you judge the
-             colour against the photograph itself
-     Hard    the name alone. No chip, no hex, and the loupe barrel is
-             neutral, so nothing on screen tells you what Glaucous
-             looks like except your own memory of the word.
+   Both modes score on the same curve, so a 78% means the same thing
+   whoever you're playing against — which is why the record keeps them
+   apart rather than the scoring doing it.
+     Standard  the name alone. No chip, no hex. The loupe magnifies the
+               photograph and its barrel carries your own colour.
+     Easy      the chip, its hex, its name, and the split loupe — two
+               flat fields meeting at a seam you watch for.
        ΔE   1 → 97    ΔE   5 → 76    ΔE  20 → 17
        ΔE   2 → 92    ΔE   8 → 59    ΔE  35 →  2
        ΔE   3 → 87    ΔE  12 → 41
    ===================================================================== */
 const MODES = {
-  easy:   {swatch:true,  loupe:'split', lockLoupe:true,  zoom:false},
-  medium: {swatch:true,  loupe:'photo', lockLoupe:false, zoom:true},
-  hard:   {swatch:false, loupe:'photo', lockLoupe:true,  zoom:true}
+  standard: {swatch:false, loupe:'photo', ringLive:true,  zoom:true},
+  easy:     {swatch:true,  loupe:'split', ringLive:false, zoom:false}
+};
+const MODE_LABEL = {standard:'Standard', easy:'Easy'};
+const MODE_NOTES = {
+  standard: 'The name and nothing else. No swatch, no hex — the loupe magnifies the photograph and wears your own colour around the rim. The swatch appears once you lock in, so you find out either way.',
+  easy:     'The colour, its hex, its name, and a loupe split down the middle: target on one side, your pixel on the other. When the join disappears you are on it.'
 };
 const CURVE = {k:13, p:1.35};
 
 function scoreFor(dE){ return Math.round(100 * Math.exp(-Math.pow(dE / CURVE.k, CURVE.p))); }
-
 /** The ΔE at which a given score is awarded — used to size the reveal. */
 function deltaEForScore(score){ return CURVE.k * Math.pow(-Math.log(score / 100), 1 / CURVE.p); }
 
@@ -1290,105 +1414,233 @@ function verdictFor(dE){
   return 'A different colour entirely';
 }
 
-/** Set the chrome for the chosen mode. Called once a session begins. */
 function applyMode(){
   const m = MODES[S.mode];
-  S.assist = m.loupe === 'split';
-  $('assistBtn').textContent = S.assist ? 'Split' : 'Photo';
-  $('assistBtn').setAttribute('aria-pressed', String(S.assist));
   $('zoomWrap').classList.toggle('hidden', !m.zoom);
-  $('loupeWrap').classList.toggle('hidden', m.lockLoupe);
   $('chiprail').classList.toggle('blind', !m.swatch);
 }
+
 /* =====================================================================
-   10. ROUND FLOW
-   Levels still carry a tier from the setup tool and a session still
-   walks from the easy end to the hard end. There's just nothing to
-   choose about it any more.
+   13. THE RECORD
+   Standard and Easy are kept apart, because an Easy 90 and a Standard
+   90 are not the same achievement and averaging them would make your
+   number drift every time you switched. Everything else — streak,
+   best day, hue strengths — is derived from the day list at read time
+   rather than stored, so a stat can be added later without migrating
+   anyone's saved data.
    ===================================================================== */
-function pickQueue(){
-  const byDiff = d => S.levels.filter(l => (l.difficulty || 3) === d);
-  const n = S.rounds, q = [];
-  for (let i = 0; i < n; i++){
-    const p = n <= 1 ? 0 : i / (n - 1);
-    const tier = Math.max(1, Math.min(5, Math.round(1 + p * 4)));
-    q.push(drawFromTier(byDiff, tier, q));
-  }
-  return q.filter(Boolean);
+const STATS_KEY = 'hueandseek.stats.v2';
+const PROG_KEY  = 'hueandseek.progress.v2';
+const MODE_KEY  = 'hueandseek.mode.v2';
+
+function readJSON(key, fallback){
+  try { const v = JSON.parse(localStorage.getItem(key)); return v == null ? fallback : v; }
+  catch(e){ return fallback; }
+}
+function writeJSON(key, value){
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch(e){ /* private mode, never mind */ }
 }
 
-function drawFromTier(byDiff, tier, already){
-  const seen = new Set(already.map(l => l && l.id));
-  for (let spread = 0; spread <= 4; spread++){
-    for (const t of [tier - spread, tier + spread]){
-      if (t < 1 || t > 5) continue;
-      const fresh = byDiff(t).filter(l => !seen.has(l.id));
-      if (fresh.length) return fresh[Math.floor(Math.random() * fresh.length)];
-    }
-  }
-  return S.levels[Math.floor(Math.random() * S.levels.length)];
+function loadStats(){
+  const s = readJSON(STATS_KEY, {});
+  for (const m of ['standard','easy']) if (!s[m]) s[m] = {days:{}};
+  return s;
 }
 
-async function startSession(){
-  S.roundIndex = 0; S.results = [];
-  updateRunning();
-  S.queue = pickQueue();
-  if (!S.queue.length){ toast('No levels available.'); return; }
+function recordDay(mode, date, results){
+  const s = loadStats();
+  if (s[mode].days[date]) return s;                 // one attempt, first one counts
+  s[mode].days[date] = {
+    avg: Math.round(results.reduce((a,r) => a + r.score, 0) / results.length),
+    scores: results.map(r => r.score),
+    groups: results.map(r => [r.group, r.score])
+  };
+  writeJSON(STATS_KEY, s);
+  return s;
+}
+
+function summarise(mode){
+  const days = loadStats()[mode].days;
+  const dates = Object.keys(days).sort();
+  if (!dates.length){
+    return {played:0, allTime:null, best:null, bestDate:null, streak:0, strongest:null, today:null};
+  }
+  const avgs = dates.map(d => days[d].avg);
+  const allTime = Math.round(avgs.reduce((a,v) => a + v, 0) / avgs.length);
+  let best = -1, bestDate = null;
+  dates.forEach(d => { if (days[d].avg > best){ best = days[d].avg; bestDate = d; } });
+
+  // A streak survives until a day is missed. Today not yet played is not
+  // a miss — yesterday's streak is still live until midnight.
+  let streak = 0;
+  let cursor = days[S.today] ? S.today : shiftDate(S.today, -1);
+  while (days[cursor]){ streak++; cursor = shiftDate(cursor, -1); }
+
+  const tally = {};
+  for (const d of dates) for (const [g, sc] of days[d].groups){
+    if (!tally[g]) tally[g] = {n:0, sum:0};
+    tally[g].n++; tally[g].sum += sc;
+  }
+  let strongest = null, bestMean = -1;
+  for (const g in tally){
+    if (tally[g].n < 3) continue;                   // three sightings before it means anything
+    const mean = tally[g].sum / tally[g].n;
+    if (mean > bestMean){ bestMean = mean; strongest = {group:g, mean:Math.round(mean), n:tally[g].n}; }
+  }
+
+  return {played:dates.length, allTime, best, bestDate, streak, strongest,
+          today: days[S.today] ? days[S.today].avg : null};
+}
+
+function statTiles(mode){
+  const st = summarise(mode);
+  const tile = (label, value, small) =>
+    `<div class="stat"><span class="eyebrow">${label}</span><b class="${small ? 'sm' : ''}">${value}</b></div>`;
+  return [
+    tile('Today',     st.today == null ? '—' : st.today + '%'),
+    tile('Average',   st.allTime == null ? '—' : st.allTime + '%'),
+    tile('Best day',  st.best == null ? '—' : st.best + '%'),
+    tile('Streak',    st.streak ? st.streak + (st.streak === 1 ? ' day' : ' days') : '—', true),
+    tile('Strongest', st.strongest ? st.strongest.group : '—', true)
+  ].join('');
+}
+
+function renderStats(){
+  $('stats').innerHTML = statTiles(S.mode);
+  $('statsLabel').textContent = 'Your record — ' + MODE_LABEL[S.mode];
+}
+
+/* =====================================================================
+   14. SESSION FLOW
+   ===================================================================== */
+function puzzleNumber(date){
+  return S.firstDate ? daysBetween(S.firstDate, date) + 1 : 1;
+}
+
+/** The row for a date, or — if you've missed a day of authoring — a
+ *  deterministic pick out of the archive, with colours re-rolled from
+ *  the same date seed. Everyone still gets the same puzzle; it just
+ *  isn't a new photograph. */
+function puzzleFor(date){
+  const exact = S.puzzles.find(p => p.date === date);
+  if (exact) return exact;
+  const past = S.puzzles.filter(p => p.date < date);
+  if (!past.length) return null;
+  const rnd = seededRng('fallback:' + date);
+  const pick = past[Math.floor(rnd() * past.length)];
+  return {date, file: pick.file, src: pick.src, title: pick.title, hexes: null, reused: true};
+}
+
+async function beginSession(kind){
+  const level = kind === 'daily' ? S.todayPuzzle
+                                 : S.archive[Math.floor(Math.random() * S.archive.length)];
+  if (!level){ toast('Nothing to play — the manifest is empty.'); return; }
+
+  S.session = {
+    kind, level,
+    date: kind === 'daily' ? S.today : level.date,
+    puzzleNo: puzzleNumber(kind === 'daily' ? S.today : level.date),
+    mode: S.mode, targets: null, index: 0, results: []
+  };
+
   applyMode();
   show('play');
-  prefetchAhead();
-  await nextRound();
-}
-
-async function nextRound(){
-  restorePlayChrome();
-  S.locked = false; S.marker = null; S.lastResult = null; S.liveHex = null; S.highlight = null;
-  $('lockBtn').disabled = true;
-  $('lockBtn').textContent = 'Lock in';
-  $('hint').style.opacity = '1';
-
-  const level = S.queue[S.roundIndex % S.queue.length];
-  S.level = level;
-  updateRunning();
+  $('stageLoading').classList.remove('hidden');
+  renderPips();
 
   try {
-    $('stageLoading').classList.remove('hidden');
-    S.img = await acquireImage(level.src);
-    $('stageLoading').classList.add('hidden');
+    S.img = await loadImage(level.src);
   } catch(e){
     $('stageLoading').classList.add('hidden');
-    toast('Image missing: ' + level.src);
-    S.roundIndex++;
-    if (S.roundIndex < S.queue.length) return nextRound();
-    return endSession();
+    toast('Could not load the photograph: ' + level.src);
+    show('menu');
+    return;
   }
+  $('stageLoading').classList.add('hidden');
+
   S.work = makeWorkCanvas(S.img);
   const wc = S.work.getContext('2d', {willReadFrequently:true});
   try {
     S.workData = wc.getImageData(0, 0, S.work.width, S.work.height).data;
   } catch(err){
-    toast('This browser blocked reading pixels from a file:// image. Serve the folder, or re-export the pack with images embedded.');
+    toast('This browser blocked reading pixels from a file:// image. Serve the folder over http instead.');
+    show('menu');
     return;
   }
 
-  // A fresh colour out of this photograph, every time it comes up.
-  const point = RANDOM_TARGETS || !isFinite(level.x) || !isFinite(level.y)
-    ? chooseTarget(S.work)
-    : {x: level.x, y: level.y};
-  const rgb = sampleDisc(point.x * S.work.width, point.y * S.work.height, 2);
-  const hex = (!RANDOM_TARGETS && level.hex) ? level.hex : rgb2hex(rgb[0], rgb[1], rgb[2]);
+  // The sheet's colours where there are any; otherwise drawn out of the
+  // photograph — seeded by date for a daily so it stays shared, freely
+  // random for the archive so a photograph is a new game every time.
+  let hexes = level.hexes;
+  if (!hexes || hexes.length !== TARGETS_PER_DAY){
+    const rnd = S.session.kind === 'daily' ? seededRng('targets:' + S.session.date) : Math.random;
+    hexes = deriveTargets(S.work, TARGETS_PER_DAY, rnd);
+  }
+  if (hexes.length < TARGETS_PER_DAY){
+    toast('This photograph has too few distinct colours to build a puzzle.');
+    show('menu');
+    return;
+  }
 
-  S.level = Object.assign({}, level, {hex, x: point.x, y: point.y});
-  S.targetLab = rgbToLab(...hex2rgb(hex));
-  S.targetName = nameOf(S.targetLab);
-  S.highlight = null;
+  S.session.targets = hexes.map(hex => {
+    const lab = rgbToLab(...hex2rgb(hex));
+    return {hex, lab, name: nameOf(lab), group: hueGroup(lab)};
+  });
 
-  $('swTarget').style.background = hex;
-  $('targetName').textContent = S.targetName;
-  $('targetHex').textContent = hex.toUpperCase();
+  // Resume a daily that was started and abandoned.
+  if (kind === 'daily'){
+    const prog = readJSON(PROG_KEY, null);
+    if (prog && prog.date === S.today && prog.mode === S.mode && !prog.done && prog.results.length){
+      S.session.results = prog.results;
+      S.session.index = prog.results.length;
+      if (S.session.index >= TARGETS_PER_DAY) return finishSession();
+    }
+  }
 
+  nextTarget();
+}
+
+function saveProgress(done){
+  if (!S.session || S.session.kind !== 'daily') return;
+  writeJSON(PROG_KEY, {
+    date: S.session.date, mode: S.session.mode,
+    results: S.session.results, done: !!done
+  });
+}
+
+function nextTarget(){
+  const sess = S.session;
+  S.locked = false; S.marker = null; S.lastResult = null; S.liveHex = null; S.highlight = null;
+
+  $('chiprail').classList.remove('revealed');
+  applyMode();
+  $('swPick').style.background = '';
+  $('rvPickName').textContent = '—';
+  $('rvPickHex').textContent = '—';
+  $('dockVerdict').classList.add('hidden');
+  $('pipWrap').classList.remove('hidden');
+  $('lockBtn').disabled = true;
+  $('lockBtn').textContent = 'Lock in';
+  $('hint').style.opacity = '1';
+
+  S.target = sess.targets[sess.index];
+  $('swTarget').style.background = S.target.hex;
+  $('targetName').textContent = S.target.name;
+  $('targetHex').textContent = S.target.hex.toUpperCase();
+
+  renderPips();
+  updateRunning();
   resizeCanvas();
-  prefetchAhead();
+}
+
+function renderPips(){
+  const sess = S.session;
+  if (!sess){ $('pips').innerHTML = ''; return; }
+  $('pips').innerHTML = Array.from({length: TARGETS_PER_DAY}, (_, i) => {
+    const done = sess.results[i];
+    const cls = 'pip' + (i === sess.index && !done ? ' now' : '');
+    return `<div class="${cls}"${done ? ` style="background:${done.targetHex}"` : ''}></div>`;
+  }).join('');
 }
 
 function lockIn(){
@@ -1398,16 +1650,15 @@ function lockIn(){
   const rgb = sampleDisc(S.marker.x, S.marker.y, 2);
   const pickHex = rgb2hex(rgb[0], rgb[1], rgb[2]);
   const pickLab = rgbToLab(rgb[0], rgb[1], rgb[2]);
-  const dE = deltaE00(pickLab, S.targetLab);
-  const score = scoreFor(dE);
-  const pickName = nameOf(pickLab);
+  const dE = deltaE00(pickLab, S.target.lab);
 
-  const truth = {x: S.level.x * S.work.width, y: S.level.y * S.work.height};
-  S.lastResult = {pick: {...S.marker}, truth, dE, score, pickHex, pickName};
-  S.results.push({
-    level: S.level, dE, score, pickHex, pickName,
-    targetHex: S.level.hex, targetName: S.targetName
-  });
+  const result = {
+    dE, score: scoreFor(dE), pickHex, pickName: nameOf(pickLab),
+    targetHex: S.target.hex, targetName: S.target.name, group: S.target.group
+  };
+  S.lastResult = result;
+  S.session.results.push(result);
+  saveProgress(S.session.results.length >= TARGETS_PER_DAY);
 
   try { S.highlight = buildHighlight(); } catch(e){ S.highlight = null; }
 
@@ -1419,7 +1670,7 @@ function showReveal(){
   const r = S.lastResult;
 
   // The rail already holds the target. On reveal it splits: your colour
-  // beside it, both named. The dock's zoom and loupe controls are inert
+  // beside it, both named. The dock's zoom and pip controls are inert
   // now, so the verdict takes their place. Nothing new appears on screen.
   $('swPick').style.background = r.pickHex;
   $('rvPickName').textContent = r.pickName;
@@ -1429,55 +1680,46 @@ function showReveal(){
   $('verdictText').textContent = verdictFor(r.dE);
   $('deltaText').textContent = `${r.score}% match · ΔE₀₀ ${r.dE.toFixed(2)}`;
   $('zoomWrap').classList.add('hidden');
-  $('loupeWrap').classList.add('hidden');
+  $('pipWrap').classList.add('hidden');
   $('dockVerdict').classList.remove('hidden');
   $('hint').style.opacity = '0';
 
   const lock = $('lockBtn');
-  lock.textContent = lastRound() ? 'See results' : 'Next round';
+  lock.textContent = S.session.results.length >= TARGETS_PER_DAY ? 'See results' : 'Next colour';
   lock.disabled = false;
   lock.focus({preventScroll:true});
   updateRunning();
 }
 
-function restorePlayChrome(){
-  $('chiprail').classList.remove('revealed');
-  applyMode();
-  $('swPick').style.background = '';
-  $('rvPickName').textContent = '—';
-  $('rvPickHex').textContent = '—';
-  $('zoomWrap').classList.remove('hidden');
-  $('loupeWrap').classList.remove('hidden');
-  $('dockVerdict').classList.add('hidden');
-}
-
-function lastRound(){ return S.roundIndex >= S.queue.length - 1; }
-
 function advance(){
-  S.roundIndex++;
-  if (S.roundIndex >= S.queue.length) endSession();
-  else nextRound();
+  S.session.index++;
+  if (S.session.index >= TARGETS_PER_DAY) finishSession();
+  else nextTarget();
 }
 
 /* One button, two jobs — it never moves and it never changes place. */
 function dockAction(){ if (S.locked) advance(); else lockIn(); }
 
 function updateRunning(){
-  const round = `Round <b>${Math.min(S.roundIndex + 1, S.queue.length)}/${S.queue.length}</b>`;
-  if (!S.results.length){ $('running').innerHTML = round; return; }
-  const avg = Math.round(S.results.reduce((a,r) => a + r.score, 0) / S.results.length);
-  $('running').innerHTML = `${round} · <b>${avg}%</b> average`;
+  const sess = S.session;
+  const n = Math.min(sess.index + 1, TARGETS_PER_DAY);
+  const head = sess.kind === 'daily'
+    ? `#${sess.puzzleNo} · Colour <b>${n}/${TARGETS_PER_DAY}</b>`
+    : `Archive · Colour <b>${n}/${TARGETS_PER_DAY}</b>`;
+  if (!sess.results.length){ $('running').innerHTML = head; return; }
+  const avg = Math.round(sess.results.reduce((a,r) => a + r.score, 0) / sess.results.length);
+  $('running').innerHTML = `${head} · <b>${avg}%</b> average`;
 }
 
 function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
 /* =====================================================================
-   10b. THE GRADE
-   Your session becomes a colour. Hue comes from the average of what you
-   actually picked, weighted by chroma — so it belongs to this pack and
-   this run. Accuracy drives lightness and saturation: play well and it
-   arrives clear and vivid, play badly and it comes out murky. Then the
-   name list tells you what you are.
+   15. THE GRADE
+   Your run becomes a colour. Hue comes from the average of what you
+   actually picked, weighted by chroma — so it belongs to this
+   photograph and this run. Accuracy drives lightness and saturation:
+   play well and it arrives clear and vivid, play badly and it comes
+   out murky. Then the name list tells you what you are.
    ===================================================================== */
 const QUIPS = [
   [95, [
@@ -1517,9 +1759,12 @@ const QUIPS = [
   ]]
 ];
 
-function quipFor(avg){
+/* The quip is seeded by the day so it's the same for everyone, and the
+   same if you come back to look at your result again. */
+function quipFor(avg, seedStr){
   const band = QUIPS.find(([floor]) => avg >= floor)[1];
-  return band[Math.floor(Math.random() * band.length)];
+  const rnd = seedStr ? seededRng('quip:' + seedStr + ':' + avg) : Math.random;
+  return band[Math.floor(rnd() * band.length)];
 }
 
 function gradeColour(avg, results){
@@ -1536,72 +1781,181 @@ function gradeColour(avg, results){
 }
 
 /* =====================================================================
-   10c. PERSONAL BESTS — one per session length
+   16. THE SHARE
+   Wordle's trick, which is that the shape travels and the answer
+   doesn't. Five blocks, one per colour, banded by score — enough to
+   compare a day against someone else's without telling them a thing
+   about what the colours were.
    ===================================================================== */
-const BEST_KEY = 'hueandseek.bests.v1';
-function loadBests(){
-  try { return JSON.parse(localStorage.getItem(BEST_KEY)) || {}; }
-  catch(e){ return {}; }
+function blockFor(score){
+  if (score >= 90) return '🟩';
+  if (score >= 75) return '🟨';
+  if (score >= 55) return '🟧';
+  if (score >= 35) return '🟥';
+  return '⬛';
 }
-function saveBests(b){
-  try { localStorage.setItem(BEST_KEY, JSON.stringify(b)); } catch(e){ /* private mode, never mind */ }
-}
-const bestKey = (rounds, mode) => rounds + ':' + mode;
-function renderBests(){
-  const b = loadBests();
-  $('bests').innerHTML = [5,10,15].map(n => {
-    const v = b[bestKey(n, S.mode)];
-    return `<div class="best">
-      <span class="eyebrow">${n} rounds</span>
-      <b>${v != null ? v + '%' : '—'}</b>
-    </div>`;
-  }).join('');
+const blocksFor = results => results.map(r => blockFor(r.score)).join('');
+
+function shareText(sess, avg){
+  const head = sess.kind === 'daily'
+    ? `Hue and Seek #${sess.puzzleNo} · ${MODE_LABEL[sess.mode]}`
+    : `Hue and Seek · Archive · ${MODE_LABEL[sess.mode]}`;
+  return `${head}\n${avg}% average\n${blocksFor(sess.results)}\ngeordie.lol/hue-and-seek`;
 }
 
-function endSession(){
-  const total = S.results.reduce((a,r) => a + r.score, 0);
-  const avg = S.results.length ? Math.round(total / S.results.length) : 0;
-  const best = S.results.reduce((a,r) => Math.min(a, r.dE), Infinity);
-  const bestScore = S.results.reduce((a,r) => Math.max(a, r.score), 0);
+async function copyShare(text){
+  try {
+    await navigator.clipboard.writeText(text);
+    toast('Copied.');
+  } catch(e){
+    // Clipboard access is refused outside a secure context, and on some
+    // browsers inside an iframe. A selectable textarea always works.
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;left:-9999px;top:0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); toast('Copied.'); }
+    catch(err){ toast('Could not copy — select the text manually.'); }
+    document.body.removeChild(ta);
+  }
+}
 
-  const hex = gradeColour(avg, S.results);
+/* =====================================================================
+   17. SUMMARY
+   ===================================================================== */
+function finishSession(){
+  const sess = S.session;
+  const results = sess.results;
+  const avg = Math.round(results.reduce((a,r) => a + r.score, 0) / results.length);
+  const bestScore = results.reduce((a,r) => Math.max(a, r.score), 0);
+  const closest = results.reduce((a,r) => Math.min(a, r.dE), Infinity);
+
+  // "New best" is only news the first time a day is banked. Coming back
+  // to look at today's sheet again must not re-announce it.
+  let priorBest = null;
+  if (sess.kind === 'daily'){
+    const fresh = !loadStats()[sess.mode].days[sess.date];
+    if (fresh){
+      priorBest = summarise(sess.mode).best;
+      recordDay(sess.mode, sess.date, results);
+      saveProgress(true);
+    }
+  }
+
+  const hex = gradeColour(avg, results);
   $('gradeSw').style.background = hex;
   $('gradeName').textContent = NAMES.length ? nameOf(rgbToLab(...hex2rgb(hex))) : '—';
   $('gradeHex').textContent = hex.toUpperCase();
   $('summaryScore').textContent = avg + '%';
-  $('quip').textContent = quipFor(avg);
+  $('quip').textContent = quipFor(avg, sess.kind === 'daily' ? sess.date : null);
 
-  const bests = loadBests();
-  const key = bestKey(S.rounds, S.mode);
-  const prior = bests[key];
-  const isRecord = S.results.length === S.rounds && (prior == null || avg > prior);
-  if (isRecord){ bests[key] = avg; saveBests(bests); }
-  const modeName = S.mode[0].toUpperCase() + S.mode.slice(1);
-  $('recordFlag').textContent = isRecord
-    ? (prior == null ? `First run at ${S.rounds} rounds on ${modeName}` : `New best on ${modeName} — up from ${prior}%`)
-    : (prior != null ? `Your best at ${S.rounds} rounds on ${modeName} is ${prior}%` : '');
+  $('sumEyebrow').textContent = sess.kind === 'daily'
+    ? `Hue and Seek #${sess.puzzleNo} · ${prettyDate(sess.date)} · ${MODE_LABEL[sess.mode]}`
+    : `Archive · ${sess.level.title} · ${MODE_LABEL[sess.mode]}`;
 
-  $('summarySub').textContent =
-    `${total} of ${S.results.length * 100} points · best round ${bestScore}% · closest ΔE ${isFinite(best) ? best.toFixed(2) : '—'}`;
+  const line = `${blocksFor(results)}  ·  best colour ${bestScore}% · closest ΔE ${isFinite(closest) ? closest.toFixed(2) : '—'}`;
+  $('recordFlag').innerHTML = sess.kind === 'daily' && priorBest != null && avg > priorBest
+    ? `${line}<br>New best on ${MODE_LABEL[sess.mode]} — up from ${priorBest}%`
+    : line;
 
-  $('summaryRows').innerHTML = S.results.map((r,i) => `
+  $('summaryRows').innerHTML = results.map((r,i) => `
     <tr>
       <td>${i+1}</td>
       <td><span class="pair"><i style="background:${r.pickHex}"></i><i style="background:${r.targetHex}"></i></span>${escapeHtml(r.pickName)} → ${escapeHtml(r.targetName)}</td>
       <td class="num">${r.dE.toFixed(1)}</td>
       <td class="num">${r.score}%</td>
     </tr>`).join('');
+
+  $('statsBlock').classList.toggle('hidden', sess.kind !== 'daily');
+  if (sess.kind === 'daily'){
+    $('sumStatsLabel').textContent = 'Your record — ' + MODE_LABEL[sess.mode];
+    $('sumStats').innerHTML = statTiles(sess.mode);
+  }
+  $('againBtn').textContent = sess.kind === 'daily' ? 'Play the archive' : 'Another from the archive';
+  $('againBtn').classList.toggle('hidden', !S.archive.length);
+
+  S.session.finalAvg = avg;
   show('summary');
 }
 
 /* =====================================================================
-   11. SHELL
+   18. THE TITLE CARD
+   ===================================================================== */
+function renderMenu(){
+  const done = dailyDone();
+  $('todayLine').textContent = S.todayPuzzle
+    ? `Puzzle #${puzzleNumber(S.today)} · ${prettyDate(S.today)}`
+    : 'A colour matching game';
+
+  $('doneField').classList.toggle('hidden', !done);
+  $('modeField').classList.toggle('hidden', !!done);
+
+  if (done){
+    // The record on show is the one you actually played today.
+    if (done.mode !== S.mode) setMode(done.mode);
+    $('doneBlocks').textContent = blocksFor(done.results);
+    $('doneAvg').textContent = done.avg + '%';
+    $('doneMode').textContent = MODE_LABEL[done.mode] + ' · done';
+    $('startBtn').textContent = "Today's result";
+    tickCountdown();
+  } else {
+    const prog = readJSON(PROG_KEY, null);
+    const resuming = prog && prog.date === S.today && !prog.done && prog.results.length;
+    $('startBtn').textContent = resuming ? `Resume (${prog.results.length}/${TARGETS_PER_DAY})` : 'Begin';
+    if (resuming && prog.mode !== S.mode) setMode(prog.mode);
+  }
+
+  $('startBtn').disabled = !S.todayPuzzle;
+  $('challengeBtn').disabled = !S.archive.length;
+  renderStats();
+}
+
+/** The completed daily for the currently-selected mode, or null. */
+function dailyDone(){
+  const prog = readJSON(PROG_KEY, null);
+  if (prog && prog.date === S.today && prog.done && prog.results.length === TARGETS_PER_DAY){
+    const days = loadStats()[prog.mode].days;
+    return {mode: prog.mode, results: prog.results,
+            avg: days[S.today] ? days[S.today].avg
+                 : Math.round(prog.results.reduce((a,r) => a + r.score, 0) / prog.results.length)};
+  }
+  return null;
+}
+
+let countdownTimer = null;
+function tickCountdown(){
+  clearInterval(countdownTimer);
+  const paint = () => {
+    const now = new Date();
+    const mid = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    const ms = mid - now;
+    if (ms <= 0){ location.reload(); return; }
+    const h = Math.floor(ms / 3600000), m = Math.floor(ms / 60000) % 60;
+    $('nextIn').textContent = `Next photograph in ${h}h ${pad2(m)}m`;
+  };
+  paint();
+  countdownTimer = setInterval(paint, 20000);
+}
+
+function setMode(mode){
+  S.mode = mode;
+  document.querySelectorAll('#tolChoices .chip-btn').forEach(b =>
+    b.setAttribute('aria-pressed', String(b.dataset.tol === mode)));
+  $('modeNote').textContent = MODE_NOTES[mode];
+  writeJSON(MODE_KEY, mode);
+  renderStats();
+}
+
+/* =====================================================================
+   19. SHELL
    ===================================================================== */
 function show(which){
   ['menu','play','rules','summary'].forEach(id => $(id).classList.toggle('hidden', id !== which));
-  if (which === 'menu'){ lastPointer = performance.now(); renderBests(); }
+  if (which === 'menu'){ lastPointer = performance.now(); renderMenu(); }
+  else clearInterval(countdownTimer);
   if (which === 'play') requestAnimationFrame(resizeCanvas);
-  if (which === 'rules') $('rules').querySelector('.sheet').scrollTop = 0;
+  if (which === 'rules' || which === 'summary') $(which).querySelector('.sheet').scrollTop = 0;
 }
 
 let toastTimer;
@@ -1612,44 +1966,33 @@ function toast(msg){
   toastTimer = setTimeout(() => t.classList.add('hidden'), 6000);
 }
 
-document.querySelectorAll('#modeChoices .chip-btn').forEach(b => {
-  b.addEventListener('click', () => {
-    document.querySelectorAll('#modeChoices .chip-btn').forEach(o => o.setAttribute('aria-pressed', 'false'));
-    b.setAttribute('aria-pressed', 'true');
-    S.rounds = parseInt(b.dataset.mode, 10);
-  });
-});
-
 document.querySelectorAll('#tolChoices .chip-btn').forEach(b => {
-  b.addEventListener('click', () => {
-    document.querySelectorAll('#tolChoices .chip-btn').forEach(o => o.setAttribute('aria-pressed', 'false'));
-    b.setAttribute('aria-pressed', 'true');
-    S.mode = b.dataset.tol;
-    $('modeNote').textContent = MODE_NOTES[S.mode];
-    renderBests();
-  });
+  b.addEventListener('click', () => setMode(b.dataset.tol));
 });
 
-const MODE_NOTES = {
-  easy:   'The colour, its name, and a loupe split down the middle: target on one side, your pixel on the other. When the join disappears you are on it.',
-  medium: 'The colour, its name, and a magnifier ringed in the target. You judge it against the photograph rather than against a flat field.',
-  hard:   'The name and nothing else. No swatch, no hex, a plain loupe. You have to already know what Glaucous looks like.'
-};
-
-$('startBtn').addEventListener('click', startSession);
+$('startBtn').addEventListener('click', () => {
+  const done = dailyDone();
+  if (done){
+    // Already played: rebuild the result sheet rather than a new run.
+    S.session = {kind:'daily', level:S.todayPuzzle, date:S.today,
+                 puzzleNo:puzzleNumber(S.today), mode:done.mode,
+                 targets:null, index:TARGETS_PER_DAY, results:done.results};
+    finishSession();
+    return;
+  }
+  beginSession('daily');
+});
+$('challengeBtn').addEventListener('click', () => beginSession('challenge'));
 $('rulesBtn').addEventListener('click', () => show('rules'));
 $('rulesBackBtn').addEventListener('click', () => show('menu'));
 $('lockBtn').addEventListener('click', dockAction);
 $('homeBtn').addEventListener('click', () => show('menu'));
-$('againBtn').addEventListener('click', startSession);
 $('menuBtn').addEventListener('click', () => show('menu'));
-
-function adoptLevels(data, label){
-  const clean = data.filter(l => l && l.src && typeof l.x === 'number' && typeof l.y === 'number');
-  if (!clean.length) throw new Error('No usable levels in the pack.');
-  S.levels = clean.map((l,i) => Object.assign({id:'lv'+i, difficulty:3}, l));
-  S.packName = label || '';
-}
+$('againBtn').addEventListener('click', () => beginSession('challenge'));
+$('shareBtn').addEventListener('click', () => {
+  if (!S.session) return;
+  copyShare(shareText(S.session, S.session.finalAvg));
+});
 
 window.addEventListener('resize', () => { if (!$('play').classList.contains('hidden')) resizeCanvas(); });
 window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 260));
@@ -1659,36 +2002,34 @@ window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 260)
   attachWordmarkPointer();
   await loadNames();
 
+  S.today = localDateStr();
   let source = null;
 
-  // 1. the spreadsheet, fetched fresh so an edit shows up on a refresh
   try {
     const res = await fetch(PACK_CSV, {cache:'no-cache'});
     if (res.ok){
-      adoptLevels(csvToLevels(await res.text(), IMAGE_BASE), PACK_CSV);
-      source = PACK_CSV;
+      const parsed = csvToPuzzles(await res.text(), IMAGE_BASE);
+      if (parsed.length){ S.puzzles = parsed; source = PACK_CSV; }
     }
   } catch(e){ /* no sheet, or opened from file:// — fall through */ }
 
-  // 2. a baked-in pack from the setup tool
-  if (!source){
-    try {
-      const baked = window.HUE_AND_SEEK_LEVELS || window.HUEPHORIA_LEVELS;
-      if (Array.isArray(baked) && baked.length){
-        adoptLevels(baked, 'levels.js');
-        source = 'levels.js';
-      }
-    } catch(e){ /* fall through */ }
+  if (!source) S.puzzles = buildFallbackPuzzles();
+
+  S.firstDate = S.puzzles.length ? S.puzzles[0].date : S.today;
+  S.todayPuzzle = puzzleFor(S.today);
+  S.archive = S.puzzles.filter(p => p.date < S.today);
+
+  const dated = S.puzzles.filter(p => p.date >= S.today).length;
+  const unbaked = S.puzzles.filter(p => !p.hexes).length;
+  $('credits').textContent =
+    `${S.puzzles.length} photograph${S.puzzles.length === 1 ? '' : 's'} · ${S.archive.length} in the archive · ` +
+    `${dated} day${dated === 1 ? '' : 's'} of runway` +
+    (source ? '' : ' · no manifest, using generated fields');
+  if (source && unbaked){
+    toast(`${unbaked} row${unbaked === 1 ? ' has' : 's have'} no colours in the sheet — those days fall back to colours drawn in the browser, which can differ between players. Run the setup tool.`);
   }
 
-  // 3. nothing to play yet — generate something rather than show a dead card
-  if (!source) S.levels = buildFallbackLevels();
-
-  const photos = S.levels.length;
-  $('credits').textContent =
-    `${photos} photograph${photos === 1 ? '' : 's'} · ${NAMES.length.toLocaleString()} colour names`;
-
-  $('modeNote').textContent = MODE_NOTES[S.mode];
+  setMode(readJSON(MODE_KEY, 'standard'));
   $('loading').classList.add('hidden');
   show('menu');
 })();

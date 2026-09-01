@@ -1,26 +1,26 @@
-file,title,x,y,hex,tier
-edvard-munch_vampire.jpg,edvard-munch_vampire,0.48684,0.38782,#733222,4
-edward-hopper_soir-bleu.jpg,edward-hopper_soir-bleu,0.61990,0.50788,#ad3a32,1
-grant-wood_american-gothic.jpg,grant-wood_american-gothic,0.33109,0.59714,#191816,2
-hiroshi-yoshida_kagurazaka-street-at-night-after-rain.jpg,hiroshi-yoshida_kagurazaka-street-at-night-after-rain,0.59770,0.21376,#c39967,1
-ivan-aivazovsky_ship-on-stormy-seas.jpg,ivan-aivazovsky_ship-on-stormy-seas,0.55526,0.60075,#2b2c34,3
-ivan-aivazovsky_the-wrath-of-the-seas.jpg,ivan-aivazovsky_the-wrath-of-the-seas,0.57632,0.57438,#1e2225,2
-johannes-vermeer_the-milkmaid.png,johannes-vermeer_the-milkmaid,0.59787,0.62783,#031022,1
-rembrandt_the-storm-on-the-sea-of-galilee.jpg,rembrandt_the-storm-on-the-sea-of-galilee,0.09709,0.71544,#1a202e,3
-vincent-van-gogh_skull-of-a-skeleton-with-burning-cigarette.jpg,vincent-van-gogh_skull-of-a-skeleton-with-burning-cigarette,0.30325,0.36499,#503f19,1
-F1000006.JPG,F1000006,0.61765,0.78945,#012c1c,1
-F1000018.JPG,F1000018,0.53421,0.42913,#e9ac54,1
-F1000008.JPG,F1000008,0.96583,0.98712,#0d1922,1
-F1000037.JPG,F1000037,0.30190,0.42252,#211007,3
-F1010002.JPG,F1010002,0.12673,0.88053,#446047,1
-JP-SK - 23.jpg,JP-SK - 23,0.94074,0.59415,#d4b068,1
-5515aa9367097b109a0890b303f67091--classic-cartoon-characters-classic-cartoons.jpg,5515aa9367097b109a0890b303f67091--classic-cartoon-characters-classic-cartoons,0.40084,0.55900,#9eadca,2
-10.jpg,10,0.86440,0.21935,#2c2f52,2
-Deep Sunset.jpg,Deep Sunset,0.81417,0.67024,#370329,1
-Hiking.jpg,Hiking,0.81250,0.53687,#1e3d42,2
-I See You.jpg,I See You,0.91853,0.44702,#2c0a34,1
-Jonathan.jpg,Jonathan,0.05580,0.71153,#060c3d,1
-Mountains.jpg,Mountains,0.41842,0.45276,#d303be,1
-New.jpg,New,0.80469,0.17805,#5f6b96,1
-New2.jpg,New2,0.96151,0.21211,#fc02b1,1
-Run Girl Run.jpg,Run Girl Run,0.71819,0.17191,#78002d,1
+date,file,title,hex1,hex2,hex3,hex4,hex5
+2026-08-25,10.jpg,10,#073640,#06041a,#c80e99,#7a1b75,#04034f
+2026-09-02,5515aa9367097b109a0890b303f67091--classic-cartoon-characters-classic-cartoons.jpg,5515aa9367097b109a0890b303f67091--classic-cartoon-characters-classic-cartoons,#bc9e7c,#9aacc6,#414753,#676f7e,#e54e47
+2026-09-03,Deep Sunset.jpg,Deep Sunset,#fb0303,#2b0220,#090307,#5f0346,#960343
+2026-09-04,edvard-munch_vampire.jpg,edvard-munch_vampire,#402c36,#9b5d49,#85564e,#453321,#1c124e
+2026-09-05,edward-hopper_soir-bleu.jpg,edward-hopper_soir-bleu,#4b8c97,#8f9e9d,#6b775e,#24404f,#aa4439
+2026-09-06,F1000006.JPG,F1000006,#011107,#5d7e94,#cdbdb0,#94adbc,#6a756d
+2026-09-07,F1000008.JPG,F1000008,#f1e3e0,#697377,#183036,#8d9299,#a9a2a4
+2026-09-08,F1000018.JPG,F1000018,#e3a34c,#824d4e,#d07b3f,#2a1408,#f5dc86
+2026-09-09,F1000037.JPG,F1000037,#efe3d4,#7a4e32,#9c6a33,#38534e,#231811
+2026-09-10,F1010002.JPG,F1010002,#eeeaeb,#110b0c,#27474d,#5b7577,#b7b891
+2026-09-11,grant-wood_american-gothic.jpg,grant-wood_american-gothic,#342310,#d5c895,#afbdab,#252624,#a59265
+2026-09-12,Hiking.jpg,Hiking,#0b250a,#0b1926,#27452d,#16323d,#213f3d
+2026-09-13,hiroshi-yoshida_kagurazaka-street-at-night-after-rain.jpg,hiroshi-yoshida_kagurazaka-street-at-night-after-rain,#292429,#395d70,#f7d5b5,#65282d,#d8ab86
+2026-09-14,I See You.jpg,I See You,#07071c,#f10a80,#e6b6b1,#e41426,#681022
+2026-09-15,ivan-aivazovsky_ship-on-stormy-seas.jpg,ivan-aivazovsky_ship-on-stormy-seas,#8c8b89,#0a2d43,#445e6d,#f6e7d2,#0b191b
+2026-09-16,ivan-aivazovsky_the-wrath-of-the-seas.jpg,ivan-aivazovsky_the-wrath-of-the-seas,#2a2823,#74848b,#3b4952,#343f42,#b7b7b1
+2026-09-17,johannes-vermeer_the-milkmaid.png,johannes-vermeer_the-milkmaid,#3c3221,#96917d,#03182c,#301a1b,#755d3d
+2026-09-18,Jonathan.jpg,Jonathan,#060d33,#fbfa93,#090f9b,#8a35d7,#f2c3b0
+2026-09-19,JP-SK - 23.jpg,JP-SK - 23,#21150a,#e0bd70,#7e6946,#a9a9ab,#788386
+2026-09-20,Mountains.jpg,Mountains,#160337,#d10cb6,#f8dfa6,#560362,#eea8aa
+2026-09-21,New.jpg,New,#220233,#666192,#730349,#1caebc,#388faa
+2026-09-22,New2.jpg,New2,#040410,#030639,#b905df,#fa0384,#fb0214
+2026-09-23,rembrandt_the-storm-on-the-sea-of-galilee.jpg,rembrandt_the-storm-on-the-sea-of-galilee,#1a1e29,#9a8573,#5f4836,#3e2624,#e5ceb3
+2026-09-24,Run Girl Run.jpg,Run Girl Run,#10020f,#41003a,#fe000a,#970025,#3c00b3
+2026-09-25,vincent-van-gogh_skull-of-a-skeleton-with-burning-cigarette.jpg,vincent-van-gogh_skull-of-a-skeleton-with-burning-cigarette,#0f0f05,#393214,#ae9d65,#d3cb8b,#6a7154
