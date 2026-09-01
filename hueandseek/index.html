@@ -725,6 +725,45 @@ const normHex = s => {
   return /^[0-9a-f]{6}$/i.test(h) ? '#' + h.toLowerCase() : null;
 };
 
+/* ---------------------------------------------------------------------
+   Dates are written ISO, and the first time the sheet is opened and saved
+   in Excel or Sheets the whole column comes back as 1/9/2026. Demanding
+   ISO means every row is dropped, the manifest reads as empty, and the
+   game quietly serves generated fields instead — which is a spreadsheet
+   doing something entirely reasonable, so the parser accommodates it.
+
+   Day/month order is inferred from the column rather than assumed: one
+   row with a first field over 12 settles it. If nothing in the column is
+   decisive we take day-first, which is what a sheet saved anywhere
+   outside the United States will have written.
+   --------------------------------------------------------------------- */
+const LOOSE_DATE = /^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})$/;
+
+function detectDateOrder(raw){
+  let dayFirst = false, monthFirst = false;
+  for (const s of raw){
+    const m = String(s).trim().match(LOOSE_DATE);
+    if (!m) continue;
+    if (+m[1] > 12) dayFirst = true;
+    if (+m[2] > 12) monthFirst = true;
+  }
+  return (monthFirst && !dayFirst) ? 'MDY' : 'DMY';
+}
+
+function normaliseDate(s, order){
+  s = String(s || '').trim();
+  const iso = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (iso) return `${iso[1]}-${pad2(+iso[2])}-${pad2(+iso[3])}`;
+  const m = s.match(LOOSE_DATE);
+  if (!m) return null;
+  let y = +m[3];
+  if (y < 100) y += 2000;
+  const day = order === 'MDY' ? +m[2] : +m[1];
+  const mon = order === 'MDY' ? +m[1] : +m[2];
+  if (mon < 1 || mon > 12 || day < 1 || day > 31 || y < 1970) return null;
+  return `${y}-${pad2(mon)}-${pad2(day)}`;
+}
+
 function csvToPuzzles(text, base){
   const rows = parseCSV(text);
   if (rows.length < 2) throw new Error('the sheet has no rows under its header');
@@ -736,11 +775,14 @@ function csvToPuzzles(text, base){
   if (iDate < 0) throw new Error('the sheet needs a date column');
   if (iFile < 0 && iUrl < 0) throw new Error('the sheet needs a file or url column');
 
+  const body = rows.slice(1);
+  const order = detectDateOrder(body.map(r => (iDate >= 0 && r[iDate] != null ? r[iDate] : '')));
+
   const out = [];
-  rows.slice(1).forEach(r => {
+  body.forEach(r => {
     const cell = i => (i >= 0 && r[i] != null ? r[i].trim() : '');
-    const date = cell(iDate), file = cell(iFile), url = cell(iUrl);
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
+    const date = normaliseDate(cell(iDate), order), file = cell(iFile), url = cell(iUrl);
+    if (!date) return;
     const src = url || (file ? base + file : '');
     if (!src) return;
     const hexes = iHex.map(cell).map(normHex).filter(Boolean);
@@ -2019,15 +2061,24 @@ window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 260)
   await loadNames();
 
   S.today = localDateStr();
-  let source = null;
+  let source = null, problem = null;
 
+  /* Falling back to generated fields without saying so is how a broken
+     manifest passes for a working game. Whatever went wrong, say it. */
   try {
     const res = await fetch(PACK_CSV, {cache:'no-cache'});
-    if (res.ok){
+    if (!res.ok){
+      problem = `${PACK_CSV} returned ${res.status}. Check it is committed beside index.html.`;
+    } else {
       const parsed = csvToPuzzles(await res.text(), IMAGE_BASE);
       if (parsed.length){ S.puzzles = parsed; source = PACK_CSV; }
+      else problem = `${PACK_CSV} loaded but no row was usable — every row needs a date and a file.`;
     }
-  } catch(e){ /* no sheet, or opened from file:// — fall through */ }
+  } catch(e){
+    problem = /^file:/.test(location.protocol)
+      ? 'Opened from file:// — serve the folder over http to read the manifest.'
+      : `${PACK_CSV} could not be read: ${e.message}`;
+  }
 
   if (!source) S.puzzles = buildFallbackPuzzles();
 
@@ -2039,7 +2090,9 @@ window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 260)
      bookkeeping for whoever maintains the sheet, not for the player. The
      one exception is a sheet that isn't finished, which is a warning. */
   const unbaked = S.puzzles.filter(p => !p.hexes).length;
-  if (source && unbaked){
+  if (problem){
+    toast(problem + ' Playing generated colour fields in the meantime.');
+  } else if (source && unbaked){
     toast(`${unbaked} row${unbaked === 1 ? ' has' : 's have'} no colours in the sheet — those days fall back to colours drawn in the browser, which can differ between players. Run the setup tool.`);
   }
 
