@@ -1908,11 +1908,27 @@ function blockFor(score){
 }
 const blocksFor = results => results.map(r => blockFor(r.score)).join('');
 
+/* Written out in full, scheme and all. Messaging apps only turn a string
+   into a tappable link when it looks unambiguously like a URL, and a bare
+   geordie.lol/hueandseek gets left as plain text in most of them. */
+const GAME_URL = 'https://geordie.lol/hueandseek';
+
 function shareText(sess, avg){
-  const head = sess.kind === 'daily'
+  const daily = sess.kind === 'daily';
+  const lines = [daily
     ? `Hue and Seek #${sess.puzzleNo} · ${MODE_LABEL[sess.mode]}`
-    : `Hue and Seek · Archive · ${MODE_LABEL[sess.mode]}`;
-  return `${head}\n${avg}% average\n${blocksFor(sess.results)}\ngeordie.lol/hueandseek`;
+    : `Hue and Seek · Archive · ${MODE_LABEL[sess.mode]}`];
+
+  /* The colour the run resolved into. It is the one personal thing in the
+     share — everyone playing today gets the same five targets, so this is
+     what differs — and it gives away nothing about the answers, since it
+     is built from what you picked rather than what you were after. */
+  if (sess.gradeName && sess.gradeName !== '—'){
+    lines.push(`${daily ? 'My colour today' : 'My colour'}: ${sess.gradeName}`);
+  }
+
+  lines.push(`${avg}% average`, blocksFor(sess.results), GAME_URL);
+  return lines.join('\n');
 }
 
 async function copyShare(text){
@@ -1956,8 +1972,11 @@ function finishSession(){
   }
 
   const hex = gradeColour(avg, results);
+  const gradeName = NAMES.length ? nameOf(rgbToLab(...hex2rgb(hex))) : '—';
+  sess.gradeHex = hex;              // the share quotes these back
+  sess.gradeName = gradeName;
   $('gradeSw').style.background = hex;
-  $('gradeName').textContent = NAMES.length ? nameOf(rgbToLab(...hex2rgb(hex))) : '—';
+  $('gradeName').textContent = gradeName;
   $('gradeHex').textContent = hex.toUpperCase();
   $('summaryScore').textContent = avg + '%';
   $('quip').textContent = quipFor(avg, sess.kind === 'daily' ? sess.date : null);
