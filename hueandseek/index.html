@@ -515,8 +515,8 @@ h4.sub{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var
 
       <div class="sheet-actions" style="margin-top:20px">
         <button class="btn primary" id="shareBtn">Copy result</button>
-        <button class="btn" id="againBtn">Play another</button>
         <button class="btn" id="menuBtn">Home</button>
+        <button class="btn" id="againBtn">Replay</button>
       </div>
     </div>
   </section>
@@ -1716,13 +1716,18 @@ function puzzleFor(date){
   return {date, file: pick.file, src: pick.src, title: pick.title, hexes: null, reused: true};
 }
 
-async function beginSession(kind){
+/* opts.replay — today's puzzle again, same photograph and the same five
+   colours in the same order, but nothing about it is written down. It does
+   not bank a score, does not touch the streak, and above all does not
+   overwrite the saved progress, because that record is what the title card
+   reads back to show you the day you actually played. */
+async function beginSession(kind, opts = {}){
   const level = kind === 'daily' ? S.todayPuzzle
                                  : S.archive[Math.floor(Math.random() * S.archive.length)];
   if (!level){ toast('Nothing to play — the manifest is empty.'); return; }
 
   S.session = {
-    kind, level,
+    kind, level, replay: !!opts.replay,
     date: kind === 'daily' ? S.today : level.date,
     puzzleNo: puzzleNumber(kind === 'daily' ? S.today : level.date),
     mode: S.mode, targets: null, index: 0, results: []
@@ -1772,8 +1777,9 @@ async function beginSession(kind){
     return {hex, lab, name: nameOf(lab), group: hueGroup(lab)};
   });
 
-  // Resume a daily that was started and abandoned.
-  if (kind === 'daily'){
+  // Resume a daily that was started and abandoned. A replay always starts
+  // clean — resuming into it would drag the real attempt's answers in.
+  if (kind === 'daily' && !S.session.replay){
     const prog = readJSON(PROG_KEY, null);
     if (prog && prog.date === S.today && prog.mode === S.mode && !prog.done && prog.results.length){
       S.session.results = prog.results;
@@ -1786,7 +1792,7 @@ async function beginSession(kind){
 }
 
 function saveProgress(done){
-  if (!S.session || S.session.kind !== 'daily') return;
+  if (!S.session || S.session.kind !== 'daily' || S.session.replay) return;
   writeJSON(PROG_KEY, {
     date: S.session.date, mode: S.session.mode,
     results: S.session.results, done: !!done
@@ -2020,9 +2026,13 @@ const GAME_URL = 'geordie.lol/hueandseek';
 
 function shareText(sess, avg){
   const daily = sess.kind === 'daily';
+  /* A replay says so on the face of it. Sharing a second attempt as though
+     it were the day's score would make every number in the thread suspect,
+     including the honest ones. */
+  const tag = MODE_LABEL[sess.mode] + (sess.replay ? ' (replay)' : '');
   const lines = [daily
-    ? `Hue and Seek #${sess.puzzleNo} · ${MODE_LABEL[sess.mode]}`
-    : `Hue and Seek · Archive · ${MODE_LABEL[sess.mode]}`];
+    ? `Hue and Seek #${sess.puzzleNo} · ${tag}`
+    : `Hue and Seek · Archive · ${tag}`];
 
   /* The colour the run resolved into. It is the one personal thing in the
      share — everyone playing today gets the same five targets, so this is
@@ -2066,8 +2076,10 @@ function finishSession(){
 
   // "New best" is only news the first time a day is banked. Coming back
   // to look at today's sheet again must not re-announce it.
+  // A replay is never banked, whatever the day's state — belt as well as
+  // braces, since the day is already recorded by the time one can start.
   let priorBest = null;
-  if (sess.kind === 'daily'){
+  if (sess.kind === 'daily' && !sess.replay){
     const fresh = !loadStats()[sess.mode].days[sess.date];
     if (fresh){
       priorBest = summarise(sess.mode).best;
@@ -2086,9 +2098,10 @@ function finishSession(){
   $('summaryScore').textContent = avg + '%';
   $('quip').textContent = quipFor(avg, sess.kind === 'daily' ? sess.date : null);
 
-  $('sumEyebrow').textContent = sess.kind === 'daily'
+  $('sumEyebrow').textContent = (sess.kind === 'daily'
     ? `Hue and Seek #${sess.puzzleNo} · ${prettyDate(sess.date)} · ${MODE_LABEL[sess.mode]}`
-    : `Archive · ${sess.level.title} · ${MODE_LABEL[sess.mode]}`;
+    : `Archive · ${sess.level.title} · ${MODE_LABEL[sess.mode]}`)
+    + (sess.replay ? ' · Replay' : '');
 
   const line = `${blocksFor(results)}  ·  best colour ${bestScore}% · closest ΔE ${isFinite(closest) ? closest.toFixed(2) : '—'}`;
   $('recordFlag').innerHTML = sess.kind === 'daily' && priorBest != null && avg > priorBest
@@ -2103,13 +2116,18 @@ function finishSession(){
       <td class="num">${r.score}%</td>
     </tr>`).join('');
 
-  $('statsBlock').classList.toggle('hidden', sess.kind !== 'daily');
-  if (sess.kind === 'daily'){
+  $('statsBlock').classList.toggle('hidden', sess.kind !== 'daily' || !!sess.replay);
+  if (sess.kind === 'daily' && !sess.replay){
     $('sumStatsLabel').textContent = 'Your record — ' + MODE_LABEL[sess.mode];
     $('sumStats').innerHTML = statTiles(sess.mode);
   }
-  $('againBtn').textContent = sess.kind === 'daily' ? 'Play the archive' : 'Another from the archive';
-  $('againBtn').classList.toggle('hidden', !S.archive.length);
+  /* Copy result · Home · Replay. On an archive round the third slot keeps
+     its own meaning — another archive photograph — since replaying a random
+     archive round is just a new random round. */
+  $('againBtn').textContent = sess.kind === 'daily'
+    ? (sess.replay ? 'Replay again' : 'Replay')
+    : 'Another from the archive';
+  $('againBtn').classList.toggle('hidden', sess.kind !== 'daily' && !S.archive.length);
 
   S.session.finalAvg = avg;
   show('summary');
@@ -2224,7 +2242,10 @@ $('rulesBackBtn').addEventListener('click', () => show('menu'));
 $('lockBtn').addEventListener('click', dockAction);
 $('homeBtn').addEventListener('click', () => show('menu'));
 $('menuBtn').addEventListener('click', () => show('menu'));
-$('againBtn').addEventListener('click', () => beginSession('challenge'));
+$('againBtn').addEventListener('click', () => {
+  if (S.session && S.session.kind === 'daily') beginSession('daily', {replay:true});
+  else beginSession('challenge');
+});
 $('shareBtn').addEventListener('click', () => {
   if (!S.session) return;
   copyShare(shareText(S.session, S.session.finalAvg));
