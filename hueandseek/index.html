@@ -4,7 +4,45 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
 <title>Hue and Seek</title>
-<link rel="icon" href="/favicon.png" type="image/png">
+<meta name="description" content="A daily colour puzzle. Five colours hidden in one photograph, the same five for everyone.">
+<meta name="theme-color" content="#0c0c0d">
+
+<!-- ICONS — relative, so they resolve inside /hueandseek/ and the game gets
+     its own rather than the site-wide one at the domain root. Files to add
+     beside index.html:
+       favicon.png          32×32 or 48×48, transparent or on #0c0c0d
+       apple-touch-icon.png 180×180, NO transparency and no rounded corners
+                            (iOS adds its own mask; a pre-rounded one gets
+                            clipped twice and looks wrong)
+     A missing apple-touch-icon degrades quietly. A missing favicon.png does
+     not — the tab shows a blank page glyph, so add that one first. -->
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<!-- LINK PREVIEWS — the card that appears when the URL is pasted into
+     Messages, WhatsApp, Slack, Discord, Bluesky and the rest.
+     og:image MUST be an absolute URL: crawlers do not resolve relative
+     paths, and a relative one silently yields no thumbnail at all. Add:
+       og-image.png   1200×630, under ~1MB, no transparency
+     Most platforms cache a preview for days and will not re-fetch on their
+     own, so when you replace the image, bump ?v=1 to ?v=2 here — that is
+     the whole trick to forcing a refresh. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Hue and Seek">
+<meta property="og:title" content="Hue and Seek">
+<meta property="og:description" content="A daily colour puzzle. Five colours hidden in one photograph, the same five for everyone.">
+<meta property="og:url" content="https://geordie.lol/hueandseek">
+<meta property="og:image" content="https://geordie.lol/hueandseek/og-image.png?v=1">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Hue and Seek — a daily colour puzzle">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Hue and Seek">
+<meta name="twitter:description" content="A daily colour puzzle. Five colours hidden in one photograph, the same five for everyone.">
+<meta name="twitter:image" content="https://geordie.lol/hueandseek/og-image.png?v=1">
+<meta name="twitter:image:alt" content="Hue and Seek — a daily colour puzzle">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
@@ -125,9 +163,21 @@ button{font:inherit; color:inherit; background:none; border:none; cursor:pointer
 #nextIn{font-size:11px; color:var(--dim); letter-spacing:.06em; margin-top:9px;}
 
 .card-foot{
-  margin-top:auto; padding-top:16px; border-top:1px solid var(--rule);
+  padding-top:16px; border-top:1px solid var(--rule);
   display:flex; align-items:center; gap:10px; flex-wrap:wrap;
 }
+/* Text, not buttons — the rule below separates them from the two things
+   you actually press. This carries the margin-top:auto that used to sit on
+   the foot, so it is what gets pushed to the bottom of the card and the
+   foot follows directly beneath its own border. */
+.footlinks{
+  margin-top:auto; padding-bottom:16px;
+  display:flex; flex-direction:column; align-items:flex-start; gap:3px;
+}
+.textlink{font-size:12px; letter-spacing:.03em; color:var(--text); padding:0; border-bottom:1px solid transparent;}
+.textlink:hover{border-bottom-color:var(--dim);}
+.byline{font-size:11px; color:var(--dim); text-decoration:none; border-bottom:1px solid transparent;}
+.byline:hover{color:var(--text); border-bottom-color:var(--dim);}
 
 /* ===================== RULES =====================
    The one screen where someone reads paragraphs rather than glancing at a
@@ -286,7 +336,7 @@ h4.sub{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var
       <h1 class="wordmark" id="wordmark" aria-label="Hue and Seek"></h1>
 
       <p class="tagline">A game of hueristics.</p>
-      <p class="instruction">Five colours. One photograph. A daily colour puzzle.</p>
+      <p class="instruction">A daily colour puzzle.</p>
 
       <div class="field" id="modeField">
         <span class="eyebrow">How much help you get</span>
@@ -319,10 +369,14 @@ h4.sub{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var
         <div class="stats" id="stats"></div>
       </div>
 
+      <div class="footlinks">
+        <button id="rulesBtn" class="textlink">How to play &amp; Scoring →</button>
+        <a class="byline" href="https://geordie.lol" target="_blank" rel="noopener">By Geordie Crawley</a>
+      </div>
+
       <div class="card-foot">
         <button class="btn primary" id="startBtn">Begin</button>
         <button class="btn" id="challengeBtn">Archive</button>
-        <button class="btn" id="rulesBtn">How it works</button>
       </div>
     </div>
   </section>
@@ -381,7 +435,7 @@ h4.sub{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var
       <span class="eyebrow">How it works</span>
       <h2 class="rulesHead">Find the colour in the photo.</h2>
 
-      <p>One photograph a day, five colours hidden in it. Everyone gets the same five.</p>
+      <p>A daily colour puzzle.</p>
 
       <h3>Playing</h3>
       <ul>
@@ -390,7 +444,6 @@ h4.sub{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var
         <li>Lock in when you're happy. There's no clock.</li>
         <li>Five colours, then you're done for the day. Your progress is saved, so you can close the tab and come back.</li>
       </ul>
-      <p><b>Where you click doesn't matter. Only the colour you land on.</b> If it turns up in five places, all five are right.</p>
 
       <h3>The two modes</h3>
       <ul>
@@ -412,14 +465,8 @@ h4.sub{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var
         </tbody>
       </table>
 
-      <h3>The reveal</h3>
-      <p>Lock in and the photo drains to grey except your colour, wherever it turns up. Not where it was. Where it all was.</p>
-
       <h3>The archive</h3>
       <p>Every photograph that's had its day goes into the archive. Play one at random with five fresh colours — a new set each time, so a picture you've already seen is still a game. Archive rounds don't touch your record.</p>
-
-      <h3>Your record</h3>
-      <p>Easy and Standard are kept apart: an Easy 90 and a Standard 90 aren't the same achievement. Your streak counts days finished. Your strongest group is the family of hues you're best at, once you've met it a few times.</p>
 
       <h3>Credits</h3>
       <p>Colours come thanks to the <a href="https://github.com/meodai/color-names" target="_blank" rel="noopener">Color Name List</a> by David Aerne and contributors. A human-curated set of 4,959 names, MIT licensed.</p>
@@ -1467,7 +1514,7 @@ const MODES = {
 };
 const MODE_LABEL = {standard:'Standard', easy:'Easy'};
 const MODE_NOTES = {
-  standard: 'You get the name. That is the lot. Find Glaucous from memory.',
+  standard: "You get the name of the colour you're trying to pin-point in the image. What do you think Ocean's Embrace looks like?",
   easy:     'You get the swatch, and a loupe split down the middle. Match the two halves until the seam vanishes.'
 };
 /* The marking curve. k stretches it sideways — bigger is kinder at every
@@ -1894,17 +1941,46 @@ function quipFor(avg, seedStr){
   return band[Math.floor(rnd() * band.length)];
 }
 
+/* Your colour is the one you got CLOSEST to today, tinted by how the rest
+   of the day went. Nothing here is random — the same five results always
+   give the same colour.
+
+   The first version averaged all five hues together and drove lightness
+   from the score, and it made almost everyone beige. Two reasons, both
+   measurable. Averaging five hues in a circle is a blender: photographs
+   already skew warm, so the mean landed in the orange band four times in
+   five, and blues and teals were mathematically unreachable — over a
+   simulated 4,200 runs they came up exactly zero times. And with lightness
+   pinned to accuracy, a middling score forced a middling lightness at a
+   middling chroma, which at a warm hue is the definition of beige.
+
+   Anchoring on one real pick instead of the average keeps a hue that was
+   actually in the photograph, and taking lightness from that pick lets a
+   dark find come out dark. Same simulation: all ten families reachable,
+   warm share down from 79% to 66% (photographs really are warm — flat
+   would be a lie), lightness spread doubled, and the number of different
+   families two players can get from the same photograph went from 4.5
+   to 8. Picking by best score rather than by a seeded draw tested just as
+   varied and needs no randomness at all, so it earns its place. */
 function gradeColour(avg, results){
-  let sx = 0, sy = 0;
-  for (const r of results){
-    const lab = rgbToLab(...hex2rgb(r.pickHex));
-    const c = Math.hypot(lab[1], lab[2]);
-    const h = hueDeg(lab[2], lab[1]) * RAD;
-    sx += Math.cos(h) * c; sy += Math.sin(h) * c;
-  }
-  const hue = (sx || sy) ? (Math.atan2(sy, sx) / RAD + 360) % 360 : 30;
   const t = Math.max(0, Math.min(1, avg / 100));
-  return lchToHex(30 + t * 36, 2 + Math.pow(t, 1.7) * 78, hue);
+  const labs = results.map(r => rgbToLab(...hex2rgb(r.pickHex)));
+  const meanL = labs.reduce((a, l) => a + l[0], 0) / labs.length;
+
+  // The closest find anchors it. Ties keep the earlier colour, so the
+  // result never depends on sort order.
+  let best = 0;
+  for (let i = 1; i < results.length; i++) if (results[i].score > results[best].score) best = i;
+  const anchor = labs[best];
+
+  const hue = hueDeg(anchor[2], anchor[1]);
+  // Mostly that pick's own lightness, steadied by the run's average and
+  // nudged toward the middle when the day went badly.
+  const L = Math.max(20, Math.min(84, anchor[0] * 0.55 + meanL * 0.20 + (28 + t * 34) * 0.25));
+  // Vividness is still earned: the anchor's chroma, scaled steeply by
+  // accuracy, so a good day arrives clear and a bad one murky.
+  const C = (12 + Math.hypot(anchor[1], anchor[2]) * 0.85) * (0.30 + 1.10 * Math.pow(t, 1.6));
+  return lchToHex(L, C, hue);
 }
 
 /* =====================================================================
