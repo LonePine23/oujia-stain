@@ -78,6 +78,17 @@
   --mat:      #131315;
   --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
   --serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+
+  /* The viewport tag says viewport-fit=cover, which is what lets the game
+     run edge to edge — and also what puts the bottom of the dock underneath
+     an iPhone's home indicator and behind its rounded corners unless
+     something pads it back. These are that padding. Held in variables
+     rather than calling env() at each site so the insets can be forced to
+     a value in a desktop browser and the layout checked without a phone. */
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
 html,body{height:100%; margin:0;}
@@ -208,7 +219,8 @@ button{font:inherit; color:inherit; background:none; border:none; cursor:pointer
 
 /* ===================== PLAY ===================== */
 #play{flex:1; display:flex; flex-direction:column; min-height:0;}
-.topbar{flex:0 0 auto; display:flex; align-items:center; gap:12px; padding:6px 12px; border-bottom:1px solid var(--rule);}
+.topbar{flex:0 0 auto; display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--rule);
+  padding:calc(6px + var(--sat)) max(12px, var(--sar)) 6px max(12px, var(--sal));}
 #homeBtn{font-family:var(--serif); font-size:19px; line-height:1; padding:3px 1px; border-bottom:1px solid transparent;}
 #homeBtn:hover{border-bottom-color:var(--dim);}
 .topbar .spacer{flex:1;}
@@ -230,9 +242,16 @@ button{font:inherit; color:inherit; background:none; border:none; cursor:pointer
 .railSide.left{text-align:right;}
 .railSide.right{text-align:left;}
 .railSide .tag{font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--dim);}
+/* Colour names run long — Glimpse Into Space, Caramel Macchiato — and on
+   one nowrap line the rail truncated them to about six characters on a
+   phone, which is useless when the name is the entire clue in Standard.
+   Two lines in a box of fixed pixel height: fixed so the two halves of the
+   rail stay aligned whether a name takes one line or two, and so nothing
+   reflows when the answer arrives. fitName() below shrinks the rare name
+   that still will not fit. */
 .railSide .nm{
-  font-family:var(--serif); font-size:clamp(20px,5.4vw,31px); line-height:1.08;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;
+  font-family:var(--serif); font-size:clamp(19px,5.4vw,26px); line-height:1.06;
+  overflow:hidden; margin-top:2px; height:56px;
 }
 .railSide .hx{font-size:10.5px; letter-spacing:.12em; color:var(--dim); margin-top:2px;}
 .chiprail:not(.revealed) .railSide.right .nm,
@@ -275,7 +294,16 @@ button{font:inherit; color:inherit; background:none; border:none; cursor:pointer
 .pip{width:16px; height:4px; background:#303035;}
 .pip.now{background:var(--text);}
 .zoomwrap{flex:0 0 auto; display:flex; flex-direction:column; gap:3px; align-items:flex-start;}
-.dock{flex:0 0 auto; border-top:1px solid var(--rule); background:var(--surface); padding:0 14px; height:64px; display:flex; align-items:center; gap:12px;}
+.dock{
+  flex:0 0 auto; border-top:1px solid var(--rule); background:var(--surface);
+  display:flex; align-items:center; gap:12px;
+  /* The dock's own background carries on down into the home-indicator
+     strip, so the bottom of the screen is dock rather than a bare band of
+     a different colour. Height grows by the inset; the controls stay in
+     their 64px. */
+  height:calc(64px + var(--sab));
+  padding:0 max(14px, var(--sar)) var(--sab) max(14px, var(--sal));
+}
 #zoomBtn{border:1px solid var(--rule); background:var(--raise); padding:7px 10px; font-size:11px; min-width:46px;}
 #lockBtn{min-width:130px;}
 
@@ -316,16 +344,18 @@ h4.sub{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var
   .instruction{margin:0 0 18px;}
 
   .chiprail{height:76px;}
-  .swatchPair{width:112px;}
+  .swatchPair{width:88px;}
+  .railSide .nm{font-size:clamp(15px,4.4vw,19px); height:42px;}
+  .railSide{padding:0 9px;}
   .railSide{padding:0 11px;}
   .railSide .hx{display:none;}
   #hint{display:none;}
   #dockVerdict .vd{font-size:17px;}
   #menu,#summary{padding:0;}
-  .card,.sheet{border:0; padding:18px 16px;}
+  .card,.sheet{border:0; padding:18px max(16px, var(--sar)) calc(18px + var(--sab)) max(16px, var(--sal));}
   #lockBtn{min-width:0; padding:11px 12px;}
   #zoomBtn{min-width:0; padding:6px 7px;}
-  .dock{gap:9px; padding-left:10px; padding-right:10px;}
+  .dock{gap:9px; padding-left:max(10px, var(--sal)); padding-right:max(10px, var(--sar));}
   .stat{flex:1 1 44%; min-width:0;}
 }
 @media (prefers-reduced-motion:reduce){ *{animation:none !important; transition:none !important;} }
@@ -1817,11 +1847,35 @@ function nextTarget(){
   S.target = sess.targets[sess.index];
   $('swTarget').style.background = S.target.hex;
   $('targetName').textContent = S.target.name;
+  fitName($('targetName'));
   $('targetHex').textContent = S.target.hex.toUpperCase();
 
   renderPips();
   updateRunning();
   resizeCanvas();
+}
+
+/* Two lines covers nearly every name in the list. For the handful that
+   still overflow, step the size down rather than truncate — the name is the
+   whole clue in Standard, so a smaller complete name beats a bigger
+   half one. Floor at 62% so it can never shrink to unreadable; below that
+   the line clamp takes over and ellipses it. */
+function fitName(el){
+  el.style.fontSize = '';
+  const box = el.clientHeight;          // the fixed two-line box set in CSS
+  if (!box) return;
+  /* The box height is the only limit, deliberately. An earlier version also
+     set -webkit-line-clamp:2, which broke this measurement outright — a
+     clamped box with a fixed height reports scrollHeight equal to
+     clientHeight, because the truncation is real and there is no overflow
+     left to detect, so the loop never ran and every long name silently
+     stayed truncated. One rule, one thing to reason about. */
+  const base = parseFloat(getComputedStyle(el).fontSize);
+  let size = base;
+  while (el.scrollHeight > box + 1 && size > base * 0.62){
+    size -= 1;
+    el.style.fontSize = size + 'px';
+  }
 }
 
 function renderPips(){
@@ -1865,6 +1919,7 @@ function showReveal(){
   // now, so the verdict takes their place. Nothing new appears on screen.
   $('swPick').style.background = r.pickHex;
   $('rvPickName').textContent = r.pickName;
+  fitName($('rvPickName'));
   $('rvPickHex').textContent = r.pickHex.toUpperCase();
   $('chiprail').classList.add('revealed');
 
@@ -2251,7 +2306,11 @@ $('shareBtn').addEventListener('click', () => {
   copyShare(shareText(S.session, S.session.finalAvg));
 });
 
-window.addEventListener('resize', () => { if (!$('play').classList.contains('hidden')) resizeCanvas(); });
+window.addEventListener('resize', () => {
+  if ($('play').classList.contains('hidden')) return;
+  resizeCanvas();
+  fitName($('targetName')); fitName($('rvPickName'));
+});
 window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 260));
 
 (async function boot(){
