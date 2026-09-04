@@ -126,6 +126,44 @@ button{font:inherit; color:inherit; background:none; border:none; cursor:pointer
 .btn:disabled{opacity:.35; cursor:default;}
 .btn.primary{background:var(--text); color:var(--ink); border-color:var(--text); font-weight:600;}
 .btn.primary:hover{background:#fff; border-color:#fff;}
+
+/* ---------------------------------------------------------------
+   The wordmark's drift, lent to the filled controls — the one button
+   on a screen that is asking to be pressed, and the mode you are on.
+   Pale and slow on purpose: it should register as warmth rather than
+   as a colour, and at 34 seconds a turn you notice it only if you sit
+   still.
+
+   Scoped to #menu, #rules and #summary, and NEVER to #play. Lock in
+   is a .btn.primary too, and a control that changes colour inside the
+   playing frame would shift how the target swatch reads through
+   simultaneous contrast — the one rule in this game that is
+   functional rather than a preference.
+
+   Hover brightens with a filter rather than a background, because a
+   running animation outranks an ordinary background declaration and
+   the old :hover rule would simply never land.
+   --------------------------------------------------------------- */
+@keyframes btnDrift{
+  0%,100%{background-color:hsl(10 34% 87%);}
+  20%    {background-color:hsl(56 30% 87%);}
+  40%    {background-color:hsl(142 24% 87%);}
+  60%    {background-color:hsl(204 30% 88%);}
+  80%    {background-color:hsl(288 26% 88%);}
+}
+#menu .btn.primary, #rules .btn.primary, #summary .btn.primary,
+#menu .chip-btn[aria-pressed="true"]{
+  animation:btnDrift 34s linear infinite;
+  border-color:transparent;
+}
+/* Offset so they never pulse in unison — the wordmark's letters each
+   run at their own rate for the same reason. */
+#menu .chip-btn[aria-pressed="true"]{animation-delay:-13s;}
+#summary .btn.primary{animation-delay:-21s;}
+#rules .btn.primary{animation-delay:-7s;}
+#menu .btn.primary:hover, #rules .btn.primary:hover, #summary .btn.primary:hover{
+  filter:brightness(1.06);
+}
 .note{color:var(--dim); font-size:11px; line-height:1.5;}
 
 /* ===================== TITLE CARD ===================== */
@@ -214,7 +252,8 @@ button{font:inherit; color:inherit; background:none; border:none; cursor:pointer
 #rules a:hover{border-bottom-color:var(--dim);}
 .scoretable{margin:14px 0 16px; max-width:62ch;}
 .scoretable td{padding:7px 0; color:var(--dim);}
-.scoretable td:first-child{color:var(--text); font-variant-numeric:tabular-nums; width:56px;}
+.scoretable td:first-child{color:var(--text); font-variant-numeric:tabular-nums; width:52px;}
+.scoretable th.num,.scoretable td.num{width:74px;}
 .scoretable td.num{color:var(--text);}
 
 /* ===================== PLAY ===================== */
@@ -250,8 +289,20 @@ button{font:inherit; color:inherit; background:none; border:none; cursor:pointer
    reflows when the answer arrives. fitName() below shrinks the rare name
    that still will not fit. */
 .railSide .nm{
-  font-family:var(--serif); font-size:clamp(19px,5.4vw,26px); line-height:1.06;
+  font-family:var(--serif); line-height:1.06;
   overflow:hidden; margin-top:2px; height:56px;
+  /* A single word longer than the box has nothing to wrap at, so without
+     this it runs off the side no matter how small the fitter goes. No real
+     colour name is that long; this just means the failure is a break
+     rather than a silent clip. */
+  overflow-wrap:anywhere;
+  /* The band fitName() is allowed to work in. The box height is fixed, so
+     the size is what flexes: a short name grows until it nearly fills the
+     box on one line, a long one settles back to two. Kept in CSS rather
+     than JS so the two breakpoints stay next to the box heights they go
+     with. The font-size below is only what shows before the fitter runs. */
+  --nm-min:15px; --nm-max:36px;
+  font-size:26px;
 }
 .railSide .hx{font-size:10.5px; letter-spacing:.12em; color:var(--dim); margin-top:2px;}
 .chiprail:not(.revealed) .railSide.right .nm,
@@ -345,7 +396,7 @@ h4.sub{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var
 
   .chiprail{height:76px;}
   .swatchPair{width:88px;}
-  .railSide .nm{font-size:clamp(15px,4.4vw,19px); height:42px;}
+  .railSide .nm{--nm-min:12px; --nm-max:25px; font-size:19px; height:42px;}
   .railSide{padding:0 9px;}
   .railSide{padding:0 11px;}
   .railSide .hx{display:none;}
@@ -493,16 +544,17 @@ h4.sub{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var
       </ul>
 
       <h3>Scoring</h3>
-      <p>Your colour and the target are compared with CIEDE2000 — a measure tuned to how an eye reads a gap rather than how far apart two numbers are. Both modes are marked on the same curve.</p>
+      <p>Your colour and the target are compared with CIEDE2000 — a measure tuned to how an eye reads a gap rather than how far apart two numbers are.</p>
+      <p>The two modes are marked differently, because they are not the same task. In Easy the swatch is in front of you and the loupe butts your pixel against it, so it is a matching job and the marking is strict. In Standard there is nothing on screen to match — you are recalling what a name looks like — so being in the right family counts for a good deal more.</p>
       <table class="scoretable">
-        <thead><tr><th>ΔE</th><th>Means</th><th class="num">Score</th></tr></thead>
+        <thead><tr><th>ΔE</th><th>Means</th><th class="num">Easy</th><th class="num">Standard</th></tr></thead>
         <tbody>
-          <tr><td>1</td><td>Invisible side by side</td><td class="num">99</td></tr>
-          <tr><td>2.3</td><td>What print and paint work accepts</td><td class="num">97</td></tr>
-          <tr><td>5</td><td>You'd notice if you looked</td><td class="num">90</td></tr>
-          <tr><td>12</td><td>Clearly not the same colour</td><td class="num">67</td></tr>
-          <tr><td>20</td><td>A different colour</td><td class="num">42</td></tr>
-          <tr><td>35+</td><td>Not even close</td><td class="num">13</td></tr>
+          <tr><td>1</td><td>Invisible side by side</td><td class="num">99</td><td class="num">100</td></tr>
+          <tr><td>5</td><td>You'd notice if you looked</td><td class="num">90</td><td class="num">96</td></tr>
+          <tr><td>12</td><td>Clearly not the same colour</td><td class="num">67</td><td class="num">83</td></tr>
+          <tr><td>18</td><td>Right family, wrong shade</td><td class="num">48</td><td class="num">67</td></tr>
+          <tr><td>25</td><td>A different colour</td><td class="num">30</td><td class="num">49</td></tr>
+          <tr><td>35+</td><td>Not even close</td><td class="num">13</td><td class="num">27</td></tr>
         </tbody>
       </table>
 
@@ -1558,20 +1610,40 @@ const MODE_NOTES = {
   standard: "You get the name of the colour you're trying to pin-point in the image. What do you think Ocean's Embrace looks like?",
   easy:     'You get the swatch, and a loupe split down the middle. Match the two halves until the seam vanishes.'
 };
-/* The marking curve. k stretches it sideways — bigger is kinder at every
-   distance. p sets the shape: above about 1.4 the top flattens, so being
-   within a couple of ΔE reads as essentially perfect, while the tail
-   still falls away hard enough that a genuinely wrong colour can't look
-   respectable. The pair below is deliberate, not arbitrary: ΔE 2.3 is the
-   tolerance print and paint work accepts, so it scores 97 rather than
-   being nickel-and-dimed, and ΔE 35 is a different colour entirely, so it
-   scores 13. Retuning is this one line. */
-const CURVE = {k:22, p:1.5};
-const CURVE_V1 = {k:13, p:1.35};   // the first curve, kept only to migrate old records
+/* A curve each, because the two modes are not the same task.
+   k stretches it sideways — bigger is kinder at every distance. p sets the
+   shape: above about 1.4 the top flattens, so being within a couple of ΔE
+   reads as essentially perfect, while the tail still falls away hard
+   enough that a genuinely wrong colour cannot look respectable.
 
-function scoreFor(dE, c = CURVE){ return Math.round(100 * Math.exp(-Math.pow(dE / c.k, c.p))); }
-/** Inverse of the curve: the ΔE that earns a given score. */
-function deltaEForScore(score, c = CURVE){ return c.k * Math.pow(-Math.log(score / 100), 1 / c.p); }
+   EASY is a matching task. The swatch is right there and the split loupe
+   butts your pixel against it, so ΔE 2 is achievable and the curve can
+   afford to be strict about the difference between good and exact.
+
+   STANDARD is a recall task. There is no colour on screen to match — you
+   are recovering "Glaucous" from memory — so landing in the right family
+   at ΔE 18 is a genuinely good answer that the Easy curve marked at 48.
+   Its curve is stretched (k 22 → 30) and steepened (p 1.5 → 1.8): the
+   steeper exponent is what buys generosity in the middle without also
+   flattering a wild miss, so ΔE 18 goes 48 → 67 while ΔE 45 stays at 13.
+
+     ΔE        1    5   12   18   25   35   45
+     Easy     99   90   67   48   30   13    5
+     Standard 100  96   83   67   49   27   13
+
+   The record already keeps the two modes apart, which is what makes this
+   safe: no average ever mixes scores from different curves. */
+const CURVES = {
+  easy:     {k:22, p:1.5},
+  standard: {k:30, p:1.8}
+};
+const CURVE_V1 = {k:13, p:1.35};   // first curve of all, scores only
+const CURVE_V2 = {k:22, p:1.5};    // one curve for both modes, ΔE stored
+const curveFor = mode => CURVES[mode] || CURVES.easy;
+
+function scoreFor(dE, mode){ const c = curveFor(mode); return Math.round(100 * Math.exp(-Math.pow(dE / c.k, c.p))); }
+/** Inverse of a curve: the ΔE that earns a given score. */
+function deltaEForScore(score, c){ return c.k * Math.pow(-Math.log(score / 100), 1 / c.p); }
 
 /* The reveal is NOT tied to the marking curve. It answers "where is this
    colour in the photograph", which is a fact about the picture and does
@@ -1605,8 +1677,9 @@ function applyMode(){
    rather than stored, so a stat can be added later without migrating
    anyone's saved data.
    ===================================================================== */
-const STATS_KEY = 'hueandseek.stats.v3';
-const STATS_KEY_V1 = 'hueandseek.stats.v2';   // scored on the first curve
+const STATS_KEY = 'hueandseek.stats.v4';
+const STATS_KEY_V2 = 'hueandseek.stats.v3';   // one curve for both modes, ΔE stored
+const STATS_KEY_V1 = 'hueandseek.stats.v2';   // first curve of all, scores only
 const PROG_KEY  = 'hueandseek.progress.v2';
 const MODE_KEY  = 'hueandseek.mode.v2';
 
@@ -1618,37 +1691,42 @@ function writeJSON(key, value){
   try { localStorage.setItem(key, JSON.stringify(value)); } catch(e){ /* private mode, never mind */ }
 }
 
-/* Days now carry the ΔE they were played at, not just the score, so the
-   curve can be retuned again without either wiping anyone's record or
-   averaging two different marking schemes together as though they meant
-   the same thing. Records from before that change hold scores only, so
-   they are migrated once by running the old curve backwards to recover
-   roughly what was actually achieved, then marking it again. Integer
-   scores make the inversion approximate — worth a few tenths of a ΔE in
-   the middle, and nothing at all compared to leaving them wrong. */
-function rescore(score){
-  const clamped = Math.min(99.4, Math.max(0.6, score));
-  return scoreFor(deltaEForScore(clamped, CURVE_V1));
+/* Every past day is re-marked on the curve its mode uses now, so an
+   average never mixes two marking schemes. This is what the ΔE stored with
+   each day was for: a recurve costs nobody their streak.
+
+   Two shapes of old record exist. v3 keeps the ΔE, so it is re-marked
+   directly. v2 keeps scores only, so its curve is run backwards to recover
+   roughly what was achieved and then re-marked — approximate to a few
+   tenths of a ΔE in the middle, and nothing at all next to leaving it
+   wrong. */
+const clampScore = sc => Math.min(99.4, Math.max(0.6, sc));
+
+function remark(day, mode, oldCurve){
+  const dEs = (day.dEs && day.dEs.length)
+    ? day.dEs
+    : (day.scores || []).map(sc => +deltaEForScore(clampScore(sc), oldCurve).toFixed(2));
+  const scores = dEs.map(d => scoreFor(d, mode));
+  const groups = (day.groups || []).map(([g], i) =>
+    [g, scores[i] != null ? scores[i] : 0]);
+  return {
+    avg: scores.length ? Math.round(scores.reduce((a, v) => a + v, 0) / scores.length) : day.avg,
+    scores, dEs, groups, recurved: true
+  };
 }
 
 function migrateStats(){
-  const old = readJSON(STATS_KEY_V1, null);
-  if (!old) return null;
+  const v3 = readJSON(STATS_KEY_V2, null);
+  const v2 = readJSON(STATS_KEY_V1, null);
+  const src = v3 || v2;
+  if (!src) return null;
+  const oldCurve = v3 ? CURVE_V2 : CURVE_V1;
+
   const out = {};
   for (const mode of ['standard','easy']){
     out[mode] = {days:{}};
-    const days = (old[mode] && old[mode].days) || {};
-    for (const date in days){
-      const d = days[date];
-      const scores = (d.scores || []).map(rescore);
-      const groups = (d.groups || []).map(([g, sc]) => [g, rescore(sc)]);
-      out[mode].days[date] = {
-        avg: scores.length ? Math.round(scores.reduce((a,v) => a + v, 0) / scores.length) : d.avg,
-        scores, groups,
-        dEs: (d.scores || []).map(sc => +deltaEForScore(Math.min(99.4, Math.max(0.6, sc)), CURVE_V1).toFixed(2)),
-        recurved: true
-      };
-    }
+    const days = (src[mode] && src[mode].days) || {};
+    for (const date in days) out[mode].days[date] = remark(days[date], mode, oldCurve);
   }
   writeJSON(STATS_KEY, out);
   return out;
@@ -1812,8 +1890,12 @@ async function beginSession(kind, opts = {}){
   if (kind === 'daily' && !S.session.replay){
     const prog = readJSON(PROG_KEY, null);
     if (prog && prog.date === S.today && prog.mode === S.mode && !prog.done && prog.results.length){
-      S.session.results = prog.results;
-      S.session.index = prog.results.length;
+      /* Re-mark on the way in. A day half-played before the curves were
+         split would otherwise carry two marking schemes inside one run —
+         the ΔE is what was measured, the score is only its rendering. */
+      S.session.results = prog.results.map(r =>
+        r.dE == null ? r : Object.assign({}, r, {score: scoreFor(r.dE, S.session.mode)}));
+      S.session.index = S.session.results.length;
       if (S.session.index >= TARGETS_PER_DAY) return finishSession();
     }
   }
@@ -1862,21 +1944,37 @@ function nextTarget(){
    the line clamp takes over and ellipses it. */
 function fitName(el){
   el.style.fontSize = '';
+  el.style.height = '';
   const box = el.clientHeight;          // the fixed two-line box set in CSS
-  if (!box) return;
-  /* The box height is the only limit, deliberately. An earlier version also
-     set -webkit-line-clamp:2, which broke this measurement outright — a
-     clamped box with a fixed height reports scrollHeight equal to
-     clientHeight, because the truncation is real and there is no overflow
-     left to detect, so the loop never ran and every long name silently
-     stayed truncated. One rule, one thing to reason about. */
-  const base = parseFloat(getComputedStyle(el).fontSize);
-  let size = base;
-  while (el.scrollHeight > box + 1 && size > base * 0.62){
-    size -= 1;
+  if (!box || !el.textContent.trim()) return;
+
+  const cs  = getComputedStyle(el);
+  const min = parseFloat(cs.getPropertyValue('--nm-min')) || 12;
+  const max = parseFloat(cs.getPropertyValue('--nm-max')) || 26;
+
+  /* Largest whole pixel size that still fits the box, found by bisection —
+     six measurements rather than thirty, and it grows as readily as it
+     shrinks. Height alone is not enough of a test: a single long word has
+     nothing to wrap at, so it would sail past the height check while
+     running off the side, which is why the width is checked too.
+
+     An earlier version only ever stepped DOWN from the CSS size, so short
+     names sat at the ceiling and never took the room they had. */
+  el.style.height = 'auto';
+  const fits = size => {
     el.style.fontSize = size + 'px';
+    return el.offsetHeight <= box && el.scrollWidth <= el.clientWidth + 1;
+  };
+
+  let lo = min, hi = max, best = min;
+  while (lo <= hi){
+    const mid = Math.floor((lo + hi) / 2);
+    if (fits(mid)){ best = mid; lo = mid + 1; } else hi = mid - 1;
   }
+  el.style.fontSize = best + 'px';
+  el.style.height = '';
 }
+
 
 function renderPips(){
   const sess = S.session;
@@ -1898,7 +1996,7 @@ function lockIn(){
   const dE = deltaE00(pickLab, S.target.lab);
 
   const result = {
-    dE, score: scoreFor(dE), pickHex, pickName: nameOf(pickLab),
+    dE, score: scoreFor(dE, S.session.mode), pickHex, pickName: nameOf(pickLab),
     targetHex: S.target.hex, targetName: S.target.name, group: S.target.group
   };
   S.lastResult = result;
