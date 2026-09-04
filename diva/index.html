@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#1F5F4B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Splits">
+<title>Splits Year One</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<!-- Homescreen install. iOS reads apple-touch-icon and ignores the manifest's
+     icons; Chrome and Android read the manifest. Replace the PNGs with your
+     own, keeping the filenames, and nothing else needs changing. -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<style>
+:root {
+  --ground:#F1F4F1; --surface:#FAFCF9; --surface-alt:#E8EDE8;
+  --ink:#1A201C; --muted:#5C665F; --faint:#7E8880;
+  --line:#D2D9D1; --line-strong:#B6C0B6;
+  --accent:#1F5F4B; --accent-soft:#DBE7DF; --on-accent:#F1F4F1;
+  --warm:#A0521E; --warm-soft:#F5E4D6; --warm-line:#D9AF8A;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground:#121714; --surface:#1B211D; --surface-alt:#232A25;
+    --ink:#E5EAE5; --muted:#9AA49C; --faint:#7C867E;
+    --line:#2C332E; --line-strong:#3E463F;
+    --accent:#74C4A1; --accent-soft:#1F3129; --on-accent:#101512;
+    --warm:#D89463; --warm-soft:#33251A; --warm-line:#5C4029;
+  }
+}
+:root[data-theme="dark"] {
+  --ground:#121714; --surface:#1B211D; --surface-alt:#232A25;
+  --ink:#E5EAE5; --muted:#9AA49C; --faint:#7C867E;
+  --line:#2C332E; --line-strong:#3E463F;
+  --accent:#74C4A1; --accent-soft:#1F3129; --on-accent:#101512;
+  --warm:#D89463; --warm-soft:#33251A; --warm-line:#5C4029;
+}
+
+* { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body { margin:0; padding:0; }
+body {
+  background:var(--ground); color:var(--ink);
+  font-family:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+  font-size:16px; line-height:1.5; -webkit-font-smoothing:antialiased;
+  padding-bottom:calc(70px + var(--safe-b));
+}
+.wrap { max-width:640px; margin:0 auto; padding:0 18px; }
+
+h1,h2,h3 { margin:0; }
+.serif { font-family:"EB Garamond",Georgia,serif; font-weight:500; }
+.mono { font-family:"IBM Plex Mono",ui-monospace,monospace; }
+
+.eyebrow {
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10.5px;
+  letter-spacing:.13em; text-transform:uppercase; color:var(--faint); margin:0 0 8px;
+}
+
+/* ---------- header ---------- */
+header.top {
+  padding:26px 0 16px; border-bottom:1px solid var(--line-strong);
+  display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+}
+header.top h1 { font-family:"EB Garamond",Georgia,serif; font-size:26px; font-weight:500; letter-spacing:-.01em; }
+header.top .where { font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11px; color:var(--faint); text-align:right; line-height:1.4; }
+
+/* ---------- cards ---------- */
+.card {
+  background:var(--surface); border:1px solid var(--line);
+  padding:18px; margin:14px 0;
+}
+.card.lead { border-color:var(--accent); }
+.card h3 { font-size:13px; font-weight:600; margin-bottom:8px; }
+
+.bigrow { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+.big { font-family:"EB Garamond",Georgia,serif; font-size:38px; line-height:1; font-weight:500; font-variant-numeric:tabular-nums; }
+.big small { font-size:15px; color:var(--muted); font-family:"IBM Plex Sans",sans-serif; }
+
+.statgrid { display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--line); border:1px solid var(--line); }
+.stat { background:var(--surface); padding:12px 13px; }
+.stat dt { font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--faint); margin:0 0 3px; }
+.stat dd { margin:0; font-size:19px; font-weight:500; font-variant-numeric:tabular-nums; }
+.stat dd span { font-size:12px; color:var(--muted); font-weight:400; }
+
+/* ---------- buttons ---------- */
+button { font:inherit; cursor:pointer; border-radius:2px; }
+.btn {
+  display:block; width:100%; padding:15px 18px; border:1px solid var(--accent);
+  background:var(--accent); color:var(--on-accent); font-size:16px; font-weight:600;
+  text-align:center; margin-top:12px;
+}
+.btn.ghost { background:transparent; color:var(--accent); }
+.btn.quiet { background:transparent; color:var(--muted); border-color:var(--line-strong); font-weight:400; font-size:14px; padding:11px 14px; }
+.btn:active { opacity:.75; }
+.btnrow { display:flex; gap:8px; }
+.btnrow .btn { margin-top:12px; }
+
+/* ---------- checklist ---------- */
+.item { border:1px solid var(--line); background:var(--surface); margin:9px 0; }
+.item.done { border-color:var(--accent-soft); background:var(--accent-soft); }
+.item-head { display:flex; gap:12px; align-items:flex-start; padding:14px; }
+.tick {
+  flex:none; width:26px; height:26px; border:1.5px solid var(--line-strong);
+  background:transparent; display:flex; align-items:center; justify-content:center;
+  color:transparent; font-size:15px; line-height:1; padding:0; margin-top:1px;
+}
+.item.done .tick { border-color:var(--accent); background:var(--accent); color:var(--on-accent); }
+.item-body { flex:1; min-width:0; }
+.item-title { font-weight:600; font-size:15px; line-height:1.3; }
+.item.done .item-title { text-decoration:line-through; text-decoration-color:var(--faint); }
+.item-sub { font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11px; color:var(--muted); margin-top:3px; }
+.item-more {
+  background:transparent; border:0; color:var(--accent); padding:0; margin-top:7px;
+  font-size:12.5px; font-family:"IBM Plex Mono",ui-monospace,monospace;
+}
+.detail { padding:0 14px 14px 52px; border-top:1px solid var(--line); margin-top:0; padding-top:12px; }
+.detail h4 {
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:9.5px; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--faint); margin:12px 0 4px; font-weight:400;
+}
+.detail h4:first-child { margin-top:0; }
+.detail ul { margin:0; padding-left:17px; font-size:14px; color:var(--muted); }
+.detail li { margin-bottom:3px; }
+.detail p { margin:0; font-size:14px; }
+.gatebox { background:var(--accent-soft); border-left:2px solid var(--accent); padding:9px 11px; font-size:13.5px; }
+.script { font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12px; color:var(--muted); line-height:1.7; }
+.script b { color:var(--ink); font-weight:500; }
+
+.sidepass { display:flex; gap:6px; flex-wrap:wrap; margin-top:7px; }
+.pass {
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10px; letter-spacing:.05em;
+  text-transform:uppercase; padding:3px 8px; border:1px solid var(--line-strong); color:var(--muted);
+}
+.pass.first { border-color:var(--warm); color:var(--warm); }
+
+/* ---------- inputs ---------- */
+label.field { display:block; margin:14px 0 0; }
+label.field span {
+  display:block; font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10px;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--faint); margin-bottom:5px;
+}
+input[type=number], input[type=text], select, textarea {
+  width:100%; padding:11px 12px; border:1px solid var(--line-strong);
+  background:var(--ground); color:var(--ink); font:inherit; font-size:16px; border-radius:2px;
+}
+textarea { min-height:70px; resize:vertical; font-size:15px; }
+.protocol { font-size:13px; color:var(--muted); margin:5px 0 0; }
+
+/* ---------- nav ---------- */
+nav.tabs {
+  position:fixed; bottom:0; left:0; right:0; z-index:20;
+  background:var(--surface); border-top:1px solid var(--line-strong);
+  display:flex; padding-bottom:var(--safe-b);
+}
+nav.tabs button {
+  flex:1; background:transparent; border:0; padding:13px 4px 12px;
+  color:var(--faint); font-size:11px; font-family:"IBM Plex Mono",ui-monospace,monospace;
+  letter-spacing:.06em; text-transform:uppercase;
+}
+nav.tabs button[aria-current="true"] { color:var(--accent); box-shadow:inset 0 2px 0 var(--accent); }
+
+/* ---------- misc ---------- */
+.muted { color:var(--muted); font-size:14px; }
+.tiny { font-size:12.5px; color:var(--faint); }
+.hr { height:1px; background:var(--line); margin:22px 0; border:0; }
+.horizon { border-left:2px solid var(--warm); padding-left:14px; }
+.horizon .lbl { font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--warm); }
+.spark { display:flex; align-items:flex-end; gap:3px; height:34px; margin-top:8px; }
+.spark i { flex:1; background:var(--accent-soft); border-top:2px solid var(--accent); min-height:2px; display:block; }
+.toast {
+  position:fixed; left:50%; transform:translateX(-50%); bottom:calc(84px + var(--safe-b));
+  background:var(--ink); color:var(--ground); padding:10px 16px; font-size:14px;
+  z-index:50; opacity:0; transition:opacity .18s; pointer-events:none; border-radius:2px;
+}
+.toast.show { opacity:1; }
+[hidden] { display:none !important; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline:2px solid var(--accent); outline-offset:2px;
+}
+@media (prefers-reduced-motion:reduce) { * { transition:none !important; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <h1>Splits Year One</h1>
+    <div class="where" id="whereami"></div>
+  </header>
+
+  <main id="view-home"></main>
+  <main id="view-session" hidden></main>
+  <main id="view-measure" hidden></main>
+  <main id="view-more" hidden></main>
+</div>
+
+<nav class="tabs">
+  <button data-view="home" aria-current="true">Today</button>
+  <button data-view="measure">Numbers</button>
+  <button data-view="more">More</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+/* ==========================================================================
+   SPLITS YEAR ONE
+   Built on Kit Laughlin, "Stretching & Flexibility", 2nd ed. (BodyPress, 2014).
+   Exercise numbers and page refs point into that book; all cue wording here is
+   original. Look at the photograph on the referenced page when the cue is not
+   enough.
+
+   Goal: front splits. Distant, and named as such. Near target: fingertip to
+   floor at zero with straight legs. Progress is by session count, not calendar.
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   1. TIMING — every duration derives from muscle size. Laughlin pp.11-12, p.20.
+   -------------------------------------------------------------------------- */
+
+const PROFILE = {
+  large:  { enter:30, contract:25, release:5, hold:40 },
+  medium: { enter:20, contract:12, release:4, hold:30 },
+  small:  { enter:10, contract:6,  release:3, hold:20 }
+};
+const CYCLES_BY_PHASE = { 1:2, 2:2, 3:3, 4:3 };
+const CAP = { large:2, medium:3, small:Infinity };   // rolling 7 days, p.10
+const BREATH = 3;                                     // seconds, ~10 breaths = 30s
+
+
+/* --------------------------------------------------------------------------
+   2. EXERCISE LIBRARY — solo and either only. Partner exercises are excluded
+      entirely so they can never be scheduled. The full 120-record library
+      including partner exercises lives in the reference document.
+   -------------------------------------------------------------------------- */
+
+const EX = [
+// warm-ups
+{id:"wu-freesquat",num:null,ref:"p.75",name:"Free squats",size:"large",tier:1,uni:0,warm:1,
+ pat:["hipFlexion","kneeFlexion","lowerLeg"],con:"none — rhythmic, breathing with the movement",
+ cues:["Feet shoulder width, heels stay down","About 20 slow smooth reps","Breathe in going down, out coming up"],gate:""},
+{id:"wu-freesquat-holds",num:null,ref:"p.125",name:"Free squats with held positions",size:"large",tier:2,uni:0,warm:1,
+ pat:["hipFlexion","kneeFlexion"],con:"hold each pause with the thighs working",
+ cues:["15-20 rhythmic squats first, heels down","Then hold the bottom, below knee, above knee","Ten breaths at each stop"],
+ gate:"First pause is hips just below knee level, no higher."},
+{id:"wu-freesquat-wide",num:null,ref:"p.151",name:"Wide free squat, knees pressed apart",size:"large",tier:1,uni:0,warm:1,
+ pat:["hipAbduction","kneeFlexion"],con:"squeeze the knees inward against your elbows",
+ cues:["Feet wider than shoulders, heels down","Sink low, elbows inside the thighs","Breathe out, let the hips drop"],gate:""},
+{id:"wu-elephantwalk",num:null,ref:"p.71",name:"Standing alternate leg forward bend",size:"large",tier:1,uni:1,warm:1,
+ pat:["hipFlexion","spineFlexion"],con:"none — this one stays loose and moving",
+ cues:["Hang forward, chin to chest, hands on floor or block","Lean over one leg and straighten the other","Bend the knees to come up"],gate:""},
+{id:"wu-legsapart",num:null,ref:"p.93",name:"Standing legs apart, bent then straight",size:"large",tier:1,uni:0,warm:1,
+ pat:["hipAbduction","hipFlexion"],con:"hold the ankles and use gentle straightening efforts",
+ cues:["Feet wide, knees soft, hang between the thighs","Travel to one leg, straighten it, then the other","Widen the stance and repeat"],gate:""},
+{id:"wu-anklesclasped",num:null,ref:"p.202",name:"Standing fold holding the ankles, into a low squat",size:"large",tier:1,uni:1,warm:1,
+ pat:["hipFlexion","spineFlexion"],con:"gently pull on the ankles while the legs push back",
+ cues:["Chest stays on the thighs, hold the ankles","Straighten one leg at a time, then both","Squat down, knees wide, pull the trunk through"],gate:""},
+{id:"wu-squat-straighten",num:null,ref:"p.224",name:"Free squat, ankles clasped, straighten legs",size:"large",tier:2,uni:0,warm:1,key:1,
+ pat:["hipFlexion","kneeFlexion"],con:"lift the head level and make a small back-straightening effort",
+ cues:["Squat down, hold the ankles, head hanging loose","Straighten the legs slowly, chest glued to the thighs","Five to ten repeats, a little further each time"],
+ gate:"If the heels will not stay down, use a board or the balls of the feet.",
+ note:"The most direct rehearsal of ex.96's entry."},
+{id:"wu-martialarts",num:null,ref:"p.127",name:"Side-to-side martial arts squat",size:"large",tier:2,uni:1,warm:1,
+ pat:["hipAbduction","kneeFlexion"],con:"control the descent with the bending leg rather than dropping",
+ cues:["Feet wide and flat, hold a rail for balance","Sink onto one leg, heels down","Stay low crossing over — five to eight transitions"],gate:""},
+{id:"wu-wallstandinglegsapart",num:null,ref:"p.176",name:"Wall standing legs apart",size:"medium",tier:2,uni:1,warm:1,
+ pat:["lowerLeg","hipFlexion","hipAbduction"],con:"press the hips back into the wall",
+ cues:["Hips and heels on the wall — that loads the calves","Bend over each leg in turn, then the middle","Bent knees first, straight legs after"],gate:""},
+{id:"wu-hipflexor-unsupported",num:null,ref:"p.185",name:"Unsupported lunge into buttock and hip flexor",size:"large",tier:2,uni:1,warm:1,key:1,counter:1,
+ pat:["hipExtension","hipFlexion"],con:"pull back on the hands to straighten the back",
+ cues:["Deep lunge, feet hip-width apart, front foot ahead of the knee","Rotate the back hip forward; brace the abdomen","Arms wide then overhead, lean back, hold five breaths"],
+ gate:"Front foot must sit slightly ahead of the knee for stability."},
+{id:"wu-ragdoll",num:null,ref:"p.162",name:"Standing rag-doll swings",size:"small",tier:1,uni:0,
+ pat:["shoulder","spineRotation"],con:"none — loose swinging, no held tension",
+ cues:["Bend knees, swivel hips; let the arms follow","Do not lift the arms yourself","Throw arms back at chest height, then overhead"],
+ gate:"Keep momentum modest; large swings make it risky."},
+{id:"wu-wallsit",num:null,ref:"p.76",name:"Wall sit hold",size:"large",tier:1,uni:0,warm:1,
+ pat:["hipFlexion","kneeFlexion"],con:"hold the shape against the wall the whole time",
+ cues:["Back flat on a smooth wall, slide down","Thighs level, shins vertical","Start at 30 seconds, build to a minute"],gate:""},
+
+// hip extension — the back leg of a front split
+{id:"ex21",num:21,ref:"p.66",name:"Buttock and hip flexor",size:"large",tier:1,uni:1,key:1,
+ pat:["hipFlexion","hipExtension"],con:"press the front foot straight down into the floor",
+ cues:["Start on all fours; hands planted, taking most of your weight","Swing one foot around and plant it flat, ahead of that knee","Slide the other knee straight back, ball of the foot tucked under","Try to straighten the back leg — the hips must not rise"],
+ gate:"The hips rising is the limit. If they lift, shorten the stance."},
+{id:"ex25",num:25,ref:"p.79",name:"Standing suspended hip flexors",size:"large",tier:2,uni:1,key:1,
+ pat:["hipExtension","kneeFlexion"],con:"try to drag the back leg forwards while nothing moves",
+ cues:["Long stride, back knee on the floor, trunk vertical","One hand presses down on the front knee; this tightens the belly","Rotate the back hip square with the waist muscles","Sink the hips and try to straighten the back leg"],
+ gate:"Keep the hips low while straightening the back leg. Contraction stays gentle — nothing external holds you.",
+ note:"The book's own replacement for the partner ex.39 (p.214)."},
+{id:"ex24",num:24,ref:"p.78",name:"Standing quadriceps",size:"large",tier:2,uni:1,key:1,
+ pat:["kneeFlexion","hipExtension"],con:"try to straighten the held leg, then try to draw it forwards",
+ cues:["Hold something for balance, grasp the ankle behind","Tighten the belly, take the thigh back in line","Only then pull the heel closer to the bottom"],
+ gate:"Stretched thigh in line with the body, spine neutral. No hyperextension."},
+{id:"ex26",num:26,ref:"p.83",name:"Seated/lying single leg quadriceps",size:"large",tier:3,uni:1,key:1,
+ pat:["kneeFlexion","hipExtension"],con:"press the folded leg's foot down into the floor",
+ cues:["Sit as for ex.23, foot pointing straight back","Tighten the belly and tuck the tailbone first","Lean to the hands, then the elbows; back never arches"],
+ gate:"The lower back must not arch. If it does, build mats behind you.",
+ note:"The book's own replacement for the partner ex.40."},
+{id:"ex82",num:82,ref:"p.228",name:"Wall lunge rotation",size:"large",tier:3,uni:1,key:1,
+ pat:["hipExtension","spineRotation","hipRotation"],con:"twist away from the wall using the waist for five, then sink and restraighten",
+ cues:["Deep lunge, one forearm's length from the wall","Rotate the far shoulder across until the knee tucks behind it","Straighten the rear leg to raise intensity; keep hips low"],
+ gate:"Set up one forearm's length from the wall or the position will not close up.",
+ note:"Loads rear-leg hip flexors and front-hip piriformis together — the pair that blocks a front split."},
+{id:"ex95",num:95,ref:"p.249",name:"Ultimate quadriceps and hip flexor",size:"large",tier:4,uni:1,key:1,
+ pat:["hipExtension","kneeFlexion"],con:"press the folded foot back into the wall, then try to draw that knee forwards",
+ cues:["Push the calf aside before folding the knee","Sit on a low bench, folded foot against the wall behind","Brace the belly and tuck the tail under","Keep the support-side hip pressed back"],
+ gate:"The folded knee must stay pain-free. It looks far easier than it is.",
+ note:"Half of a front split is hip flexor length. Loads the whole thigh, focus in the middle."},
+{id:"ex42",num:42,ref:"p.118",name:"Floor feet held back bend",size:"large",tier:3,uni:0,counter:1,
+ pat:["spineExtension","hipExtension"],con:"push the hips up using the quadriceps while the feet stay held",
+ cues:["On your back, hold both ankles or a strap","Height depends on quad strength as much as range","Keep the lower back muscles as slack as you can"],
+ gate:"Bend the spine forwards afterwards."},
+
+// hip flexion — the front leg
+{id:"ex51",num:51,ref:"p.154",name:"Standing clasped single bent leg hamstring",size:"large",tier:2,uni:1,key:1,
+ pat:["hipFlexion"],con:"try to lift the trunk away from the thigh using the hamstrings",
+ cues:["Back foot one leg length back, turned out 45 degrees","Chest glued to the thigh, back straight","Straighten the front leg without leaving the thigh"],
+ gate:"The chest must stay on the thigh. If it lifts, the back is doing the work."},
+{id:"ex52",num:52,ref:"p.155",name:"Standing single leg forward bend",size:"large",tier:2,uni:1,key:1,
+ pat:["hipFlexion"],con:"press the front heel down into the floor",
+ cues:["One leg length stride, hips and shoulders level","Hands on a fixed waist-height support","Hinge from the hips, back slightly arched, sink down"],gate:""},
+{id:"ex17n",num:17,ref:"p.72",name:"Lunge hamstrings, solo",size:"large",tier:2,uni:1,key:1,
+ pat:["hipFlexion","kneeFlexion"],con:"hook the front heel back against friction, then press it down",
+ cues:["Deep lunge, back knee far behind, front knee bent","Wrap one arm round the front thigh; ribs glued to it","Slide the front foot away to open the knee"],
+ gate:"",note:"Second-edition replacement for ex.17."},
+{id:"ex78",num:78,ref:"p.210",name:"Floor forward bend over straight leg, hurdler's",size:"large",tier:3,uni:1,key:1,
+ pat:["hipFlexion","kneeFlexion"],con:"press the whole straight leg down into the floor",
+ cues:["Folded leg out at 90, foot beside the hip","Calf pushed out of the way, foot not turned outward","Flat back over the straight leg, chest lifted"],
+ gate:"Both sit bones must reach the floor before leaning — if not, skip it and do ex.23 and ex.26 first. The folded foot must not turn out."},
+{id:"ex79",num:79,ref:"p.211",name:"Standing forward bend over bent and straight leg",size:"large",tier:3,uni:1,key:1,
+ pat:["hipFlexion","spineRotation","hipAbduction"],con:"pull back on the bottom hand to arch the back and load the hamstring",
+ cues:["Bent version: stride 1.5 legs, foot in front of the knee","Straight version: one leg length, hips square, hand down","Finish by pushing the front hip forwards until you feel that hip"],
+ gate:"Bottom hand must bear weight before you rotate. Stop when the bent knee travels forwards. Descend only until the low back rounds."},
+{id:"ex80",num:80,ref:"p.213",name:"Kneeling outer hamstring, foot dorsiflexed",size:"large",tier:3,uni:1,key:1,integ:1,
+ pat:["hipFlexion","hipExtension","lowerLeg"],con:"press the heel into the floor, or the ball of the foot into the board",
+ cues:["Kneel on one leg, front foot pressed to a board or wall","Back thigh as far behind you as it will go, hips square","Lean the chest outside the line of the front leg"],
+ gate:"Do not put the foot high up the wall. Modest height, prioritise leaning across the leg.",
+ note:"The strongest solo front-splits exercise in the book. End position resembles ex.47."},
+{id:"ex81-solo",num:81,ref:"p.226",name:"Wall reverse legs apart forward bend",size:"large",tier:3,uni:0,
+ pat:["hipFlexion","hipAbduction","lowerLeg"],con:"small back-straightening efforts; gravity holds the position",
+ cues:["Lower back on the wall, feet out at your hamstring distance","Let gravity hold you, no support under the hips","Hold the final position 20-30 breaths"],gate:""},
+
+// integrators — the whole movement, always last
+{id:"ex96",num:96,ref:"p.250",name:"Forward bend over straight legs",size:"large",tier:3,uni:0,key:1,integ:1,
+ pat:["hipFlexion","spineFlexion"],con:"pull the heels toward the floor, or press the straight legs down into it",
+ cues:["Start bent-legged, ribs hard onto the thighs","Straighten one leg at a time","Pull yourself along the legs, not face to knees"],
+ gate:"Get the ribs onto the thighs before straightening — otherwise the back rounds and the hamstrings never load.",
+ note:"THE YEAR-ONE TARGET. The book's closing pose, shown done perfectly solo."},
+{id:"ex47",num:47,ref:"p.133",name:"Partial front splits, off support",size:"large",tier:3,uni:1,key:1,integ:1,
+ pat:["hipFlexion","hipExtension"],con:"pull the front foot back toward you, then press it down into the floor",
+ cues:["Front leg bent on a support, back leg stretched behind","Hips as square as you can hold them; sink down","Trunk vertical; lean back slightly to load the rear leg"],
+ gate:"Front and back legs should feel roughly equal. If the front hamstring dominates, straighten the trunk. Watch for hips skewing or lifting.",
+ note:"The book's named route into ex.93."},
+{id:"ex96-bent",num:96,ref:"p.250",name:"Forward bend, bent legs, straightening one at a time",size:"large",tier:1,uni:0,key:1,integ:1,
+ pat:["hipFlexion","spineFlexion"],con:"pull the heels toward the floor while the ribs stay on the thighs",
+ cues:["Sit with both knees bent, ribs hard onto the thighs","Straighten one leg only as far as the ribs stay down","Swap legs; then try both, and stop where the ribs lift"],
+ gate:"The ribs leaving the thighs is the limit. Past that the back rounds and the hamstrings stop working.",
+ note:"The book's own entry to ex.96, and it says this bent-leg route produces the dramatic improvement. The whole-movement version of your near target."},
+{id:"ex47-supported",num:47,ref:"p.133",name:"Partial front splits, high support",size:"large",tier:2,uni:1,key:1,integ:1,
+ pat:["hipFlexion","hipExtension"],con:"pull the front foot back toward you, then press it down",
+ cues:["Front leg bent on a chair-height support — high, not low","Back leg stretched behind, hips as square as you can hold","Sink toward the floor; the support height is the regression"],
+ gate:"Use a support high enough that the hips stay square and level. Lower it over months, not weeks.",
+ note:"The chair-height version of ex.47. The split shape learned safely before the range exists."},
+{id:"ex48",num:48,ref:"p.135",name:"Floor forward bend over bent legs",size:"medium",tier:1,uni:0,integ:1,cp:1,
+ pat:["spineFlexion","hipRotation"],con:"pull gently with the arms on the feet to draw the head down",
+ cues:["Sit holding both feet, chin down, back slumps","Draw the face toward the floor between the knees","Alternate arms across to the opposite foot"],
+ gate:"",note:"The book's named counterpose after hip flexor work tightens the lower back."},
+
+// adductors — middle splits, low dose
+{id:"ex30",num:30,ref:"p.97",name:"Wall seated knees apart",size:"large",tier:2,uni:0,
+ pat:["hipAbduction","hipRotation"],con:"lift the knees up against your hands",
+ cues:["Back to the wall, soles together, lower in from above","Straight arms, hands on the knees, shoulders lifted","Sit on a folded mat to go further"],gate:""},
+{id:"ex31",num:31,ref:"p.98",name:"Kneeling knees apart",size:"large",tier:2,uni:0,
+ pat:["hipAbduction"],con:"squeeze the knees together while the hips stay down",
+ cues:["Hands and knees, knees wide, hips over the knees","Belly in, low back straight, let the knees slide apart","Come out by drawing the hips forwards slowly"],gate:""},
+{id:"ex33",num:33,ref:"p.101",name:"Wall lying straight legs apart",size:"large",tier:1,uni:0,
+ pat:["hipAbduction"],con:"hold the legs and lightly try to bring them together",
+ cues:["Lie with the legs up the wall, let them slide apart","Gravity does the work; straps on the feet for more","Stay several minutes, widening now and then"],gate:""},
+{id:"ex34",num:34,ref:"p.102",name:"Wall seated straight legs apart",size:"large",tier:2,uni:0,
+ pat:["hipAbduction","hipFlexion"],con:"squeeze the legs together, thighs tight to protect the knees",
+ cues:["Face the wall, legs wide on it, kneecaps up","Hands behind the hips, walk in until the legs stop","Drive the hips toward the wall, not the chest"],
+ gate:"Thighs stay tight throughout — that is what protects the knees."},
+{id:"ex63",num:63,ref:"p.179",name:"Legs apart, off support",size:"large",tier:3,uni:0,
+ pat:["hipAbduction"],con:"try to drag the legs together through the floor",
+ cues:["Sit on a low soft block, feet flat, legs wide","Squeeze inwards, building force over a slow ten count","Breathe out and slide the feet further apart"],
+ gate:"First attempts: use no more than half your strength."},
+{id:"ex55-solo",num:55,ref:"p.222",name:"Seated legs apart, solo version",size:"large",tier:3,uni:1,counter:1,
+ pat:["hipAbduction","hipFlexion","spineLateralFlexion"],con:"hold the foot and try to pull the body away from it, then draw closer",
+ cues:["Roll the top shoulder back, turn towards the leg","Hold the back straight yourself","A wall behind you helps line the body up"],
+ gate:"Legs no wider than lets you still reach the feet."},
+
+// lower leg
+{id:"ex19",num:19,ref:"p.63",name:"Wall standing calf (gastrocnemius)",size:"medium",tier:1,uni:1,
+ pat:["lowerLeg"],con:"press the ball of the back foot into the floor without lifting the heel",
+ cues:["Long step back, back leg straight, kneecap pulled up","Heel down, weight toward the little-toe side","Take the hips toward the wall, not the chest"],
+ gate:"The back leg must stay straight or the stretch is lost."},
+{id:"ex18",num:18,ref:"p.62",name:"Floor folded leg calf (soleus)",size:"medium",tier:1,uni:1,
+ pat:["lowerLeg","wristAnkle"],con:"press the ball of the foot down into the floor",
+ cues:["Kneel on one knee, elbow just behind the front knee","Knee tracks straight over the foot — no rolling in","Lean weight through the elbow to close the ankle"],gate:""},
+{id:"ex20",num:20,ref:"p.64",name:"Floor single leg calf",size:"medium",tier:2,uni:1,
+ pat:["lowerLeg","hipFlexion"],con:"press the ball of the foot into the floor",
+ cues:["Hands on a stable support, one foot back, heel down","Then straighten the back and fold from the hips","Step version: hang the heel off the edge"],gate:""},
+{id:"ex70a",num:70,ref:"p.197",name:"Floor single leg calf, self-supported",size:"medium",tier:2,uni:1,
+ pat:["lowerLeg","hipFlexion"],con:"press the ball of the foot down into the floor",
+ cues:["Hands on the floor or a fixed bench, working leg straight","Push the hips back as the arms straighten","Heel into the floor-wall join so it cannot slide"],
+ gate:"If hamstrings or ankles are tight, hands go on a bench that cannot slide."},
+{id:"ex77a",num:77,ref:"p.209",name:"Bar standing calf, heel jammed to the wall",size:"medium",tier:3,uni:1,key:1,
+ pat:["lowerLeg"],con:"press the ball of the foot into the wall for eight to ten",
+ cues:["Hold a bar or rail, heel hard into the floor-wall join","Leg straight, kneecap pulled up","Lift your own hips with the arms until it bites"],
+ gate:"",note:"The rear-chain lock that caps how far the front leg travels."},
+
+// spine extension (needs counterpose)
+{id:"ex2",num:2,ref:"p.28",name:"Backward bend from floor",size:"medium",tier:1,uni:0,counter:1,
+ pat:["spineExtension"],con:"none — the arms lift, the back stays soft",
+ cues:["Face down, lift onto the elbows using the arms only","Straighten the arms fully for the stronger version","Keep every back muscle loose; hips stay heavy"],
+ gate:"Follow with a strong forward bend or a rotation."},
+{id:"ex2v-suspended",num:2,ref:"p.81",name:"Suspended backward bend from push-up",size:"medium",tier:2,uni:0,counter:1,
+ pat:["spineExtension"],con:"keep the arms locked straight, everything else soft",
+ cues:["From the top of a push-up, let the hips sink","Straighten the legs once the thighs touch, then relax","Open the mouth, head back, shoulders back"],gate:""},
+{id:"ex14",num:14,ref:"p.54",name:"Wall middle and upper back backward bend",size:"medium",tier:2,uni:0,counter:1,
+ pat:["spineExtension","shoulder"],con:"try to drag the hands down the wall",
+ cues:["Hands on the wall above head height, stand back","Stand closer if the stretch bites too hard","Relax completely — gravity does the bending"],gate:""},
+{id:"ex27-solo",num:27,ref:"p.223",name:"Backward bend over support, solo",size:"medium",tier:2,uni:0,counter:1,
+ pat:["spineExtension","spineLateralFlexion"],con:"tighten the abdominals to lift head and shoulders slightly, then relax",
+ cues:["Drape backwards over the support and stop fighting it","Stay longer than you would with help","Add small rolls side to side to reach the waist"],
+ gate:"Support must be stable; pad a flat one into a curve."},
+
+// spine flexion — counterposes and back work
+{id:"ex1",num:1,ref:"p.25",name:"Floor clasped feet middle and upper back",size:"medium",tier:2,uni:0,cp:1,
+ pat:["spineFlexion","shoulder"],con:"pull gently on the feet to round the upper back",
+ cues:["Kneel, reach inside the knees, hold both feet","Rest the crown of the head on the floor","Ease the hips forward until the upper back rounds"],gate:""},
+{id:"ex43",num:43,ref:"p.119",name:"Folded legs clasped knees upper back",size:"medium",tier:1,uni:0,cp:1,
+ pat:["spineFlexion","spineRotation"],con:"brace the abdominals and push the hips back away from the hands",
+ cues:["Sit on folded legs, hold both knees, chin to chest","Push the mid-back back and pull with the arms","Add small rotations to move the stretch sideways"],gate:""},
+{id:"ex75",num:75,ref:"p.204",name:"Seated clasped bent leg upper back",size:"medium",tier:1,uni:0,cp:1,
+ pat:["spineFlexion"],con:"tighten the abdominals to roll the hips back",
+ cues:["Sit holding the backs of the thighs","Let the hips roll back, round forward","Lean to each side, chin toward the chest"],gate:""},
+{id:"ex45",num:45,ref:"p.123",name:"Upper back on all fours",size:"medium",tier:1,uni:0,cp:1,
+ pat:["spineFlexion","spineExtension"],con:"in the curl push the hands away; in the arch drag them back",
+ cues:["Hands under shoulders, knees under hips","Curl and push the hands away; arch and drag back","Return to neutral, then look to each heel"],gate:""},
+
+// rotation and lateral flexion
+{id:"ex38",num:38,ref:"p.110",name:"Lying rotations",size:"medium",tier:1,uni:1,
+ pat:["spineRotation"],con:"press both palms down and lift the legs back with the waist",
+ cues:["Arms wide, palms down, shoulders stay flat","Knees halfway to the chest, lower toward one hand","Touch lightly, pause, lift back slowly"],gate:""},
+{id:"ex64",num:64,ref:"p.182",name:"Seated or standing bent leg rotation",size:"medium",tier:2,uni:1,
+ pat:["spineRotation"],con:"twist the waist back against your own arm hold",
+ cues:["Body between the knees, grasp one ankle","Other hand on the knee; press that shoulder back","Pull and push together to place the twist"],gate:""},
+{id:"ex72",num:72,ref:"p.200",name:"Kneeling elbow on floor rotation",size:"medium",tier:2,uni:1,
+ pat:["spineRotation"],con:"twist back out of the position using the waist for five",
+ cues:["Kneel, breathe out, drop one elbow to the floor","Hands together, lean on the bottom hand","Press the top shoulder back, keep the back long"],gate:""},
+{id:"ex84",num:84,ref:"p.232",name:"Wall squatting rotation",size:"medium",tier:2,uni:1,
+ pat:["spineRotation","hipRotation"],con:"arch the back and try to untwist against the wall for five",
+ cues:["Squat a forearm's length from the wall, holding one knee","Breathe out, hold it out, turn the far shoulder across","Reach the top hand to the wall, forearm square to it"],
+ gate:"If the ankles will not allow flat feet, squat on the balls of the feet."},
+{id:"ex36",num:36,ref:"p.105",name:"Floor lying bottom leg folded rotation",size:"medium",tier:2,uni:1,
+ pat:["spineRotation","spineLateralFlexion"],con:"press the supporting arm into the floor as if rotating back",
+ cues:["On your side, bottom leg folded to 90 degrees","Bend onto the forearm, top arm reaches across","Lower the chest, then open the top shoulder"],gate:""},
+{id:"ex4",num:4,ref:"p.32",name:"Standing side bend",size:"medium",tier:1,uni:1,
+ pat:["spineLateralFlexion","shoulder"],con:"let the support arm carry the weight rather than the waist",
+ cues:["Back against the wall, lean onto the support arm","Reach the top arm over the head","Come out by rolling the top shoulder forward"],gate:""},
+{id:"ex29",num:29,ref:"p.95",name:"Floor side bend over straight leg",size:"medium",tier:2,uni:1,
+ pat:["spineLateralFlexion","spineRotation"],con:"gently try to pull the gripping hand away from the foot",
+ cues:["One leg out to the side, the other folded in","Palm-up grip on the foot or strap, elbow inside the leg","Roll the top shoulder back, reach the top arm over"],gate:""},
+{id:"ex56",num:56,ref:"p.165",name:"Sideways bend across support",size:"medium",tier:2,uni:1,
+ pat:["spineLateralFlexion"],con:"lift your torso away from the support",
+ cues:["Lie sideways over the curve, hips and shoulders stacked","Relax and let gravity do the work","Roll hips forward, then back, restretch each way"],
+ gate:"Ease off if breathing gets hard; one lung is compressed."},
+
+// hip rotation
+{id:"ex22",num:22,ref:"p.68",name:"Lying hip (piriformis)",size:"medium",tier:1,uni:1,
+ pat:["hipRotation","hipFlexion"],con:"press the crossed foot down into the supporting thigh",
+ cues:["Face up, ankle across the far thigh near the knee","Reach through and hold that thigh, or use a strap","Draw the folded leg toward the armpit"],gate:""},
+{id:"ex5",num:5,ref:"p.34",name:"Seated hip",size:"large",tier:1,uni:1,
+ pat:["hipFlexion","hipRotation"],con:"press the knee into the forearm, then draw it to the armpit",
+ cues:["First: hold both ankles, let the body slump","Then arch the back backwards, feel the pelvis roll forward","Now hold one knee with the opposite elbow, lift the chest"],
+ gate:"Both sitting bones must stay on the floor."},
+{id:"ex74",num:74,ref:"p.203",name:"Seated legs folded knees apart forward bend",size:"medium",tier:2,uni:1,
+ pat:["hipRotation","hipFlexion"],con:"press the shins down while the arms pull you forward",
+ cues:["Cross-legged, knees wide, one ankle on the other","Flat back — lean forward from the hips","Turn the shoulders and lean over each knee"],
+ gate:"Knees need not touch the floor, but they must be spread apart."},
+{id:"ex76v-bench",num:76,ref:"p.206",name:"Solo external hip rotator, with support",size:"medium",tier:2,uni:1,
+ pat:["hipRotation"],con:"press the front foot straight down into the bench",
+ cues:["Only one hip on the bench, other foot on the floor","Front knee open at 90, foot inside the bench edge","Aim the chest at the bench edge, back straight"],gate:""},
+
+// accessory — small
+{id:"ex6",num:6,ref:"p.37",name:"Chin to chest",size:"small",tier:1,uni:0,
+ pat:["neck"],con:"press the head back into the fingers for a short count",
+ cues:["Sit tall, let the chin fall toward the chest","Fingers on the back of the head; arm weight does it","To go back: open the mouth wide first, then tilt"],
+ gate:"Do not pull the head forwards forcefully."},
+{id:"ex7",num:7,ref:"p.40",name:"Neck side bend",size:"small",tier:1,uni:1,
+ pat:["neck"],con:"shrug the anchored shoulder up, or press the head into the hand",
+ cues:["Hold the chair seat or shin to pin one shoulder down","Lean the body away, tip the ear to the far shoulder","Do not lift the shoulder toward the ear"],gate:""},
+{id:"ex15",num:15,ref:"p.56",name:"Floor neck rotation",size:"small",tier:1,uni:1,
+ pat:["neck"],con:"turn the head back against the hands, then rotate further",
+ cues:["Head level, turn to one side to the limit","Pause a second or two, then turn a little further","Let go of body tension before the second turn"],gate:""},
+{id:"ex9",num:9,ref:"p.44",name:"Arm across body",size:"small",tier:1,uni:1,
+ pat:["shoulder"],con:"press the straight arm outward against the holding forearm",
+ cues:["Swing the arm across the throat, not the chest","Catch it in the crook of the other elbow","Lying version: same-side leg out, chest lowers"],gate:""},
+{id:"ex13",num:13,ref:"p.52",name:"Arm behind head",size:"medium",tier:1,uni:1,
+ pat:["shoulder"],con:"press the held elbow out to the side against the hand",
+ cues:["Palm between the shoulder blades, other hand on that elbow","Press the arm back with the head so it lines up","Feel the chest lift as the arm goes back"],gate:""},
+{id:"ex59",num:59,ref:"p.170",name:"Shoulder internal rotation",size:"small",tier:2,uni:1,
+ pat:["shoulder"],con:"press the held elbow back against the other hand",
+ cues:["Fingers rigid at the back of the waist","Reach around with the other hand and hold that elbow","Draw the elbow slowly forwards"],
+ gate:"Target: the elbow reaches about 45 degrees ahead of the shoulder line."},
+{id:"ex60",num:60,ref:"p.171",name:"Shoulder external rotation",size:"small",tier:2,uni:1,
+ pat:["shoulder"],con:"press the hand into the support using the shoulder",
+ cues:["Hold the support; other hand pins upper arm to your side","Elbow must not drift away from the body","Rotate the whole body away from the held arm"],
+ gate:"Target: the forearm arrives near the plane of the shoulders."},
+{id:"ex23",num:23,ref:"p.77",name:"Floor instep",size:"small",tier:2,uni:1,
+ pat:["wristAnkle","lowerLeg"],con:"press the toes down into the floor while holding the knee",
+ cues:["One leg folded beside you, foot pointing straight back","Keep both hips level, prop the straight-leg hip","Lean onto the folded-leg hip, lift that knee"],
+ gate:"If the arch cramps, do ex.19 first, then return to this."},
+{id:"ex67",num:67,ref:"p.188",name:"Floor feet and toes sequence",size:"small",tier:1,uni:0,
+ pat:["wristAnkle","lowerLeg"],con:"draw the toes back against your fingers; press the toes into the floor",
+ cues:["Sit cross-legged, lace your fingers between the toes","Kneel with the ball down, slide the knee forward","Stand and find three contact points: ball, little-toe side, heel"],gate:""},
+{id:"ex71",num:71,ref:"p.198",name:"Floor wrist and hand sequence",size:"small",tier:1,uni:0,
+ pat:["wristAnkle"],con:"press fingers or knuckles down into the floor, then lean further back",
+ cues:["Fingers point back at you; palms or knuckles stay flat","Keep elbows locked — bending them kills the stretch","Then work each finger and the thumb separately"],
+ gate:"If leaning back feels past comfort, walk the hands forward first."}
+];
+
+const BY_ID = Object.fromEntries(EX.map(e => [e.id, e]));
+
+/* Horizon poses — displayed, never scheduled. */
+const HORIZON = [
+  { num:93, ref:"p.247", name:"The ultimate front splits",
+    note:"The goal. The book's demonstrator started here — a stiff runner who could not touch his toes — and is photographed after about five years of classes. Hips square at ninety degrees, front knee bent to enter, mats under the front leg, socks on a smooth floor. Route in is ex.47." },
+  { num:91, ref:"p.242", name:"The ultimate legs-apart stretch",
+    note:"Side splits. Laughlin says it took him twenty years. Not on the critical path." }
+];
+
+
+/* --------------------------------------------------------------------------
+   3. PROGRAMME — phases and session shapes. Slots, not sessions.
+   -------------------------------------------------------------------------- */
+
+const PHASES = [
+  { n:1, from:1,   to:36,  name:"Form",      maxTier:2,
+    aim:"Learn contract–relax and the out-breath restretch. Establish which side is tighter. The split shape appears only on a high support." },
+  { n:2, from:37,  to:72,  name:"Base",      maxTier:2,
+    aim:"Solo hip flexor work becomes a staple. Partial front splits enter as an assessment, not a target." },
+  { n:3, from:73,  to:108, name:"Load",      maxTier:3,
+    aim:"Three cycles on large muscle groups. Partial front splits becomes a working position." },
+  { n:4, from:109, to:999, name:"Depth",     maxTier:4,
+    aim:"Toes on straight legs, and measured depth in the partial split. The full splits stays a horizon." }
+];
+
+/* A and C are the front-splits drivers; both carry hip flexion and hip
+   extension, which puts each at exactly two appearances a week — the cap.
+   B is the counterbalance day. Accessory appears in two sessions of three. */
+const SHAPES = [
+  { key:"A", label:"Front leg", slots:[
+      { role:"warmup", pat:["hipFlexion","spineFlexion"] },
+      { role:"work",   pat:["hipFlexion"],      size:"large" },
+      { role:"work",   pat:["hipExtension"],    size:"large" },
+      { role:"work",   pat:["spineExtension","shoulder"] },
+      { role:"work",   pat:["neck","shoulder","wristAnkle"], size:"small", drop:1 },
+      { role:"integrator", pat:["spineFlexion","hipFlexion"] }
+  ]},
+  { key:"B", label:"Counterbalance", slots:[
+      { role:"warmup", pat:["hipAbduction","kneeFlexion"] },
+      { role:"work",   pat:["kneeFlexion"],   size:"large" },
+      { role:"work",   pat:["hipAbduction"],  size:"large" },
+      { role:"work",   pat:["lowerLeg"],      size:"medium" },
+      { role:"work",   pat:["neck","shoulder","wristAnkle"], size:"small", drop:1 },
+      { role:"integrator", pat:["hipFlexion","hipExtension","spineFlexion"] }
+  ]},
+  { key:"C", label:"Back leg", slots:[
+      { role:"warmup", pat:["hipExtension","hipFlexion"] },
+      { role:"work",   pat:["hipExtension"], size:"large" },
+      { role:"work",   pat:["hipFlexion"],   size:"large" },
+      { role:"work",   pat:["spineRotation","spineLateralFlexion","hipRotation"], size:"medium", drop:1 },
+      { role:"integrator", pat:["hipFlexion","hipExtension","spineFlexion"] }
+  ]}
+];
+
+const MEASURES = [
+  { id:"ftf", label:"Fingertip to floor", unit:"cm", target:0, dir:"down", primary:true,
+    protocol:"Standing forward bend, straight legs, no bounce. Measure from fingertips to floor. Positive if short of the floor. This is the toe-touch number." },
+  { id:"splitL", label:"Front split, left leg forward", unit:"cm", target:0, dir:"down",
+    protocol:"Sink as low as is comfortable. Measure floor to front hip crease." },
+  { id:"splitR", label:"Front split, right leg forward", unit:"cm", target:0, dir:"down",
+    protocol:"Same again, other leg forward. The difference between sides sets which side you stretch first." },
+  { id:"straddle", label:"Straddle width", unit:"cm", target:null, dir:"up",
+    protocol:"Seated, back flat to a wall, legs as wide as they go. Measure heel to heel." }
+];
+
+
+/* --------------------------------------------------------------------------
+   4. STATE
+   -------------------------------------------------------------------------- */
+
+const KEY = "splits-year-one/v1";
+const BLANK = {
+  version:1,
+  sessionsCompleted:0,
+  lastSessionISO:null,
+  history:[],                 // {n, shape, date, done:[], skipped:[], note}
+  tightList:[],               // {exId, addedAt, clearedAt}
+  sideBias:{},                // pattern -> "L" | "R"
+  measures:[],                // {id, n, date, value}
+  tierAdjust:{},              // exId -> -1 | +1
+  draft:null,                 // in-progress session {n, done:[]}
+  settings:{ sessionLength:30 }
+};
+
+let S = load();
+
+function load() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return structuredClone(BLANK);
+    const parsed = JSON.parse(raw);
+    return Object.assign(structuredClone(BLANK), parsed);
+  } catch (e) {
+    return structuredClone(BLANK);
+  }
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(S)); }
+  catch (e) { toast("Could not save — storage may be full or blocked"); }
+}
+
+
+/* --------------------------------------------------------------------------
+   5. ASSEMBLER — deterministic. Same session number and history always
+      produce the same session.
+   -------------------------------------------------------------------------- */
+
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+function phaseFor(n) {
+  return PHASES.find(p => n >= p.from && n <= p.to) || PHASES[PHASES.length - 1];
+}
+
+function daysBetween(a, b) {
+  return Math.abs(new Date(a) - new Date(b)) / 86400000;
+}
+
+/* Rolling seven-day load, counted by MUSCLE GROUP rather than by exercise —
+   Laughlin's cap is on the muscle, not the movement, so three different
+   hamstring exercises in a week is still three hamstring sessions (p.10).
+   Warm-ups and the closing whole-movement are exempt: partials are the dose,
+   the integrator is the point of the session. */
+/* The cap is counted over the last three completed sessions rather than a
+   calendar week. One A/B/C rotation is three sessions, so this is exactly
+   Laughlin's "twice a week" for someone training three times a week — and
+   unlike a rolling seven-day window it does not wobble when a session lands a
+   day early or late. Progression here is by session count throughout; the
+   dose guard should be too.
+
+   `h.load` records which slot each exercise filled, because an exercise can
+   serve two groups and only the slot knows which one it was worked for. */
+function recentLoad() {
+  const counts = {};
+  const recent = S.history.slice(-3);
+  for (const h of recent)
+    for (const g of (h.load || [])) counts["pat:" + g] = (counts["pat:" + g] || 0) + 1;
+  // per-exercise recency, for variety. Warm-ups included — otherwise the same
+  // two warm-ups win every scoring round forever.
+  for (const h of S.history.slice(-9))
+    for (const id of (h.done || [])) counts["ex:" + id] = (counts["ex:" + id] || 0) + 1;
+  return counts;
+}
+
+/* Deload: a gap over 14 days repeats the previous block rather than advancing. */
+function effectiveSessionNumber() {
+  const n = S.sessionsCompleted + 1;
+  if (!S.lastSessionISO) return n;
+  if (daysBetween(S.lastSessionISO, Date.now()) > 14) {
+    return Math.max(1, n - 3);
+  }
+  return n;
+}
+
+function tierOf(ex) {
+  return Math.max(1, Math.min(4, ex.tier + (S.tierAdjust[ex.id] || 0)));
+}
+
+function candidatesFor(slot, phase, chosen, load) {
+  const chosenIds = new Set(chosen.map(c => c.ex.id));
+  return EX.filter(ex => {
+    if (chosenIds.has(ex.id)) return false;
+    if (slot.role === "warmup" && !ex.warm) return false;
+    if (slot.role !== "warmup" && ex.warm) return false;
+    if (slot.role === "integrator" && !ex.integ) return false;
+    if (slot.role === "work" && ex.integ) return false;
+    if (slot.size && ex.size !== slot.size) return false;
+    if (tierOf(ex) > phase.maxTier) return false;
+    if (!ex.pat.some(p => slot.pat.includes(p))) return false;
+    // frequency cap on the muscle group this slot works it for, work slots only
+    if (slot.role === "work") {
+      const used = load["pat:" + groupFor(ex, slot)] || 0;
+      if (used >= CAP[ex.size]) return false;
+    }
+    return true;
+  });
+}
+
+function scoreOf(ex, load) {
+  let s = 0;
+  if (ex.key) s += 3;
+  if (S.tightList.some(t => t.exId === ex.id && !t.clearedAt)) s += 5;
+  s -= (load["ex:" + ex.id] || 0) * 4;   // strong recency penalty, or variety collapses
+  return s;
+}
+
+/* Which group is this exercise being worked for? The slot decides, not the
+   exercise — ex.21 stretches glutes through hip flexion AND hip flexors
+   through extension, and which one counts depends on the slot it filled. */
+function groupFor(ex, slot) {
+  return ex.pat.find(p => slot.pat.includes(p)) || ex.pat[0];
+}
+
+function assemble(n) {
+  const phase = phaseFor(n);
+  const shape = SHAPES[(n - 1) % SHAPES.length];
+  const rng = mulberry32(n * 2654435761);
+  const load = recentLoad();
+  const cycles = CYCLES_BY_PHASE[phase.n];
+  const chosen = [];
+
+  for (const slot of shape.slots) {
+    let cands = candidatesFor(slot, phase, chosen, load);
+    if (!cands.length) {
+      // relax the cap rather than leave a hole
+      cands = EX.filter(ex =>
+        !chosen.some(c => c.ex.id === ex.id) &&
+        ex.pat.some(p => slot.pat.includes(p)) &&
+        tierOf(ex) <= phase.maxTier &&
+        (slot.role === "warmup" ? ex.warm : !ex.warm) &&
+        (slot.role === "integrator" ? ex.integ : !ex.integ || slot.role === "integrator"));
+    }
+    if (!cands.length) continue;
+    const best = cands.map(ex => ({ ex, s: scoreOf(ex, load) + rng() }))
+                      .sort((a, b) => b.s - a.s)[0].ex;
+    const group = groupFor(best, slot);
+    chosen.push({ ex:best, role:slot.role, group, drop:slot.drop || 0,
+                  passes: passesFor(best, cycles) });
+    load["ex:" + best.id] = (load["ex:" + best.id] || 0) + 1;
+    if (slot.role === "work") load["pat:" + group] = (load["pat:" + group] || 0) + 1;
+  }
+
+  // Principle viii: a backward bend must be followed by a forward bend.
+  const needs = chosen.findIndex(c => c.ex.counter);
+  if (needs !== -1 && !chosen.some(c => c.ex.cp)) {
+    const pool = EX.filter(e => e.cp && !chosen.some(c => c.ex.id === e.id));
+    if (pool.length) {
+      const cp = pool.map(ex => ({ ex, s: scoreOf(ex, load) + rng() }))
+                     .sort((a, b) => b.s - a.s)[0].ex;
+      chosen.splice(needs + 1, 0,
+        { ex:cp, role:"counterpose", group:cp.pat[0], drop:0,
+          passes: passesFor(cp, cycles) });
+    }
+  }
+
+  // Budget. Thirty minutes buys about four working movements; when the cycle
+  // count rises in phase 3 it stops buying five. Drop the accessory slot
+  // before letting the session sprawl.
+  const target = (S.settings.sessionLength || 30) * 60;
+  let items = chosen;
+  while (sessionSeconds(items) > target * 1.15 && items.some(i => i.drop)) {
+    const idx = items.map(i => i.drop).lastIndexOf(1);
+    items = items.filter((_, i) => i !== idx);
+  }
+
+  return { n, phase, shape, items, seconds: sessionSeconds(items) };
+}
+
+/* Principle vi: tighter side, looser side, tighter side again (abbreviated).
+   Once the sides match, equal work. */
+function passesFor(ex, cycles) {
+  // Warm-ups are movement, not contract–relax. One short block, no cycles.
+  if (ex.warm) return [{ side:"both", cycles:0, seconds:120, warm:true }];
+  const p = PROFILE[ex.size];
+  const one = c => p.enter + c * (p.contract + p.release + p.hold);
+  if (!ex.uni) return [{ side:"both", cycles, seconds:one(cycles) }];
+  const bias = S.sideBias[ex.pat[0]];
+  if (!bias) {
+    return [
+      { side:"L", cycles, seconds:one(cycles) },
+      { side:"R", cycles, seconds:one(cycles) }
+    ];
+  }
+  const other = bias === "L" ? "R" : "L";
+  return [
+    { side:bias,  cycles,    seconds:one(cycles), first:true },
+    { side:other, cycles,    seconds:one(cycles) },
+    { side:bias,  cycles:1,  seconds:one(1), short:true }
+  ];
+}
+
+function sessionSeconds(items) {
+  const work = items.reduce((t, i) => t + i.passes.reduce((u, p) => u + p.seconds, 0), 0);
+  return work + 120;           // plus the lying finish
+}
+
+function fmtMin(sec) {
+  const m = Math.round(sec / 60);
+  return m + " min";
+}
+function fmtClock(sec) {
+  const m = Math.floor(sec / 60), s = Math.round(sec % 60);
+  return m + ":" + String(s).padStart(2, "0");
+}
+
+
+/* --------------------------------------------------------------------------
+   6. DERIVED VIEWS OF STATE
+   -------------------------------------------------------------------------- */
+
+function sessionsLast28() {
+  const now = Date.now();
+  return S.history.filter(h => daysBetween(h.date, now) <= 28).length;
+}
+function daysSinceLast() {
+  if (!S.lastSessionISO) return null;
+  return Math.floor(daysBetween(S.lastSessionISO, Date.now()));
+}
+function readyForNext() {
+  const d = daysSinceLast();
+  return d === null || d >= 2;
+}
+function measureSeries(id) {
+  return S.measures.filter(m => m.id === id).sort((a, b) => new Date(a.date) - new Date(b.date));
+}
+function latestMeasure(id) {
+  const s = measureSeries(id);
+  return s.length ? s[s.length - 1] : null;
+}
+function firstMeasure(id) {
+  const s = measureSeries(id);
+  return s.length ? s[0] : null;
+}
+function isAuditDue() {
+  return S.sessionsCompleted > 0 && S.sessionsCompleted % 12 === 0;
+}
+
+
+/* --------------------------------------------------------------------------
+   7. RENDER
+   -------------------------------------------------------------------------- */
+
+const views = {
+  home:    document.getElementById("view-home"),
+  session: document.getElementById("view-session"),
+  measure: document.getElementById("view-measure"),
+  more:    document.getElementById("view-more")
+};
+let current = "home";
+
+function show(name) {
+  for (const k in views) views[k].hidden = (k !== name);
+  document.querySelectorAll("nav.tabs button").forEach(b =>
+    b.setAttribute("aria-current", String(b.dataset.view === name)));
+  current = name;
+  window.scrollTo(0, 0);
+  render();
+}
+
+function esc(s) {
+  return String(s == null ? "" : s)
+    .replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+}
+
+function render() {
+  const n = effectiveSessionNumber();
+  const ph = phaseFor(n);
+  document.getElementById("whereami").innerHTML =
+    "Session " + n + "<br>Phase " + ph.n + " &middot; " + esc(ph.name);
+
+  if (current === "home")    renderHome();
+  if (current === "session") renderSession();
+  if (current === "measure") renderMeasure();
+  if (current === "more")    renderMore();
+}
+
+function renderHome() {
+  const n = effectiveSessionNumber();
+  const ph = phaseFor(n);
+  const s = assemble(n);
+  const ftf = latestMeasure("ftf");
+  const ftf0 = firstMeasure("ftf");
+  const d = daysSinceLast();
+  const ready = readyForNext();
+  const freq = sessionsLast28();
+
+  let html = "";
+
+  // where you are in the work — process first
+  html += '<div class="card lead">';
+  html += '<p class="eyebrow">Next up</p>';
+  html += '<div class="bigrow"><span class="big">' + n + '</span>';
+  html += '<span class="muted">' + esc(s.shape.label) + ' &middot; ' + fmtMin(s.seconds) +
+          ' &middot; ' + s.items.length + ' movements</span></div>';
+  if (!ready) {
+    html += '<p class="muted" style="margin-top:10px">Last session was ' +
+            (d === 0 ? "today" : d + (d === 1 ? " day" : " days") + " ago") +
+            '. Two days between sessions is the intent, but the queue waits for you — start anyway if you feel ready.</p>';
+  }
+  if (d !== null && d > 14) {
+    html += '<p class="muted" style="margin-top:10px">It has been ' + d +
+            ' days, so the programme has stepped back a block rather than advancing. Deliberate, not a penalty.</p>';
+  }
+  html += '<button class="btn" data-act="start">' +
+          (S.draft && S.draft.n === n ? "Resume session " + n : "Begin session " + n) + '</button>';
+  html += '</div>';
+
+  if (isAuditDue()) {
+    html += '<div class="card"><p class="eyebrow" style="color:var(--warm)">Audit due</p>';
+    html += '<p class="muted">Twelve sessions done. Take the four measurements, then work slowly through your whole body and note what feels tightest — that becomes extra work for the next block. Good moment to export a backup too.</p>';
+    html += '<button class="btn ghost" data-act="tomeasure">Take the measurements</button></div>';
+  }
+
+  // the work so far
+  html += '<div class="card"><p class="eyebrow">The work so far</p>';
+  html += '<dl class="statgrid">';
+  html += stat("Sessions", S.sessionsCompleted);
+  html += stat("Last 4 weeks", freq + ' <span>of 12</span>');
+  html += stat("Phase", ph.n + ' <span>of 4</span>');
+  html += stat("Block ends", Math.max(0, ph.to - n + 1) + ' <span>sessions</span>');
+  html += '</dl>';
+  html += '<p class="tiny" style="margin-top:10px">' + esc(ph.aim) + '</p>';
+  html += '</div>';
+
+  // near target — the toe touch
+  html += '<div class="card"><p class="eyebrow">Near target &middot; toes on straight legs</p>';
+  if (ftf) {
+    const delta = ftf0 ? (ftf0.value - ftf.value) : 0;
+    html += '<div class="bigrow"><span class="big">' + ftf.value + '<small> cm</small></span>';
+    html += '<span class="muted">to the floor' +
+            (ftf0 && delta !== 0 ? ' &middot; ' + (delta > 0 ? "&minus;" : "+") +
+              Math.abs(delta).toFixed(1) + ' cm since you started' : '') + '</span></div>';
+    html += sparkline(measureSeries("ftf").map(m => m.value), true);
+  } else {
+    html += '<p class="muted">No baseline yet. Take the fingertip-to-floor measurement before your first session, or the whole year has nothing to compare against.</p>';
+    html += '<button class="btn ghost" data-act="tomeasure">Take a baseline</button>';
+  }
+  html += '</div>';
+
+  // the horizon
+  html += '<div class="card"><p class="eyebrow">The goal</p><div class="horizon">';
+  html += '<span class="lbl">Ex. 93 &middot; p.247</span>';
+  html += '<p style="margin:4px 0 0"><strong>The ultimate front splits.</strong></p>';
+  html += '<p class="muted" style="margin-top:6px">' + esc(HORIZON[0].note) + '</p>';
+  html += '<p class="tiny" style="margin-top:8px">Distant, and named as such. The work between here and there is the same work either way.</p>';
+  html += '</div></div>';
+
+  views.home.innerHTML = html;
+}
+
+function stat(label, value) {
+  return '<div class="stat"><dt>' + esc(label) + '</dt><dd>' + value + '</dd></div>';
+}
+
+function sparkline(vals, invert) {
+  if (vals.length < 2) return "";
+  const max = Math.max(...vals), min = Math.min(...vals);
+  const span = (max - min) || 1;
+  let h = '<div class="spark">';
+  for (const v of vals) {
+    let pct = (v - min) / span;
+    if (invert) pct = 1 - pct;
+    h += '<i style="height:' + (10 + pct * 90) + '%"></i>';
+  }
+  return h + '</div>';
+}
+
+function renderSession() {
+  const n = (S.draft && S.draft.n) || effectiveSessionNumber();
+  const s = assemble(n);
+  const done = new Set((S.draft && S.draft.done) || []);
+
+  let html = '<div style="padding-top:18px">';
+  html += '<p class="eyebrow">Session ' + n + ' &middot; ' + esc(s.shape.label) +
+          ' &middot; ' + fmtMin(s.seconds) + '</p>';
+  html += '<h2 class="serif" style="font-size:24px;margin-bottom:4px">' + esc(s.phase.name) + '</h2>';
+  html += '<p class="muted" style="margin:0 0 4px">Partials first. The whole movement is last — that is the point of the session, not a cool-down.</p>';
+  html += '</div>';
+
+  html += '<p class="tiny" style="margin:16px 0 4px">Warm up for four minutes first: easy movement until you are warm. ' +
+          'The times on each side are the <strong>whole sequence for that side</strong> — settle, then contract, release and hold, ' +
+          'repeated. The longest you hold still is ' + PROFILE.large.hold + ' seconds.</p>';
+
+  s.items.forEach((item, i) => {
+    const ex = item.ex;
+    const isDone = done.has(ex.id);
+    const p = PROFILE[ex.size];
+    html += '<div class="item' + (isDone ? ' done' : '') + '" data-ex="' + esc(ex.id) + '">';
+    html += '<div class="item-head">';
+    html += '<button class="tick" data-act="tick" data-ex="' + esc(ex.id) + '" aria-label="Mark done">&#10003;</button>';
+    html += '<div class="item-body">';
+    html += '<div class="item-title">' + esc(ex.name) + '</div>';
+    html += '<div class="item-sub">' + (ex.warm
+            ? "Warm-up &middot; " + esc(ex.ref) + " &middot; 2 min"
+            : "Ex. " + ex.num + " &middot; " + esc(ex.ref) + " &middot; " +
+              esc(ex.size) + ' &middot; ' + roleLabel(item.role)) + '</div>';
+    if (!ex.warm) {
+      html += '<div class="sidepass">';
+      item.passes.forEach(pass => {
+        html += '<span class="pass' + (pass.first ? ' first' : '') + '">' +
+                (pass.side === "both" ? "both" : pass.side) +
+                (pass.short ? " short" : "") + ' &middot; ' + fmtClock(pass.seconds) + '</span>';
+      });
+      html += '</div>';
+    }
+    html += '<button class="item-more" data-act="more" data-ex="' + esc(ex.id) + '">' +
+            (openDetail === ex.id ? "hide detail" : "how &rarr;") + '</button>';
+    html += '</div></div>';
+
+    if (openDetail === ex.id) {
+      html += '<div class="detail">';
+      html += '<h4>Cues</h4><ul>' + ex.cues.map(c => '<li>' + esc(c) + '</li>').join("") + '</ul>';
+      if (ex.gate) html += '<h4>Gate</h4><div class="gatebox">' + esc(ex.gate) + '</div>';
+      if (!ex.warm) {
+        html += '<h4>Contract–relax</h4><div class="script">';
+        html += '<b>Settle</b> ' + p.enter + 's, then per cycle &times;' + item.passes[0].cycles + ':<br>';
+        html += '<b>Contract</b> ' + p.contract + 's at 20–30% &mdash; ' + esc(ex.con) + '<br>';
+        html += '<b>Breathe in, release</b> ' + p.release + 's<br>';
+        html += '<b>Restretch on the out-breath, hold</b> ' + p.hold + 's (about ' +
+                Math.round(p.hold / BREATH) + ' breaths)';
+        html += '</div>';
+        html += '<p class="tiny" style="margin-top:8px">If you cannot hold the final position for ten breaths, you overdid it. Say so below and the next session steps back.</p>';
+        html += '<div class="btnrow">';
+        html += '<button class="btn quiet" data-act="easier" data-ex="' + esc(ex.id) + '">Too much</button>';
+        html += '<button class="btn quiet" data-act="harder" data-ex="' + esc(ex.id) + '">Too little</button>';
+        html += '</div>';
+      }
+      if (ex.note) html += '<h4>Note</h4><p class="muted">' + esc(ex.note) + '</p>';
+      html += '</div>';
+    }
+    html += '</div>';
+  });
+
+  html += '<p class="tiny" style="margin-top:16px">Finish by lying down for two minutes. Laughlin is firm about this and it is easy to skip.</p>';
+  html += '<button class="btn" data-act="finish">Finish session</button>';
+  html += '<button class="btn quiet" data-act="abandon">Back without saving</button>';
+  html += '<div style="height:20px"></div>';
+
+  views.session.innerHTML = html;
+}
+
+function roleLabel(r) {
+  return { warmup:"warm-up", work:"working", integrator:"whole movement", counterpose:"counterpose" }[r] || r;
+}
+
+function renderMeasure() {
+  let html = '<div style="padding-top:18px">';
+  html += '<p class="eyebrow">Numbers</p>';
+  html += '<h2 class="serif" style="font-size:24px">Where the body actually is</h2>';
+  html += '<p class="muted" style="margin-top:6px">Every twelfth session, after warming up and before stretching. Same time of day, same conditions. Repeatability matters more than the choice of measure.</p></div>';
+
+  for (const m of MEASURES) {
+    const last = latestMeasure(m.id), first = firstMeasure(m.id);
+    const series = measureSeries(m.id);
+    html += '<div class="card' + (m.primary ? ' lead' : '') + '">';
+    html += '<h3>' + esc(m.label) + '</h3>';
+    if (last) {
+      html += '<div class="bigrow"><span class="big">' + last.value + '<small> ' + esc(m.unit) + '</small></span>';
+      if (first && series.length > 1) {
+        const delta = last.value - first.value;
+        const good = m.dir === "down" ? delta < 0 : delta > 0;
+        html += '<span class="muted">' + (delta === 0 ? "no change" :
+                (delta > 0 ? "+" : "&minus;") + Math.abs(delta).toFixed(1) + " " + m.unit +
+                (good ? "" : "")) + ' since ' + new Date(first.date).toLocaleDateString("en-AU",{month:"short",year:"numeric"}) + '</span>';
+      }
+      html += '</div>';
+      html += sparkline(series.map(x => x.value), m.dir === "down");
+    } else {
+      html += '<p class="muted">Not measured yet.</p>';
+    }
+    html += '<p class="protocol">' + esc(m.protocol) + '</p>';
+    html += '<label class="field"><span>New reading (' + esc(m.unit) + ')</span>';
+    html += '<input type="number" step="0.5" inputmode="decimal" id="mi-' + m.id + '" placeholder="cm"></label>';
+    html += '<button class="btn ghost" data-act="savemeasure" data-m="' + m.id + '">Save reading</button>';
+    html += '</div>';
+  }
+
+  const l = latestMeasure("splitL"), r = latestMeasure("splitR");
+  if (l && r && Math.abs(l.value - r.value) >= 2) {
+    const tighter = l.value > r.value ? "left leg forward" : "right leg forward";
+    html += '<div class="card"><p class="eyebrow">Side difference</p>';
+    html += '<p class="muted">Your ' + tighter + ' split is ' + Math.abs(l.value - r.value).toFixed(1) +
+            ' cm shallower. Laughlin\'s rule is to stretch the tighter side first, then the looser, then the tighter side again briefly — until they match.</p>';
+    html += '<button class="btn ghost" data-act="setbias" data-side="' + (l.value > r.value ? "L" : "R") +
+            '">Set that as the tighter side</button></div>';
+  }
+
+  html += '<div style="height:20px"></div>';
+  views.measure.innerHTML = html;
+}
+
+function renderMore() {
+  let html = '<div style="padding-top:18px"><p class="eyebrow">More</p></div>';
+
+  html += '<div class="card"><h3>Backup</h3>';
+  html += '<p class="muted">This app keeps everything on this phone only. iOS can clear it without warning, so export every audit — a year of history is not something to lose.</p>';
+  html += '<button class="btn ghost" data-act="export">Export a backup file</button>';
+  html += '<label class="field"><span>Restore from a backup</span><input type="file" id="importfile" accept="application/json"></label>';
+  html += '</div>';
+
+  if (S.history.length) {
+    html += '<div class="card"><h3>History</h3>';
+    html += '<p class="muted">' + S.history.length + ' sessions recorded.</p>';
+    html += '<div class="script" style="margin-top:8px;max-height:220px;overflow:auto">';
+    for (const h of [...S.history].reverse().slice(0, 40)) {
+      html += '<b>' + h.n + '</b> &middot; ' + h.shape + ' &middot; ' +
+              new Date(h.date).toLocaleDateString("en-AU") +
+              ' &middot; ' + (h.done ? h.done.length : 0) + ' done<br>';
+    }
+    html += '</div></div>';
+  }
+
+  const adj = Object.entries(S.tierAdjust).filter(([, v]) => v !== 0);
+  if (adj.length) {
+    html += '<div class="card"><h3>Your adjustments</h3><div class="script">';
+    for (const [id, v] of adj) {
+      const ex = BY_ID[id];
+      if (ex) html += esc(ex.name) + ' &middot; ' + (v < 0 ? "easier" : "harder") + '<br>';
+    }
+    html += '</div></div>';
+  }
+
+  html += '<div class="card"><h3>The horizon</h3>';
+  for (const h of HORIZON) {
+    html += '<p style="margin:10px 0 2px"><strong>Ex. ' + h.num + ' &middot; ' + esc(h.name) + '</strong> <span class="tiny">' + esc(h.ref) + '</span></p>';
+    html += '<p class="muted" style="margin:0">' + esc(h.note) + '</p>';
+  }
+  html += '</div>';
+
+  html += '<div class="card"><h3>Reset</h3>';
+  html += '<p class="muted">Clears everything on this device. Export first.</p>';
+  html += '<button class="btn quiet" data-act="reset">Erase all data</button></div>';
+
+  html += '<p class="tiny" style="margin:22px 0">Exercise numbers and page references point into Kit Laughlin, <em>Stretching &amp; Flexibility</em>, 2nd edition. Cue wording here is original. Open the book at the referenced page when a cue is not enough.</p>';
+  html += '<div style="height:20px"></div>';
+
+  views.more.innerHTML = html;
+}
+
+
+/* --------------------------------------------------------------------------
+   8. ACTIONS
+   -------------------------------------------------------------------------- */
+
+let openDetail = null;
+
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+document.addEventListener("click", e => {
+  const btn = e.target.closest("[data-act]");
+  if (!btn) return;
+  const act = btn.dataset.act;
+  const exId = btn.dataset.ex;
+
+  if (act === "start") {
+    const n = effectiveSessionNumber();
+    if (!S.draft || S.draft.n !== n) { S.draft = { n, done:[] }; save(); }
+    show("session");
+  }
+
+  else if (act === "tick") {
+    if (!S.draft) return;
+    const set = new Set(S.draft.done);
+    set.has(exId) ? set.delete(exId) : set.add(exId);
+    S.draft.done = [...set];
+    save(); renderSession();
+  }
+
+  else if (act === "more") {
+    openDetail = (openDetail === exId) ? null : exId;
+    renderSession();
+    if (openDetail) {
+      const el = document.querySelector('[data-ex="' + CSS.escape(openDetail) + '"]');
+      if (el) el.scrollIntoView({ block:"nearest", behavior:"smooth" });
+    }
+  }
+
+  else if (act === "easier" || act === "harder") {
+    const delta = act === "easier" ? -1 : 1;
+    S.tierAdjust[exId] = Math.max(-2, Math.min(2, (S.tierAdjust[exId] || 0) + delta));
+    save();
+    toast(act === "easier" ? "Stepped down for next time" : "Stepped up for next time");
+  }
+
+  else if (act === "finish") {
+    if (!S.draft) { show("home"); return; }
+    const n = S.draft.n;
+    const s = assemble(n);
+    const all = s.items.map(i => i.ex.id);
+    const done = S.draft.done.filter(id => all.includes(id));
+    // record which group each completed working movement was worked for, so
+    // the seven-day cap can be counted correctly next time
+    const loadGroups = s.items
+      .filter(i => i.role === "work" && done.includes(i.ex.id))
+      .map(i => i.group);
+    S.history.push({
+      n, shape: s.shape.key, date: new Date().toISOString(),
+      done, skipped: all.filter(id => !done.includes(id)), load: loadGroups
+    });
+    S.sessionsCompleted = Math.max(S.sessionsCompleted, n);
+    S.lastSessionISO = new Date().toISOString();
+    S.draft = null;
+    save();
+    toast(done.length + " of " + all.length + " done. Session " + n + " logged.");
+    show("home");
+  }
+
+  else if (act === "abandon") { show("home"); }
+
+  else if (act === "tomeasure") { show("measure"); }
+
+  else if (act === "savemeasure") {
+    const id = btn.dataset.m;
+    const input = document.getElementById("mi-" + id);
+    const v = parseFloat(input.value);
+    if (isNaN(v)) { toast("Enter a number first"); return; }
+    S.measures.push({ id, n:S.sessionsCompleted, date:new Date().toISOString(), value:v });
+    save(); input.value = "";
+    toast("Saved");
+    renderMeasure();
+  }
+
+  else if (act === "setbias") {
+    const side = btn.dataset.side;
+    S.sideBias = { hipFlexion:side, hipExtension:side, kneeFlexion:side };
+    save();
+    toast("Tighter side set to " + (side === "L" ? "left" : "right"));
+    renderMeasure();
+  }
+
+  else if (act === "export") {
+    const blob = new Blob([JSON.stringify(S, null, 2)], { type:"application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "splits-backup-" + new Date().toISOString().slice(0,10) + ".json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    toast("Backup downloaded");
+  }
+
+  else if (act === "reset") {
+    if (confirm("Erase everything on this device? Export first if you want to keep it.")) {
+      S = structuredClone(BLANK); save(); show("home");
+    }
+  }
+});
+
+document.addEventListener("change", e => {
+  if (e.target.id !== "importfile") return;
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (typeof data.sessionsCompleted !== "number") throw new Error("not a backup");
+      S = Object.assign(structuredClone(BLANK), data);
+      save();
+      toast("Restored " + S.history.length + " sessions");
+      show("home");
+    } catch (err) {
+      toast("That file could not be read as a backup");
+    }
+  };
+  reader.readAsText(file);
+});
+
+document.querySelectorAll("nav.tabs button").forEach(b =>
+  b.addEventListener("click", () => show(b.dataset.view)));
+
+show("home");
+</script>
+</body>
+</html>
