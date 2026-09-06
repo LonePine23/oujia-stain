@@ -8,7 +8,7 @@
 <!-- PWA bits. The manifest tells the phone what to call the app and which icon
      to use when you "Add to Home Screen". -->
 <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#b4451c">
+<meta name="theme-color" content="#001021">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Yummers">
 <link rel="apple-touch-icon" href="./icon-192.png">
@@ -17,38 +17,46 @@
 <style>
 /* ===========================================================================
    DESIGN TOKENS
-   Every colour is defined once here as a CSS variable, then re-defined for
-   dark mode below. Change these to restyle the whole app.
+   Every colour in the app is defined once, here. Change a value and it
+   changes everywhere.
+
+   The scheme is a single deep-navy theme (no light mode) built around
+   readability. The orange is deliberately rare: it marks the wordmark, the
+   one primary action on screen, the star rating, the active filter, and the
+   keyboard focus ring. Everything else is neutral blue-grey, so when orange
+   does appear it means something.
+
+   Contrast against the page background, for reference:
+     --text   16.6:1   (WCAG AAA wants 7:1)
+     --muted   7.8:1
+     --accent 10.7:1
    =========================================================================== */
 :root {
-  --bg:        #fdf8f3;
-  --surface:   #ffffff;
-  --surface-2: #f6efe7;
-  --line:      #e6dbcf;
-  --text:      #2b2320;
-  --muted:     #7c6f66;
-  --accent:    #b4451c;
-  --accent-soft:#fbeadf;
-  --danger:    #a3271f;
-  --star:      #d99414;
+  color-scheme: dark;          /* makes native controls + scrollbars render dark */
+
+  --bg:          #001021;      /* the page */
+  --surface:     #06192e;      /* cards, inputs, sheets */
+  --surface-2:   #0d2540;      /* hovers, wells, chips */
+  --line:        #1e3d5c;      /* borders */
+  --line-soft:   #143050;      /* quieter dividers */
+
+  --text:        #eaf2fa;      /* body text */
+  --muted:       #9db3c9;      /* secondary text, labels, hints */
+  --placeholder: #7c93aa;
+
+  --accent:      #ffb300;      /* the orange — used sparingly, on purpose */
+  --accent-ink:  #001021;      /* text sitting ON the orange */
+  --accent-wash: rgba(255, 179, 0, .14);
+
+  --link:        #8dc0f0;      /* links stay blue so orange stays rare */
+  --danger:      #ff9b8a;
+  --danger-wash: rgba(255, 120, 100, .14);
+  --info-wash:   rgba(141, 192, 240, .13);
+  --star:        #ffb300;
+
   --radius:    14px;
-  --shadow:    0 1px 2px rgba(43,35,32,.05), 0 6px 20px rgba(43,35,32,.06);
+  --shadow:    0 1px 2px rgba(0,0,0,.45), 0 8px 28px rgba(0,0,0,.35);
   --maxw:      940px;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg:        #17140f;
-    --surface:   #211d18;
-    --surface-2: #2b2620;
-    --line:      #3a332b;
-    --text:      #f0e8df;
-    --muted:     #a2968a;
-    --accent:    #f08a5a;
-    --accent-soft:#3a2419;
-    --danger:    #e0705f;
-    --star:      #e8b44a;
-    --shadow:    0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.25);
-  }
 }
 
 * { box-sizing: border-box; }
@@ -61,7 +69,7 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
 }
 h1, h2, h3 { line-height: 1.2; margin: 0 0 .4em; font-weight: 650; letter-spacing: -.01em; }
-a { color: var(--accent); }
+a { color: var(--link); }
 [hidden] { display: none !important; }
 
 .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 16px; }
@@ -77,16 +85,19 @@ button, .btn {
   cursor: pointer;
   transition: background .12s, border-color .12s, transform .06s;
 }
-button:hover, .btn:hover { background: var(--surface-2); }
+button:hover, .btn:hover { background: var(--surface-2); border-color: var(--line); }
 button:active { transform: translateY(1px); }
+/* The one primary action on any given screen. This is most of the app's orange. */
 button.primary {
-  background: var(--accent); border-color: var(--accent); color: #fff;
+  background: var(--accent); border-color: var(--accent); color: var(--accent-ink);
+  font-weight: 650;
 }
-button.primary:hover { filter: brightness(1.07); background: var(--accent); }
+button.primary:hover { filter: brightness(1.08); background: var(--accent); border-color: var(--accent); }
 button.ghost { background: transparent; border-color: transparent; color: var(--muted); }
-button.ghost:hover { background: var(--surface-2); color: var(--text); }
-button.danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, transparent); }
-button:disabled { opacity: .5; cursor: default; }
+button.ghost:hover { background: var(--surface-2); color: var(--text); border-color: transparent; }
+button.danger { color: var(--danger); border-color: rgba(255,155,138,.38); }
+button.danger:hover { background: var(--danger-wash); border-color: var(--danger); }
+button:disabled { opacity: .45; cursor: default; }
 
 input, textarea, select {
   font: inherit;
@@ -97,10 +108,20 @@ input, textarea, select {
   border-radius: 10px;
   padding: 10px 12px;
 }
+input::placeholder, textarea::placeholder { color: var(--placeholder); opacity: 1; }
 input:focus, textarea:focus, select:focus {
-  outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  outline: 2px solid var(--accent);
   outline-offset: 1px;
   border-color: var(--accent);
+}
+/* Chrome paints autofilled fields white by default, which on a dark theme
+   means white text on a white box. This forces them back to our colours. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text);
+  -webkit-box-shadow: 0 0 0 1000px var(--surface) inset;
+  caret-color: var(--text);
 }
 textarea { resize: vertical; min-height: 80px; }
 label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 5px; }
@@ -130,7 +151,8 @@ header.app {
   border: 1px solid var(--line); background: var(--surface); color: var(--muted);
   cursor: pointer;
 }
-.chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+/* Only ever one chip is active, so this stays a light touch of orange. */
+.chip.on { background: var(--accent-wash); border-color: var(--accent); color: var(--accent); }
 
 /* --- recipe list ---------------------------------------------------------- */
 .grid {
@@ -143,11 +165,11 @@ header.app {
   cursor: pointer; display: flex; flex-direction: column;
   transition: transform .1s, box-shadow .12s;
 }
-.card:hover { transform: translateY(-2px); box-shadow: 0 4px 24px rgba(0,0,0,.10); }
+.card:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(0,0,0,.45); border-color: var(--line); }
 .card .thumb {
   aspect-ratio: 4/3; background: var(--surface-2);
   display: flex; align-items: center; justify-content: center;
-  font-size: 34px; color: var(--line);
+  font-size: 34px; color: #2e5478;
 }
 .card .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .card .body { padding: 11px 13px 13px; }
@@ -155,7 +177,8 @@ header.app {
 .card p { margin: 0; font-size: 13px; color: var(--muted);
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .card .meta { margin-top: 7px; font-size: 12px; color: var(--muted); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.tag { background: var(--accent-soft); color: var(--accent); border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
+.tag { background: var(--surface-2); color: #b9cee1; border: 1px solid var(--line-soft);
+       border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
 
 .empty { text-align: center; color: var(--muted); padding: 60px 20px; }
 .empty .big { font-size: 46px; margin-bottom: 10px; }
@@ -170,14 +193,14 @@ header.app {
 .cols { display: grid; gap: 28px; grid-template-columns: minmax(0,1fr); }
 @media (min-width: 720px) { .cols { grid-template-columns: 300px minmax(0,1fr); } }
 ul.ingredients { list-style: none; padding: 0; margin: 0; }
-ul.ingredients li { padding: 7px 0; border-bottom: 1px dashed var(--line); font-size: 15px; }
+ul.ingredients li { padding: 7px 0; border-bottom: 1px dashed var(--line-soft); font-size: 15px; }
 ul.ingredients li b { font-variant-numeric: tabular-nums; }
 ol.steps { padding-left: 0; margin: 0; list-style: none; counter-reset: s; }
 ol.steps li { counter-increment: s; position: relative; padding: 0 0 16px 40px; }
 ol.steps li::before {
   content: counter(s); position: absolute; left: 0; top: 0;
   width: 26px; height: 26px; border-radius: 50%;
-  background: var(--accent-soft); color: var(--accent);
+  background: var(--surface-2); color: var(--text); border: 1px solid var(--line);
   display: grid; place-items: center; font-size: 13px; font-weight: 700;
 }
 .notebox { background: var(--surface-2); border-left: 3px solid var(--accent); border-radius: 8px; padding: 12px 14px; margin-top: 20px; font-size: 15px; white-space: pre-wrap; }
@@ -189,7 +212,8 @@ ol.steps li::before {
 .step-row textarea { flex: 1 1 auto; min-height: 60px; }
 .ing-row button, .step-row button { flex: none; padding: 9px 11px; color: var(--muted); }
 .stars { display: flex; gap: 3px; }
-.stars button { border: none; background: none; padding: 2px; font-size: 24px; line-height: 1; color: var(--line); }
+.stars button { border: none; background: none; padding: 2px; font-size: 24px; line-height: 1; color: #2e5478; }
+.stars button:hover { background: none; }
 .stars button.on { color: var(--star); }
 .catpick { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 10px; }
 
@@ -201,8 +225,8 @@ ol.steps li::before {
 
 /* --- misc ----------------------------------------------------------------- */
 .msg { border-radius: 10px; padding: 10px 12px; font-size: 14px; margin-bottom: 14px; }
-.msg.err { background: color-mix(in srgb, var(--danger) 12%, transparent); color: var(--danger); }
-.msg.ok  { background: var(--accent-soft); color: var(--accent); }
+.msg.err { background: var(--danger-wash); color: var(--danger); }
+.msg.ok  { background: var(--info-wash);   color: var(--link); }
 #toast {
   position: fixed; left: 50%; bottom: calc(88px + env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(20px);
   background: var(--text); color: var(--bg); padding: 11px 18px; border-radius: 999px;
@@ -213,15 +237,17 @@ ol.steps li::before {
 .fab {
   position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom));
   width: 56px; height: 56px; border-radius: 50%; font-size: 27px; line-height: 1;
-  background: var(--accent); color: #fff; border: none;
-  box-shadow: 0 6px 20px rgba(0,0,0,.25); z-index: 30;
+  background: var(--accent); color: var(--accent-ink); border: none; font-weight: 600;
+  box-shadow: 0 6px 20px rgba(0,0,0,.5); z-index: 30;
 }
+.fab:hover { background: var(--accent); filter: brightness(1.08); }
 .panel {
-  position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 60;
+  position: fixed; inset: 0; background: rgba(0,4,10,.65); z-index: 60;
   display: flex; align-items: flex-end; justify-content: center;
 }
 .panel .sheet {
   background: var(--surface); width: 100%; max-width: 460px;
+  border: 1px solid var(--line); border-bottom: none;
   border-radius: 16px 16px 0 0; padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
   max-height: 88vh; overflow: auto;
 }
@@ -579,6 +605,7 @@ let draft     = null;   // the recipe currently open in the editor
 let filterCat = null;   // category id being filtered by, 'fav', or null
 let query     = '';     // current search text
 let recoveryMode = false;
+let booted    = false;  // has the app already loaded? (see onAuthStateChange)
 
 // Cache of Storage signed URLs, so we don't ask Supabase to re-sign the same
 // image on every render.  path -> { url, expiresAt }
@@ -1503,6 +1530,21 @@ $('#btn-cancel').addEventListener('click', () => {
   draft.id ? openDetail(draft.id) : goList();
 });
 
+/** Safety net: if you close the tab or hit reload with a part-written recipe
+ *  open, the browser asks you to confirm first. It can't be styled or worded
+ *  by us — browsers show their own generic message — but it stops accidental
+ *  loss of a long paste. */
+window.addEventListener('beforeunload', (e) => {
+  if ($('#view-edit').hidden) return;
+  const started = $('#ed-title').value.trim() ||
+                  $('#paste').value.trim() ||
+                  Array.from($$('#ing-list .itm')).some(i => i.value.trim()) ||
+                  Array.from($$('#step-list textarea')).some(t => t.value.trim());
+  if (!started) return;
+  e.preventDefault();
+  e.returnValue = '';
+});
+
 /* --- delete (two taps, no browser popup) ---------------------------------- */
 let deleteArmed = false, deleteTimer;
 $('#btn-delete').addEventListener('click', async () => {
@@ -1684,6 +1726,7 @@ document.addEventListener('keydown', e => {
    15. STARTUP
    =========================================================================== */
 function showAuth() {
+  booted = false;
   $('#view-app').hidden  = true;
   $('#view-auth').hidden = false;
   $('#pane-signin').hidden  = recoveryMode;
@@ -1693,6 +1736,7 @@ function showAuth() {
 }
 
 async function startApp() {
+  booted = true;
   $('#view-auth').hidden = true;
   $('#view-app').hidden  = false;
   $('#grid').innerHTML = '<div class="spinner" style="grid-column:1/-1">Loading your recipes…</div>';
@@ -1723,21 +1767,35 @@ async function boot() {
     showMsg($('#auth-msg'), decodeURIComponent(hash.get('error_description')).replace(/\+/g, ' '));
   }
 
-  // React to every change in login state: signing in, signing out, the token
-  // being refreshed, and the special PASSWORD_RECOVERY event.
+  // React to changes in login state: signing in, signing out, the token being
+  // refreshed, and the special PASSWORD_RECOVERY event.
+  //
+  // IMPORTANT — why the `booted` guard exists:
+  // The Supabase library watches for the tab becoming visible again (you switch
+  // to another tab or app and come back) and quietly re-checks your session.
+  // That fires a SIGNED_IN / TOKEN_REFRESHED event even though nothing about
+  // your login actually changed. Without this guard, every tab switch re-ran
+  // startApp(), which reloads the data and jumps back to the recipe list —
+  // throwing away a half-written recipe.
+  //
+  // So: only start the app on the FIRST session we see. After that, just keep
+  // the `session` variable up to date and leave whatever you're doing alone.
   supabase.auth.onAuthStateChange((event, s) => {
     session = s;
+
     if (event === 'PASSWORD_RECOVERY') { recoveryMode = true; showAuth(); return; }
-    if (recoveryMode) { showAuth(); return; }
-    if (s) startApp(); else showAuth();
+    if (recoveryMode) return;                     // mid password reset — don't move
+    if (!s || event === 'SIGNED_OUT') { showAuth(); return; }
+    if (booted) return;                           // already running: do nothing
+    startApp();
   });
 
   // And check whether we're already signed in from a previous visit.
   const { data } = await supabase.auth.getSession();
   session = data.session;
   if (recoveryMode) showAuth();
-  else if (session) startApp();
-  else showAuth();
+  else if (session && !booted) startApp();
+  else if (!session) showAuth();
 }
 
 boot();
