@@ -52,7 +52,7 @@ body {
   background:var(--ground); color:var(--ink);
   font-family:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
   font-size:16px; line-height:1.5; -webkit-font-smoothing:antialiased;
-  padding-bottom:calc(70px + var(--safe-b));
+  padding-bottom:calc(126px + var(--safe-b));
 }
 .wrap { max-width:640px; margin:0 auto; padding:0 18px; }
 
@@ -115,9 +115,9 @@ button { font:inherit; cursor:pointer; border-radius:2px; }
 }
 .item.done .tick { border-color:var(--accent); background:var(--accent); color:var(--on-accent); }
 .item-body { flex:1; min-width:0; }
-.item-title { font-weight:600; font-size:15px; line-height:1.3; }
+.item-title { font-weight:600; font-size:18px; line-height:1.28; }
 .item.done .item-title { text-decoration:line-through; text-decoration-color:var(--faint); }
-.item-sub { font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11px; color:var(--muted); margin-top:3px; }
+.item-sub { font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12px; color:var(--muted); margin-top:4px; }
 .item-more {
   background:transparent; border:0; color:var(--accent); padding:0; margin-top:7px;
   font-size:12.5px; font-family:"IBM Plex Mono",ui-monospace,monospace;
@@ -128,11 +128,11 @@ button { font:inherit; cursor:pointer; border-radius:2px; }
   text-transform:uppercase; color:var(--faint); margin:12px 0 4px; font-weight:400;
 }
 .detail h4:first-child { margin-top:0; }
-.detail ul { margin:0; padding-left:17px; font-size:14px; color:var(--muted); }
-.detail li { margin-bottom:3px; }
-.detail p { margin:0; font-size:14px; }
-.gatebox { background:var(--accent-soft); border-left:2px solid var(--accent); padding:9px 11px; font-size:13.5px; }
-.script { font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12px; color:var(--muted); line-height:1.7; }
+.detail ul { margin:0; padding-left:18px; font-size:16px; color:var(--ink); }
+.detail li { margin-bottom:6px; }
+.detail p { margin:0; font-size:15px; }
+.gatebox { background:var(--accent-soft); border-left:2px solid var(--accent); padding:11px 13px; font-size:15px; }
+.script { font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:13.5px; color:var(--muted); line-height:1.8; }
 .script b { color:var(--ink); font-weight:500; }
 
 .sidepass { display:flex; gap:6px; flex-wrap:wrap; margin-top:7px; }
@@ -141,6 +141,49 @@ button { font:inherit; cursor:pointer; border-radius:2px; }
   text-transform:uppercase; padding:3px 8px; border:1px solid var(--line-strong); color:var(--muted);
 }
 .pass.first { border-color:var(--warm); color:var(--warm); }
+
+/* toggle buttons — pressed state persists, pressing again clears it */
+.btn.toggle[aria-pressed="true"] {
+  background:var(--accent); border-color:var(--accent); color:var(--on-accent); font-weight:600;
+}
+.btn.toggle[aria-pressed="true"]::after { content:" \2713"; }
+
+/* count-up stopwatch, sits above the tab bar */
+.stopwatch {
+  position:fixed; left:0; right:0; bottom:calc(58px + var(--safe-b)); z-index:19;
+  background:var(--surface-alt); border-top:1px solid var(--line);
+  display:flex; align-items:center; gap:10px; padding:8px 16px;
+}
+.stopwatch .sw-time {
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:21px; font-weight:500;
+  font-variant-numeric:tabular-nums; letter-spacing:.02em; min-width:74px;
+}
+.stopwatch .sw-time.running { color:var(--accent); }
+.stopwatch button {
+  border:1px solid var(--line-strong); background:var(--surface); color:var(--ink);
+  padding:8px 15px; font-size:14px; font-weight:500;
+}
+.stopwatch button.go { background:var(--accent); border-color:var(--accent); color:var(--on-accent); }
+.stopwatch .sw-hint {
+  margin-left:auto; font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint);
+}
+
+/* glossary */
+.gloss { border-top:1px solid var(--line); padding:14px 0; }
+.gloss:last-child { border-bottom:1px solid var(--line); }
+.gloss dt { font-weight:600; font-size:16px; margin:0 0 3px; }
+.gloss dd { margin:0; color:var(--muted); font-size:15px; }
+.gloss dd em { font-style:normal; color:var(--faint); font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12px; }
+.verdict { display:grid; grid-template-columns:auto 1fr; gap:10px 14px; align-items:start; }
+.verdict .k {
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10px; letter-spacing:.08em;
+  text-transform:uppercase; padding:4px 8px; white-space:nowrap; border:1px solid;
+}
+.k.ok   { color:var(--accent); border-color:var(--accent); }
+.k.over { color:var(--warm);   border-color:var(--warm); }
+.k.under{ color:var(--faint);  border-color:var(--line-strong); }
+.k.stop { color:var(--on-accent); background:var(--warm); border-color:var(--warm); }
 
 /* ---------- inputs ---------- */
 label.field { display:block; margin:14px 0 0; }
@@ -177,7 +220,7 @@ nav.tabs button[aria-current="true"] { color:var(--accent); box-shadow:inset 0 2
 .spark { display:flex; align-items:flex-end; gap:3px; height:34px; margin-top:8px; }
 .spark i { flex:1; background:var(--accent-soft); border-top:2px solid var(--accent); min-height:2px; display:block; }
 .toast {
-  position:fixed; left:50%; transform:translateX(-50%); bottom:calc(84px + var(--safe-b));
+  position:fixed; left:50%; transform:translateX(-50%); bottom:calc(122px + var(--safe-b));
   background:var(--ink); color:var(--ground); padding:10px 16px; font-size:14px;
   z-index:50; opacity:0; transition:opacity .18s; pointer-events:none; border-radius:2px;
 }
@@ -200,12 +243,21 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   <main id="view-home"></main>
   <main id="view-session" hidden></main>
   <main id="view-measure" hidden></main>
+  <main id="view-guide" hidden></main>
   <main id="view-more" hidden></main>
+</div>
+
+<div class="stopwatch">
+  <span class="sw-time" id="swTime">0:00</span>
+  <button id="swGo" class="go">Start</button>
+  <button id="swReset">Reset</button>
+  <span class="sw-hint" id="swHint"></span>
 </div>
 
 <nav class="tabs">
   <button data-view="home" aria-current="true">Today</button>
   <button data-view="measure">Numbers</button>
+  <button data-view="guide">Guide</button>
   <button data-view="more">More</button>
 </nav>
 
@@ -812,6 +864,28 @@ function passesFor(ex, cycles) {
   ];
 }
 
+/* A session freezes the moment you begin it. Marking an exercise "too much"
+   changes its tier, which would otherwise make the assembler swap it out from
+   under you mid-session. Adjustments apply to the NEXT session, never this one. */
+function planFor(n) {
+  const d = S.draft;
+  if (d && d.n === n && Array.isArray(d.plan) && d.plan.length) {
+    const items = d.plan
+      .map(p => BY_ID[p.id] && ({ ex:BY_ID[p.id], role:p.role, group:p.group,
+                                  drop:0, passes:p.passes }))
+      .filter(Boolean);
+    if (items.length) {
+      return { n, phase:phaseFor(n), shape:SHAPES[(n - 1) % SHAPES.length],
+               items, seconds:sessionSeconds(items), frozen:true };
+    }
+  }
+  return assemble(n);
+}
+
+function freeze(session) {
+  return session.items.map(i => ({ id:i.ex.id, role:i.role, group:i.group, passes:i.passes }));
+}
+
 function sessionSeconds(items) {
   const work = items.reduce((t, i) => t + i.passes.reduce((u, p) => u + p.seconds, 0), 0);
   return work + 120;           // plus the lying finish
@@ -867,6 +941,7 @@ const views = {
   home:    document.getElementById("view-home"),
   session: document.getElementById("view-session"),
   measure: document.getElementById("view-measure"),
+  guide:   document.getElementById("view-guide"),
   more:    document.getElementById("view-more")
 };
 let current = "home";
@@ -878,6 +953,7 @@ function show(name) {
   current = name;
   window.scrollTo(0, 0);
   render();
+  if (typeof keepAwake === "function") keepAwake(name === "session");
 }
 
 function esc(s) {
@@ -894,13 +970,14 @@ function render() {
   if (current === "home")    renderHome();
   if (current === "session") renderSession();
   if (current === "measure") renderMeasure();
+  if (current === "guide")   renderGuide();
   if (current === "more")    renderMore();
 }
 
 function renderHome() {
   const n = effectiveSessionNumber();
   const ph = phaseFor(n);
-  const s = assemble(n);
+  const s = planFor(n);
   const ftf = latestMeasure("ftf");
   const ftf0 = firstMeasure("ftf");
   const d = daysSinceLast();
@@ -990,7 +1067,7 @@ function sparkline(vals, invert) {
 
 function renderSession() {
   const n = (S.draft && S.draft.n) || effectiveSessionNumber();
-  const s = assemble(n);
+  const s = planFor(n);
   const done = new Set((S.draft && S.draft.done) || []);
 
   let html = '<div style="padding-top:18px">';
@@ -1042,10 +1119,14 @@ function renderSession() {
         html += '<b>Restretch on the out-breath, hold</b> ' + p.hold + 's (about ' +
                 Math.round(p.hold / BREATH) + ' breaths)';
         html += '</div>';
-        html += '<p class="tiny" style="margin-top:8px">If you cannot hold the final position for ten breaths, you overdid it. Say so below and the next session steps back.</p>';
+        const adj = S.tierAdjust[ex.id] || 0;
+        html += '<p class="tiny" style="margin-top:8px">If you cannot hold the final position for ten breaths, you overdid it. ' +
+                'Mark it and the next session offers an easier version. Tap again to clear.</p>';
         html += '<div class="btnrow">';
-        html += '<button class="btn quiet" data-act="easier" data-ex="' + esc(ex.id) + '">Too much</button>';
-        html += '<button class="btn quiet" data-act="harder" data-ex="' + esc(ex.id) + '">Too little</button>';
+        html += '<button class="btn quiet toggle" data-act="easier" data-ex="' + esc(ex.id) +
+                '" aria-pressed="' + (adj < 0) + '">Too much</button>';
+        html += '<button class="btn quiet toggle" data-act="harder" data-ex="' + esc(ex.id) +
+                '" aria-pressed="' + (adj > 0) + '">Too little</button>';
         html += '</div>';
       }
       if (ex.note) html += '<h4>Note</h4><p class="muted">' + esc(ex.note) + '</p>';
@@ -1110,6 +1191,76 @@ function renderMeasure() {
 
   html += '<div style="height:20px"></div>';
   views.measure.innerHTML = html;
+}
+
+function renderGuide() {
+  let html = '<div style="padding-top:18px">';
+  html += '<p class="eyebrow">Guide</p>';
+  html += '<h2 class="serif" style="font-size:24px">Enough, too much, or right</h2>';
+  html += '<p class="muted" style="margin-top:6px">Laughlin gives one test that settles most of it: <strong>if you cannot hold the end position for ten breaths, you overdid it.</strong> Everything below is downstream of that.</p></div>';
+
+  html += '<div class="card"><div class="verdict">';
+  html += '<span class="k ok">Right</span><div>' +
+    'Strong sensation as you enter, and it <strong>fades</strong> over the hold. ' +
+    'You can breathe slowly and could hold a conversation. ' +
+    'You are visibly deeper on cycle two than cycle one. ' +
+    'You can hold the end position ten breaths without bracing.</div>';
+  html += '<span class="k over">Too much</span><div>' +
+    'You cannot hold the end position for ten breaths. ' +
+    'Breathing goes shallow, or you catch it. ' +
+    'You are gripping somewhere else — jaw, shoulders, the other leg. ' +
+    'The sensation stays flat or climbs instead of fading. ' +
+    'Next day you are sore enough that it changes how you move.</div>';
+  html += '<span class="k under">Too little</span><div>' +
+    'No clear sensation anywhere. ' +
+    'Nothing changes between the first cycle and the last. ' +
+    'You could stay there for several minutes. ' +
+    'Four weeks on, the number in Numbers has not moved at all.</div>';
+  html += '<span class="k stop">Stop</span><div>' +
+    'Sharp, electric, burning, or radiating down a limb. ' +
+    'Anything felt <strong>in the joint</strong> rather than through the belly of the muscle. ' +
+    'Pins and needles. Pain concentrated on one small spot rather than spread through the muscle. ' +
+    'None of these are "too much" — they are a different thing, and the answer is to come out, not to ease off.</div>';
+  html += '</div></div>';
+
+  html += '<div class="card"><h3>The contraction is meant to be gentle</h3>';
+  html += '<p class="muted">Twenty to thirty per cent of what you could produce. Laughlin is explicit that harder contractions work <em>against</em> the result — the surrounding muscles brace to stabilise you and the release never comes. If you are shaking, it is far too hard.</p></div>';
+
+  html += '<div class="card"><h3>The first fortnight is not a fair test</h3>';
+  html += '<p class="muted">Some next-day awareness in the first two weeks is the normal response to a new stimulus. What matters is whether it settles within a day and whether it stops happening by about week three. Soreness that keeps arriving after a month means the dose is wrong, not that you are working hard.</p>';
+  html += '<p class="muted" style="margin-top:10px">And do not judge a session by how much it hurt. Judge it by whether you could hold the end positions, and by the fingertip-to-floor number four weeks from now.</p></div>';
+
+  html += '<h2 class="serif" style="font-size:22px;margin:30px 0 10px">Glossary</h2>';
+  html += '<dl style="margin:0">';
+  const G = [
+    ["Contract–relax", "C–R", "The method the whole programme runs on. Get into a comfortable stretch, tense the muscle being stretched against something immovable, release, then move further in as you breathe out. Not a passive hold."],
+    ["Settle", "", "The first phase. You get into position and stay there while the initial protest dies down, before any contraction. 30 seconds for a big muscle."],
+    ["Contract", "", "Tense the stretched muscle against resistance without anything moving. What you push or pull is named on each exercise."],
+    ["Restretch", "", "The move into new range, made on the out-breath immediately after the release. This is where the gain happens."],
+    ["End position", "", "The deepest position of a cycle, held. Ten breaths is Laughlin's minimum; the app schedules about thirteen for large muscles."],
+    ["Cycle", "", "One contract → release → restretch → hold. Two cycles per pass early on, three from phase three. There is no benefit past three."],
+    ["Pass", "", "All the cycles on one side. The times on the session screen — L 2:50 — are passes, not holds."],
+    ["Tighter side first", "principle vi", "Where one side is clearly tighter, you work it first, then the looser side, then return to the tighter side briefly. It gets the work twice and catches up. Set it in Numbers once you have both split measurements."],
+    ["Counterpose", "principle viii", "A forward bend that must follow a backward bend. The app inserts one automatically; it is not optional and not a cool-down."],
+    ["Partial pose", "", "A stretch that isolates one link in a chain. Laughlin's core idea: work the parts, then attempt the whole movement, rather than grinding at the whole movement badly."],
+    ["Whole movement", "integrator", "The complete pose the session has been preparing you for, always last. Currently the bent-leg forward bend or the supported partial split."],
+    ["Gate", "", "A checkable condition that must be true before you go further — both sit bones down, the ribs still on the thighs. Shown in green on the exercise. Failing a gate means do a different exercise, not push harder."],
+    ["Size", "large / medium / small", "How big the target muscle is. It sets every duration: a large muscle gets 30s to settle, a 25s contraction and a 40s hold; a small one gets 10, 6 and 20."],
+    ["Phase", "1–4", "Where you are in the year. Phases raise the difficulty ceiling and the cycle count. Set by sessions completed, not by the calendar."],
+    ["Shape", "A / B / C", "Which day this is. A and C drive the front splits; B is the counterbalance day. Rotating them is what keeps any big muscle to twice a week."],
+    ["Tier", "1–4", "How hard a given exercise is, from accessible-now to end pose. Your “too much” and “too little” taps move exercises up and down this."],
+    ["Audit", "", "Every twelfth session, an extra one. Take the four measurements, then move through the whole body noticing what is tightest. Also when you export a backup."],
+    ["Breath", "", "Laughlin's unit for hold times. About three seconds when you are working. Ten breaths is roughly thirty seconds."]
+  ];
+  for (const [term, alt, def] of G) {
+    html += '<div class="gloss"><dt>' + esc(term) +
+            (alt ? ' <em>' + esc(alt) + '</em>' : '') + '</dt>';
+    html += '<dd>' + def + '</dd></div>';
+  }
+  html += '</dl>';
+  html += '<p class="tiny" style="margin:22px 0">When a cue is not enough, the page reference on each exercise is where the photograph is. The book is the source; this app is only the schedule.</p>';
+  html += '<div style="height:20px"></div>';
+  views.guide.innerHTML = html;
 }
 
 function renderMore() {
@@ -1183,7 +1334,10 @@ document.addEventListener("click", e => {
 
   if (act === "start") {
     const n = effectiveSessionNumber();
-    if (!S.draft || S.draft.n !== n) { S.draft = { n, done:[] }; save(); }
+    if (!S.draft || S.draft.n !== n || !S.draft.plan) {
+      S.draft = { n, done:[], plan: freeze(assemble(n)) };
+      save();
+    }
     show("session");
   }
 
@@ -1205,16 +1359,20 @@ document.addEventListener("click", e => {
   }
 
   else if (act === "easier" || act === "harder") {
-    const delta = act === "easier" ? -1 : 1;
-    S.tierAdjust[exId] = Math.max(-2, Math.min(2, (S.tierAdjust[exId] || 0) + delta));
+    // A setting, not a counter. Tapping the same one again clears it, tapping
+    // the other one replaces it. Pressing twice can never mean "twice as much".
+    const want = act === "easier" ? -1 : 1;
+    const now = S.tierAdjust[exId] || 0;
+    if (now === want) { delete S.tierAdjust[exId]; toast("Cleared"); }
+    else { S.tierAdjust[exId] = want; toast(want < 0 ? "Easier version next time" : "Harder version next time"); }
     save();
-    toast(act === "easier" ? "Stepped down for next time" : "Stepped up for next time");
+    renderSession();
   }
 
   else if (act === "finish") {
     if (!S.draft) { show("home"); return; }
     const n = S.draft.n;
-    const s = assemble(n);
+    const s = planFor(n);
     const all = s.items.map(i => i.ex.id);
     const done = S.draft.done.filter(id => all.includes(id));
     // record which group each completed working movement was worked for, so
@@ -1296,6 +1454,96 @@ document.addEventListener("change", e => {
 
 document.querySelectorAll("nav.tabs button").forEach(b =>
   b.addEventListener("click", () => show(b.dataset.view)));
+
+
+/* --------------------------------------------------------------------------
+   9. STOPWATCH — counts up, independent of the session. Sits above the tabs
+      so it is reachable with a thumb from the floor.
+   -------------------------------------------------------------------------- */
+
+const sw = {
+  el:    document.getElementById("swTime"),
+  go:    document.getElementById("swGo"),
+  reset: document.getElementById("swReset"),
+  hint:  document.getElementById("swHint"),
+  base: 0,          // accumulated ms from previous runs
+  startedAt: null,  // wall-clock ms when the current run began
+  tick: null
+};
+
+function swElapsed() {
+  return sw.base + (sw.startedAt ? Date.now() - sw.startedAt : 0);
+}
+function swPaint() {
+  const t = Math.floor(swElapsed() / 1000);
+  const m = Math.floor(t / 60), s = t % 60;
+  sw.el.textContent = m + ":" + String(s).padStart(2, "0");
+  sw.el.classList.toggle("running", !!sw.startedAt);
+  sw.go.textContent = sw.startedAt ? "Pause" : (swElapsed() ? "Resume" : "Start");
+  sw.go.classList.toggle("go", !sw.startedAt);
+}
+function swStart() {
+  if (sw.startedAt) return;
+  sw.startedAt = Date.now();
+  // Wall-clock based, so it stays accurate even if the tab is throttled.
+  sw.tick = setInterval(swPaint, 250);
+  keepAwake(true);
+  swPaint();
+}
+function swPause() {
+  if (!sw.startedAt) return;
+  sw.base = swElapsed();
+  sw.startedAt = null;
+  clearInterval(sw.tick); sw.tick = null;
+  keepAwake(false);
+  swPaint();
+}
+sw.go.addEventListener("click", () => sw.startedAt ? swPause() : swStart());
+sw.reset.addEventListener("click", () => {
+  sw.base = 0;
+  if (sw.startedAt) sw.startedAt = Date.now();
+  swPaint();
+});
+swPaint();
+
+
+/* --------------------------------------------------------------------------
+   10. WAKE LOCK — the screen must not sleep mid-hold. Held while the
+       stopwatch runs or while a session is open. Safari drops the lock when
+       the page is backgrounded, so it is re-acquired on return.
+   -------------------------------------------------------------------------- */
+
+let wakeLock = null;
+let wantAwake = false;
+
+async function keepAwake(on) {
+  if (on) wantAwake = true;
+  else wantAwake = (current === "session") || !!sw.startedAt;
+
+  if (!("wakeLock" in navigator)) {
+    sw.hint.textContent = wantAwake ? "screen may sleep" : "";
+    return;
+  }
+  try {
+    if (wantAwake && !wakeLock) {
+      wakeLock = await navigator.wakeLock.request("screen");
+      wakeLock.addEventListener("release", () => { wakeLock = null; });
+      sw.hint.textContent = "screen on";
+    } else if (!wantAwake && wakeLock) {
+      await wakeLock.release();
+      wakeLock = null;
+      sw.hint.textContent = "";
+    }
+  } catch (e) {
+    // Denied, or the device is in low power mode. Not worth interrupting for.
+    sw.hint.textContent = "screen may sleep";
+  }
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && wantAwake) { wakeLock = null; keepAwake(true); }
+  if (sw.startedAt) swPaint();
+});
 
 show("home");
 </script>
