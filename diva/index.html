@@ -52,7 +52,7 @@ body {
   background:var(--ground); color:var(--ink);
   font-family:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
   font-size:16px; line-height:1.5; -webkit-font-smoothing:antialiased;
-  padding-bottom:calc(126px + var(--safe-b));
+  padding-bottom:calc(112px + var(--safe-b));
 }
 .wrap { max-width:640px; margin:0 auto; padding:0 18px; }
 
@@ -148,11 +148,16 @@ button { font:inherit; cursor:pointer; border-radius:2px; }
 }
 .btn.toggle[aria-pressed="true"]::after { content:" \2713"; }
 
-/* count-up stopwatch, sits above the tab bar */
+/* One dock at the bottom: stopwatch above, tabs below, a single surface with
+   one outer border and one hairline between them. */
+.dock {
+  position:fixed; left:0; right:0; bottom:0; z-index:20;
+  background:var(--surface); border-top:1px solid var(--line-strong);
+  padding-bottom:var(--safe-b);
+}
 .stopwatch {
-  position:fixed; left:0; right:0; bottom:calc(58px + var(--safe-b)); z-index:19;
-  background:var(--surface-alt); border-top:1px solid var(--line);
   display:flex; align-items:center; gap:10px; padding:8px 16px;
+  border-bottom:1px solid var(--line);
 }
 .stopwatch .sw-time {
   font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:21px; font-weight:500;
@@ -168,6 +173,15 @@ button { font:inherit; cursor:pointer; border-radius:2px; }
   margin-left:auto; font-family:"IBM Plex Mono",ui-monospace,monospace;
   font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint);
 }
+
+/* segmented control inside the Guide tab */
+.seg { display:flex; margin-top:14px; border:1px solid var(--line-strong); }
+.seg button {
+  flex:1; background:transparent; border:0; border-right:1px solid var(--line-strong);
+  padding:11px 6px; font-size:13.5px; color:var(--muted); border-radius:0;
+}
+.seg button:last-child { border-right:0; }
+.seg button[aria-pressed="true"] { background:var(--accent); color:var(--on-accent); font-weight:600; }
 
 /* glossary */
 .gloss { border-top:1px solid var(--line); padding:14px 0; }
@@ -199,11 +213,7 @@ textarea { min-height:70px; resize:vertical; font-size:15px; }
 .protocol { font-size:13px; color:var(--muted); margin:5px 0 0; }
 
 /* ---------- nav ---------- */
-nav.tabs {
-  position:fixed; bottom:0; left:0; right:0; z-index:20;
-  background:var(--surface); border-top:1px solid var(--line-strong);
-  display:flex; padding-bottom:var(--safe-b);
-}
+nav.tabs { display:flex; }
 nav.tabs button {
   flex:1; background:transparent; border:0; padding:13px 4px 12px;
   color:var(--faint); font-size:11px; font-family:"IBM Plex Mono",ui-monospace,monospace;
@@ -244,22 +254,21 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   <main id="view-session" hidden></main>
   <main id="view-measure" hidden></main>
   <main id="view-guide" hidden></main>
-  <main id="view-more" hidden></main>
 </div>
 
-<div class="stopwatch">
-  <span class="sw-time" id="swTime">0:00</span>
-  <button id="swGo" class="go">Start</button>
-  <button id="swReset">Reset</button>
-  <span class="sw-hint" id="swHint"></span>
+<div class="dock">
+  <div class="stopwatch">
+    <span class="sw-time" id="swTime">0:00</span>
+    <button id="swGo" class="go">Start</button>
+    <button id="swReset">Reset</button>
+    <span class="sw-hint" id="swHint"></span>
+  </div>
+  <nav class="tabs">
+    <button data-view="home" aria-current="true">Today</button>
+    <button data-view="measure">Numbers</button>
+    <button data-view="guide">Guide</button>
+  </nav>
 </div>
-
-<nav class="tabs">
-  <button data-view="home" aria-current="true">Today</button>
-  <button data-view="measure">Numbers</button>
-  <button data-view="guide">Guide</button>
-  <button data-view="more">More</button>
-</nav>
 
 <div class="toast" id="toast"></div>
 
@@ -941,9 +950,9 @@ const views = {
   home:    document.getElementById("view-home"),
   session: document.getElementById("view-session"),
   measure: document.getElementById("view-measure"),
-  guide:   document.getElementById("view-guide"),
-  more:    document.getElementById("view-more")
+  guide:   document.getElementById("view-guide")
 };
+let guideTab = "how";   // "how" | "words" | "data"
 let current = "home";
 
 function show(name) {
@@ -971,7 +980,6 @@ function render() {
   if (current === "session") renderSession();
   if (current === "measure") renderMeasure();
   if (current === "guide")   renderGuide();
-  if (current === "more")    renderMore();
 }
 
 function renderHome() {
@@ -1194,12 +1202,24 @@ function renderMeasure() {
 }
 
 function renderGuide() {
-  let html = '<div style="padding-top:18px">';
-  html += '<p class="eyebrow">Guide</p>';
-  html += '<h2 class="serif" style="font-size:24px">Enough, too much, or right</h2>';
-  html += '<p class="muted" style="margin-top:6px">Laughlin gives one test that settles most of it: <strong>if you cannot hold the end position for ten breaths, you overdid it.</strong> Everything below is downstream of that.</p></div>';
+  const SEG = [["how","How much"],["words","Glossary"],["data","Your data"]];
+  let html = '<div style="padding-top:18px"><p class="eyebrow">Guide</p><div class="seg">';
+  for (const [k, label] of SEG) {
+    html += '<button data-act="guidetab" data-tab="' + k + '" aria-pressed="' +
+            (guideTab === k) + '">' + label + '</button>';
+  }
+  html += '</div></div>';
+  if (guideTab === "how")   html += guideHow();
+  if (guideTab === "words") html += guideWords();
+  if (guideTab === "data")  html += guideData();
+  html += '<div style="height:20px"></div>';
+  views.guide.innerHTML = html;
+}
 
-  html += '<div class="card"><div class="verdict">';
+function guideHow() {
+  let html = '<h2 class="serif" style="font-size:23px;margin-top:20px">Enough, too much, or right</h2>';
+  html += '<p class="muted" style="margin-top:6px">Laughlin gives one test that settles most of it: <strong>if you cannot hold the end position for ten breaths, you overdid it.</strong> Everything below is downstream of that.</p>';
+html += '<div class="card"><div class="verdict">';
   html += '<span class="k ok">Right</span><div>' +
     'Strong sensation as you enter, and it <strong>fades</strong> over the hold. ' +
     'You can breathe slowly and could hold a conversation. ' +
@@ -1229,8 +1249,11 @@ function renderGuide() {
   html += '<div class="card"><h3>The first fortnight is not a fair test</h3>';
   html += '<p class="muted">Some next-day awareness in the first two weeks is the normal response to a new stimulus. What matters is whether it settles within a day and whether it stops happening by about week three. Soreness that keeps arriving after a month means the dose is wrong, not that you are working hard.</p>';
   html += '<p class="muted" style="margin-top:10px">And do not judge a session by how much it hurt. Judge it by whether you could hold the end positions, and by the fingertip-to-floor number four weeks from now.</p></div>';
+  return html;
+}
 
-  html += '<h2 class="serif" style="font-size:22px;margin:30px 0 10px">Glossary</h2>';
+function guideWords() {
+  let html = '<h2 class="serif" style="font-size:23px;margin:20px 0 10px">Glossary</h2>';
   html += '<dl style="margin:0">';
   const G = [
     ["Contract–relax", "C–R", "The method the whole programme runs on. Get into a comfortable stretch, tense the muscle being stretched against something immovable, release, then move further in as you breathe out. Not a passive hold."],
@@ -1260,13 +1283,12 @@ function renderGuide() {
   html += '</dl>';
   html += '<p class="tiny" style="margin:22px 0">When a cue is not enough, the page reference on each exercise is where the photograph is. The book is the source; this app is only the schedule.</p>';
   html += '<div style="height:20px"></div>';
-  views.guide.innerHTML = html;
+  return html;
 }
 
-function renderMore() {
-  let html = '<div style="padding-top:18px"><p class="eyebrow">More</p></div>';
-
-  html += '<div class="card"><h3>Backup</h3>';
+function guideData() {
+  let html = "";
+html += '<div class="card"><h3>Backup</h3>';
   html += '<p class="muted">This app keeps everything on this phone only. iOS can clear it without warning, so export every audit — a year of history is not something to lose.</p>';
   html += '<button class="btn ghost" data-act="export">Export a backup file</button>';
   html += '<label class="field"><span>Restore from a backup</span><input type="file" id="importfile" accept="application/json"></label>';
@@ -1307,9 +1329,9 @@ function renderMore() {
 
   html += '<p class="tiny" style="margin:22px 0">Exercise numbers and page references point into Kit Laughlin, <em>Stretching &amp; Flexibility</em>, 2nd edition. Cue wording here is original. Open the book at the referenced page when a cue is not enough.</p>';
   html += '<div style="height:20px"></div>';
-
-  views.more.innerHTML = html;
+  return html;
 }
+
 
 
 /* --------------------------------------------------------------------------
@@ -1395,6 +1417,12 @@ document.addEventListener("click", e => {
   else if (act === "abandon") { show("home"); }
 
   else if (act === "tomeasure") { show("measure"); }
+
+  else if (act === "guidetab") {
+    guideTab = btn.dataset.tab;
+    renderGuide();
+    window.scrollTo(0, 0);
+  }
 
   else if (act === "savemeasure") {
     const id = btn.dataset.m;
