@@ -1,0 +1,1765 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Yummers</title>
+
+<!-- PWA bits. The manifest tells the phone what to call the app and which icon
+     to use when you "Add to Home Screen". -->
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#b4451c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Yummers">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="icon" href="./icon-192.png">
+
+<style>
+/* ===========================================================================
+   DESIGN TOKENS
+   Every colour is defined once here as a CSS variable, then re-defined for
+   dark mode below. Change these to restyle the whole app.
+   =========================================================================== */
+:root {
+  --bg:        #fdf8f3;
+  --surface:   #ffffff;
+  --surface-2: #f6efe7;
+  --line:      #e6dbcf;
+  --text:      #2b2320;
+  --muted:     #7c6f66;
+  --accent:    #b4451c;
+  --accent-soft:#fbeadf;
+  --danger:    #a3271f;
+  --star:      #d99414;
+  --radius:    14px;
+  --shadow:    0 1px 2px rgba(43,35,32,.05), 0 6px 20px rgba(43,35,32,.06);
+  --maxw:      940px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:        #17140f;
+    --surface:   #211d18;
+    --surface-2: #2b2620;
+    --line:      #3a332b;
+    --text:      #f0e8df;
+    --muted:     #a2968a;
+    --accent:    #f08a5a;
+    --accent-soft:#3a2419;
+    --danger:    #e0705f;
+    --star:      #e8b44a;
+    --shadow:    0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.25);
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, "Helvetica Neue", sans-serif;
+  -webkit-text-size-adjust: 100%;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+h1, h2, h3 { line-height: 1.2; margin: 0 0 .4em; font-weight: 650; letter-spacing: -.01em; }
+a { color: var(--accent); }
+[hidden] { display: none !important; }
+
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 16px; }
+
+/* --- buttons & form controls --------------------------------------------- */
+button, .btn {
+  font: inherit; font-weight: 550;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 9px 14px;
+  cursor: pointer;
+  transition: background .12s, border-color .12s, transform .06s;
+}
+button:hover, .btn:hover { background: var(--surface-2); }
+button:active { transform: translateY(1px); }
+button.primary {
+  background: var(--accent); border-color: var(--accent); color: #fff;
+}
+button.primary:hover { filter: brightness(1.07); background: var(--accent); }
+button.ghost { background: transparent; border-color: transparent; color: var(--muted); }
+button.ghost:hover { background: var(--surface-2); color: var(--text); }
+button.danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, transparent); }
+button:disabled { opacity: .5; cursor: default; }
+
+input, textarea, select {
+  font: inherit;
+  width: 100%;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+input:focus, textarea:focus, select:focus {
+  outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  outline-offset: 1px;
+  border-color: var(--accent);
+}
+textarea { resize: vertical; min-height: 80px; }
+label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 5px; }
+.field { margin-bottom: 16px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; }
+.row > * { flex: 1 1 160px; }
+
+/* --- header --------------------------------------------------------------- */
+header.app {
+  position: sticky; top: 0; z-index: 20;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+  padding-top: env(safe-area-inset-top);
+}
+.brandbar { display: flex; align-items: center; gap: 10px; padding: 12px 0; }
+.brand {
+  font-size: 22px; font-weight: 750; letter-spacing: -.02em;
+  color: var(--accent); margin: 0; flex: 1;
+}
+.searchbar { display: flex; gap: 8px; padding-bottom: 10px; }
+.chips { display: flex; gap: 7px; overflow-x: auto; padding: 0 0 12px; scrollbar-width: none; }
+.chips::-webkit-scrollbar { display: none; }
+.chip {
+  white-space: nowrap; flex: none;
+  font-size: 13px; padding: 6px 12px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--muted);
+  cursor: pointer;
+}
+.chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* --- recipe list ---------------------------------------------------------- */
+.grid {
+  display: grid; gap: 14px; padding: 18px 0 90px;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+}
+.card {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow);
+  cursor: pointer; display: flex; flex-direction: column;
+  transition: transform .1s, box-shadow .12s;
+}
+.card:hover { transform: translateY(-2px); box-shadow: 0 4px 24px rgba(0,0,0,.10); }
+.card .thumb {
+  aspect-ratio: 4/3; background: var(--surface-2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 34px; color: var(--line);
+}
+.card .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.card .body { padding: 11px 13px 13px; }
+.card h3 { font-size: 16px; margin-bottom: 3px; }
+.card p { margin: 0; font-size: 13px; color: var(--muted);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.card .meta { margin-top: 7px; font-size: 12px; color: var(--muted); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.tag { background: var(--accent-soft); color: var(--accent); border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
+
+.empty { text-align: center; color: var(--muted); padding: 60px 20px; }
+.empty .big { font-size: 46px; margin-bottom: 10px; }
+
+/* --- detail view ---------------------------------------------------------- */
+.hero { width: 100%; border-radius: var(--radius); display: block; margin-bottom: 18px; max-height: 46vh; object-fit: cover; }
+.detail h2 { font-size: 28px; }
+.detail .lede { color: var(--muted); margin: 0 0 14px; }
+.factbar { display: flex; gap: 18px; flex-wrap: wrap; font-size: 14px; color: var(--muted);
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 12px 0; margin-bottom: 20px; }
+.factbar b { color: var(--text); font-weight: 600; }
+.cols { display: grid; gap: 28px; grid-template-columns: minmax(0,1fr); }
+@media (min-width: 720px) { .cols { grid-template-columns: 300px minmax(0,1fr); } }
+ul.ingredients { list-style: none; padding: 0; margin: 0; }
+ul.ingredients li { padding: 7px 0; border-bottom: 1px dashed var(--line); font-size: 15px; }
+ul.ingredients li b { font-variant-numeric: tabular-nums; }
+ol.steps { padding-left: 0; margin: 0; list-style: none; counter-reset: s; }
+ol.steps li { counter-increment: s; position: relative; padding: 0 0 16px 40px; }
+ol.steps li::before {
+  content: counter(s); position: absolute; left: 0; top: 0;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--accent-soft); color: var(--accent);
+  display: grid; place-items: center; font-size: 13px; font-weight: 700;
+}
+.notebox { background: var(--surface-2); border-left: 3px solid var(--accent); border-radius: 8px; padding: 12px 14px; margin-top: 20px; font-size: 15px; white-space: pre-wrap; }
+
+/* --- editor --------------------------------------------------------------- */
+.ing-row, .step-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: flex-start; }
+.ing-row input.amt { flex: 0 0 108px; }
+.ing-row input.itm { flex: 1 1 auto; }
+.step-row textarea { flex: 1 1 auto; min-height: 60px; }
+.ing-row button, .step-row button { flex: none; padding: 9px 11px; color: var(--muted); }
+.stars { display: flex; gap: 3px; }
+.stars button { border: none; background: none; padding: 2px; font-size: 24px; line-height: 1; color: var(--line); }
+.stars button.on { color: var(--star); }
+.catpick { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 10px; }
+
+/* --- auth ----------------------------------------------------------------- */
+.authpage { max-width: 380px; margin: 0 auto; padding: 12vh 20px 40px; }
+.authpage .brand { text-align: center; font-size: 40px; margin-bottom: 4px; }
+.authpage .sub { text-align: center; color: var(--muted); margin: 0 0 28px; }
+.authcard { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); }
+
+/* --- misc ----------------------------------------------------------------- */
+.msg { border-radius: 10px; padding: 10px 12px; font-size: 14px; margin-bottom: 14px; }
+.msg.err { background: color-mix(in srgb, var(--danger) 12%, transparent); color: var(--danger); }
+.msg.ok  { background: var(--accent-soft); color: var(--accent); }
+#toast {
+  position: fixed; left: 50%; bottom: calc(88px + env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(20px);
+  background: var(--text); color: var(--bg); padding: 11px 18px; border-radius: 999px;
+  font-size: 14px; font-weight: 550; opacity: 0; pointer-events: none; transition: .2s; z-index: 100;
+  max-width: 90vw; text-align: center;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.fab {
+  position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom));
+  width: 56px; height: 56px; border-radius: 50%; font-size: 27px; line-height: 1;
+  background: var(--accent); color: #fff; border: none;
+  box-shadow: 0 6px 20px rgba(0,0,0,.25); z-index: 30;
+}
+.panel {
+  position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 60;
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.panel .sheet {
+  background: var(--surface); width: 100%; max-width: 460px;
+  border-radius: 16px 16px 0 0; padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
+  max-height: 88vh; overflow: auto;
+}
+@media (min-width: 560px) { .panel { align-items: center; } .panel .sheet { border-radius: 16px; } }
+.menuitem { display: block; width: 100%; text-align: left; border: none; background: none; padding: 12px 6px; border-radius: 8px; }
+.menuitem:hover { background: var(--surface-2); }
+.hint { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
+.spinner { text-align: center; padding: 60px; color: var(--muted); }
+.imgpreview { max-width: 100%; border-radius: 10px; margin-bottom: 10px; max-height: 220px; object-fit: cover; display: block; }
+.toolbar { display: flex; gap: 8px; align-items: center; padding: 14px 0; flex-wrap: wrap; }
+.toolbar .spacer { flex: 1; }
+</style>
+</head>
+<body>
+
+<!-- =========================================================================
+     0. CONFIGURATION ERROR SCREEN
+     Shown if you haven't pasted your Supabase URL / key in yet.
+     ========================================================================= -->
+<section id="view-config" class="authpage" hidden>
+  <h1 class="brand">Yummers</h1>
+  <div class="authcard">
+    <h3>Almost there</h3>
+    <p class="hint">Open <code>index.html</code>, scroll to the <b>CONFIGURATION</b> block near the top of
+    the <code>&lt;script&gt;</code> tag, and paste in your Supabase project URL and publishable key.
+    Step 4 of SETUP.md walks you through where to find them.</p>
+  </div>
+</section>
+
+<!-- =========================================================================
+     1. AUTH VIEWS
+     ========================================================================= -->
+<section id="view-auth" class="authpage" hidden>
+  <h1 class="brand">Yummers</h1>
+  <p class="sub">Your recipes, everywhere.</p>
+
+  <!-- Sign in -->
+  <div class="authcard" id="pane-signin">
+    <div id="auth-msg"></div>
+    <form id="form-signin">
+      <div class="field">
+        <label for="si-email">Email</label>
+        <input id="si-email" type="email" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label for="si-pass">Password</label>
+        <input id="si-pass" type="password" autocomplete="current-password" required>
+      </div>
+      <button class="primary" style="width:100%" type="submit">Sign in</button>
+    </form>
+    <!-- Passkey button: only shown when ENABLE_PASSKEYS is true in the config -->
+    <button id="btn-passkey-signin" style="width:100%;margin-top:8px" hidden>Sign in with a passkey</button>
+    <p style="text-align:center;margin:14px 0 0">
+      <button class="ghost" id="btn-forgot" type="button">Forgot password?</button>
+    </p>
+  </div>
+
+  <!-- Forgot password: send the reset email -->
+  <div class="authcard" id="pane-forgot" hidden>
+    <h3>Reset your password</h3>
+    <p class="hint" style="margin-bottom:14px">We'll email you a link. Opening it brings you back
+      here and lets you set a new password.</p>
+    <div id="forgot-msg"></div>
+    <form id="form-forgot">
+      <div class="field">
+        <label for="fp-email">Email</label>
+        <input id="fp-email" type="email" autocomplete="username" required>
+      </div>
+      <button class="primary" style="width:100%" type="submit">Send reset link</button>
+    </form>
+    <p style="text-align:center;margin:14px 0 0">
+      <button class="ghost" id="btn-back-signin" type="button">Back to sign in</button>
+    </p>
+  </div>
+
+  <!-- Set a new password: shown after clicking the emailed recovery link -->
+  <div class="authcard" id="pane-newpass" hidden>
+    <h3>Choose a new password</h3>
+    <div id="newpass-msg"></div>
+    <form id="form-newpass">
+      <div class="field">
+        <label for="np-pass">New password</label>
+        <input id="np-pass" type="password" autocomplete="new-password" minlength="8" required>
+      </div>
+      <button class="primary" style="width:100%" type="submit">Save new password</button>
+    </form>
+  </div>
+</section>
+
+<!-- =========================================================================
+     2. MAIN APP
+     ========================================================================= -->
+<div id="view-app" hidden>
+  <header class="app">
+    <div class="wrap">
+      <div class="brandbar">
+        <button class="ghost" id="btn-back" hidden aria-label="Back">&larr;</button>
+        <h1 class="brand">Yummers</h1>
+        <button class="ghost" id="btn-menu" aria-label="Menu">&#9776;</button>
+      </div>
+      <div class="searchbar" id="searchbar">
+        <input id="search" type="search" placeholder="Search titles, descriptions, ingredients…" autocomplete="off">
+      </div>
+      <div class="chips" id="chips"></div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- LIST -->
+    <section id="view-list">
+      <div class="grid" id="grid"></div>
+    </section>
+
+    <!-- DETAIL -->
+    <section id="view-detail" class="detail" hidden></section>
+
+    <!-- EDITOR -->
+    <section id="view-edit" hidden>
+      <div class="toolbar">
+        <h2 id="edit-heading" style="margin:0;flex:1">Add recipe</h2>
+      </div>
+
+      <!-- Paste-to-parse -->
+      <div class="field" id="paste-block">
+        <label for="paste">Paste a recipe (from a website, a message, anywhere)</label>
+        <textarea id="paste" rows="7" placeholder="Paste the whole messy lot here — title, ingredients, method — and press Parse. You'll get a chance to check it before saving."></textarea>
+        <div class="row" style="margin-top:8px">
+          <button class="primary" id="btn-parse" type="button" style="flex:0 0 auto">Parse it</button>
+          <button class="ghost" id="btn-skip-parse" type="button" style="flex:0 0 auto">Skip — I'll type it myself</button>
+        </div>
+      </div>
+
+      <form id="form-edit" hidden>
+        <div class="field">
+          <label for="ed-title">Title</label>
+          <input id="ed-title" required>
+        </div>
+        <div class="field">
+          <label for="ed-desc">Description</label>
+          <textarea id="ed-desc" rows="2"></textarea>
+        </div>
+
+        <div class="row">
+          <div class="field"><label for="ed-servings">Servings</label><input id="ed-servings" placeholder="Serves 4"></div>
+          <div class="field"><label for="ed-prep">Prep time</label><input id="ed-prep" placeholder="20 min"></div>
+          <div class="field"><label for="ed-cook">Cook time</label><input id="ed-cook" placeholder="45 min"></div>
+        </div>
+
+        <div class="field">
+          <label>Ingredients</label>
+          <div id="ing-list"></div>
+          <button type="button" id="btn-add-ing">+ Add ingredient</button>
+        </div>
+
+        <div class="field">
+          <label>Method</label>
+          <div id="step-list"></div>
+          <button type="button" id="btn-add-step">+ Add step</button>
+        </div>
+
+        <div class="field">
+          <label>Categories</label>
+          <div class="catpick" id="catpick"></div>
+          <div class="row">
+            <input id="new-cat" placeholder="New category…" style="flex:1 1 0;min-width:0">
+            <button type="button" id="btn-add-cat" style="flex:0 0 auto">Add</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Image</label>
+          <img id="ed-img-preview" class="imgpreview" hidden alt="">
+          <div class="row">
+            <button type="button" id="btn-pick-file" style="flex:0 0 auto">Upload from device</button>
+            <button type="button" id="btn-remove-img" class="ghost" style="flex:0 0 auto" hidden>Remove image</button>
+          </div>
+          <input type="file" id="file-input" accept="image/*" hidden>
+          <input id="ed-img-url" placeholder="…or paste an image URL" style="margin-top:8px">
+          <p class="hint">Uploads are shrunk in your browser before they're sent — a full-size photo and a
+            small thumbnail, roughly 250&nbsp;KB and 40&nbsp;KB. That keeps you comfortably inside
+            Supabase's free 1&nbsp;GB storage limit.</p>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label>Rating</label>
+            <div class="stars" id="stars"></div>
+          </div>
+          <div class="field">
+            <label for="ed-fav">Favourite</label>
+            <button type="button" id="ed-fav">☆ Not a favourite</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="ed-source">Source (URL or where it came from)</label>
+          <input id="ed-source">
+        </div>
+        <div class="field">
+          <label for="ed-notes">My notes</label>
+          <textarea id="ed-notes" rows="3" placeholder="Halve the salt. Good with the sourdough."></textarea>
+        </div>
+
+        <div class="toolbar" style="padding-bottom:90px">
+          <button class="primary" id="btn-save" type="submit">Save recipe</button>
+          <button class="ghost" id="btn-cancel" type="button">Cancel</button>
+          <span class="spacer"></span>
+          <button class="danger" id="btn-delete" type="button" hidden>Delete</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <button class="fab" id="fab" aria-label="Add recipe">+</button>
+</div>
+
+<!-- Menu sheet -->
+<div class="panel" id="menu-panel" hidden>
+  <div class="sheet">
+    <h3>Yummers</h3>
+    <p class="hint" id="menu-account" style="margin-bottom:12px"></p>
+    <button class="menuitem" id="mi-export">⬇︎&nbsp; Export a backup (JSON)</button>
+    <button class="menuitem" id="mi-export-images">⬇︎&nbsp; Export backup <i>with</i> image files</button>
+    <button class="menuitem" id="mi-import">⬆︎&nbsp; Import a backup</button>
+    <button class="menuitem" id="mi-passkey" hidden>🔑&nbsp; Add a passkey to this device</button>
+    <button class="menuitem" id="mi-signout">↪&nbsp; Sign out</button>
+    <button class="menuitem ghost" id="mi-close" style="margin-top:8px;text-align:center">Close</button>
+    <input type="file" id="import-input" accept="application/json,.json" hidden>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+/* ===========================================================================
+   YUMMERS
+   ---------------------------------------------------------------------------
+   Everything below is plain JavaScript running in the browser. There is no
+   build step: the file you're reading is the file that runs.
+   The one thing loaded from outside is the Supabase client library, imported
+   from a CDN on the next line.
+   =========================================================================== */
+
+// The Supabase JavaScript library. "+esm" tells jsDelivr to hand us a modern
+// ES module so we can `import` it directly, with no bundler involved.
+// @2 means "the latest version 2.x". If you want to freeze it so it can never
+// change under you, replace @2 with a specific version, e.g. @2.105.0.
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+
+/* ===========================================================================
+   1. CONFIGURATION  ←←← THIS IS THE PART YOU EDIT
+   ===========================================================================
+   Both values below are safe to have in a public file. The publishable key
+   identifies your project; it does NOT grant access to your data. Access is
+   decided by the Row Level Security policies you ran in the SQL editor, which
+   only ever let a logged-in user see their own rows.
+
+   Never put the "secret" / "service_role" key here. That one bypasses all
+   security and must stay on a server.
+*/
+const SUPABASE_URL      = 'https://YOUR-PROJECT-REF.supabase.co';
+const SUPABASE_ANON_KEY = 'https://pqxsypligyshciolijof.supabase.co';
+
+// Passkeys are a beta Supabase feature. Leave this false until you've turned
+// passkeys on in the dashboard (see the optional bonus section of SETUP.md).
+const ENABLE_PASSKEYS = false;
+
+// The Storage bucket name. Must match what you created in the dashboard.
+const BUCKET = 'recipe-images';
+
+// Image sizing. Bigger = better looking, more storage and bandwidth used.
+const FULL_MAX_PX  = 1400;   // longest edge of the full-size image
+const FULL_QUALITY = 0.82;
+const THUMB_MAX_PX = 480;    // longest edge of the list thumbnail
+const THUMB_QUALITY= 0.72;
+
+
+/* ===========================================================================
+   2. THE SUPABASE CLIENT
+   ===========================================================================
+   `supabase` is the single object we use for everything: database queries,
+   file storage, and login. Creating it doesn't talk to the network — it just
+   sets up an object that knows your project's address.
+
+   Options explained:
+     persistSession    keep me logged in after I close the tab (stored in the
+                       browser's localStorage)
+     autoRefreshToken  quietly renew the login token before it expires, so a
+                       long session doesn't suddenly log you out
+     detectSessionInUrl when you arrive back from a password-reset email, the
+                       login details are in the URL; this reads them
+                       automatically and then tidies the URL up
+     experimental.passkey  opt in to the beta passkey API (ignored if unused)
+*/
+const configured = !SUPABASE_URL.includes('YOUR-PROJECT-REF') &&
+                   !SUPABASE_ANON_KEY.includes('YOUR-PUBLISHABLE');
+
+const supabase = configured ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    experimental: { passkey: ENABLE_PASSKEYS }
+  }
+}) : null;
+
+
+/* ===========================================================================
+   3. SMALL HELPERS
+   =========================================================================== */
+const $  = (sel) => document.querySelector(sel);
+const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+/** Escape text before putting it inside HTML, so a recipe called
+ *  "<script>" can never run as code. */
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c =>
+    ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+/** Brief message at the bottom of the screen. */
+let toastTimer;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+function showMsg(el, text, kind = 'err') {
+  el.innerHTML = text ? `<div class="msg ${kind}">${esc(text)}</div>` : '';
+}
+
+/** Supabase returns { data, error } rather than throwing. This turns an
+ *  error into a thrown exception so our try/catch blocks can handle it. */
+function must({ data, error }) {
+  if (error) throw error;
+  return data;
+}
+
+
+/* ===========================================================================
+   4. APPLICATION STATE
+   ===========================================================================
+   All the app's data lives in these few variables. Everything on screen is
+   drawn from them, so "change the data, then re-render" is the whole pattern.
+*/
+let session   = null;   // the logged-in user's session, or null
+let recipes   = [];     // every recipe row for this user
+let categories= [];     // every category row for this user
+let links     = [];     // every row of recipe_categories
+let draft     = null;   // the recipe currently open in the editor
+let filterCat = null;   // category id being filtered by, 'fav', or null
+let query     = '';     // current search text
+let recoveryMode = false;
+
+// Cache of Storage signed URLs, so we don't ask Supabase to re-sign the same
+// image on every render.  path -> { url, expiresAt }
+const signedCache = new Map();
+
+
+/* ===========================================================================
+   5. VIEW SWITCHING
+   =========================================================================== */
+function show(which) {
+  $('#view-list').hidden   = which !== 'list';
+  $('#view-detail').hidden = which !== 'detail';
+  $('#view-edit').hidden   = which !== 'edit';
+  $('#searchbar').hidden   = which !== 'list';
+  $('#chips').hidden       = which !== 'list';
+  $('#btn-back').hidden    = which === 'list';
+  $('#fab').hidden         = which !== 'list';
+  window.scrollTo(0, 0);
+}
+
+
+/* ===========================================================================
+   6. AUTHENTICATION
+   ===========================================================================
+   How Supabase Auth works, briefly:
+
+   Supabase keeps a private table of users (auth.users). When you sign in with
+   an email and password, Supabase checks them and hands the browser a signed
+   token — a JWT. The library stores that token and attaches it to every
+   database request after that. Postgres reads the user id out of the token,
+   which is what makes auth.uid() work inside your RLS policies.
+
+   You never write password-checking code. You call one function and either get
+   a session back or an error.
+*/
+
+/** Sign in with email + password. */
+$('#form-signin').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  showMsg($('#auth-msg'), '');
+  const btn = e.target.querySelector('button[type=submit]');
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    // signInWithPassword: the single call that logs you in.
+    must(await supabase.auth.signInWithPassword({
+      email: $('#si-email').value.trim(),
+      password: $('#si-pass').value
+    }));
+    // We don't need to do anything else here — the onAuthStateChange listener
+    // further down notices the new session and starts the app.
+  } catch (err) {
+    showMsg($('#auth-msg'), err.message || 'Could not sign in.');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Sign in';
+  }
+});
+
+/** Show the "forgot password" pane. */
+$('#btn-forgot').addEventListener('click', () => {
+  $('#pane-signin').hidden = true;
+  $('#pane-forgot').hidden = false;
+  $('#fp-email').value = $('#si-email').value;
+});
+$('#btn-back-signin').addEventListener('click', () => {
+  $('#pane-forgot').hidden = true;
+  $('#pane-signin').hidden = false;
+});
+
+/** Send the password-recovery email.
+ *  Supabase emails a one-time link. `redirectTo` is where that link lands the
+ *  user afterwards — it must be listed under Authentication → URL Configuration
+ *  → Redirect URLs in the dashboard, or Supabase will refuse it. */
+$('#form-forgot').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  showMsg($('#forgot-msg'), '');
+  const btn = e.target.querySelector('button[type=submit]');
+  btn.disabled = true;
+  try {
+    must(await supabase.auth.resetPasswordForEmail($('#fp-email').value.trim(), {
+      redirectTo: location.origin + location.pathname
+    }));
+    showMsg($('#forgot-msg'), 'Check your email for the reset link.', 'ok');
+  } catch (err) {
+    showMsg($('#forgot-msg'), err.message || 'Could not send the email.');
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+/** Save the new password after arriving from the recovery link. */
+$('#form-newpass').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  showMsg($('#newpass-msg'), '');
+  try {
+    // At this point the recovery link has already signed you in temporarily,
+    // so updateUser can change the password of "the current user".
+    must(await supabase.auth.updateUser({ password: $('#np-pass').value }));
+    recoveryMode = false;
+    showMsg($('#newpass-msg'), 'Password updated. Loading your recipes…', 'ok');
+    setTimeout(startApp, 900);
+  } catch (err) {
+    showMsg($('#newpass-msg'), err.message || 'Could not update the password.');
+  }
+});
+
+/** Optional: sign in with a passkey (Supabase beta feature).
+ *  A passkey is a key pair: the private half never leaves your phone or laptop
+ *  and is unlocked by Face ID / Touch ID / your device PIN. Nothing to type,
+ *  nothing to phish. */
+$('#btn-passkey-signin').addEventListener('click', async () => {
+  try {
+    must(await supabase.auth.signInWithPasskey());
+  } catch (err) {
+    showMsg($('#auth-msg'), err.message || 'Passkey sign-in failed. Use your password instead.');
+  }
+});
+
+/** Register a passkey on the device you're currently using.
+ *  You must already be signed in (with your password) to add one. */
+async function addPasskey() {
+  try {
+    must(await supabase.auth.registerPasskey({ friendlyName: navigator.platform || 'This device' }));
+    toast('Passkey added to this device.');
+  } catch (err) {
+    toast(err.message || 'Could not add a passkey.');
+  }
+}
+
+/** Sign out: clears the stored token. Your data stays in Supabase. */
+async function signOut() {
+  await supabase.auth.signOut();
+  location.reload();
+}
+
+
+/* ===========================================================================
+   7. LOADING DATA
+   ===========================================================================
+   One trip to the database on startup pulls everything down. For a personal
+   recipe collection this is by far the simplest design: searching, filtering
+   and sorting then all happen instantly on your device with no further network
+   calls.
+
+   FREE TIER NOTE: this loads every recipe row each time the app opens. Recipe
+   text is tiny (a few KB each), so even 1,000 recipes is only a couple of MB —
+   nowhere near the 5 GB/month egress allowance. If you ever had tens of
+   thousands of recipes you'd want to page the results instead.
+*/
+async function loadAll() {
+  const [r, c, l] = await Promise.all([
+    // .select('*') = "give me all columns". RLS silently limits it to your rows.
+    supabase.from('recipes').select('*').order('updated_at', { ascending: false }),
+    supabase.from('categories').select('*').order('name'),
+    supabase.from('recipe_categories').select('*')
+  ]);
+  recipes    = must(r);
+  categories = must(c);
+  links      = must(l);
+}
+
+/** Category ids attached to one recipe. */
+function catsOf(recipeId) {
+  return links.filter(l => l.recipe_id === recipeId).map(l => l.category_id);
+}
+function catName(id) {
+  const c = categories.find(c => c.id === id);
+  return c ? c.name : '';
+}
+
+
+/* ===========================================================================
+   8. IMAGES
+   ===========================================================================
+   Two things happen to an uploaded photo:
+
+   1. It's resized in the browser, on a <canvas>, before it's sent. We make a
+      full-size version and a small thumbnail. This matters because Supabase's
+      server-side image resizing is a PAID feature — on the free plan, whatever
+      you upload is exactly what gets downloaded again. Resizing here keeps both
+      your 1 GB storage and your 5 GB/month bandwidth well clear of the limits.
+
+   2. It goes into a PRIVATE bucket, in a folder named after your user id. A
+      private bucket means the file has no public web address; to display it we
+      ask Supabase for a temporary "signed URL" that works for a few hours.
+      That's a bit more code than a public bucket, but it means your photos
+      genuinely aren't readable by anyone but you.
+*/
+
+function loadImageEl(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('That file could not be read as an image.'));
+    img.src = src;
+  });
+}
+
+/** Draw the picture onto a canvas at a smaller size and read it back as JPEG. */
+async function resizeToBlob(file, maxPx, quality) {
+  const objUrl = URL.createObjectURL(file);
+  try {
+    const img = await loadImageEl(objUrl);
+    const scale = Math.min(1, maxPx / Math.max(img.naturalWidth, img.naturalHeight));
+    const w = Math.max(1, Math.round(img.naturalWidth  * scale));
+    const h = Math.max(1, Math.round(img.naturalHeight * scale));
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#fff';           // JPEGs can't be transparent
+    ctx.fillRect(0, 0, w, h);
+    ctx.drawImage(img, 0, 0, w, h);
+    return await new Promise(res => canvas.toBlob(res, 'image/jpeg', quality));
+  } finally {
+    URL.revokeObjectURL(objUrl);
+  }
+}
+
+/** Upload both sizes. Returns { image_path, thumb_path }. */
+async function uploadImage(fullBlob, thumbBlob) {
+  const uid = session.user.id;
+  const key = crypto.randomUUID();
+  const full  = `${uid}/${key}.jpg`;
+  const thumb = `${uid}/${key}_thumb.jpg`;
+
+  // storage.from(BUCKET).upload(path, blob) — the storage equivalent of an
+  // INSERT. The storage RLS policies you ran check that the first folder in
+  // the path is your own user id.
+  must(await supabase.storage.from(BUCKET).upload(full,  fullBlob,  { contentType: 'image/jpeg' }));
+  must(await supabase.storage.from(BUCKET).upload(thumb, thumbBlob, { contentType: 'image/jpeg' }));
+  return { image_path: full, thumb_path: thumb };
+}
+
+/** Delete stored files (used when replacing or deleting a recipe image). */
+async function deleteStored(paths) {
+  const real = paths.filter(Boolean);
+  if (!real.length) return;
+  // remove() takes an array of paths. Errors here are non-fatal — an orphaned
+  // file costs a few KB, so we log rather than interrupt the user.
+  const { error } = await supabase.storage.from(BUCKET).remove(real);
+  if (error) console.warn('Could not remove old image:', error.message);
+  real.forEach(p => signedCache.delete(p));
+}
+
+/** Ask Supabase for temporary URLs for a batch of stored files. */
+async function signPaths(paths) {
+  const now = Date.now();
+  const needed = [...new Set(paths.filter(Boolean))]
+    .filter(p => { const e = signedCache.get(p); return !e || e.expiresAt < now + 60000; });
+  if (!needed.length) return;
+  // createSignedUrls signs many paths in a single request — much better than
+  // one request per image.
+  const { data, error } = await supabase.storage.from(BUCKET)
+    .createSignedUrls(needed, 60 * 60 * 8); // valid for 8 hours
+  if (error) { console.warn('Signing images failed:', error.message); return; }
+  (data || []).forEach(d => {
+    if (d.signedUrl) signedCache.set(d.path, { url: d.signedUrl, expiresAt: now + 7.5 * 3600 * 1000 });
+  });
+}
+
+/** The best available URL for a recipe's image. `size` is 'thumb' or 'full'. */
+function imageSrc(recipe, size) {
+  if (recipe.image_url) return recipe.image_url;          // pasted external link
+  const path = size === 'thumb'
+    ? (recipe.thumb_path || recipe.image_path)
+    : (recipe.image_path || recipe.thumb_path);
+  const entry = path && signedCache.get(path);
+  return entry ? entry.url : null;
+}
+
+
+/* ===========================================================================
+   9. THE RECIPE PARSER
+   ===========================================================================
+   This turns a blob of pasted text into structured fields. It's rules, not
+   magic — it looks for the shapes recipes usually take:
+
+     • explicit headings ("Ingredients", "Method") if they're there
+     • lines that start with a quantity  → ingredients
+     • lines numbered "1." or long sentences → steps
+     • lines like "Serves 4" or "Prep: 20 min" → the metadata fields
+
+   It will get things wrong on unusual formatting. That's why you always land
+   on the review form before anything is saved.
+*/
+
+// Units we recognise at the start of an ingredient line.
+const UNITS = [
+  'cups?','c','tbsps?','tbs','tablespoons?','tsps?','teaspoons?','dsp','dessertspoons?',
+  'g','gr','grams?','kg','kilos?','kilograms?','mg',
+  'ml','mls','millilitres?','milliliters?','l','litres?','liters?',
+  'oz','ounces?','lbs?','pounds?','fl\\.?\\s?oz',
+  'pinch(?:es)?','dash(?:es)?','handfuls?','knobs?','splash(?:es)?','drops?',
+  'cloves?','sprigs?','sticks?','slices?','rashers?','fillets?','strips?',
+  'cans?','tins?','jars?','packets?','packs?','punnets?','bunch(?:es)?','heads?',
+  'sheets?','blocks?','bulbs?','stalks?','ears?','pieces?','portions?','servings?'
+];
+
+const FRAC = '¼½¾⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞';
+const NUM  = `(?:\\d+\\s*[${FRAC}]|\\d+\\s*\\d\\/\\d|\\d+(?:[.,]\\d+)?\\/\\d+|\\d+(?:[.,]\\d+)?|[${FRAC}])`;
+const RANGE= `${NUM}(?:\\s*(?:-|–|—|to|or)\\s*${NUM})?`;
+const AMOUNT_RE = new RegExp(`^(${RANGE})\\s*(${UNITS.join('|')})?\\.?\\b\\s*(?:of\\s+)?(.*)$`, 'i');
+const WORDY_AMOUNT_RE = new RegExp(`^(an?|one|two|three|four|five|six)\\s+((?:${UNITS.join('|')}))\\s+(?:of\\s+)?(.+)$`, 'i');
+
+// Lines that are website furniture rather than recipe content.
+const JUNK_RE = /^(print(?:\s+recipe)?|pin(?:\s+it)?|save(?:\s+recipe)?|share|jump to (?:recipe|video)|rate this recipe|advertisement|watch|shop|equipment|nutrition(?: information| facts)?|calories?|protein|carbohydrates?|fat|sodium|fibre|sugar|author|course|cuisine|keywords?|difficulty|©.*|all rights reserved.*)\s*:?\s*$/i;
+
+const HEAD_ING  = /^(ingredients?|you(?:'|’)?ll need|what you need|shopping list)\s*:?\s*$/i;
+const HEAD_STEP = /^(method|steps?|instructions?|directions?|preparation|to (?:make|cook)|how to make.*)\s*:?\s*$/i;
+const HEAD_NOTE = /^(notes?|tips?|to serve|to finish|variations?|storage|leftovers)\s*:?\s*$/i;
+
+/** Strip bullets, checkbox glyphs and step numbers from the front of a line. */
+function stripBullet(line) {
+  return line
+    .replace(/^\s*[•▪●◦‣⁃❑▢☐☑◻◼*–—-]\s+/, '')
+    .replace(/^\s*\[\s*\]\s*/, '')
+    .trim();
+}
+function stripStepNumber(line) {
+  return line.replace(/^\s*(?:step\s*)?\d{1,2}\s*[.):\]]\s+/i, '').trim();
+}
+
+/** Split "2 cups plain flour" into { amount: "2 cups", item: "plain flour" }. */
+function splitAmount(line) {
+  const wordy = line.match(WORDY_AMOUNT_RE);
+  if (wordy) return { amount: `${wordy[1]} ${wordy[2]}`.trim(), item: wordy[3].trim() };
+
+  const m = line.match(AMOUNT_RE);
+  if (m && m[1]) {
+    const amount = [m[1].trim(), (m[2] || '').trim()].filter(Boolean).join(' ');
+    const item = (m[3] || '').trim();
+    // If splitting left nothing behind, it wasn't really an amount.
+    if (item) return { amount, item };
+  }
+  return { amount: '', item: line.trim() };
+}
+
+/** Does this line look like an ingredient rather than an instruction? */
+function looksLikeIngredient(line) {
+  if (/^\s*(?:step\s*)?\d{1,2}\s*[.):\]]\s+\S/i.test(line)) return false; // "1. Preheat…"
+  if (WORDY_AMOUNT_RE.test(line)) return true;
+  const m = line.match(AMOUNT_RE);
+  if (m && m[1] && m[3]) return true;                    // starts with a quantity
+  const words = line.trim().split(/\s+/).length;
+  if (words <= 7 && !/[.!?]\s*$/.test(line)) return true; // short, no full stop
+  return false;
+}
+
+function parseRecipeText(raw) {
+  const out = {
+    title: '', description: '', ingredients: [], steps: [],
+    servings: '', prep_time: '', cook_time: '', source_url: '', notes: ''
+  };
+  if (!raw || !raw.trim()) return out;
+
+  const lines = raw
+    .replace(/\r\n?/g, '\n')
+    .replace(/ /g, ' ')      // non-breaking spaces from web pastes
+    .split('\n')
+    .map(l => l.trim());
+
+  // --- first pass: pull out metadata, drop junk, note section headings ------
+  const kept = [];
+  for (let line of lines) {
+    if (!line) { kept.push({ blank: true }); continue; }
+    if (JUNK_RE.test(line)) continue;
+
+    let m;
+    if ((m = line.match(/^serv(?:es|ings?)\s*[:\-–]?\s*(.+)$/i)) && !out.servings) { out.servings = 'Serves ' + m[1].replace(/^serves?\s*/i,''); continue; }
+    if ((m = line.match(/^yield\s*[:\-–]?\s*(.+)$/i)) && !out.servings)            { out.servings = m[1]; continue; }
+    if ((m = line.match(/^prep(?:aration)?(?:\s*time)?\s*[:\-–]\s*(.+)$/i)))       { out.prep_time = m[1]; continue; }
+    if ((m = line.match(/^cook(?:ing)?(?:\s*time)?\s*[:\-–]\s*(.+)$/i)))           { out.cook_time = m[1]; continue; }
+    if ((m = line.match(/^(?:total|ready in)(?:\s*time)?\s*[:\-–]\s*(.+)$/i)) && !out.cook_time) { out.cook_time = m[1]; continue; }
+    if ((m = line.match(/^(?:source|from|adapted from|recipe by)\s*[:\-–]\s*(.+)$/i)) && !out.source_url) { out.source_url = m[1]; continue; }
+    if (/^https?:\/\/\S+$/i.test(line) && !out.source_url) { out.source_url = line; continue; }
+
+    if (HEAD_ING.test(line))  { kept.push({ head: 'ing'  }); continue; }
+    if (HEAD_NOTE.test(line)) { kept.push({ head: 'note' }); continue; }
+    if (HEAD_STEP.test(line)) { kept.push({ head: 'step' }); continue; }
+
+    kept.push({ text: stripBullet(line) });
+  }
+
+  // --- title: the first real line ------------------------------------------
+  let i = 0;
+  while (i < kept.length && (kept[i].blank || kept[i].head)) i++;
+  if (i < kept.length && kept[i].text && kept[i].text.length <= 110) {
+    out.title = kept[i].text.replace(/^#+\s*/, '').replace(/[:\s]+$/, '');
+    i++;
+  }
+
+  // --- description: prose immediately after the title, before any list ------
+  const descBits = [];
+  while (i < kept.length) {
+    const k = kept[i];
+    if (k.head) break;
+    if (k.blank) { if (descBits.length) break; i++; continue; }
+    if (looksLikeIngredient(k.text)) break;
+    descBits.push(k.text);
+    i++;
+    if (descBits.length >= 3) break;
+  }
+  out.description = descBits.join(' ');
+
+  // --- the rest: assign each line to ingredients, steps, or notes ----------
+  // Headings, where they exist, are trusted. Where they don't, we guess line by
+  // line — and once we've seen a couple of step-shaped lines in a row we assume
+  // the ingredient list is over.
+  //
+  // Two deliberate bits of forgiveness:
+  //   • If the paste has a "Method" heading but no "Ingredients" heading, we
+  //     still guess at everything above it rather than throwing it away.
+  //   • If we're inside an ingredient list and hit an obvious full sentence,
+  //     we assume the method has started without announcing itself.
+  const hasIngHeading = kept.some(k => k.head === 'ing');
+  let mode = hasIngHeading ? null : 'guess';
+  let stepStreak = 0;
+  const noteBits = [];
+
+  for (; i < kept.length; i++) {
+    const k = kept[i];
+    if (k.blank) continue;
+    if (k.head) { mode = k.head === 'ing' ? 'ing' : k.head === 'step' ? 'step' : 'note'; continue; }
+    if (mode === null) continue;                       // text before any heading
+
+    const text = k.text;
+    if (!text) continue;
+
+    if (mode === 'note') { noteBits.push(text); continue; }
+
+    if (mode === 'ing') {
+      // An unannounced switch from list to prose ends the ingredient list.
+      if (out.ingredients.length >= 2 && !looksLikeIngredient(text)) {
+        mode = 'step';
+        out.steps.push(stripStepNumber(text));
+      } else {
+        out.ingredients.push(splitAmount(text));
+      }
+      continue;
+    }
+
+    if (mode === 'step') { out.steps.push(stripStepNumber(text)); continue; }
+
+    // mode === 'guess'
+    if (looksLikeIngredient(text) && stepStreak < 2) {
+      out.ingredients.push(splitAmount(text));
+      stepStreak = 0;
+    } else {
+      out.steps.push(stripStepNumber(text));
+      stepStreak++;
+    }
+  }
+
+  out.notes = noteBits.join('\n');
+
+  // Some pastes have no title line at all — fall back to the first step.
+  if (!out.title && out.steps.length) out.title = 'Untitled recipe';
+  return out;
+}
+
+
+/* ===========================================================================
+   10. LIST VIEW
+   =========================================================================== */
+
+/** Apply the current search text and category filter. */
+function visibleRecipes() {
+  const q = query.trim().toLowerCase();
+  return recipes.filter(r => {
+    // Category / favourite filter
+    if (filterCat === 'fav' && !r.is_favourite) return false;
+    if (filterCat && filterCat !== 'fav' && !catsOf(r.id).includes(filterCat)) return false;
+
+    // Text search across title, description and ingredient names
+    if (!q) return true;
+    const hay = [
+      r.title, r.description,
+      ...(r.ingredients || []).map(x => `${x.amount || ''} ${x.item || ''}`)
+    ].join(' ').toLowerCase();
+    return hay.includes(q);
+  });
+}
+
+function renderChips() {
+  const el = $('#chips');
+  const counts = new Map();
+  links.forEach(l => counts.set(l.category_id, (counts.get(l.category_id) || 0) + 1));
+  const favCount = recipes.filter(r => r.is_favourite).length;
+
+  let html = `<button class="chip ${filterCat === null ? 'on' : ''}" data-cat="">All ${recipes.length}</button>`;
+  if (favCount) html += `<button class="chip ${filterCat === 'fav' ? 'on' : ''}" data-cat="fav">★ ${favCount}</button>`;
+  categories.forEach(c => {
+    const n = counts.get(c.id) || 0;
+    if (!n) return;                                    // hide unused categories
+    html += `<button class="chip ${filterCat === c.id ? 'on' : ''}" data-cat="${c.id}">${esc(c.name)} ${n}</button>`;
+  });
+  el.innerHTML = html;
+  el.querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => {
+    const v = b.dataset.cat;
+    filterCat = v === '' ? null : v;
+    renderChips(); renderList();
+  }));
+}
+
+async function renderList() {
+  const list = visibleRecipes();
+  const grid = $('#grid');
+
+  if (!list.length) {
+    grid.innerHTML = recipes.length
+      ? `<div class="empty" style="grid-column:1/-1"><div class="big">🔍</div>Nothing matches that.</div>`
+      : `<div class="empty" style="grid-column:1/-1"><div class="big">🥣</div>
+           <p>No recipes yet.</p><p class="hint">Tap the + button and paste one in.</p></div>`;
+    return;
+  }
+
+  // Get signed URLs for all the thumbnails in one go, then draw.
+  await signPaths(list.map(r => r.thumb_path || r.image_path));
+
+  grid.innerHTML = list.map(r => {
+    const src = imageSrc(r, 'thumb');
+    const cats = catsOf(r.id).map(catName).filter(Boolean);
+    return `
+      <article class="card" data-id="${r.id}">
+        <div class="thumb">${src ? `<img src="${esc(src)}" alt="" loading="lazy">` : '🍽'}</div>
+        <div class="body">
+          <h3>${esc(r.title)}${r.is_favourite ? ' <span style="color:var(--star)">★</span>' : ''}</h3>
+          ${r.description ? `<p>${esc(r.description)}</p>` : ''}
+          <div class="meta">
+            ${cats.slice(0, 3).map(c => `<span class="tag">${esc(c)}</span>`).join('')}
+            ${r.servings ? `<span>${esc(r.servings)}</span>` : ''}
+          </div>
+        </div>
+      </article>`;
+  }).join('');
+
+  grid.querySelectorAll('.card').forEach(card =>
+    card.addEventListener('click', () => openDetail(card.dataset.id)));
+}
+
+
+/* ===========================================================================
+   11. DETAIL VIEW
+   =========================================================================== */
+async function openDetail(id) {
+  const r = recipes.find(x => x.id === id);
+  if (!r) return;
+  await signPaths([r.image_path, r.thumb_path]);
+  const src  = imageSrc(r, 'full');
+  const cats = catsOf(r.id).map(catName).filter(Boolean);
+  const stars = r.rating ? '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating) : '';
+
+  $('#view-detail').innerHTML = `
+    ${src ? `<img class="hero" src="${esc(src)}" alt="">` : ''}
+    <div class="toolbar">
+      <h2 style="flex:1;margin:0">${esc(r.title)}</h2>
+      <button id="d-fav" class="ghost" title="Favourite" style="font-size:22px;color:${r.is_favourite ? 'var(--star)' : 'var(--muted)'}">${r.is_favourite ? '★' : '☆'}</button>
+      <button id="d-edit">Edit</button>
+    </div>
+    ${r.description ? `<p class="lede">${esc(r.description)}</p>` : ''}
+    <div class="factbar">
+      ${r.servings   ? `<span><b>${esc(r.servings)}</b></span>` : ''}
+      ${r.prep_time  ? `<span>Prep <b>${esc(r.prep_time)}</b></span>` : ''}
+      ${r.cook_time  ? `<span>Cook <b>${esc(r.cook_time)}</b></span>` : ''}
+      ${stars        ? `<span style="color:var(--star)">${stars}</span>` : ''}
+      ${cats.length  ? `<span>${cats.map(c => `<span class="tag">${esc(c)}</span>`).join(' ')}</span>` : ''}
+    </div>
+    <div class="cols">
+      <div>
+        <h3>Ingredients</h3>
+        <ul class="ingredients">
+          ${(r.ingredients || []).map(x =>
+            `<li>${x.amount ? `<b>${esc(x.amount)}</b> ` : ''}${esc(x.item)}</li>`).join('')
+            || '<li style="color:var(--muted)">None listed</li>'}
+        </ul>
+      </div>
+      <div>
+        <h3>Method</h3>
+        <ol class="steps">
+          ${(r.steps || []).map(s => `<li>${esc(s)}</li>`).join('')
+            || '<li style="color:var(--muted)">No steps listed</li>'}
+        </ol>
+        ${r.notes ? `<div class="notebox"><b>Notes</b>\n${esc(r.notes)}</div>` : ''}
+        ${r.source_url ? `<p class="hint" style="margin-top:18px">Source: ${
+          /^https?:\/\//i.test(r.source_url)
+            ? `<a href="${esc(r.source_url)}" target="_blank" rel="noopener">${esc(r.source_url)}</a>`
+            : esc(r.source_url)}</p>` : ''}
+      </div>
+    </div>
+    <div style="height:80px"></div>`;
+
+  $('#d-edit').addEventListener('click', () => openEditor(r));
+  $('#d-fav').addEventListener('click', async () => {
+    // A tiny targeted UPDATE: change one column on one row.
+    const next = !r.is_favourite;
+    try {
+      must(await supabase.from('recipes').update({ is_favourite: next }).eq('id', r.id));
+      r.is_favourite = next;
+      openDetail(id); renderChips();
+    } catch (e) { toast(e.message); }
+  });
+
+  show('detail');
+}
+
+
+/* ===========================================================================
+   12. EDITOR
+   =========================================================================== */
+
+function blankDraft() {
+  return {
+    id: null, title: '', description: '', ingredients: [], steps: [],
+    servings: '', prep_time: '', cook_time: '', source_url: '', notes: '',
+    rating: 0, is_favourite: false,
+    image_path: null, thumb_path: null, image_url: null,
+    categoryIds: new Set(),
+    _newFull: null, _newThumb: null, _previewUrl: null, _clearImage: false
+  };
+}
+
+function openEditor(recipe) {
+  if (recipe) {
+    draft = {
+      ...blankDraft(),
+      id: recipe.id,
+      title: recipe.title || '',
+      description: recipe.description || '',
+      ingredients: JSON.parse(JSON.stringify(recipe.ingredients || [])),
+      steps: [...(recipe.steps || [])],
+      servings: recipe.servings || '', prep_time: recipe.prep_time || '',
+      cook_time: recipe.cook_time || '', source_url: recipe.source_url || '',
+      notes: recipe.notes || '',
+      rating: recipe.rating || 0, is_favourite: !!recipe.is_favourite,
+      image_path: recipe.image_path, thumb_path: recipe.thumb_path, image_url: recipe.image_url,
+      categoryIds: new Set(catsOf(recipe.id))
+    };
+    $('#edit-heading').textContent = 'Edit recipe';
+    $('#paste-block').hidden = true;
+    $('#form-edit').hidden = false;
+    $('#btn-delete').hidden = false;
+  } else {
+    draft = blankDraft();
+    $('#edit-heading').textContent = 'Add recipe';
+    $('#paste').value = '';
+    $('#paste-block').hidden = false;
+    $('#form-edit').hidden = true;
+    $('#btn-delete').hidden = true;
+  }
+  fillEditor();
+  show('edit');
+}
+
+function fillEditor() {
+  $('#ed-title').value   = draft.title;
+  $('#ed-desc').value    = draft.description;
+  $('#ed-servings').value= draft.servings;
+  $('#ed-prep').value    = draft.prep_time;
+  $('#ed-cook').value    = draft.cook_time;
+  $('#ed-source').value  = draft.source_url;
+  $('#ed-notes').value   = draft.notes;
+  $('#ed-img-url').value = draft.image_url || '';
+  renderIngredients();
+  renderSteps();
+  renderCatPicker();
+  renderStars();
+  renderFavButton();
+  refreshImagePreview();
+}
+
+/* --- ingredient rows ------------------------------------------------------ */
+function renderIngredients() {
+  const box = $('#ing-list');
+  box.innerHTML = '';
+  if (!draft.ingredients.length) draft.ingredients.push({ amount: '', item: '' });
+  draft.ingredients.forEach((ing, idx) => {
+    const row = document.createElement('div');
+    row.className = 'ing-row';
+    row.innerHTML = `
+      <input class="amt" placeholder="2 cups" value="${esc(ing.amount)}">
+      <input class="itm" placeholder="plain flour" value="${esc(ing.item)}">
+      <button type="button" title="Remove">✕</button>`;
+    row.querySelector('.amt').addEventListener('input', e => draft.ingredients[idx].amount = e.target.value);
+    row.querySelector('.itm').addEventListener('input', e => draft.ingredients[idx].item   = e.target.value);
+    row.querySelector('button').addEventListener('click', () => {
+      draft.ingredients.splice(idx, 1); renderIngredients();
+    });
+    box.appendChild(row);
+  });
+}
+$('#btn-add-ing').addEventListener('click', () => {
+  draft.ingredients.push({ amount: '', item: '' }); renderIngredients();
+  $('#ing-list').lastElementChild.querySelector('.amt').focus();
+});
+
+/* --- step rows ------------------------------------------------------------ */
+function renderSteps() {
+  const box = $('#step-list');
+  box.innerHTML = '';
+  if (!draft.steps.length) draft.steps.push('');
+  draft.steps.forEach((s, idx) => {
+    const row = document.createElement('div');
+    row.className = 'step-row';
+    row.innerHTML = `<textarea placeholder="Step ${idx + 1}">${esc(s)}</textarea>
+                     <button type="button" title="Remove">✕</button>`;
+    row.querySelector('textarea').addEventListener('input', e => draft.steps[idx] = e.target.value);
+    row.querySelector('button').addEventListener('click', () => { draft.steps.splice(idx, 1); renderSteps(); });
+    box.appendChild(row);
+  });
+}
+$('#btn-add-step').addEventListener('click', () => {
+  draft.steps.push(''); renderSteps();
+  $('#step-list').lastElementChild.querySelector('textarea').focus();
+});
+
+/* --- categories ----------------------------------------------------------- */
+function renderCatPicker() {
+  const box = $('#catpick');
+  box.innerHTML = categories.map(c =>
+    `<button type="button" class="chip ${draft.categoryIds.has(c.id) ? 'on' : ''}" data-id="${c.id}">${esc(c.name)}</button>`
+  ).join('') || '<span class="hint">No categories yet — add one below.</span>';
+  box.querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => {
+    const id = b.dataset.id;
+    draft.categoryIds.has(id) ? draft.categoryIds.delete(id) : draft.categoryIds.add(id);
+    renderCatPicker();
+  }));
+}
+
+/** Create a category on the fly. */
+$('#btn-add-cat').addEventListener('click', async () => {
+  const name = $('#new-cat').value.trim();
+  if (!name) return;
+  const existing = categories.find(c => c.name.toLowerCase() === name.toLowerCase());
+  if (existing) { draft.categoryIds.add(existing.id); $('#new-cat').value = ''; renderCatPicker(); return; }
+  try {
+    // .insert(...).select().single() = insert one row and give me back the row
+    // that was created (so we get its generated id).
+    const row = must(await supabase.from('categories').insert({ name }).select().single());
+    categories.push(row);
+    categories.sort((a, b) => a.name.localeCompare(b.name));
+    draft.categoryIds.add(row.id);
+    $('#new-cat').value = '';
+    renderCatPicker();
+  } catch (e) { toast(e.message); }
+});
+$('#new-cat').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); $('#btn-add-cat').click(); }
+});
+
+/* --- rating and favourite ------------------------------------------------- */
+function renderStars() {
+  $('#stars').innerHTML = [1,2,3,4,5].map(n =>
+    `<button type="button" class="${n <= draft.rating ? 'on' : ''}" data-n="${n}">★</button>`).join('');
+  $('#stars').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    const n = Number(b.dataset.n);
+    draft.rating = (draft.rating === n) ? 0 : n;   // tap the same star to clear
+    renderStars();
+  }));
+}
+function renderFavButton() {
+  $('#ed-fav').textContent = draft.is_favourite ? '★ Favourite' : '☆ Not a favourite';
+  $('#ed-fav').style.color = draft.is_favourite ? 'var(--star)' : '';
+}
+$('#ed-fav').addEventListener('click', () => { draft.is_favourite = !draft.is_favourite; renderFavButton(); });
+
+/* --- image ---------------------------------------------------------------- */
+$('#btn-pick-file').addEventListener('click', () => $('#file-input').click());
+$('#file-input').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  toast('Resizing…');
+  try {
+    draft._newFull  = await resizeToBlob(file, FULL_MAX_PX,  FULL_QUALITY);
+    draft._newThumb = await resizeToBlob(file, THUMB_MAX_PX, THUMB_QUALITY);
+    draft.image_url = '';
+    draft._clearImage = false;
+    $('#ed-img-url').value = '';
+    if (draft._previewUrl) URL.revokeObjectURL(draft._previewUrl);
+    draft._previewUrl = URL.createObjectURL(draft._newFull);
+    refreshImagePreview();
+    toast(`Ready — ${Math.round(draft._newFull.size / 1024)} KB`);
+  } catch (err) {
+    toast(err.message || 'Could not read that image.');
+  }
+  e.target.value = '';   // let the same file be chosen again later
+});
+$('#ed-img-url').addEventListener('input', e => {
+  draft.image_url = e.target.value.trim();
+  draft._newFull = draft._newThumb = null;
+  if (draft._previewUrl) { URL.revokeObjectURL(draft._previewUrl); draft._previewUrl = null; }
+  refreshImagePreview();
+});
+$('#btn-remove-img').addEventListener('click', () => {
+  draft._clearImage = true;
+  draft.image_url = '';
+  draft._newFull = draft._newThumb = null;
+  if (draft._previewUrl) { URL.revokeObjectURL(draft._previewUrl); draft._previewUrl = null; }
+  $('#ed-img-url').value = '';
+  refreshImagePreview();
+});
+
+async function refreshImagePreview() {
+  const img = $('#ed-img-preview');
+  let src = null;
+  if (draft._previewUrl)      src = draft._previewUrl;
+  else if (draft.image_url)   src = draft.image_url;
+  else if (!draft._clearImage && (draft.image_path || draft.thumb_path)) {
+    await signPaths([draft.image_path, draft.thumb_path]);
+    src = imageSrc(draft, 'full');
+  }
+  img.hidden = !src;
+  if (src) img.src = src;
+  $('#btn-remove-img').hidden = !src;
+}
+
+/* --- parse button --------------------------------------------------------- */
+$('#btn-parse').addEventListener('click', () => {
+  const parsed = parseRecipeText($('#paste').value);
+  Object.assign(draft, {
+    title: parsed.title, description: parsed.description,
+    ingredients: parsed.ingredients.length ? parsed.ingredients : [{ amount: '', item: '' }],
+    steps: parsed.steps.length ? parsed.steps : [''],
+    servings: parsed.servings, prep_time: parsed.prep_time, cook_time: parsed.cook_time,
+    source_url: parsed.source_url, notes: parsed.notes
+  });
+  fillEditor();
+  $('#paste-block').hidden = true;
+  $('#form-edit').hidden = false;
+  toast(`Found ${parsed.ingredients.length} ingredients and ${parsed.steps.length} steps — check them over.`);
+});
+$('#btn-skip-parse').addEventListener('click', () => {
+  $('#paste-block').hidden = true;
+  $('#form-edit').hidden = false;
+  $('#ed-title').focus();
+});
+
+/* --- save ----------------------------------------------------------------- */
+$('#form-edit').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = $('#btn-save');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  try {
+    // Pull the plain text fields straight off the form.
+    draft.title       = $('#ed-title').value.trim();
+    draft.description = $('#ed-desc').value.trim();
+    draft.servings    = $('#ed-servings').value.trim();
+    draft.prep_time   = $('#ed-prep').value.trim();
+    draft.cook_time   = $('#ed-cook').value.trim();
+    draft.source_url  = $('#ed-source').value.trim();
+    draft.notes       = $('#ed-notes').value.trim();
+
+    // Drop blank rows the user left behind.
+    const ingredients = draft.ingredients
+      .map(x => ({ amount: (x.amount || '').trim(), item: (x.item || '').trim() }))
+      .filter(x => x.item || x.amount);
+    const steps = draft.steps.map(s => s.trim()).filter(Boolean);
+
+    // --- image handling ---------------------------------------------------
+    let image_path = draft.image_path, thumb_path = draft.thumb_path;
+    const oldPaths = [draft.image_path, draft.thumb_path];
+
+    if (draft._newFull) {
+      const up = await uploadImage(draft._newFull, draft._newThumb);
+      image_path = up.image_path; thumb_path = up.thumb_path;
+      await deleteStored(oldPaths);
+    } else if (draft._clearImage || draft.image_url) {
+      if (oldPaths.some(Boolean)) await deleteStored(oldPaths);
+      image_path = null; thumb_path = null;
+    }
+
+    const payload = {
+      title: draft.title, description: draft.description || null,
+      ingredients, steps,
+      servings: draft.servings || null, prep_time: draft.prep_time || null,
+      cook_time: draft.cook_time || null, source_url: draft.source_url || null,
+      notes: draft.notes || null,
+      rating: draft.rating || null, is_favourite: draft.is_favourite,
+      image_path, thumb_path,
+      image_url: draft.image_url || null
+    };
+
+    // INSERT a new row, or UPDATE the existing one.
+    // .eq('id', ...) is the WHERE clause. RLS makes sure it can only ever
+    // match a row you own, even if someone tampered with the id.
+    let saved;
+    if (draft.id) {
+      saved = must(await supabase.from('recipes').update(payload).eq('id', draft.id).select().single());
+    } else {
+      saved = must(await supabase.from('recipes').insert(payload).select().single());
+    }
+
+    // --- reconcile the category links ------------------------------------
+    const before = new Set(draft.id ? catsOf(draft.id) : []);
+    const after  = draft.categoryIds;
+    const toAdd    = [...after].filter(id => !before.has(id));
+    const toRemove = [...before].filter(id => !after.has(id));
+
+    if (toAdd.length) {
+      must(await supabase.from('recipe_categories')
+        .insert(toAdd.map(cid => ({ recipe_id: saved.id, category_id: cid }))));
+    }
+    for (const cid of toRemove) {
+      must(await supabase.from('recipe_categories')
+        .delete().eq('recipe_id', saved.id).eq('category_id', cid));
+    }
+
+    if (draft._previewUrl) URL.revokeObjectURL(draft._previewUrl);
+    await loadAll();
+    renderChips();
+    toast('Saved');
+    openDetail(saved.id);
+  } catch (err) {
+    console.error(err);
+    toast(err.message || 'Could not save.');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Save recipe';
+  }
+});
+
+$('#btn-cancel').addEventListener('click', () => {
+  if (draft._previewUrl) URL.revokeObjectURL(draft._previewUrl);
+  draft.id ? openDetail(draft.id) : goList();
+});
+
+/* --- delete (two taps, no browser popup) ---------------------------------- */
+let deleteArmed = false, deleteTimer;
+$('#btn-delete').addEventListener('click', async () => {
+  const btn = $('#btn-delete');
+  if (!deleteArmed) {
+    deleteArmed = true;
+    btn.textContent = 'Tap again to delete';
+    clearTimeout(deleteTimer);
+    deleteTimer = setTimeout(() => { deleteArmed = false; btn.textContent = 'Delete'; }, 4000);
+    return;
+  }
+  clearTimeout(deleteTimer); deleteArmed = false; btn.textContent = 'Delete';
+  try {
+    await deleteStored([draft.image_path, draft.thumb_path]);
+    // The recipe_categories rows disappear automatically, because of the
+    // "on delete cascade" in the schema.
+    must(await supabase.from('recipes').delete().eq('id', draft.id));
+    await loadAll();
+    renderChips(); renderList(); goList();
+    toast('Deleted');
+  } catch (e) { toast(e.message); }
+});
+
+
+/* ===========================================================================
+   13. EXPORT / IMPORT
+   ===========================================================================
+   The free plan has no automatic database backups, so this is your backup.
+   The file is plain JSON — readable in any text editor, and readable by any
+   future app you build. It is not tied to Supabase in any way.
+*/
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function exportData(withImages) {
+  toast(withImages ? 'Downloading images…' : 'Building backup…');
+  const payload = {
+    app: 'Yummers',
+    format_version: 1,
+    exported_at: new Date().toISOString(),
+    recipes, categories, recipe_categories: links,
+    images: {}     // bucket path -> base64 data URL, only when withImages
+  };
+
+  if (withImages) {
+    // FREE TIER NOTE: this downloads every stored image, which counts against
+    // your 5 GB/month egress. With a few hundred recipes that's tens of MB —
+    // fine occasionally, but don't run it daily.
+    const paths = recipes.flatMap(r => [r.image_path, r.thumb_path]).filter(Boolean);
+    await signPaths(paths);
+    for (const p of paths) {
+      const entry = signedCache.get(p);
+      if (!entry) continue;
+      try {
+        const blob = await (await fetch(entry.url)).blob();
+        payload.images[p] = await new Promise(res => {
+          const fr = new FileReader();
+          fr.onload = () => res(fr.result);
+          fr.readAsDataURL(blob);
+        });
+      } catch (e) { console.warn('Skipped image', p, e); }
+    }
+  }
+
+  const stamp = new Date().toISOString().slice(0, 10);
+  downloadBlob(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }),
+               `yummers-backup-${stamp}.json`);
+  toast('Backup downloaded');
+}
+
+async function importData(file) {
+  let data;
+  try { data = JSON.parse(await file.text()); }
+  catch { return toast('That file isn\'t valid JSON.'); }
+  if (!data || !Array.isArray(data.recipes)) return toast('That doesn\'t look like a Yummers backup.');
+
+  toast('Importing…');
+  const uid = session.user.id;
+  try {
+    // upsert = "insert, or overwrite if a row with this id already exists".
+    // We force user_id to the current user, so a backup restores into
+    // whichever account you're signed into.
+    if (data.categories?.length) {
+      must(await supabase.from('categories')
+        .upsert(data.categories.map(c => ({ id: c.id, name: c.name, user_id: uid })),
+                { onConflict: 'id' }));
+    }
+
+    // Put images back first, so the paths in the recipe rows resolve.
+    if (data.images && Object.keys(data.images).length) {
+      for (const [path, dataUrl] of Object.entries(data.images)) {
+        try {
+          const blob = await (await fetch(dataUrl)).blob();
+          // Rewrite the folder to the current user id, in case the backup came
+          // from a different account.
+          const newPath = path.replace(/^[^/]+\//, uid + '/');
+          await supabase.storage.from(BUCKET).upload(newPath, blob,
+            { contentType: 'image/jpeg', upsert: true });
+        } catch (e) { console.warn('Image restore failed', path, e); }
+      }
+    }
+
+    const fix = p => (p ? p.replace(/^[^/]+\//, uid + '/') : null);
+    must(await supabase.from('recipes').upsert(data.recipes.map(r => ({
+      id: r.id, user_id: uid,
+      title: r.title, description: r.description ?? null,
+      ingredients: r.ingredients ?? [], steps: r.steps ?? [],
+      servings: r.servings ?? null, prep_time: r.prep_time ?? null,
+      cook_time: r.cook_time ?? null, source_url: r.source_url ?? null,
+      notes: r.notes ?? null, rating: r.rating ?? null,
+      is_favourite: !!r.is_favourite,
+      image_path: fix(r.image_path), thumb_path: fix(r.thumb_path),
+      image_url: r.image_url ?? null
+    })), { onConflict: 'id' }));
+
+    if (data.recipe_categories?.length) {
+      must(await supabase.from('recipe_categories').upsert(
+        data.recipe_categories.map(l => ({
+          recipe_id: l.recipe_id, category_id: l.category_id, user_id: uid
+        })), { onConflict: 'recipe_id,category_id' }));
+    }
+
+    await loadAll();
+    renderChips(); renderList();
+    toast(`Imported ${data.recipes.length} recipes`);
+  } catch (e) {
+    console.error(e);
+    toast(e.message || 'Import failed.');
+  }
+}
+
+
+/* ===========================================================================
+   14. WIRING UP THE CHROME (header, menu, navigation)
+   =========================================================================== */
+function goList() { show('list'); renderList(); }
+
+$('#btn-back').addEventListener('click', goList);
+$('#fab').addEventListener('click', () => openEditor(null));
+
+$('#search').addEventListener('input', e => { query = e.target.value; renderList(); });
+
+const menu = $('#menu-panel');
+$('#btn-menu').addEventListener('click', () => {
+  $('#menu-account').textContent = session ? `Signed in as ${session.user.email}` : '';
+  $('#mi-passkey').hidden = !ENABLE_PASSKEYS;
+  menu.hidden = false;
+});
+$('#mi-close').addEventListener('click', () => menu.hidden = true);
+menu.addEventListener('click', e => { if (e.target === menu) menu.hidden = true; });
+
+$('#mi-export').addEventListener('click', () => { menu.hidden = true; exportData(false); });
+$('#mi-export-images').addEventListener('click', () => { menu.hidden = true; exportData(true); });
+$('#mi-import').addEventListener('click', () => $('#import-input').click());
+$('#import-input').addEventListener('change', e => {
+  const f = e.target.files[0];
+  menu.hidden = true;
+  if (f) importData(f);
+  e.target.value = '';
+});
+$('#mi-passkey').addEventListener('click', () => { menu.hidden = true; addPasskey(); });
+$('#mi-signout').addEventListener('click', signOut);
+
+// Escape key: close the menu, or step back one view.
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (!menu.hidden) { menu.hidden = true; return; }
+  if (!$('#view-detail').hidden || !$('#view-edit').hidden) goList();
+});
+
+
+/* ===========================================================================
+   15. STARTUP
+   =========================================================================== */
+function showAuth() {
+  $('#view-app').hidden  = true;
+  $('#view-auth').hidden = false;
+  $('#pane-signin').hidden  = recoveryMode;
+  $('#pane-forgot').hidden  = true;
+  $('#pane-newpass').hidden = !recoveryMode;
+  $('#btn-passkey-signin').hidden = !ENABLE_PASSKEYS;
+}
+
+async function startApp() {
+  $('#view-auth').hidden = true;
+  $('#view-app').hidden  = false;
+  $('#grid').innerHTML = '<div class="spinner" style="grid-column:1/-1">Loading your recipes…</div>';
+  try {
+    await loadAll();
+    renderChips();
+    goList();
+  } catch (e) {
+    $('#grid').innerHTML = `<div class="empty" style="grid-column:1/-1">
+      <div class="big">⚠️</div><p>Couldn't load your recipes.</p>
+      <p class="hint">${esc(e.message || e)}</p>
+      <p class="hint">If this says something about a missing table, re-run
+      yummers-schema.sql in the Supabase SQL editor.</p></div>`;
+  }
+}
+
+async function boot() {
+  if (!configured) { $('#view-config').hidden = false; return; }
+
+  // If we arrived from a password-reset email, the URL carries the proof.
+  // supabase-js reads and clears it; we just need to notice the type.
+  const hash = new URLSearchParams(location.hash.replace(/^#/, ''));
+  if (hash.get('type') === 'recovery' || location.search.includes('type=recovery')) {
+    recoveryMode = true;
+  }
+  if (hash.get('error_description')) {
+    showAuth();
+    showMsg($('#auth-msg'), decodeURIComponent(hash.get('error_description')).replace(/\+/g, ' '));
+  }
+
+  // React to every change in login state: signing in, signing out, the token
+  // being refreshed, and the special PASSWORD_RECOVERY event.
+  supabase.auth.onAuthStateChange((event, s) => {
+    session = s;
+    if (event === 'PASSWORD_RECOVERY') { recoveryMode = true; showAuth(); return; }
+    if (recoveryMode) { showAuth(); return; }
+    if (s) startApp(); else showAuth();
+  });
+
+  // And check whether we're already signed in from a previous visit.
+  const { data } = await supabase.auth.getSession();
+  session = data.session;
+  if (recoveryMode) showAuth();
+  else if (session) startApp();
+  else showAuth();
+}
+
+boot();
+
+
+/* ===========================================================================
+   16. PWA SERVICE WORKER
+   ===========================================================================
+   The service worker is a small script the browser keeps around after you
+   close the tab. It caches the app's own files so Yummers opens instantly and
+   still opens (showing a friendly message) with no connection. It deliberately
+   never caches Supabase responses — your recipes always come fresh.
+
+   Service workers only run over HTTPS (or on localhost), which is why this
+   needs to be hosted rather than opened as a file:// URL.
+*/
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(err =>
+      console.warn('Service worker registration failed:', err));
+  });
+}
+</script>
+</body>
+</html>
