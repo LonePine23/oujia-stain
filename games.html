@@ -99,12 +99,16 @@
     .game.visible { opacity:1; transform:translateY(0); }
     .game:hover { border-color:rgba(255,255,255,0.26); }
 
+    /* Card artwork lives in images/games/ and is its own thing, separate from
+       the share images in images/og/. Shown uncropped at 1200x630 — change the
+       aspect-ratio below if the card artwork is ever a different shape. */
     .game .thumb {
-      flex:0 0 clamp(180px,32%,300px);
+      flex:0 0 clamp(220px,38%,380px);
+      aspect-ratio:1200/630;
+      align-self:center;
       border-radius:14px; overflow:hidden;
       border:1px solid rgba(255,255,255,0.14);
       box-shadow:0 6px 24px rgba(0,0,0,0.32);
-      align-self:stretch;
       display:flex;
     }
     .game .thumb img {
@@ -208,7 +212,7 @@
 
     @media (max-width:700px){
       .game { flex-direction:column; align-items:stretch; }
-      .game .thumb { flex:0 0 auto; aspect-ratio:16/10; }
+      .game .thumb { flex:0 0 auto; align-self:stretch; }
     }
     @media (max-width:560px){
       nav { gap:6px 18px; }
@@ -277,7 +281,7 @@
 
       <article class="game">
         <div class="thumb">
-          <img src="images/provenance/provenance-screenshot.jpg" alt="A round of Provenance showing The Raft of the Medusa" loading="lazy">
+          <img src="images/games/provenance-card.jpg" alt="Provenance" loading="lazy">
         </div>
         <div class="body">
           <div class="eyebrow">A guessing game</div>
@@ -293,7 +297,7 @@
 
       <article class="game">
         <div class="thumb">
-          <img src="images/hueandseek/hueandseek-screenshot.jpg" alt="A round of Hue and Seek, with the loupe hovering over a photograph" loading="lazy">
+          <img src="images/games/hueandseek-card.jpg" alt="Hue and Seek" loading="lazy">
         </div>
         <div class="body">
           <div class="eyebrow">A daily colour puzzle</div>
