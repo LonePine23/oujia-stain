@@ -15,7 +15,7 @@
    old version even after uploading a new one.
    =========================================================================== */
 
-const CACHE_VERSION = 'yummers-v4';
+const CACHE_VERSION = 'yummers-v5';
 
 // The "app shell": the files that make up the app itself, as opposed to your
 // data. Paths are relative, so this works from any folder on your site.

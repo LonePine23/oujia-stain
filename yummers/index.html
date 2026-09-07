@@ -661,6 +661,61 @@ function must({ data, error }) {
   return data;
 }
 
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+/* ---------------------------------------------------------------------------
+   RETRYING TRANSIENT FAILURES
+
+   Two things go wrong occasionally that have nothing to do with your data, and
+   both fix themselves if you simply ask again a second later.
+
+   1. "JWT issued at future" (error code PGRST303).
+      Supabase has two separate services involved in every query: Auth, which
+      mints your login token, and PostgREST, which checks it before touching the
+      database. Their clocks can drift apart by a second or two, and PostgREST
+      caches its idea of "now" — so a token that Auth stamped a moment ago can
+      look, to PostgREST, like it was issued in the future. It refuses it.
+
+      This is entirely inside Supabase; your phone's clock is not involved. It
+      shows up most on free projects, because those go to sleep and the wake-up
+      is exactly when a stale cached clock meets a brand-new token — which is
+      why it hits when you OPEN the app rather than while you're using it.
+
+      A rejected request never reached the database, so retrying it is safe even
+      for something that writes.
+
+   2. A dropped connection — patchy reception, waking from sleep. Only reads are
+      retried automatically for this one; a write that may have half-landed is
+      not something to repeat behind your back.
+   --------------------------------------------------------------------------- */
+function errorText(e) {
+  return [e?.message, e?.code, e?.details, e?.hint].filter(Boolean).join(' ');
+}
+function isClockSkew(e)   { return /PGRST303|issued at future/i.test(errorText(e)); }
+function isNetworkBlip(e) {
+  return /failed to fetch|networkerror|load failed|network connection was lost|timeout|50[234]/i
+    .test(errorText(e));
+}
+
+/** Run a Supabase call, retrying the transient failures above.
+ *  Waits 0.6s, then 1.1s, then 2s, then 3.6s — about 7 seconds of patience
+ *  before giving up and showing you the error. */
+async function retrying(fn, { readOnly = false, attempts = 5, onWait = null } = {}) {
+  let lastError;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      lastError = e;
+      const worthRetrying = isClockSkew(e) || (readOnly && isNetworkBlip(e));
+      if (!worthRetrying || i === attempts - 1) throw e;
+      onWait && onWait(i + 1, e);
+      await sleep(600 * Math.pow(1.8, i));
+    }
+  }
+  throw lastError;
+}
+
 
 /* ===========================================================================
    4. APPLICATION STATE
@@ -825,16 +880,20 @@ async function signOut() {
    nowhere near the 5 GB/month egress allowance. If you ever had tens of
    thousands of recipes you'd want to page the results instead.
 */
-async function loadAll() {
-  const [r, c, l] = await Promise.all([
-    // .select('*') = "give me all columns". RLS silently limits it to your rows.
-    supabase.from('recipes').select('*').order('updated_at', { ascending: false }),
-    supabase.from('categories').select('*').order('name'),
-    supabase.from('recipe_categories').select('*')
-  ]);
-  recipes    = must(r);
-  categories = must(c);
-  links      = must(l);
+async function loadAll(onWait = null) {
+  // Wrapped in retrying() because this is the call that runs the instant the
+  // app opens — exactly when Supabase's clock-skew hiccup tends to bite.
+  return retrying(async () => {
+    const [r, c, l] = await Promise.all([
+      // .select('*') = "give me all columns". RLS silently limits it to your rows.
+      supabase.from('recipes').select('*').order('updated_at', { ascending: false }),
+      supabase.from('categories').select('*').order('name'),
+      supabase.from('recipe_categories').select('*')
+    ]);
+    recipes    = must(r);
+    categories = must(c);
+    links      = must(l);
+  }, { readOnly: true, onWait });
 }
 
 /** Category ids attached to one recipe. */
@@ -1861,11 +1920,15 @@ $('#form-edit').addEventListener('submit', async (e) => {
     // INSERT a new row, or UPDATE the existing one.
     // .eq('id', ...) is the WHERE clause. RLS makes sure it can only ever
     // match a row you own, even if someone tampered with the id.
+    // retrying() here only ever fires for the clock-skew rejection, which the
+    // database never saw — so there's no risk of saving the same recipe twice.
     let saved;
     if (draft.id) {
-      saved = must(await supabase.from('recipes').update(payload).eq('id', draft.id).select().single());
+      saved = await retrying(async () => must(
+        await supabase.from('recipes').update(payload).eq('id', draft.id).select().single()));
     } else {
-      saved = must(await supabase.from('recipes').insert(payload).select().single());
+      saved = await retrying(async () => must(
+        await supabase.from('recipes').insert(payload).select().single()));
     }
 
     // --- reconcile the category links ------------------------------------
@@ -2112,15 +2175,35 @@ async function startApp() {
   $('#view-app').hidden  = false;
   $('#grid').innerHTML = '<div class="spinner" style="grid-column:1/-1">Loading your recipes…</div>';
   try {
-    await loadAll();
+    // Tell the user what's happening if the first go doesn't work, rather than
+    // leaving them looking at a spinner that seems stuck.
+    await loadAll((attempt) => {
+      $('#grid').innerHTML = `<div class="spinner" style="grid-column:1/-1">
+        Waking Supabase up… (attempt ${attempt + 1})</div>`;
+    });
     renderChips();
     goList();
   } catch (e) {
-    $('#grid').innerHTML = `<div class="empty" style="grid-column:1/-1">
-      <div class="big">⚠️</div><p>Couldn't load your recipes.</p>
-      <p class="hint">${esc(e.message || e)}</p>
-      <p class="hint">If this says something about a missing table, re-run
-      yummers-schema.sql in the Supabase SQL editor.</p></div>`;
+    const skew = isClockSkew(e);
+    $('#grid').innerHTML = `
+      <div class="empty" style="grid-column:1/-1">
+        <div class="big">⚠️</div>
+        <p>Couldn't load your recipes.</p>
+        <p class="hint">${esc(e.message || e)}</p>
+        <p style="margin:18px 0"><button class="primary" id="btn-retry">Try again</button></p>
+        <p class="hint" style="max-width:420px;margin:0 auto">${
+          skew
+            ? `This one is Supabase's own doing — its login service and its database
+               service briefly disagreed about the time, so a perfectly good token
+               got refused. Nothing is wrong with your recipes. Tapping "Try again"
+               almost always sorts it.`
+            : `If this mentions a missing table, re-run yummers-schema.sql in the
+               Supabase SQL editor. If it mentions the network, check your
+               connection. If the project has been idle for over a week, Supabase
+               may have paused it — restore it from the dashboard.`
+        }</p>
+      </div>`;
+    $('#btn-retry').addEventListener('click', startApp);
   }
 }
 
@@ -2162,8 +2245,10 @@ async function boot() {
   });
 
   // And check whether we're already signed in from a previous visit.
+  // Defensive `?.` — if this call ever fails outright we want to fall through
+  // to the sign-in screen, not throw and leave a blank page.
   const { data } = await supabase.auth.getSession();
-  session = data.session;
+  session = data?.session ?? null;
   if (recoveryMode) showAuth();
   else if (session && !booted) startApp();
   else if (!session) showAuth();
