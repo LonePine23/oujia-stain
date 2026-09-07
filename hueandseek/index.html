@@ -130,9 +130,18 @@ button{font:inherit; color:inherit; background:none; border:none; cursor:pointer
 /* ---------------------------------------------------------------
    The wordmark's drift, lent to the filled controls — the one button
    on a screen that is asking to be pressed, and the mode you are on.
-   Pale and slow on purpose: it should register as warmth rather than
-   as a colour, and at 34 seconds a turn you notice it only if you sit
-   still.
+   Slow but definite. The first attempt was too timid — chroma of 5 to 9,
+   which is all but neutral, stepping about ΔE 8 between stops. That is
+   the worst place to sit: far enough to notice something moved, too
+   close to see what, so the eye keeps re-checking. Chroma is now 34 and
+   the steps are ΔE 25 to 38.
+
+   The stops are picked in Lab at a FIXED lightness and chroma rather than
+   in HSL, which matters for comfort as much as looks: equal HSL lightness
+   is not equal perceived lightness — an HSL yellow reads far brighter
+   than an HSL blue — so the old version pulsed in brightness as it
+   cycled. These seven all sit at L*78 C*34 and hold 10.8:1 against the
+   button's text the whole way round, so only the hue moves.
 
    Scoped to #menu, #rules and #summary, and NEVER to #play. Lock in
    is a .btn.primary too, and a control that changes colour inside the
@@ -145,13 +154,15 @@ button{font:inherit; color:inherit; background:none; border:none; cursor:pointer
    the old :hover rule would simply never land.
    --------------------------------------------------------------- */
 @keyframes btnDrift{
-  0%,100%{background-color:hsl(10 34% 87%);}
-  20%    {background-color:hsl(56 30% 87%);}
-  40%    {background-color:hsl(142 24% 87%);}
-  60%    {background-color:hsl(204 30% 88%);}
-  80%    {background-color:hsl(288 26% 88%);}
+  0%,100%{background-color:#feaca1;}
+  14%    {background-color:#e2bb83;}
+  29%    {background-color:#a7cc91;}
+  43%    {background-color:#71d2bb;}
+  57%    {background-color:#5cd0ec;}
+  71%    {background-color:#babcfb;}
+  86%    {background-color:#eeaddb;}
 }
-#menu .btn.primary, #rules .btn.primary, #summary .btn.primary,
+#menu .btn.primary, #rules .btn.primary, #summary .btn.primary, #comp .btn.primary,
 #menu .chip-btn[aria-pressed="true"]{
   animation:btnDrift 34s linear infinite;
   border-color:transparent;
@@ -161,13 +172,14 @@ button{font:inherit; color:inherit; background:none; border:none; cursor:pointer
 #menu .chip-btn[aria-pressed="true"]{animation-delay:-13s;}
 #summary .btn.primary{animation-delay:-21s;}
 #rules .btn.primary{animation-delay:-7s;}
-#menu .btn.primary:hover, #rules .btn.primary:hover, #summary .btn.primary:hover{
+#comp .btn.primary{animation-delay:-29s;}
+#menu .btn.primary:hover, #rules .btn.primary:hover, #summary .btn.primary:hover, #comp .btn.primary:hover{
   filter:brightness(1.06);
 }
 .note{color:var(--dim); font-size:11px; line-height:1.5;}
 
 /* ===================== TITLE CARD ===================== */
-#menu{flex:1; min-height:0; padding:14px; display:flex;}
+#menu, #comp{flex:1; min-height:0; padding:14px; display:flex;}
 .card{
   flex:1; min-height:0; overflow-y:auto;
   border:1px solid var(--rule); background:var(--surface);
@@ -219,9 +231,55 @@ button{font:inherit; color:inherit; background:none; border:none; cursor:pointer
    you actually press. This carries the margin-top:auto that used to sit on
    the foot, so it is what gets pushed to the bottom of the card and the
    foot follows directly beneath its own border. */
-.footlinks{
+.footrow{
   margin-top:auto; padding-bottom:16px;
-  display:flex; flex-direction:column; align-items:flex-start; gap:3px;
+  display:flex; align-items:flex-end; justify-content:space-between; gap:16px;
+}
+.footlinks{display:flex; flex-direction:column; align-items:flex-start; gap:3px;}
+
+/* The way in. Opposite the rules link, invisible until you go looking —
+   which is the whole point, so it is deliberately kept out of the tab
+   order and hidden from screen readers rather than announced as a
+   control nobody was told about. On a touch screen there is no hover to
+   reveal it with, so the first tap shows it and the second one commits;
+   with a mouse, hovering has already done the showing. */
+.secret{
+  font-size:11px; letter-spacing:.06em; white-space:nowrap;
+  padding:2px 0; color:var(--dim); opacity:0;
+  transition:opacity .5s ease;
+}
+@media (hover:hover){ .secret:hover{opacity:1; animation:secretHue 4.5s linear infinite;} }
+.secret.shown{opacity:1; animation:secretHue 4.5s linear infinite;}
+@keyframes secretHue{
+  0%,100%{color:#ff5f5f;}
+  16%{color:#ffae3d;}
+  33%{color:#8bff54;}
+  50%{color:#3ad9ff;}
+  66%{color:#8a6bff;}
+  83%{color:#ff5fe0;}
+}
+
+/* Every colour in the list gets a slot, in spectral order, so the gaps
+   are as legible as the progress. A hairline: it belongs to the picture,
+   not to the chrome. */
+#specBar{display:block; width:100%; height:9px; flex:0 0 auto; background:var(--raise);}
+/* How far through the list, kept away from the running score in the top
+   bar so the two never read as one number. It is a fraction of five
+   thousand, so it needs the decimals to visibly move at all. */
+.specPct{
+  flex:0 0 auto; text-align:right; padding:3px 12px 0;
+  font-size:10px; letter-spacing:.06em; color:var(--dim);
+  font-variant-numeric:tabular-nums;
+}
+.compHead{font-family:var(--serif); font-size:clamp(26px,6vw,34px); font-weight:400;
+          line-height:1.05; margin:14px 0 12px;}
+/* The foot goes to the bottom of the card the way the title card's does,
+   so the two screens sit the same way in the frame. */
+#comp .card-foot{margin-top:auto;}
+#comp .instruction{max-width:64ch; line-height:1.6;}
+.compBar{
+  display:block; width:100%; height:26px; margin:8px 0 8px;
+  background:var(--raise); border:1px solid var(--rule);
 }
 .textlink{font-size:12px; letter-spacing:.03em; color:var(--text); padding:0; border-bottom:1px solid transparent;}
 .textlink:hover{border-bottom-color:var(--dim);}
@@ -461,14 +519,49 @@ h4.sub{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var
         <div class="stats" id="stats"></div>
       </div>
 
-      <div class="footlinks">
-        <button id="rulesBtn" class="textlink">How to play &amp; Scoring →</button>
-        <a class="byline" href="https://geordie.lol" target="_blank" rel="noopener">By Geordie Crawley</a>
+      <div class="footrow">
+        <div class="footlinks">
+          <button id="rulesBtn" class="textlink">How to play &amp; Scoring →</button>
+          <a class="byline" href="https://geordie.lol" target="_blank" rel="noopener">By Geordie Crawley</a>
+        </div>
+        <button id="secretBtn" class="secret" tabindex="-1" aria-hidden="true">Completionist Mode →</button>
       </div>
 
       <div class="card-foot">
         <button class="btn primary" id="startBtn">Begin</button>
         <button class="btn" id="challengeBtn">Archive</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== COMPLETIONIST ===================== -->
+  <!-- The way in is hidden, so this is the first thing that explains what
+       the mode is. It doubles as its home: the record lives here, not on
+       the title card, because it has nothing to do with the daily game. -->
+  <section id="comp" class="hidden">
+    <div class="card">
+      <div class="card-top">
+        <span class="eyebrow">Completionist Mode</span>
+        <span class="eyebrow" id="compFound">—</span>
+      </div>
+
+      <h2 class="compHead">Every colour in the list.</h2>
+      <p class="instruction" id="compBlurb">—</p>
+
+      <div class="field">
+        <span class="eyebrow">Your progress</span>
+        <div class="stats" id="compStats"></div>
+      </div>
+
+      <div class="field">
+        <span class="eyebrow">The whole list, in spectral order</span>
+        <canvas id="compBar" class="compBar" aria-hidden="true"></canvas>
+        <p class="note">One thread per colour, in its own place on the spectrum whatever order you catch them in. Solid is caught; faint is attempted.</p>
+      </div>
+
+      <div class="card-foot">
+        <button class="btn primary" id="compStartBtn">Begin</button>
+        <button class="btn" id="compBackBtn">Home</button>
       </div>
     </div>
   </section>
@@ -480,6 +573,9 @@ h4.sub{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var
       <span class="spacer"></span>
       <span class="running" id="running">—</span>
     </div>
+
+    <canvas id="specBar" class="hidden" aria-hidden="true"></canvas>
+    <div id="specPct" class="specPct hidden"></div>
 
     <div class="chiprail" id="chiprail">
       <div class="railSide left">
@@ -1663,7 +1759,9 @@ function verdictFor(dE){
 }
 
 function applyMode(){
-  const m = MODES[S.mode];
+  // The session's mode is the truth while one is running — a spectrum run
+  // is always Standard whatever the title card has selected.
+  const m = MODES[(S.session && S.session.mode) || S.mode];
   $('zoomWrap').classList.toggle('hidden', !m.zoom);
   $('chiprail').classList.toggle('blind', !m.swatch);
 }
@@ -1829,22 +1927,232 @@ function puzzleFor(date){
    not bank a score, does not touch the streak, and above all does not
    overwrite the saved progress, because that record is what the title card
    reads back to show you the day you actually played. */
+/* =====================================================================
+   14b. EVERY COLOUR — the completionist mode behind the hidden button
+   No photograph, no five-a-day, no clock: one generated spectrum and the
+   whole name list to work through, a colour at a time, saved as you go.
+
+   It is scored on the Standard curve and shown Standard's way — the name
+   and nothing else — because with a spectrum in front of you a swatch
+   would turn it into a colour-picker rather than a game.
+   ===================================================================== */
+const SPEC_KEY     = 'hueandseek.spectrum.v1';
+const SPEC_COLLECT = 70;      // the score that counts a colour as caught
+const SPEC_W = 1600, SPEC_H = 984;   // 16:9 sheet with the neutral ramp beneath it
+
+const loadSpectrum = () => readJSON(SPEC_KEY, {});
+const saveSpectrum = got => writeJSON(SPEC_KEY, got);
+
+/* The sheet: hue left to right, lightness top to bottom, saturation
+   pinned at full — HSL laid flat, which is the picture everybody already
+   reads as "all the colours".
+
+   Built from gradients rather than per-pixel, because a million-odd
+   hand-written hsl() calls is a visible pause and this is instant. The
+   vertical pass is exact rather than approximate: painting opaque white
+   fading to nothing across the top half gives c + (255−c)·(2l−1), which
+   is precisely what HSL does above l 0.5, and the black half mirrors it.
+   Two separate fills, not one four-stop gradient, so no engine gets the
+   chance to haze the middle while interpolating white to black.
+
+   Full saturation has one blind spot: it never makes a grey. A plain
+   sheet tops out around 60% on mid-neutrals — under the catch line, so
+   the greyer names in the list could never be completed. Hence the
+   narrow neutral ramp along the bottom. */
+function buildSpectrumCanvas(){
+  const cv = document.createElement('canvas');
+  cv.width = SPEC_W; cv.height = SPEC_H;
+  const c = cv.getContext('2d', {willReadFrequently:true});
+  const greyH = Math.round(SPEC_H * 0.085);
+  const sheetH = SPEC_H - greyH;
+
+  const hue = c.createLinearGradient(0, 0, SPEC_W, 0);
+  for (let k = 0; k <= 72; k++) hue.addColorStop(k / 72, `hsl(${k * 5} 100% 50%)`);
+  c.fillStyle = hue; c.fillRect(0, 0, SPEC_W, sheetH);
+
+  const up = c.createLinearGradient(0, 0, 0, sheetH / 2);
+  up.addColorStop(0, 'rgba(255,255,255,1)'); up.addColorStop(1, 'rgba(255,255,255,0)');
+  c.fillStyle = up; c.fillRect(0, 0, SPEC_W, Math.ceil(sheetH / 2));
+
+  const down = c.createLinearGradient(0, sheetH / 2, 0, sheetH);
+  down.addColorStop(0, 'rgba(0,0,0,0)'); down.addColorStop(1, 'rgba(0,0,0,1)');
+  c.fillStyle = down; c.fillRect(0, Math.floor(sheetH / 2), SPEC_W, Math.ceil(sheetH / 2) + 1);
+
+  const grey = c.createLinearGradient(0, 0, SPEC_W, 0);
+  grey.addColorStop(0, '#ffffff'); grey.addColorStop(1, '#000000');
+  c.fillStyle = grey; c.fillRect(0, sheetH, SPEC_W, greyH);
+  return cv;
+}
+
+/* Slots for the bar, in spectral order: hues swept round, then the
+   near-neutrals by lightness. Play order is random, but a colour always
+   lands in the same place on the bar, so what is missing reads as
+   plainly as what is done. Computed once — it is a sort of five
+   thousand entries. */
+let SPEC_SLOTS = null;
+function spectrumSlots(){
+  if (SPEC_SLOTS && SPEC_SLOTS.length === NAMES.length) return SPEC_SLOTS;
+  SPEC_SLOTS = NAMES.map(n => {
+    const chroma = Math.hypot(n.lab[1], n.lab[2]);
+    return {name:n.name, hex:n.hex, lab:n.lab,
+            key: chroma < 12 ? 1000 + n.lab[0] : hueDeg(n.lab[2], n.lab[1])};
+  }).sort((a, b) => a.key - b.key);
+  return SPEC_SLOTS;
+}
+
+const specCaught = (got, name) => (got[name] || 0) >= SPEC_COLLECT;
+function spectrumCount(got){
+  let n = 0;
+  for (const k in got) if (got[k] >= SPEC_COLLECT) n++;
+  return n;
+}
+
+/* Two numbers that are easy to confuse, so they are kept apart everywhere
+   they appear: caught is a tally of colours finished, average is how
+   close you have been getting. The average is over your best attempt at
+   each colour you have tried, not every attempt — otherwise a colour you
+   went back and nailed would still be dragging its early misses along.
+   Walks NAMES rather than the saved keys, so a colour that has left the
+   list can't inflate the count. */
+function spectrumStats(){
+  const got = loadSpectrum();
+  let caught = 0, tried = 0, sum = 0;
+  const tally = {};
+  for (const c of NAMES){
+    const sc = got[c.name];
+    if (sc == null) continue;
+    tried++; sum += sc;
+    if (sc >= SPEC_COLLECT) caught++;
+    const g = hueGroup(c.lab);
+    if (!tally[g]) tally[g] = {n:0, sum:0};
+    tally[g].n++; tally[g].sum += sc;
+  }
+  let strongest = null, bestMean = -1;
+  for (const g in tally){
+    if (tally[g].n < 3) continue;                  // three sightings before it means anything
+    const mean = tally[g].sum / tally[g].n;
+    if (mean > bestMean){ bestMean = mean; strongest = {group:g, mean:Math.round(mean), n:tally[g].n}; }
+  }
+  const total = NAMES.length;
+  return {caught, tried, total, strongest,
+          avg: tried ? Math.round(sum / tried) : null,
+          through: total ? caught / total * 100 : 0};
+}
+
+/* At six colours out of five thousand a whole percent is a lie and a
+   rounded one reads as nought forever, so the decimals stay until the
+   number can carry itself. */
+function pctThrough(p){
+  if (p >= 10) return Math.round(p) + '%';
+  if (p >= 1)  return p.toFixed(1) + '%';
+  return (p > 0 && p < 0.01 ? '<0.01' : p.toFixed(2)) + '%';
+}
+
+/* The card behind the hidden button: what the mode is, where you are up
+   to, and the band. Shown before play, and returned to afterwards. */
+function renderCompletionist(){
+  const st = spectrumStats();
+  const tile = (label, value, small) =>
+    `<div class="stat"><span class="eyebrow">${label}</span><b class="${small ? 'sm' : ''}">${value}</b></div>`;
+  $('compStats').innerHTML = [
+    tile('Caught',    st.caught.toLocaleString()),
+    tile('Through',   pctThrough(st.through)),
+    tile('Average',   st.avg == null ? '—' : st.avg + '%'),
+    tile('Strongest', st.strongest ? st.strongest.group : '—', true)
+  ].join('');
+  $('compFound').textContent =
+    st.caught.toLocaleString() + ' of ' + st.total.toLocaleString();
+  $('compBlurb').textContent =
+    'One sheet holding every hue, and the whole name list to work through — a colour at a '
+    + 'time, in no order at all. Marked the Standard way: you get the name and nothing else. '
+    + 'Reach ' + SPEC_COLLECT + '% and the colour is yours for good. There is no end to a '
+    + 'sitting, nothing here touches your daily record, and it saves as you go.';
+  $('compStartBtn').textContent = st.tried ? 'Continue' : 'Begin';
+  requestAnimationFrame(() => drawSpecBar('compBar'));
+}
+
+function openCompletionist(){
+  if (!NAMES.length){ toast('Colour names are still loading.'); return; }
+  show('comp');
+}
+
+/** A colour you have not caught yet, at random. */
+function pickSpectrumTarget(){
+  const got = loadSpectrum();
+  const left = NAMES.filter(n => !specCaught(got, n.name));
+  if (!left.length) return null;
+  const n = left[Math.floor(Math.random() * left.length)];
+  return {hex:n.hex, lab:n.lab, name:n.name, group:hueGroup(n.lab)};
+}
+
+/* One slice per colour in the list. At five thousand slots on an
+   eight-hundred-pixel bar a slice is a fifth of a pixel, so each is drawn
+   at a minimum width — early on the bar reads as scattered threads, and
+   fills into a spectrum. Attempted-but-missed sits at low opacity, so a
+   near miss still shows you were there. */
+function drawSpecBar(id = 'specBar'){
+  const cv = $(id);
+  if (!cv || cv.classList.contains('hidden') || !NAMES.length) return;
+  const r = cv.getBoundingClientRect();
+  if (!r.width) return;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = Math.max(1, Math.round(r.width * dpr));
+  cv.height = Math.max(1, Math.round(r.height * dpr));
+  const c = cv.getContext('2d');
+  c.setTransform(dpr, 0, 0, dpr, 0, 0);
+  c.clearRect(0, 0, r.width, r.height);
+
+  const slots = spectrumSlots(), got = loadSpectrum();
+  const w = r.width / slots.length;
+  for (let i = 0; i < slots.length; i++){
+    const sc = got[slots[i].name];
+    if (sc == null) continue;
+    c.globalAlpha = sc >= SPEC_COLLECT ? 1 : 0.3;
+    c.fillStyle = slots[i].hex;
+    c.fillRect(i * w, 0, Math.max(w, 0.7), r.height);
+  }
+  c.globalAlpha = 1;
+}
+
+function enterSpectrum(){
+  if (!NAMES.length){ toast('Colour names are still loading.'); return; }
+  beginSession('spectrum');
+}
+
 async function beginSession(kind, opts = {}){
-  const level = kind === 'daily' ? S.todayPuzzle
+  const spectrum = kind === 'spectrum';
+  const level = spectrum ? {title:'Completionist Mode', src:null}
+              : kind === 'daily' ? S.todayPuzzle
                                  : S.archive[Math.floor(Math.random() * S.archive.length)];
   if (!level){ toast('Nothing to play — the manifest is empty.'); return; }
 
   S.session = {
     kind, level, replay: !!opts.replay,
-    date: kind === 'daily' ? S.today : level.date,
-    puzzleNo: puzzleNumber(kind === 'daily' ? S.today : level.date),
-    mode: S.mode, targets: null, index: 0, results: []
+    date: spectrum ? S.today : (kind === 'daily' ? S.today : level.date),
+    puzzleNo: spectrum ? 0 : puzzleNumber(kind === 'daily' ? S.today : level.date),
+    // Always Standard: with a spectrum on screen, a swatch would turn the
+    // whole thing into a colour picker.
+    mode: spectrum ? 'standard' : S.mode,
+    targets: [], index: 0, results: []
   };
 
+  $('specBar').classList.toggle('hidden', !spectrum);
+  $('specPct').classList.toggle('hidden', !spectrum);
   applyMode();
   show('play');
   $('stageLoading').classList.remove('hidden');
   renderPips();
+
+  if (spectrum){
+    S.img = null;
+    S.work = buildSpectrumCanvas();
+    S.workData = S.work.getContext('2d', {willReadFrequently:true})
+                      .getImageData(0, 0, S.work.width, S.work.height).data;
+    $('stageLoading').classList.add('hidden');
+    if (!nextTarget()) return;          // nothing left to catch
+    requestAnimationFrame(drawSpecBar);
+    return;
+  }
 
   try {
     S.img = await loadImage(level.src);
@@ -1926,6 +2234,16 @@ function nextTarget(){
   $('lockBtn').textContent = 'Lock in';
   $('hint').style.opacity = '1';
 
+  if (sess.kind === 'spectrum'){
+    const t = pickSpectrumTarget();
+    if (!t){
+      toast('Every colour in the list. All ' + NAMES.length.toLocaleString() + ' of them. Go outside.');
+      show('comp');
+      return false;
+    }
+    sess.targets[sess.index] = t;
+  }
+
   S.target = sess.targets[sess.index];
   $('swTarget').style.background = S.target.hex;
   $('targetName').textContent = S.target.name;
@@ -1935,6 +2253,7 @@ function nextTarget(){
   renderPips();
   updateRunning();
   resizeCanvas();
+  return true;
 }
 
 /* Two lines covers nearly every name in the list. For the handful that
@@ -1979,6 +2298,7 @@ function fitName(el){
 function renderPips(){
   const sess = S.session;
   if (!sess){ $('pips').innerHTML = ''; return; }
+  if (sess.kind === 'spectrum'){ $('pipWrap').classList.add('hidden'); $('pips').innerHTML = ''; return; }
   $('pips').innerHTML = Array.from({length: TARGETS_PER_DAY}, (_, i) => {
     const done = sess.results[i];
     const cls = 'pip' + (i === sess.index && !done ? ' now' : '');
@@ -2001,7 +2321,18 @@ function lockIn(){
   };
   S.lastResult = result;
   S.session.results.push(result);
-  saveProgress(S.session.results.length >= TARGETS_PER_DAY);
+
+  if (S.session.kind === 'spectrum'){
+    // Keep the best attempt on each colour, so a later, worse go can never
+    // un-catch something already caught.
+    const got = loadSpectrum();
+    const name = S.target.name;
+    if (!(got[name] >= result.score)) got[name] = result.score;
+    saveSpectrum(got);
+    drawSpecBar();
+  } else {
+    saveProgress(S.session.results.length >= TARGETS_PER_DAY);
+  }
 
   try { S.highlight = buildHighlight(); } catch(e){ S.highlight = null; }
 
@@ -2029,7 +2360,9 @@ function showReveal(){
   $('hint').style.opacity = '0';
 
   const lock = $('lockBtn');
-  lock.textContent = S.session.results.length >= TARGETS_PER_DAY ? 'See results' : 'Next colour';
+  lock.textContent = S.session.kind === 'spectrum'
+    ? (S.lastResult.score >= SPEC_COLLECT ? 'Caught it · Next' : 'Try another')
+    : (S.session.results.length >= TARGETS_PER_DAY ? 'See results' : 'Next colour');
   lock.disabled = false;
   lock.focus({preventScroll:true});
   updateRunning();
@@ -2037,6 +2370,8 @@ function showReveal(){
 
 function advance(){
   S.session.index++;
+  // No end to reach: Home is the way out, and progress is already saved.
+  if (S.session.kind === 'spectrum') return void nextTarget();
   if (S.session.index >= TARGETS_PER_DAY) finishSession();
   else nextTarget();
 }
@@ -2046,6 +2381,23 @@ function dockAction(){ if (S.locked) advance(); else lockIn(); }
 
 function updateRunning(){
   const sess = S.session;
+  if (sess.kind === 'spectrum'){
+    // Two different numbers, so they are labelled and never share a unit.
+    // Caught is the lifetime tally out of the whole list; average is how
+    // well this sitting is going. How far through the list you are is the
+    // third number, and it lives under the band rather than up here —
+    // a percentage next to a percentage is how they get read as one.
+    const caught = spectrumCount(loadSpectrum());
+    let out = `Caught <b>${caught.toLocaleString()}</b> / ${NAMES.length.toLocaleString()}`;
+    if (sess.results.length){
+      const avg = Math.round(sess.results.reduce((a, r) => a + r.score, 0) / sess.results.length);
+      out += ` · Average <b>${avg}%</b>`;
+    }
+    $('running').innerHTML = out;
+    $('specPct').textContent =
+      pctThrough(NAMES.length ? caught / NAMES.length * 100 : 0) + ' of the list';
+    return;
+  }
   const n = Math.min(sess.index + 1, TARGETS_PER_DAY);
   const head = sess.kind === 'daily'
     ? `#${sess.puzzleNo} · Colour <b>${n}/${TARGETS_PER_DAY}</b>`
@@ -2358,9 +2710,10 @@ function setMode(mode){
    19. SHELL
    ===================================================================== */
 function show(which){
-  ['menu','play','rules','summary'].forEach(id => $(id).classList.toggle('hidden', id !== which));
+  ['menu','comp','play','rules','summary'].forEach(id => $(id).classList.toggle('hidden', id !== which));
   if (which === 'menu'){ lastPointer = performance.now(); renderMenu(); }
   else clearInterval(countdownTimer);
+  if (which === 'comp') renderCompletionist();
   if (which === 'play') requestAnimationFrame(resizeCanvas);
   if (which === 'rules' || which === 'summary') $(which).querySelector('.sheet').scrollTop = 0;
 }
@@ -2390,10 +2743,25 @@ $('startBtn').addEventListener('click', () => {
   beginSession('daily');
 });
 $('challengeBtn').addEventListener('click', () => beginSession('challenge'));
+/* Hover reveals it on a mouse, so one click is enough. A touch screen has
+   no hover, so the first tap reveals and the second commits — otherwise
+   brushing a blank corner would drop you into a mode you never saw. */
+const COARSE = matchMedia('(hover: none)').matches;
+$('secretBtn').addEventListener('click', () => {
+  const b = $('secretBtn');
+  if (COARSE && !b.classList.contains('shown')){ b.classList.add('shown'); return; }
+  openCompletionist();
+});
+$('compStartBtn').addEventListener('click', () => enterSpectrum());
+$('compBackBtn').addEventListener('click', () => show('menu'));
 $('rulesBtn').addEventListener('click', () => show('rules'));
 $('rulesBackBtn').addEventListener('click', () => show('menu'));
 $('lockBtn').addEventListener('click', dockAction);
-$('homeBtn').addEventListener('click', () => show('menu'));
+/* A completionist run belongs to its own card, not the title card — that
+   is where its record is, and leaving a sitting is the moment you want to
+   see what it did to the total. */
+$('homeBtn').addEventListener('click', () =>
+  show(S.session && S.session.kind === 'spectrum' ? 'comp' : 'menu'));
 $('menuBtn').addEventListener('click', () => show('menu'));
 $('againBtn').addEventListener('click', () => {
   if (S.session && S.session.kind === 'daily') beginSession('daily', {replay:true});
@@ -2405,9 +2773,11 @@ $('shareBtn').addEventListener('click', () => {
 });
 
 window.addEventListener('resize', () => {
+  if (!$('comp').classList.contains('hidden')) drawSpecBar('compBar');
   if ($('play').classList.contains('hidden')) return;
   resizeCanvas();
   fitName($('targetName')); fitName($('rvPickName'));
+  drawSpecBar();
 });
 window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 260));
 
