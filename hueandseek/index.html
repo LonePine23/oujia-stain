@@ -556,7 +556,7 @@ h4.sub{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var
       <div class="field">
         <span class="eyebrow">The whole list, in spectral order</span>
         <canvas id="compBar" class="compBar" aria-hidden="true"></canvas>
-        <p class="note">One thread per colour, in its own place on the spectrum whatever order you catch them in. Solid is caught; faint is attempted.</p>
+        <p class="note">One thread per colour, in its own place on the spectrum whatever order you meet them in. Solid is caught; faint is seen but missed.</p>
       </div>
 
       <div class="card-foot">
@@ -1573,7 +1573,7 @@ function drawLoupe(sp, rect){
   cx = Math.max(R + 6, Math.min(rect.width - R - 6, cx));
   cy = Math.max(R + 6, Math.min(rect.height - R - 6, cy));
 
-  const M = MODES[S.mode];
+  const M = MODES[liveMode()];
   ctx.save();
 
   if (M.loupe === 'split'){
@@ -1758,10 +1758,14 @@ function verdictFor(dE){
   return 'A different colour entirely';
 }
 
+/* The session's mode is the truth while one is running — a spectrum run
+   is always Standard whatever the title card happens to have selected.
+   Everything that presents the game asks this rather than S.mode, which
+   is only ever the title card's setting for the NEXT daily run. */
+function liveMode(){ return (S.session && S.session.mode) || S.mode; }
+
 function applyMode(){
-  // The session's mode is the truth while one is running — a spectrum run
-  // is always Standard whatever the title card has selected.
-  const m = MODES[(S.session && S.session.mode) || S.mode];
+  const m = MODES[liveMode()];
   $('zoomWrap').classList.toggle('hidden', !m.zoom);
   $('chiprail').classList.toggle('blind', !m.swatch);
 }
@@ -2001,12 +2005,6 @@ function spectrumSlots(){
 }
 
 const specCaught = (got, name) => (got[name] || 0) >= SPEC_COLLECT;
-function spectrumCount(got){
-  let n = 0;
-  for (const k in got) if (got[k] >= SPEC_COLLECT) n++;
-  return n;
-}
-
 /* Two numbers that are easy to confuse, so they are kept apart everywhere
    they appear: caught is a tally of colours finished, average is how
    close you have been getting. The average is over your best attempt at
@@ -2036,7 +2034,7 @@ function spectrumStats(){
   const total = NAMES.length;
   return {caught, tried, total, strongest,
           avg: tried ? Math.round(sum / tried) : null,
-          through: total ? caught / total * 100 : 0};
+          through: total ? tried / total * 100 : 0};
 }
 
 /* At six colours out of five thousand a whole percent is a lie and a
@@ -2055,18 +2053,19 @@ function renderCompletionist(){
   const tile = (label, value, small) =>
     `<div class="stat"><span class="eyebrow">${label}</span><b class="${small ? 'sm' : ''}">${value}</b></div>`;
   $('compStats').innerHTML = [
-    tile('Caught',    st.caught.toLocaleString()),
     tile('Through',   pctThrough(st.through)),
+    tile('Caught',    st.caught.toLocaleString()),
     tile('Average',   st.avg == null ? '—' : st.avg + '%'),
     tile('Strongest', st.strongest ? st.strongest.group : '—', true)
   ].join('');
   $('compFound').textContent =
-    st.caught.toLocaleString() + ' of ' + st.total.toLocaleString();
+    st.tried.toLocaleString() + ' of ' + st.total.toLocaleString() + ' seen';
   $('compBlurb').textContent =
     'One sheet holding every hue, and the whole name list to work through — a colour at a '
     + 'time, in no order at all. Marked the Standard way: you get the name and nothing else. '
-    + 'Reach ' + SPEC_COLLECT + '% and the colour is yours for good. There is no end to a '
-    + 'sitting, nothing here touches your daily record, and it saves as you go.';
+    + 'Every colour moves you along whatever you score on it; ' + SPEC_COLLECT + '% or better '
+    + 'and it counts as caught. There is no end to a sitting, nothing here touches your daily '
+    + 'record, and it saves as you go.';
   $('compStartBtn').textContent = st.tried ? 'Continue' : 'Begin';
   requestAnimationFrame(() => drawSpecBar('compBar'));
 }
@@ -2076,11 +2075,17 @@ function openCompletionist(){
   show('comp');
 }
 
-/** A colour you have not caught yet, at random. */
+/* Working through the list is the game; catching them all is not the
+   price of finishing it. So the first pass serves colours you have never
+   been shown, whatever you scored on the last one — a colour you missed
+   is behind you, not blocking you. Only once the whole list has been seen
+   does it come back round with the ones you missed, for anyone who wants
+   to raise their average. */
 function pickSpectrumTarget(){
   const got = loadSpectrum();
-  const left = NAMES.filter(n => !specCaught(got, n.name));
-  if (!left.length) return null;
+  let left = NAMES.filter(n => got[n.name] == null);        // never seen
+  if (!left.length) left = NAMES.filter(n => !specCaught(got, n.name));  // seen, missed
+  if (!left.length) return null;                            // every one caught
   const n = left[Math.floor(Math.random() * left.length)];
   return {hex:n.hex, lab:n.lab, name:n.name, group:hueGroup(n.lab)};
 }
@@ -2237,7 +2242,7 @@ function nextTarget(){
   if (sess.kind === 'spectrum'){
     const t = pickSpectrumTarget();
     if (!t){
-      toast('Every colour in the list. All ' + NAMES.length.toLocaleString() + ' of them. Go outside.');
+      toast('Every colour in the list caught. All ' + NAMES.length.toLocaleString() + ' of them. Go outside.');
       show('comp');
       return false;
     }
@@ -2361,7 +2366,7 @@ function showReveal(){
 
   const lock = $('lockBtn');
   lock.textContent = S.session.kind === 'spectrum'
-    ? (S.lastResult.score >= SPEC_COLLECT ? 'Caught it · Next' : 'Try another')
+    ? (S.lastResult.score >= SPEC_COLLECT ? 'Caught it · Next' : 'Next colour')
     : (S.session.results.length >= TARGETS_PER_DAY ? 'See results' : 'Next colour');
   lock.disabled = false;
   lock.focus({preventScroll:true});
@@ -2382,20 +2387,20 @@ function dockAction(){ if (S.locked) advance(); else lockIn(); }
 function updateRunning(){
   const sess = S.session;
   if (sess.kind === 'spectrum'){
-    // Two different numbers, so they are labelled and never share a unit.
-    // Caught is the lifetime tally out of the whole list; average is how
-    // well this sitting is going. How far through the list you are is the
-    // third number, and it lives under the band rather than up here —
-    // a percentage next to a percentage is how they get read as one.
-    const caught = spectrumCount(loadSpectrum());
-    let out = `Caught <b>${caught.toLocaleString()}</b> / ${NAMES.length.toLocaleString()}`;
+    // Three numbers that are easy to confuse, so they are split by what
+    // they are about. Up here, how you are doing: colours caught for good,
+    // and this sitting's average. Under the band, how far you have got:
+    // colours seen, and that as a fraction of the list. Progress sits
+    // with the thing that shows progress, and no two percentages touch.
+    const st = spectrumStats();
+    let out = `Caught <b>${st.caught.toLocaleString()}</b>`;
     if (sess.results.length){
       const avg = Math.round(sess.results.reduce((a, r) => a + r.score, 0) / sess.results.length);
       out += ` · Average <b>${avg}%</b>`;
     }
     $('running').innerHTML = out;
     $('specPct').textContent =
-      pctThrough(NAMES.length ? caught / NAMES.length * 100 : 0) + ' of the list';
+      `${st.tried.toLocaleString()} of ${st.total.toLocaleString()} seen · ${pctThrough(st.through)} through`;
     return;
   }
   const n = Math.min(sess.index + 1, TARGETS_PER_DAY);
