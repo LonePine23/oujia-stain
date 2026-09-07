@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scripts — Geordie Crawley</title>
-  <meta name="description" content="Plays, programs, games and experiments by Geordie Crawley — Logue Lake, Hive Mind, Girl in the Wood and more, with synopses and script downloads.">
-  <link rel="canonical" href="https://geordie.lol/scripts">
+  <title>Games — Geordie Crawley</title>
+  <meta name="description" content="Two free browser games: Provenance, an art history guessing game, and Hue and Seek, a daily colour-hunting puzzle. No sign-up, no app.">
+  <link rel="canonical" href="https://geordie.lol/games">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Geordie Crawley">
   <meta property="og:locale" content="en_AU">
-  <meta property="og:title" content="Creative Works — Geordie Crawley">
-  <meta property="og:description" content="Plays, programs, games and experiments by Geordie Crawley — Logue Lake, Hive Mind, Girl in the Wood and more, with synopses and script downloads.">
-  <meta property="og:url" content="https://geordie.lol/scripts">
-  <meta property="og:image" content="https://geordie.lol/images/og/scripts.jpg">
+  <meta property="og:title" content="Games — Geordie Crawley">
+  <meta property="og:description" content="Two free browser games: Provenance, an art history guessing game, and Hue and Seek, a daily colour-hunting puzzle. No sign-up, no app.">
+  <meta property="og:url" content="https://geordie.lol/games">
+  <meta property="og:image" content="https://geordie.lol/images/og/games.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Creative works by Geordie Crawley">
+  <meta property="og:image:alt" content="Provenance and Hue and Seek">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" type="image/png" href="/favicon.png">
   <script defer src="https://cloud.umami.is/script.js" data-website-id="6e8639e8-bf58-459d-9a37-5f0f82788902"></script>
@@ -35,13 +35,13 @@
     .bg { position:fixed; inset:0; z-index:0; background:#0a0a0a; }
     .bg img {
       width:100%; height:100%; object-fit:cover;
-      object-position:center 60%;
+      object-position:center center;
       opacity:0; transition:opacity 1.4s ease;
     }
     .bg img.loaded { opacity:1; }
     .bg::after {
       content:""; position:absolute; inset:0;
-      background:linear-gradient(180deg, rgba(10,10,12,0.12) 0%, rgba(10,10,12,0.04) 35%, rgba(10,10,12,0.52) 100%);
+      background:linear-gradient(180deg, rgba(8,9,12,0.48) 0%, rgba(8,9,12,0.40) 35%, rgba(8,9,12,0.70) 100%);
     }
 
     .page {
@@ -53,7 +53,7 @@
 
     header.intro {
       text-align:center;
-      margin-bottom:clamp(36px,5vh,64px);
+      margin-bottom:clamp(32px,4.5vh,56px);
       opacity:0; transform:translateY(14px);
       transition:opacity 0.8s ease 0.2s, transform 0.8s ease 0.2s;
     }
@@ -64,7 +64,7 @@
       font-size:clamp(2rem,6vw,3.6rem);
       letter-spacing:-0.02em;
       line-height:1.05;
-      text-shadow:0 2px 30px rgba(0,0,0,0.4);
+      text-shadow:0 2px 30px rgba(0,0,0,0.45);
     }
     header.intro p {
       font-family:'Spectral',serif;
@@ -72,74 +72,102 @@
       font-size:clamp(1rem,2vw,1.25rem);
       margin-top:14px;
       color:rgba(244,242,238,0.85);
-      text-shadow:0 1px 12px rgba(0,0,0,0.4);
+      text-shadow:0 1px 12px rgba(0,0,0,0.45);
     }
 
-    .works {
-      display:grid;
-      grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));
-      gap:clamp(16px,2vw,24px);
+    .games {
+      display:flex; flex-direction:column;
+      gap:clamp(18px,2.4vw,28px);
       width:100%;
       max-width:920px;
     }
 
-    .work {
-      display:block;
-      text-decoration:none;
-      color:inherit;
-      padding:clamp(24px,2.6vw,34px);
-      border-radius:16px;
-      background:rgba(20,20,22,0.32);
-      backdrop-filter:blur(16px) saturate(1.2);
-      -webkit-backdrop-filter:blur(16px) saturate(1.2);
+    .game {
+      display:flex;
+      gap:clamp(20px,3vw,38px);
+      align-items:center;
+      padding:clamp(22px,2.6vw,32px);
+      border-radius:18px;
+      background:rgba(18,18,20,0.42);
+      backdrop-filter:blur(20px) saturate(1.2);
+      -webkit-backdrop-filter:blur(20px) saturate(1.2);
       border:1px solid rgba(255,255,255,0.14);
-      box-shadow:0 8px 32px rgba(0,0,0,0.26);
-      transition:transform 0.4s cubic-bezier(0.2,0.8,0.3,1), border-color 0.4s ease, background 0.4s ease;
+      box-shadow:0 8px 32px rgba(0,0,0,0.3);
       opacity:0; transform:translateY(18px);
-      position:relative;
-      overflow:hidden;
+      transition:opacity 0.7s ease, transform 0.7s cubic-bezier(0.2,0.8,0.3,1), border-color 0.4s ease;
     }
-    .work.visible { opacity:1; transform:translateY(0); }
-    .work:hover {
-      transform:translateY(-4px);
-      border-color:rgba(255,255,255,0.3);
-      background:rgba(28,28,30,0.42);
+    .game.visible { opacity:1; transform:translateY(0); }
+    .game:hover { border-color:rgba(255,255,255,0.26); }
+
+    .game .thumb {
+      flex:0 0 clamp(180px,32%,300px);
+      border-radius:14px; overflow:hidden;
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow:0 6px 24px rgba(0,0,0,0.32);
+      align-self:stretch;
+      display:flex;
     }
-    .work .num {
+    .game .thumb img {
+      width:100%; height:100%; object-fit:cover; display:block;
+      transition:transform 0.6s cubic-bezier(0.2,0.8,0.3,1);
+    }
+    .game:hover .thumb img { transform:scale(1.04); }
+
+    .game .body { flex:1 1 auto; min-width:0; }
+    .game .eyebrow {
       font-family:'IBM Plex Mono',monospace;
-      font-size:0.72rem;
-      letter-spacing:0.12em;
-      color:rgba(244,242,238,0.45);
+      font-size:0.72rem; letter-spacing:0.16em; text-transform:uppercase;
+      color:rgba(244,242,238,0.6); margin-bottom:12px;
+    }
+    .game h2 {
+      font-family:'IBM Plex Mono',monospace;
+      font-weight:700;
+      font-size:clamp(1.5rem,3vw,2.1rem);
+      letter-spacing:-0.02em;
+      line-height:1.08;
+      margin-bottom:8px;
+    }
+    .game .tagline {
+      font-family:'Spectral',serif; font-style:italic;
+      font-size:clamp(1rem,1.7vw,1.2rem);
+      color:rgba(244,242,238,0.85);
       margin-bottom:14px;
     }
-    .work h2 {
+    .game p {
       font-family:'Spectral',serif;
-      font-weight:500;
-      font-style:italic;
-      font-size:clamp(1.35rem,2.4vw,1.85rem);
-      line-height:1.15;
-      margin-bottom:10px;
-      text-shadow:0 1px 14px rgba(0,0,0,0.35);
+      font-size:clamp(1rem,1.5vw,1.12rem);
+      line-height:1.6;
+      color:#ebe9e4;
+      text-shadow:0 1px 10px rgba(0,0,0,0.35);
+      margin-bottom:clamp(18px,2.2vw,24px);
     }
-    .work .meta {
+
+    .actions { display:flex; align-items:center; gap:clamp(14px,2vw,22px); flex-wrap:wrap; }
+    .play-btn {
+      display:inline-flex; align-items:center; gap:10px;
       font-family:'IBM Plex Mono',monospace;
-      font-size:0.82rem;
-      color:rgba(244,242,238,0.68);
-      line-height:1.5;
-      letter-spacing:0.01em;
-      padding-right:24px;
-      min-height:1.2em;
+      font-size:0.9rem; font-weight:500; letter-spacing:0.04em;
+      color:#14140f;
+      background:#f4f2ee;
+      border:1px solid #f4f2ee;
+      border-radius:12px;
+      padding:13px 26px;
+      text-decoration:none;
+      transition:background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
     }
-    .work .arrow {
-      position:absolute;
-      right:clamp(20px,2.4vw,30px);
-      bottom:clamp(20px,2.4vw,30px);
-      font-size:1.1rem;
-      opacity:0;
-      transform:translateX(-6px);
-      transition:opacity 0.4s ease, transform 0.4s ease;
+    .play-btn:hover {
+      background:#fff;
+      transform:translateY(-2px);
+      box-shadow:0 8px 24px rgba(0,0,0,0.3);
     }
-    .work:hover .arrow { opacity:0.7; transform:translateX(0); }
+    .more {
+      font-family:'Spectral',serif; font-style:italic;
+      font-size:clamp(0.98rem,1.6vw,1.12rem);
+      color:#f4f2ee; text-decoration:none;
+      border-bottom:1.5px solid rgba(255,255,255,0.35);
+      transition:border-color 0.3s ease, opacity 0.3s ease;
+    }
+    .more:hover { border-bottom-color:#fff; opacity:0.85; }
 
     nav {
       position:fixed;
@@ -178,11 +206,14 @@
     nav a:hover { border-bottom-color:currentColor; opacity:0.85; }
     nav a.current { border-bottom-color:rgba(244,242,238,0.5); }
 
-    @media (max-width:540px){
-      .works { grid-template-columns:1fr; }
+    @media (max-width:700px){
+      .game { flex-direction:column; align-items:stretch; }
+      .game .thumb { flex:0 0 auto; aspect-ratio:16/10; }
+    }
+    @media (max-width:560px){
       nav { gap:6px 18px; }
     }
-  
+
     /* --- Mobile collapsible nav --- */
     .nav-toggle { display:none; }
     .nav-links { display:contents; }
@@ -234,71 +265,48 @@
   </style>
 </head>
 <body>
-  <div class="bg"><img id="bgImg" src="images/IMG_6631.jpg" alt=""></div>
+  <div class="bg"><img id="bgImg" src="images/JP-SK_-_149.jpg" alt=""></div>
 
   <div class="page">
     <header class="intro" id="intro">
-      <h1>Creative Works</h1>
-      <p>Plays, games, programs &amp; experiments</p>
+      <h1>Games</h1>
+      <p>Free to play in your browser, no sign-up</p>
     </header>
 
-    <div class="works" id="works">
-      <!-- Each card links to its own page (to be built). Update href when ready. -->
-      <a class="work" href="/provenance">
-        <div class="num">01</div>
-        <h2>Provenance</h2>
-        <div class="meta">An art history guessing game</div>
-        <div class="arrow">→</div>
-      </a>
+    <div class="games" id="games">
 
-      <a class="work" href="/hue-and-seek">
-        <div class="num">02</div>
-        <h2>Hue and Seek</h2>
-        <div class="meta">A daily colour puzzle</div>
-        <div class="arrow">→</div>
-      </a>
+      <article class="game">
+        <div class="thumb">
+          <img src="images/provenance/provenance-screenshot.jpg" alt="A round of Provenance showing The Raft of the Medusa" loading="lazy">
+        </div>
+        <div class="body">
+          <div class="eyebrow">A guessing game</div>
+          <h2>Provenance</h2>
+          <div class="tagline">No plaque? No problem.</div>
+          <p>You get an artwork and its title. Work out the artist, movement, year and country of origin — from 32,000-year-old cave paintings to pieces still warm from the studio. Play in rounds of five, ten or fifteen.</p>
+          <div class="actions">
+            <a class="play-btn" href="/game">Play Provenance <span class="arr">→</span></a>
+            <a class="more" href="/provenance">Read more</a>
+          </div>
+        </div>
+      </article>
 
-      <a class="work" href="/logue-lake">
-        <div class="num">03</div>
-        <h2>Logue Lake</h2>
-        <div class="meta">A queer cabin-in-the-woods horror</div>
-        <div class="arrow">→</div>
-      </a>
+      <article class="game">
+        <div class="thumb">
+          <img src="images/hueandseek/hueandseek-screenshot.jpg" alt="A round of Hue and Seek, with the loupe hovering over a photograph" loading="lazy">
+        </div>
+        <div class="body">
+          <div class="eyebrow">A daily colour puzzle</div>
+          <h2>Hue and Seek</h2>
+          <div class="tagline">A game of hueristics.</div>
+          <p>One photo a day, five colours hidden somewhere inside it, the same puzzle for everyone. Hunt each one down with the loupe and see how close you got. Build a streak, or dig through the archive.</p>
+          <div class="actions">
+            <a class="play-btn" href="/hueandseek">Play Hue and Seek <span class="arr">→</span></a>
+            <a class="more" href="/hue-and-seek">Read more</a>
+          </div>
+        </div>
+      </article>
 
-      <a class="work" href="/all-that-is-solid">
-        <div class="num">04</div>
-        <h2>All That Is Solid Melts Into Air</h2>
-        <div class="meta">Would you want to live forever?</div>
-        <div class="arrow">→</div>
-      </a>
-
-      <a class="work" href="/hive-mind">
-        <div class="num">05</div>
-        <h2>Hive Mind</h2>
-        <div class="meta">A bee cult takes over</div>
-        <div class="arrow">→</div>
-      </a>
-
-      <a class="work" href="/girl-in-the-wood">
-        <div class="num">06</div>
-        <h2>Girl in the Wood</h2>
-        <div class="meta">A spooky forest fairytale</div>
-        <div class="arrow">→</div>
-      </a>
-
-      <a class="work" href="/the-lost-tape">
-        <div class="num">07</div>
-        <h2>The Lost Tape</h2>
-        <div class="meta">Micro dramas on tape</div>
-        <div class="arrow">→</div>
-      </a>
-
-      <a class="work" href="/deadline-gang">
-        <div class="num">08</div>
-        <h2>Deadline Gang</h2>
-        <div class="meta">A writing program</div>
-        <div class="arrow">→</div>
-      </a>
     </div>
   </div>
 
@@ -306,8 +314,8 @@
     <button class="nav-toggle" aria-label="Menu"><span class="bars"><span></span><span></span><span></span></span>Menu</button>
     <div class="nav-links">
     <a href="/">Home</a>
-    <a href="/games">Games</a>
-    <a href="/scripts" class="current">Creative Works</a>
+    <a href="/games" class="current">Games</a>
+    <a href="/scripts">Creative Works</a>
     <a href="/bio">Bio</a>
     <a href="/contact">Contact</a>
     </div>
@@ -317,31 +325,27 @@
     const img = document.getElementById('bgImg');
     const intro = document.getElementById('intro');
     const nav = document.getElementById('nav');
-    const works = Array.from(document.querySelectorAll('.work'));
+    const cards = Array.from(document.querySelectorAll('.game'));
 
     function reveal() {
       intro.classList.add('visible');
       nav.classList.add('visible');
-      // staggered reveal of the work cards
-      works.forEach((w, i) => {
-        setTimeout(() => w.classList.add('visible'), 200 + i * 110);
+      cards.forEach((c, i) => {
+        setTimeout(() => c.classList.add('visible'), 200 + i * 140);
       });
     }
-    if (img.complete) {
-      img.classList.add('loaded');
-      reveal();
-    } else {
+    if (img.complete) { img.classList.add('loaded'); reveal(); }
+    else {
       img.addEventListener('load', () => { img.classList.add('loaded'); reveal(); });
       img.addEventListener('error', reveal);
     }
-  
+
     // Mobile nav toggle
     (function(){
       const navEl = document.getElementById('nav');
       const toggle = navEl ? navEl.querySelector('.nav-toggle') : null;
       if (toggle && navEl) {
         toggle.addEventListener('click', () => navEl.classList.toggle('open'));
-        // close menu after tapping a link
         navEl.querySelectorAll('.nav-links a').forEach(a => {
           a.addEventListener('click', () => navEl.classList.remove('open'));
         });

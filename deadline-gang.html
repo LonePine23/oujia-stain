@@ -4,6 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Deadline Gang — Geordie Crawley</title>
+  <meta name="description" content="A twelve-week writing program for writers who can&#x27;t write but want to. Six playwrights, fortnightly meetings, one finished first draft.">
+  <link rel="canonical" href="https://geordie.lol/deadline-gang">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Geordie Crawley">
+  <meta property="og:locale" content="en_AU">
+  <meta property="og:title" content="Deadline Gang — Geordie Crawley">
+  <meta property="og:description" content="A twelve-week writing program for writers who can&#x27;t write but want to. Six playwrights, fortnightly meetings, one finished first draft.">
+  <meta property="og:url" content="https://geordie.lol/deadline-gang">
+  <meta property="og:image" content="https://geordie.lol/images/og/deadline-gang.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Deadline Gang">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" type="image/png" href="/favicon.png">
   <script defer src="https://cloud.umami.is/script.js" data-website-id="6e8639e8-bf58-459d-9a37-5f0f82788902"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -55,6 +68,14 @@
       margin-bottom:clamp(28px,4vh,44px);
     }
     .hero-title img { width:100%; height:auto; display:block; }
+
+    /* The branded artwork carries the title visually; this keeps a real
+       heading in the document for search engines and screen readers. */
+    .visually-hidden {
+      position:absolute; width:1px; height:1px;
+      padding:0; margin:-1px; overflow:hidden;
+      clip:rect(0 0 0 0); white-space:nowrap; border:0;
+    }
 
     .eyebrow {
       text-align:center;
@@ -194,6 +215,8 @@
 
       <div class="eyebrow">A writing program</div>
 
+      <h1 class="visually-hidden">Deadline Gang</h1>
+
       <div class="hero-title">
         <img src="images/deadline-gang/deadline-gang-title.jpg" alt="Deadline Gang" loading="lazy">
       </div>
@@ -212,8 +235,10 @@
     <button class="nav-toggle" aria-label="Menu"><span class="bars"><span></span><span></span><span></span></span>Menu</button>
     <div class="nav-links">
     <a href="/">Home</a>
+    <a href="/games">Games</a>
     <a href="/scripts">Creative Works</a>
     <a href="/bio">Bio</a>
+    <a href="/contact">Contact</a>
     </div>
   </nav>
 

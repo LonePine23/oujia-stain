@@ -3,28 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Provenance — Geordie Crawley</title>
-  <meta name="description" content="An art history guessing game. You get the artwork and its title — you work out the artist, movement, year and country. Free to play in your browser.">
-  <link rel="canonical" href="https://geordie.lol/provenance">
+  <title>Hue and Seek — Geordie Crawley</title>
+  <meta name="description" content="A daily colour puzzle. One photo, five colours hidden inside it, the same for every player. Find them all and keep your streak going.">
+  <link rel="canonical" href="https://geordie.lol/hue-and-seek">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="Geordie Crawley">
   <meta property="og:locale" content="en_AU">
-  <meta property="og:title" content="Provenance — Geordie Crawley">
-  <meta property="og:description" content="An art history guessing game. You get the artwork and its title — you work out the artist, movement, year and country. Free to play in your browser.">
-  <meta property="og:url" content="https://geordie.lol/provenance">
-  <meta property="og:image" content="https://geordie.lol/images/og/provenance.jpg">
+  <meta property="og:title" content="Hue and Seek — Geordie Crawley">
+  <meta property="og:description" content="A daily colour puzzle. One photo, five colours hidden inside it, the same for every player. Find them all and keep your streak going.">
+  <meta property="og:url" content="https://geordie.lol/hue-and-seek">
+  <meta property="og:image" content="https://geordie.lol/images/og/hue-and-seek.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="A round of Provenance showing The Raft of the Medusa">
+  <meta property="og:image:alt" content="A round of Hue and Seek">
   <meta name="twitter:card" content="summary_large_image">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "VideoGame",
-    "name": "Provenance",
-    "url": "https://geordie.lol/game",
-    "description": "An art history guessing game: given an artwork and its title, work out the artist, movement, year and country of origin.",
-    "image": "https://geordie.lol/images/og/provenance.jpg",
+    "name": "Hue and Seek",
+    "url": "https://geordie.lol/hueandseek",
+    "description": "A daily colour puzzle: one photograph, five hidden colours, the same puzzle for every player each day.",
+    "image": "https://geordie.lol/images/og/hue-and-seek.jpg",
     "author": { "@id": "https://geordie.lol/#geordie" },
     "applicationCategory": "Game",
     "gamePlatform": "Web browser",
@@ -230,6 +230,7 @@
       text-shadow:0 1px 8px rgba(0,0,0,0.4); white-space:nowrap;
     }
     nav a:hover { border-bottom-color:currentColor; opacity:0.85; }
+    nav a.current { border-bottom-color:rgba(244,242,238,0.5); }
 
     .nav-toggle { display:none; }
     .nav-links { display:contents; }
@@ -271,19 +272,19 @@
   </style>
 </head>
 <body>
-  <div class="bg"><img id="bgImg" src="images/F1010025.jpg" alt=""></div>
+  <div class="bg"><img id="bgImg" src="images/JP-SK_-_108.jpg" alt=""></div>
 
   <div class="page">
     <div class="wrap" id="wrap">
 
-      <button class="shot" data-full="images/provenance/provenance-screenshot.jpg">
-        <img src="images/provenance/provenance-screenshot.jpg" alt="A round of Provenance showing The Raft of the Medusa" loading="lazy">
+      <button class="shot" data-full="images/hueandseek/hueandseek-screenshot.jpg">
+        <img src="images/hueandseek/hueandseek-screenshot.jpg" alt="A round of Hue and Seek, with the loupe hovering over a photograph" loading="lazy">
       </button>
 
       <div class="info">
-        <div class="eyebrow">A guessing game</div>
-        <h1>Provenance</h1>
-        <div class="tagline">No plaque? No problem.</div>
+        <div class="eyebrow">A daily colour puzzle</div>
+        <h1>Hue and Seek</h1>
+        <div class="tagline">A game of hueristics.</div>
 
         <div class="tabs">
           <button class="tab active" data-tab="about">About</button>
@@ -291,22 +292,22 @@
         </div>
 
         <div class="tab-content active" id="about">
-          <p>Provenance is an art history guessing game for people who like their culture slightly competitive and a bit cheeky.</p>
-          <p>You're shown an artwork and its title. That's it. From there, you've got to work out the Artist, Movement, Year, and Country of Origin — or at least make a convincing argument to yourself in the moment.</p>
-          <p>Inspired by games like <em>Interior Motives</em>, <em>Wordle</em>, and talking shit in the gallery. The game is approachable, fun, and quietly humbling.</p>
-          <p>Is this a Pre-Raphaelite masterpiece, or a chiaroscuro? Pop-Art or Neo-Expressionism? Test yourself to find out! The works stretch from ancient images carved 32,000 years ago right through to contemporary pieces still warm from the studio.</p>
-          <p>There are hints if you get stuck, but learning is part of the fun. Play in rounds of five, ten, or fifteen works, and try to beat your own best score — or just enjoy the slow realisation that you've been lying to yourself about knowing art history this whole time.</p>
-          <p>Either way, I hope you have fun!</p>
+          <p>Hue and Seek is a daily colour puzzle. One photograph, five colours hidden somewhere inside it. A new picture, and a new set of striking colour names each day.</p>
+          <p>You're given a colour to find, and you're scored on how close you actually got, which is rarely as close as it felt.</p>
+          <p>There are two ways to play. <strong>Standard</strong> which gives you just the colour's name. And <strong>Easy</strong> which gives you more support in matching the colour.</p>
+          <p>The game keeps track of your daily average, your best day, your streak, and which colour families you're quietly best at. And of course, share your results with your friends by telling them which colour you are today!</p>
+          <p>If one puzzle a day isn't enough, Challenge mode pulls photos out of the archive and plays them in rounds of five.</p>
+          <p>And quietly, between you and me, keep an eye out for the secret completionist mode. Hidden on the site!</p>
         </div>
 
         <div class="tab-content" id="ai">
-          <p>Provenance was made by Geordie Crawley with the assistance of Claude (by Anthropic). I'd never written code before this project; Claude wrote the code, working from my decisions about how the game should look, feel, and play.</p>
-          <p><strong>The human part:</strong> every artwork in the game was chosen, researched, and tagged by me. The visual design, the rating ladder, the tone of the writing, the scoring rules, the difficulty calls, the comedy at the bottom of the rankings — all mine. So is the editorial responsibility for what's in the game and how it plays.</p>
-          <p><strong>The AI part:</strong> Claude wrote and debugged the underlying code, suggested technical tradeoffs, and helped shape the structure of the page. When something didn't work or didn't feel right, I asked for changes; Claude made them.</p>
-          <p>I think of the relationship as closer to "I directed, Claude implemented" than "I used a tool." It's a collaboration that wouldn't have produced this game without both halves, and I'd rather be honest about that than pretend otherwise.</p>
+          <p>Hue and Seek was made by myself with the assistance of Claude (by Anthropic). I don't write code (I've tried so many times, but can never seem to get the hang of it); so I direct Claude about how the game should look, feel, and play.</p>
+          <p><strong>The human part:</strong> the photographs, the colours, the difficulty modes, the scoring, the writing, the secret mode, and the daily rhythm of the thing are mine.</p>
+          <p><strong>The AI part:</strong> Claude wrote and debugged the code, suggested technical tradeoffs, and helped shape the structure of the page.</p>
+          <p>In my head, I delineate it as: I designed it. Claude programmed it.</p>
         </div>
 
-        <a class="play-btn" href="/game">Play the game <span class="arr">→</span></a>
+        <a class="play-btn" href="/hueandseek">Play the game <span class="arr">→</span></a>
       </div>
 
     </div>
