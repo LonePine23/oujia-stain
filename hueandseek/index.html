@@ -271,12 +271,10 @@ button{font:inherit; color:inherit; background:none; border:none; cursor:pointer
   font-size:10px; letter-spacing:.06em; color:var(--dim);
   font-variant-numeric:tabular-nums;
 }
-.compHead{font-family:var(--serif); font-size:clamp(26px,6vw,34px); font-weight:400;
-          line-height:1.05; margin:14px 0 12px;}
 /* The foot goes to the bottom of the card the way the title card's does,
    so the two screens sit the same way in the frame. */
 #comp .card-foot{margin-top:auto;}
-#comp .instruction{max-width:64ch; line-height:1.6;}
+#comp .instruction{line-height:1.6; margin:16px 0 20px;}
 .compBar{
   display:block; width:100%; height:26px; margin:8px 0 8px;
   background:var(--raise); border:1px solid var(--rule);
@@ -545,7 +543,6 @@ h4.sub{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var
         <span class="eyebrow" id="compFound">—</span>
       </div>
 
-      <h2 class="compHead">Every colour in the list.</h2>
       <p class="instruction" id="compBlurb">—</p>
 
       <div class="field">
@@ -556,7 +553,6 @@ h4.sub{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var
       <div class="field">
         <span class="eyebrow">The whole list, in spectral order</span>
         <canvas id="compBar" class="compBar" aria-hidden="true"></canvas>
-        <p class="note">One thread per colour, in its own place on the spectrum whatever order you meet them in. Solid is caught; faint is seen but missed.</p>
       </div>
 
       <div class="card-foot">
@@ -623,25 +619,22 @@ h4.sub{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var
       <span class="eyebrow">How it works</span>
       <h2 class="rulesHead">Find the colour in the photo.</h2>
 
-      <p>A daily colour puzzle.</p>
-
       <h3>Playing</h3>
       <ul>
         <li>Tap anywhere to drop a marker. Drag to move it.</li>
         <li>Arrow keys nudge it a pixel. Hold Shift for ten.</li>
         <li>Lock in when you're happy. There's no clock.</li>
-        <li>Five colours, then you're done for the day. Your progress is saved, so you can close the tab and come back.</li>
+        <li>Five colours, then you're done for the day. Progress saves as you go.</li>
       </ul>
 
       <h3>The two modes</h3>
       <ul>
-        <li><b>Easy</b> — you get the swatch, its name and its hex. The loupe splits down the middle: the colour you're after on one side, the pixel under your marker on the other. When the seam vanishes, you've got it.</li>
-        <li><b>Standard</b> — you get the name. That's the lot. The loupe magnifies the photo and wears your colour on its rim, so you can see what you've picked but not what you're chasing. The swatch turns up when you lock in.</li>
+        <li><b>Easy</b> — the swatch, its name and its hex. The loupe splits down the middle; when the seam vanishes, you've got it.</li>
+        <li><b>Standard</b> — the name. That's the lot. The swatch turns up when you lock in.</li>
       </ul>
 
       <h3>Scoring</h3>
-      <p>Your colour and the target are compared with CIEDE2000 — a measure tuned to how an eye reads a gap rather than how far apart two numbers are.</p>
-      <p>The two modes are marked differently, because they are not the same task. In Easy the swatch is in front of you and the loupe butts your pixel against it, so it is a matching job and the marking is strict. In Standard there is nothing on screen to match — you are recalling what a name looks like — so being in the right family counts for a good deal more.</p>
+      <p>Scored on CIEDE2000, which measures a colour gap the way an eye does. Easy is a matching job, so it's marked strictly; Standard is a guess, so it's marked kindly.</p>
       <table class="scoretable">
         <thead><tr><th>ΔE</th><th>Means</th><th class="num">Easy</th><th class="num">Standard</th></tr></thead>
         <tbody>
@@ -655,11 +648,11 @@ h4.sub{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var
       </table>
 
       <h3>The archive</h3>
-      <p>Every photograph that's had its day goes into the archive. Play one at random with five fresh colours — a new set each time, so a picture you've already seen is still a game. Archive rounds don't touch your record.</p>
+      <p>Every photograph that's had its day goes into the archive. Play one at random, with five fresh colours each time. Archive rounds don't touch your record.</p>
 
       <h3>Credits</h3>
       <p>Colours come thanks to the <a href="https://github.com/meodai/color-names" target="_blank" rel="noopener">Color Name List</a> by David Aerne and contributors. A human-curated set of 4,959 names, MIT licensed.</p>
-      <p>Made with assistance from Claude by Anthropic. More information can be found <a href="https://geordie.lol/colourgame" target="_blank" rel="noopener">here</a>.</p>
+      <p>Made with assistance from Claude by Anthropic. More information can be found <a href="https://geordie.lol/hue-and-seek" target="_blank" rel="noopener">here</a>.</p>
 
       <div class="sheet-actions">
         <button class="btn primary" id="rulesBackBtn">Back</button>
@@ -2060,12 +2053,10 @@ function renderCompletionist(){
   ].join('');
   $('compFound').textContent =
     st.tried.toLocaleString() + ' of ' + st.total.toLocaleString() + ' seen';
+  // The list length, not a hard 4,959 — offline it falls back to a short one.
   $('compBlurb').textContent =
-    'One sheet holding every hue, and the whole name list to work through — a colour at a '
-    + 'time, in no order at all. Marked the Standard way: you get the name and nothing else. '
-    + 'Every colour moves you along whatever you score on it; ' + SPEC_COLLECT + '% or better '
-    + 'and it counts as caught. There is no end to a sitting, nothing here touches your daily '
-    + 'record, and it saves as you go.';
+    'Try and guess every colour in the game. All ' + st.total.toLocaleString()
+    + ' of them. Good luck!';
   $('compStartBtn').textContent = st.tried ? 'Continue' : 'Begin';
   requestAnimationFrame(() => drawSpecBar('compBar'));
 }
@@ -2400,7 +2391,7 @@ function updateRunning(){
     }
     $('running').innerHTML = out;
     $('specPct').textContent =
-      `${st.tried.toLocaleString()} of ${st.total.toLocaleString()} seen · ${pctThrough(st.through)} through`;
+      `${st.tried.toLocaleString()} of ${st.total.toLocaleString()} seen`;
     return;
   }
   const n = Math.min(sess.index + 1, TARGETS_PER_DAY);
@@ -2824,7 +2815,7 @@ window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 260)
   if (problem){
     toast(problem + ' Playing generated colour fields in the meantime.');
   } else if (source && unbaked){
-    toast(`${unbaked} row${unbaked === 1 ? ' has' : 's have'} no colours in the sheet — those days fall back to colours drawn in the browser, which can differ between players. Run the setup tool.`);
+    toast(`${unbaked} row${unbaked === 1 ? ' has' : 's have'} no colours in the sheet. Run the setup tool.`);
   }
 
   setMode(readJSON(MODE_KEY, 'standard'));
