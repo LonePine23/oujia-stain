@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hue and Seek · Setup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Serif&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0c0c0d; --surface:#141416; --raise:#1c1c1f; --rule:#2b2b2f;
+  --dim:#74747a; --text:#dcdcd8; --mat:#7d7d7d; --warn:#c8a24a;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --serif:"Instrument Serif",Georgia,serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;height:100%;}
+body{background:var(--ink);color:var(--text);font-family:var(--mono);font-size:13px;line-height:1.45;display:flex;flex-direction:column;}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;}
+:focus-visible{outline:1px solid var(--text);outline-offset:2px;}
+.hidden{display:none !important;}
+.eyebrow{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);}
+.btn{border:1px solid var(--rule);background:var(--raise);padding:9px 14px;font-size:12px;letter-spacing:.05em;text-transform:uppercase;}
+.btn:hover:not(:disabled){border-color:var(--dim);}
+.btn:disabled{opacity:.35;cursor:default;}
+.btn.primary{background:var(--text);color:var(--ink);border-color:var(--text);font-weight:600;}
+.btn.sm{padding:6px 9px;font-size:11px;}
+.btn.sm[aria-pressed="true"]{background:var(--text);color:var(--ink);border-color:var(--text);}
+
+header{border-bottom:1px solid var(--rule);padding:14px 18px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;}
+header h1{font-family:var(--serif);font-size:30px;margin:0;line-height:1;}
+header .sub{color:var(--dim);font-size:11.5px;max-width:44ch;}
+header .spacer{flex:1;}
+
+main{flex:1;display:grid;grid-template-columns:250px 1fr 330px;min-height:0;}
+@media (max-width:1060px){ main{grid-template-columns:1fr;} #filmstrip{max-height:140px;} aside{border-left:0 !important;border-top:1px solid var(--rule);} }
+
+#filmstrip{border-right:1px solid var(--rule);overflow-y:auto;padding:10px;}
+.thumb{display:flex;gap:9px;align-items:center;padding:7px;border:1px solid transparent;cursor:pointer;margin-bottom:4px;}
+.thumb[aria-selected="true"]{border-color:var(--rule);background:var(--surface);}
+.thumb img{width:46px;height:36px;object-fit:cover;display:block;background:#222;}
+.thumb .ghostTile{width:46px;height:36px;display:flex;flex:0 0 auto;background:#222;}
+.thumb .ghostTile i{flex:1;}
+.thumb .nm{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.thumb .st{font-size:10px;color:var(--dim);}
+.thumb .st.done{color:var(--text);}
+.thumb .strip{display:flex;margin-top:3px;}
+.thumb .strip i{display:block;width:11px;height:6px;}
+.thumb .day{display:inline-block;min-width:18px;color:var(--dim);font-variant-numeric:tabular-nums;}
+.thumb .pin{color:var(--warn);letter-spacing:.1em;}
+.slot .re[data-re]{cursor:pointer;}
+
+#canvasWrap{position:relative;background:var(--mat);min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+#editor{display:block;max-width:100%;max-height:100%;cursor:crosshair;}
+#empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:var(--ink);color:var(--dim);text-align:center;padding:24px;}
+#empty p{margin:0;max-width:54ch;line-height:1.6;}
+
+aside{border-left:1px solid var(--rule);overflow-y:auto;padding:16px;}
+aside section{margin-bottom:22px;}
+aside h2{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);font-weight:400;margin:0 0 9px;}
+
+/* the five slots */
+.slot{display:flex;gap:10px;align-items:center;border:1px solid var(--rule);background:var(--raise);padding:0;margin-bottom:5px;cursor:pointer;width:100%;text-align:left;}
+.slot[aria-pressed="true"]{border-color:var(--text);}
+.slot .sw{flex:0 0 auto;width:46px;height:44px;background:#2a2a2e;}
+.slot .lb{min-width:0;flex:1;padding:4px 0;}
+.slot .nm{font-family:var(--serif);font-size:16px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.slot .hx{font-size:10px;letter-spacing:.1em;color:var(--dim);}
+.slot .ix{flex:0 0 auto;width:22px;text-align:center;font-size:11px;color:var(--dim);}
+.slot .re{flex:0 0 auto;padding:0 9px 0 0;font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;}
+.slot .re:hover{color:var(--text);}
+
+.metric{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--rule);font-size:11.5px;}
+.metric span:last-child{color:var(--dim);font-variant-numeric:tabular-nums;}
+.metric span.warn{color:var(--warn);}
+label.lbl{display:block;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);margin:10px 0 5px;}
+input[type=text],input[type=date]{width:100%;background:var(--surface);border:1px solid var(--rule);color:var(--text);font:inherit;font-size:12px;padding:7px 9px;}
+textarea{width:100%;height:150px;background:var(--surface);border:1px solid var(--rule);color:var(--text);font:inherit;font-size:10.5px;padding:8px;resize:vertical;white-space:pre;}
+.stack{display:flex;gap:7px;flex-wrap:wrap;}
+.note{color:var(--dim);font-size:11px;line-height:1.5;}
+.note.warn{color:var(--warn);}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--raise);border:1px solid var(--rule);padding:10px 16px;font-size:11.5px;z-index:30;max-width:90vw;text-align:center;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Hue and Seek</h1>
+  <span class="sub">Setup — five colours and a date per photograph. The sheet is the whole publishing step.</span>
+  <span class="spacer"></span>
+  <button class="btn" id="addBtn">Add images</button>
+  <input type="file" id="fileInput" accept="image/*" multiple class="hidden">
+  <button class="btn" id="importBtn">Import sheet</button>
+  <input type="file" id="importInput" accept=".csv,text/csv" class="hidden">
+  <button class="btn primary" id="exportBtn" disabled>Download levels.csv</button>
+</header>
+
+<main>
+  <div id="filmstrip"></div>
+
+  <div id="canvasWrap">
+    <canvas id="editor"></canvas>
+    <div id="empty"><p>Add photographs to begin.<br><br>Each one gets five target colours, drawn from its own dominant regions and held apart so they read as five distinct hunts. Approve them, or click the photo to place one yourself.</p></div>
+  </div>
+
+  <aside>
+    <section>
+      <h2>This photograph</h2>
+      <label class="lbl" for="titleInput">Title</label>
+      <input type="text" id="titleInput" placeholder="Title for this image">
+      <label class="lbl" for="dateInput">Puzzle date</label>
+      <input type="date" id="dateInput">
+      <div class="stack" style="margin-top:8px;">
+        <button class="btn sm" id="pinBtn" aria-pressed="false">Pin</button>
+        <button class="btn sm" id="upBtn">↑ Earlier</button>
+        <button class="btn sm" id="downBtn">↓ Later</button>
+      </div>
+      <p class="note" style="margin-top:8px;">Setting a date drops this photograph onto that day and shifts everything from that day onward along by one — nothing else needs rejigging by hand. It pins itself there at the same time, so a later shuffle flows around it instead of moving it.</p>
+    </section>
+
+    <section>
+      <h2>The five colours</h2>
+      <div id="slots"></div>
+      <div class="stack" style="margin-top:8px;">
+        <button class="btn sm" id="autoBtn">Redraw all five</button>
+        <button class="btn sm" id="clearBtn">Clear</button>
+      </div>
+      <p class="note" style="margin-top:8px;">Select a slot, then click anywhere on the photo to place that colour by hand. Arrow keys nudge one pixel. The photo dims everywhere the selected colour <em>isn't</em>, so you can see how much room a player will have.</p>
+    </section>
+
+    <section>
+      <h2>Check</h2>
+      <div class="metric"><span>Closest pair</span><span id="mSep">—</span></div>
+      <div class="metric"><span>Smallest region</span><span id="mSize">—</span></div>
+      <div class="metric"><span>Palette spread</span><span id="mSpread">—</span></div>
+      <p class="note" id="checkNote" style="margin-top:8px;"></p>
+    </section>
+
+    <section>
+      <h2>Confirm</h2>
+      <div class="stack">
+        <button class="btn primary" id="confirmBtn" disabled>Confirm photograph</button>
+        <button class="btn" id="skipBtn">Remove</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>Schedule</h2>
+      <label class="lbl" for="startInput">First puzzle date</label>
+      <input type="date" id="startInput">
+      <div class="stack" style="margin-top:8px;">
+        <button class="btn sm" id="shuffleBtn">Shuffle</button>
+        <button class="btn sm" id="reflowBtn">Redate in order</button>
+      </div>
+      <p class="note" style="margin-top:8px;">The filmstrip <em>is</em> the schedule — one photograph per day, running forward from the first date. Shuffle reorders and redates the lot, then pulls similar-looking photographs apart so you don't get four paintings in a row. Pinned dates stay put and everything else flows around them.</p>
+    </section>
+
+    <section>
+      <h2>Export</h2>
+      <textarea id="exportBox" readonly placeholder="Confirm at least one photograph."></textarea>
+      <div class="stack" style="margin-top:8px;">
+        <button class="btn" id="copyBtn">Copy</button>
+        <button class="btn" id="downloadBtn">Download</button>
+      </div>
+      <p class="note" style="margin-top:8px;">Commit <code>levels.csv</code> next to <code>index.html</code>, and the photographs into <code>images/</code>. The game reads the sheet on load, so a new row is a new day with no rebuild.</p>
+    </section>
+  </aside>
+</main>
+
+<div id="toast" class="hidden"></div>
+
+<script>
+"use strict";
+
+/* ---------- colour maths (identical to the game) ---------- */
+const RAD = Math.PI/180;
+function srgbToLinear(c){c/=255;return c<=0.04045?c/12.92:Math.pow((c+0.055)/1.055,2.4);}
+function rgbToLab(r,g,b){
+  const R=srgbToLinear(r),G=srgbToLinear(g),B=srgbToLinear(b);
+  let X=R*0.4124564+G*0.3575761+B*0.1804375;
+  let Y=R*0.2126729+G*0.7151522+B*0.0721750;
+  let Z=R*0.0193339+G*0.1191920+B*0.9503041;
+  X/=0.95047; Z/=1.08883;
+  const f=t=>t>0.008856451679?Math.cbrt(t):(903.2962962*t+16)/116;
+  const fx=f(X),fy=f(Y),fz=f(Z);
+  return [116*fy-16,500*(fx-fy),200*(fy-fz)];
+}
+function hueDeg(b,ap){ if(b===0&&ap===0)return 0; const h=Math.atan2(b,ap)/RAD; return h<0?h+360:h; }
+function deltaE00(lab1,lab2){
+  const [L1,a1,b1]=lab1,[L2,a2,b2]=lab2;
+  const C1=Math.hypot(a1,b1),C2=Math.hypot(a2,b2),Cbar=(C1+C2)/2;
+  const Cb7=Math.pow(Cbar,7);
+  const G=0.5*(1-Math.sqrt(Cb7/(Cb7+6103515625)));
+  const a1p=(1+G)*a1,a2p=(1+G)*a2;
+  const C1p=Math.hypot(a1p,b1),C2p=Math.hypot(a2p,b2);
+  const h1p=hueDeg(b1,a1p),h2p=hueDeg(b2,a2p);
+  const dLp=L2-L1,dCp=C2p-C1p;
+  let dhp=0;
+  if(C1p*C2p!==0){ dhp=h2p-h1p; if(dhp>180)dhp-=360; else if(dhp<-180)dhp+=360; }
+  const dHp=2*Math.sqrt(C1p*C2p)*Math.sin(dhp*RAD/2);
+  const Lbp=(L1+L2)/2,Cbp=(C1p+C2p)/2;
+  let hbp;
+  if(C1p*C2p===0) hbp=h1p+h2p;
+  else { const d=Math.abs(h1p-h2p);
+    if(d<=180)hbp=(h1p+h2p)/2; else if(h1p+h2p<360)hbp=(h1p+h2p+360)/2; else hbp=(h1p+h2p-360)/2; }
+  const T=1-0.17*Math.cos((hbp-30)*RAD)+0.24*Math.cos((2*hbp)*RAD)+0.32*Math.cos((3*hbp+6)*RAD)-0.20*Math.cos((4*hbp-63)*RAD);
+  const dTheta=30*Math.exp(-Math.pow((hbp-275)/25,2));
+  const Cbp7=Math.pow(Cbp,7);
+  const Rc=2*Math.sqrt(Cbp7/(Cbp7+6103515625));
+  const Sl=1+(0.015*Math.pow(Lbp-50,2))/Math.sqrt(20+Math.pow(Lbp-50,2));
+  const Sc=1+0.045*Cbp, Sh=1+0.015*Cbp*T;
+  const Rt=-Math.sin(2*dTheta*RAD)*Rc;
+  const tL=dLp/Sl,tC=dCp/Sc,tH=dHp/Sh;
+  return Math.sqrt(tL*tL+tC*tC+tH*tH+Rt*tC*tH);
+}
+const hex2rgb=h=>{const n=parseInt(h.slice(1),16);return [n>>16&255,n>>8&255,n&255];};
+const rgb2hex=(r,g,b)=>'#'+[r,g,b].map(v=>Math.round(v).toString(16).padStart(2,'0')).join('');
+
+/* ---------- constants shared with the game ---------- */
+const TARGETS = 5;
+const MIN_SEPARATION = 15;     // ΔE below which two of the day's colours read as the same hunt
+/* The band the game reveals on lock-in, and what the mask preview here
+   shows. A fixed perceptual threshold rather than a score, so retuning
+   the marking curve never quietly changes how much of the frame lights
+   up. Keep this in step with REVEAL_DE in the game. */
+const REVEAL_DE = 4.5;
+
+/* ---------- names ---------- */
+const NAME_SOURCES=[
+  'https://cdn.jsdelivr.net/npm/color-name-list/dist/colornames.bestof.json',
+  'https://unpkg.com/color-name-list/dist/colornames.bestof.json',
+  'https://cdnjs.cloudflare.com/ajax/libs/color-name-list/14.47.0/colornames.bestof.json'
+];
+let NAMES=[];
+(async()=>{
+  for(const u of NAME_SOURCES){
+    try{
+      const r=await fetch(u,{cache:'force-cache'}); if(!r.ok) continue;
+      const raw=await r.json(); if(!Array.isArray(raw)||raw.length<200) continue;
+      NAMES=raw.map(c=>{const [r2,g2,b2]=hex2rgb(c.hex);return {name:c.name,hex:c.hex,lab:rgbToLab(r2,g2,b2)};});
+      break;
+    }catch(e){}
+  }
+  if(!NAMES.length) toast('Colour names unavailable offline — the game will still name them if it can reach the CDN.');
+  if(ST.current) renderSlots();
+})();
+function nameOf(lab){
+  let best='—',bd=Infinity;
+  for(const n of NAMES){const d=deltaE00(lab,n.lab); if(d<bd){bd=d;best=n.name;}}
+  return best;
+}
+
+/* ---------- state ---------- */
+const ST = { items: [], current: null, slot: 0 };
+const $ = id => document.getElementById(id);
+const editor = $('editor'), ectx = editor.getContext('2d', {willReadFrequently:true});
+
+let toastTimer;
+function toast(m){ const t=$('toast'); t.textContent=m; t.classList.remove('hidden'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.add('hidden'),5500); }
+
+const pad2 = n => String(n).padStart(2,'0');
+const todayStr = () => { const d=new Date(); return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); };
+function shiftDate(s, days){ const [y,m,d]=s.split('-').map(Number); const dt=new Date(y,m-1,d); dt.setDate(dt.getDate()+days); return dt.getFullYear()+'-'+pad2(dt.getMonth()+1)+'-'+pad2(dt.getDate()); }
+
+/* ---------- ingest ---------- */
+$('addBtn').onclick = () => $('fileInput').click();
+$('fileInput').onchange = async ev => {
+  const files=[...ev.target.files].sort((a,b)=>a.name.localeCompare(b.name));
+  const added=[];
+  for(const f of files){ const it = await addFile(f); if(it) added.push(it); }
+  ev.target.value='';
+  fillUndated();                       // new arrivals take the next free days
+  // Land on the first photograph that still needs its five colours, rather
+  // than leaving a carried-over row selected with nothing to do.
+  const next = added.find(i=>!i.confirmed) || added[0] || (!ST.current && ST.items[0]);
+  if(next) select(next);
+  renderStrip(); rebuildExport();
+};
+
+function readAsDataURL(file){
+  return new Promise((res,rej)=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.onerror=rej; fr.readAsDataURL(file); });
+}
+function loadImg(src){
+  return new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=src; });
+}
+
+/* A row carried over from the sheet whose photograph is not loaded: date,
+   title and five hexes, and nothing else. It exports byte-for-byte as it
+   came in, so publishing a new batch no longer means re-importing the
+   whole back catalogue — which is what used to make deleting old
+   photographs the only way to keep this tool quick. Its date is already
+   live in the game, so it arrives pinned and shuffling flows around it. */
+function makeGhost(filename, date, title, hexes){
+  return {
+    id: 'g' + Math.random().toString(36).slice(2,9),
+    filename,
+    title: title || filename.replace(/\.[^.]+$/,''),
+    date: date || '',
+    dataURL: null, img: null, sig: null, analysis: null,
+    targets: hexes.map(h => h ? {x:0.5, y:0.5, hex:h} : null),
+    pinned: true,
+    confirmed: hexes.every(Boolean),
+    ghost: true
+  };
+}
+
+async function addFile(file){
+  const seen = ST.items.find(i => i.filename === file.name);
+  if (seen && !seen.ghost) return null;
+  const url = await readAsDataURL(file);
+  const img = await loadImg(url);
+
+  // The photograph behind a carried-over row has turned up: give it back
+  // rather than refusing the file as a duplicate. The sheet's hexes stand;
+  // only the markers need finding, since the sheet never stored positions.
+  if (seen){
+    seen.dataURL = url; seen.img = img; seen.sig = thumbSignature(img);
+    seen.ghost = false; seen.analysis = null;
+    analyse(seen);
+    seen.targets = seen.targets.map(t => t ? Object.assign(locateHex(seen, t.hex), {hex:t.hex}) : null);
+    if (!seen.targets.some(Boolean)) fillTargets(seen, true);
+    return seen;
+  }
+
+  const item = {
+    id: 'i'+Math.random().toString(36).slice(2,9),
+    filename: file.name,
+    title: file.name.replace(/\.[^.]+$/,''),
+    date: '',
+    dataURL: url, img,
+    targets: new Array(TARGETS).fill(null),   // {x,y,hex} in 0–1 coords
+    pinned: false,          // a pinned date survives shuffling and redating
+    sig: thumbSignature(img),
+    confirmed: false
+  };
+  ST.items.push(item);
+  return item;
+}
+
+/* How a photograph reads at thumbnail size, in one Lab value: the whole
+   frame squashed to 8×8 and averaged. Cheap enough to run on every image
+   at load, and a good enough proxy for "these two look alike in a row" —
+   two dark brown frames land close together whether one is a Rembrandt
+   and the other is a film photo of a pub. That is exactly the adjacency
+   worth avoiding, so it is the right signal for spacing the schedule. */
+function thumbSignature(img){
+  const cv=document.createElement('canvas'); cv.width=8; cv.height=8;
+  const c=cv.getContext('2d',{willReadFrequently:true});
+  c.imageSmoothingQuality='high';
+  c.drawImage(img,0,0,8,8);
+  const d=c.getImageData(0,0,8,8).data;
+  let r=0,g=0,b=0;
+  for(let i=0;i<64;i++){ r+=d[i*4]; g+=d[i*4+1]; b+=d[i*4+2]; }
+  return rgbToLab(r/64,g/64,b/64);
+}
+
+/* ---------- analysis ---------- */
+const ANALYSIS_MAX = 190;
+const CLUSTERS = 14;
+
+function analyse(item){
+  const img = item.img;
+  const long = Math.max(img.naturalWidth, img.naturalHeight);
+  const k = ANALYSIS_MAX / long;
+  const aw = Math.max(8, Math.round(img.naturalWidth * k));
+  const ah = Math.max(8, Math.round(img.naturalHeight * k));
+  const cv = document.createElement('canvas'); cv.width=aw; cv.height=ah;
+  const c = cv.getContext('2d',{willReadFrequently:true});
+  c.drawImage(img,0,0,aw,ah);
+  const d = c.getImageData(0,0,aw,ah).data;
+  const n = aw*ah;
+
+  const labs = new Float32Array(n*3);
+  for(let i=0;i<n;i++){
+    const lab = rgbToLab(d[i*4],d[i*4+1],d[i*4+2]);
+    labs[i*3]=lab[0]; labs[i*3+1]=lab[1]; labs[i*3+2]=lab[2];
+  }
+
+  const K = CLUSTERS;
+  const cen = kmeansPP(labs, n, K);
+  const assign = new Int16Array(n);
+  const counts = new Int32Array(K);
+  for(let iter=0; iter<14; iter++){
+    counts.fill(0);
+    const sums = new Float64Array(K*3);
+    for(let i=0;i<n;i++){
+      let bi=0,bd=Infinity;
+      for(let j=0;j<K;j++){
+        const dl=labs[i*3]-cen[j*3], da=labs[i*3+1]-cen[j*3+1], db=labs[i*3+2]-cen[j*3+2];
+        const dist=dl*dl+da*da+db*db;
+        if(dist<bd){bd=dist;bi=j;}
+      }
+      assign[i]=bi; counts[bi]++;
+      sums[bi*3]+=labs[i*3]; sums[bi*3+1]+=labs[i*3+1]; sums[bi*3+2]+=labs[i*3+2];
+    }
+    for(let j=0;j<K;j++){
+      if(!counts[j]) continue;
+      cen[j*3]=sums[j*3]/counts[j];
+      cen[j*3+1]=sums[j*3+1]/counts[j];
+      cen[j*3+2]=sums[j*3+2]/counts[j];
+    }
+  }
+
+  item.analysis = {aw,ah,n,K,labs,assign,cen,counts,data:d};
+}
+
+function kmeansPP(labs, n, K){
+  const centres = new Float64Array(K*3);
+  const first = Math.floor(Math.random()*n);
+  centres[0]=labs[first*3]; centres[1]=labs[first*3+1]; centres[2]=labs[first*3+2];
+  const dist = new Float64Array(n).fill(Infinity);
+  for(let j=1;j<K;j++){
+    let total=0;
+    for(let i=0;i<n;i++){
+      const dl=labs[i*3]-centres[(j-1)*3], da=labs[i*3+1]-centres[(j-1)*3+1], db=labs[i*3+2]-centres[(j-1)*3+2];
+      const dd=dl*dl+da*da+db*db;
+      if(dd<dist[i]) dist[i]=dd;
+      total+=dist[i];
+    }
+    let t=Math.random()*total, pick=0;
+    for(let i=0;i<n;i++){ t-=dist[i]; if(t<=0){pick=i;break;} }
+    centres[j*3]=labs[pick*3]; centres[j*3+1]=labs[pick*3+1]; centres[j*3+2]=labs[pick*3+2];
+  }
+  return centres;
+}
+
+/** Member pixel nearest a cluster's centre of mass, in 0–1 coordinates. */
+function clusterPoint(A, j){
+  let sx=0, sy=0;
+  for(let i=0;i<A.n;i++) if(A.assign[i]===j){ sx+=i%A.aw; sy+=(i/A.aw)|0; }
+  const cx=sx/A.counts[j], cy=sy/A.counts[j];
+  let bx=cx, by=cy, bd=Infinity;
+  for(let i=0;i<A.n;i++){
+    if(A.assign[i]!==j) continue;
+    const x=i%A.aw, y=(i/A.aw)|0;
+    const dd=(x-cx)*(x-cx)+(y-cy)*(y-cy);
+    if(dd<bd){bd=dd;bx=x;by=y;}
+  }
+  return {x:(bx+0.5)/A.aw, y:(by+0.5)/A.ah};
+}
+
+/* Nudge onto the flattest spot nearby, so a target isn't a lone edge pixel
+   that exists in exactly one place and can't be hit twice. Same routine the
+   game uses for archive rounds, so hand-picked and auto-picked agree. */
+function refinePoint(item, nx, ny){
+  const W = item.img.naturalWidth, H = item.img.naturalHeight;
+  const span = Math.round(Math.min(W,H) * 0.03);
+  let bestX=nx*W, bestY=ny*H, bestVar=Infinity;
+  for(let dy=-2; dy<=2; dy++) for(let dx=-2; dx<=2; dx++){
+    const x = Math.max(3, Math.min(W-4, nx*W + dx*span/2));
+    const y = Math.max(3, Math.min(H-4, ny*H + dy*span/2));
+    const centre = sampleAtPx(item, x/W, y/H);
+    let variance = 0;
+    for(const [ox,oy] of [[-3,0],[3,0],[0,-3],[0,3]]){
+      const s = sampleAtPx(item, (x+ox)/W, (y+oy)/H, 1);
+      variance += Math.abs(s[0]-centre[0])+Math.abs(s[1]-centre[1])+Math.abs(s[2]-centre[2]);
+    }
+    if(variance < bestVar){ bestVar=variance; bestX=x; bestY=y; }
+  }
+  return {x:bestX/W, y:bestY/H};
+}
+
+/** Sample the working image at the same cap and disc radius the game uses,
+ *  so the hex in the sheet is exactly the hex a player is scored against. */
+function sampleAtPx(item, nx, ny, R = 2){
+  const long=Math.max(item.img.naturalWidth,item.img.naturalHeight);
+  const k = long>2000 ? 2000/long : 1;
+  const w=Math.round(item.img.naturalWidth*k), h=Math.round(item.img.naturalHeight*k);
+  if(!item._full || item._full.width!==w){
+    const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+    const c=cv.getContext('2d',{willReadFrequently:true});
+    c.imageSmoothingQuality='high';
+    c.drawImage(item.img,0,0,w,h);
+    item._full=cv; item._fullData=c.getImageData(0,0,w,h).data;
+  }
+  const d=item._fullData;
+  const x0=Math.round(nx*w), y0=Math.round(ny*h);
+  let r=0,g=0,b=0,n=0;
+  for(let dy=-R;dy<=R;dy++) for(let dx=-R;dx<=R;dx++){
+    if(dx*dx+dy*dy>R*R) continue;
+    const px=x0+dx, py=y0+dy;
+    if(px<0||py<0||px>=w||py>=h) continue;
+    const i=(py*w+px)*4; r+=d[i]; g+=d[i+1]; b+=d[i+2]; n++;
+  }
+  return n? [r/n,g/n,b/n] : [0,0,0];
+}
+const sampleHex = (item,nx,ny) => { const c = sampleAtPx(item,nx,ny); return rgb2hex(c[0],c[1],c[2]); };
+
+/* Five colours out of one photograph. Weighted towards vivid regions that
+   occupy a findable slice of the frame, drawn without replacement, and held
+   apart by ΔE so you get five distinct hunts rather than three browns and
+   two other browns. The separation rule relaxes only if the photograph
+   genuinely hasn't got five distinguishable regions in it. */
+function autoTargets(item, keep = []){
+  const A = item.analysis;
+
+  /* Every candidate is resolved to the colour it would actually serve
+     BEFORE anything is compared. Comparing cluster centroids instead is
+     subtly wrong twice over: k-means asked for fourteen clusters on a
+     photograph holding eight colours returns near-duplicates, and two
+     clusters genuinely apart in Lab can still be interleaved in the frame
+     and resolve onto the same pixel. Either way two slots end up holding
+     the same colour. Judge what will be served. */
+  const cands = [];
+  for(let j=0;j<A.K;j++){
+    if(!A.counts[j]) continue;
+    const area = A.counts[j]/A.n;
+    if(area > 0.45) continue;
+    const centroid = [A.cen[j*3],A.cen[j*3+1],A.cen[j*3+2]];
+    const seed = clusterPoint(A, j);
+    let pt = refinePoint(item, seed.x, seed.y);
+    let rgb = sampleAtPx(item, pt.x, pt.y);
+    /* Refinement nudges off a lone edge pixel; it isn't licence to go for
+       a walk. If the flattest neighbour within 3% of the frame isn't the
+       colour we came for, it has left its own region — keep the seed. */
+    if(deltaE00(rgbToLab(rgb[0],rgb[1],rgb[2]), centroid) > 6){
+      pt = seed; rgb = sampleAtPx(item, seed.x, seed.y);
+    }
+    const lab = rgbToLab(rgb[0],rgb[1],rgb[2]);
+    const chroma = Math.hypot(lab[1],lab[2]);
+    cands.push({area, lab, x:pt.x, y:pt.y, hex:rgb2hex(rgb[0],rgb[1],rgb[2]),
+                weight:(area<0.006?0.4:1)*(0.25+chroma/55)*Math.pow(area,0.35)});
+  }
+
+  // Candidates that landed on the same colour are one candidate.
+  const pool = [];
+  for(const p of cands.slice().sort((a,b)=>b.area-a.area)){
+    const twin = pool.find(m => deltaE00(m.lab, p.lab) < 4);
+    if(twin) twin.area += p.area;
+    else pool.push(p);
+  }
+
+  const chosen = [];
+  const fixedLabs = keep.map(t => rgbToLab(...hex2rgb(t.hex)));
+  const want = TARGETS - keep.length;
+  for(const sep of [MIN_SEPARATION, 11, 7, 4]){
+    let guard=0;
+    while(chosen.length < want && guard++ < 300){
+      const ok = pool.filter(p => !chosen.includes(p) &&
+        fixedLabs.every(l => deltaE00(l,p.lab) >= sep) &&
+        chosen.every(q => deltaE00(q.lab,p.lab) >= sep));
+      if(!ok.length) break;
+      let roll = Math.random()*ok.reduce((a,p)=>a+p.weight,0);
+      let pick = ok[ok.length-1];
+      for(const p of ok){ roll -= p.weight; if(roll<=0){ pick=p; break; } }
+      chosen.push(pick);
+    }
+    if(chosen.length >= want) break;
+  }
+  // Rather than leave a slot empty, repeat and let the check panel flag it.
+  for(const p of cands){ if(chosen.length >= want) break; if(!chosen.includes(p)) chosen.push(p); }
+
+  chosen.sort((a,b)=>b.area-a.area);
+  return chosen.map(p => ({x:p.x, y:p.y, hex:p.hex}));
+}
+
+/** The point in the photograph closest to a given colour. Used when a sheet
+ *  is imported: the row carries the hex but not where it lives. */
+function locateHex(item, hex){
+  const A = item.analysis;
+  const lab = rgbToLab(...hex2rgb(hex));
+  let bi = 0, bd = Infinity;
+  for(let i=0;i<A.n;i++){
+    const d = deltaE00(lab, [A.labs[i*3],A.labs[i*3+1],A.labs[i*3+2]]);
+    if(d < bd){ bd = d; bi = i; }
+  }
+  return {x: ((bi % A.aw) + 0.5)/A.aw, y: (((bi / A.aw)|0) + 0.5)/A.ah};
+}
+
+function fillTargets(item, redrawAll){
+  if(!item.analysis) analyse(item);
+  if(redrawAll) item.targets = new Array(TARGETS).fill(null);
+  const keep = item.targets.filter(Boolean);
+  const fresh = autoTargets(item, keep);
+  let f = 0;
+  for(let i=0;i<TARGETS;i++) if(!item.targets[i] && f < fresh.length) item.targets[i] = fresh[f++];
+}
+
+/* ---------- measurements ---------- */
+/** Share of the frame within scoring range of a colour, and how the day's
+ *  five sit against each other. */
+function measure(item){
+  const A = item.analysis;
+  const set = item.targets.filter(Boolean);
+  if(!A || !set.length) return null;
+  const thr = REVEAL_DE;
+
+  let smallest = Infinity;
+  for(const t of set){
+    const lab = rgbToLab(...hex2rgb(t.hex));
+    let hits = 0;
+    for(let i=0;i<A.n;i++){
+      if(deltaE00(lab,[A.labs[i*3],A.labs[i*3+1],A.labs[i*3+2]]) <= thr) hits++;
+    }
+    smallest = Math.min(smallest, hits/A.n);
+  }
+
+  let closest = Infinity;
+  for(let a=0;a<set.length;a++) for(let b=a+1;b<set.length;b++){
+    closest = Math.min(closest, deltaE00(rgbToLab(...hex2rgb(set[a].hex)), rgbToLab(...hex2rgb(set[b].hex))));
+  }
+
+  let spreadSum=0, wsum=0;
+  for(let a=0;a<A.K;a++) for(let b=a+1;b<A.K;b++){
+    if(!A.counts[a]||!A.counts[b]) continue;
+    const w=A.counts[a]*A.counts[b];
+    spreadSum += w*deltaE00([A.cen[a*3],A.cen[a*3+1],A.cen[a*3+2]],[A.cen[b*3],A.cen[b*3+1],A.cen[b*3+2]]);
+    wsum+=w;
+  }
+  return {smallest, closest: set.length>1 ? closest : Infinity, spread: wsum? spreadSum/wsum : 0};
+}
+
+/* ---------- editor rendering ---------- */
+let fit = {scale:1,w:0,h:0};
+
+function select(item){
+  ST.current = item;
+  ST.slot = 0;
+  if(!item.ghost){
+    if(!item.analysis) analyse(item);
+    if(!item.targets.some(Boolean)) fillTargets(item, true);
+  }
+  $('titleInput').value = item.title || '';
+  $('dateInput').value = item.date || '';
+  $('pinBtn').setAttribute('aria-pressed', String(!!item.pinned));
+  $('pinBtn').textContent = item.pinned ? 'Pinned' : 'Pin';
+
+  if(item.ghost){
+    // Nothing to draw and nothing to re-pick: the row is already published.
+    editor.width = editor.height = 0;
+    $('empty').innerHTML = `<p><b>${item.title || item.filename}</b> came from the sheet.<br><br>`
+      + 'Its five colours are already live and export unchanged. Add the photograph itself '
+      + 'if you want to re-pick them.</p>';
+    $('empty').classList.remove('hidden');
+  } else {
+    $('empty').classList.add('hidden');
+    layout();
+  }
+  renderSlots(); renderStrip(); rebuildExport();
+}
+
+function layout(){
+  const it = ST.current; if(!it || it.ghost) return;
+  const wrap = $('canvasWrap').getBoundingClientRect();
+  const s = Math.min((wrap.width-24)/it.img.naturalWidth, (wrap.height-24)/it.img.naturalHeight, 1);
+  fit = {scale:s, w:Math.round(it.img.naturalWidth*s), h:Math.round(it.img.naturalHeight*s)};
+  const dpr = Math.min(window.devicePixelRatio||1, 2);
+  editor.width = fit.w*dpr; editor.height = fit.h*dpr;
+  editor.style.width = fit.w+'px'; editor.style.height = fit.h+'px';
+  ectx.setTransform(dpr,0,0,dpr,0,0);
+  drawEditor();
+}
+
+function drawEditor(){
+  const it = ST.current; if(!it || it.ghost) return;
+  ectx.clearRect(0,0,fit.w,fit.h);
+  ectx.drawImage(it.img,0,0,fit.w,fit.h);
+
+  // Dim everything the selected colour does NOT reach — the same band the
+  // game reveals on lock-in, so this is a preview of the player's answer.
+  const active = it.targets[ST.slot];
+  if(active && it.analysis){
+    const A=it.analysis, target=rgbToLab(...hex2rgb(active.hex));
+    const thr = REVEAL_DE;
+    const off=document.createElement('canvas'); off.width=A.aw; off.height=A.ah;
+    const oc=off.getContext('2d');
+    const im=oc.createImageData(A.aw,A.ah);
+    for(let i=0;i<A.n;i++){
+      const on = deltaE00(target,[A.labs[i*3],A.labs[i*3+1],A.labs[i*3+2]]) <= thr;
+      im.data[i*4]=0; im.data[i*4+1]=0; im.data[i*4+2]=0;
+      im.data[i*4+3]= on?0:135;
+    }
+    oc.putImageData(im,0,0);
+    ectx.save(); ectx.imageSmoothingEnabled=true;
+    ectx.drawImage(off,0,0,fit.w,fit.h);
+    ectx.restore();
+  }
+
+  it.targets.forEach((t,i)=>{
+    if(!t) return;
+    const x=t.x*fit.w, y=t.y*fit.h, on=(i===ST.slot);
+    ectx.save();
+    ectx.lineWidth = on?1.8:1.2;
+    ectx.globalAlpha = on?1:0.55;
+    ectx.strokeStyle='#000'; ectx.beginPath(); ectx.arc(x,y,on?9:6,0,Math.PI*2); ectx.stroke();
+    ectx.strokeStyle='#fff'; ectx.beginPath(); ectx.arc(x,y,on?10.5:7.5,0,Math.PI*2); ectx.stroke();
+    if(on){
+      ectx.beginPath();
+      ectx.moveTo(x-16,y); ectx.lineTo(x-4,y); ectx.moveTo(x+4,y); ectx.lineTo(x+16,y);
+      ectx.moveTo(x,y-16); ectx.lineTo(x,y-4); ectx.moveTo(x,y+4); ectx.lineTo(x,y+16);
+      ectx.stroke();
+    }
+    ectx.fillStyle='#fff'; ectx.font='500 10px '+getComputedStyle(document.body).fontFamily;
+    ectx.fillText(String(i+1), x+(on?13:10), y-(on?11:8));
+    ectx.restore();
+  });
+}
+
+function setPoint(nx,ny){
+  const it=ST.current; if(!it) return;
+  const x=Math.max(0,Math.min(1,nx)), y=Math.max(0,Math.min(1,ny));
+  it.targets[ST.slot] = {x, y, hex:sampleHex(it,x,y)};
+  drawEditor(); renderSlots(); renderStrip(); rebuildExport();
+}
+
+editor.addEventListener('pointerdown', ev=>{
+  if(ST.current && ST.current.ghost) return;
+  const r=editor.getBoundingClientRect();
+  setPoint((ev.clientX-r.left)/r.width, (ev.clientY-r.top)/r.height);
+});
+
+window.addEventListener('keydown', ev=>{
+  const it=ST.current; if(!it || it.ghost) return;
+  if(document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return;
+  if(/^[1-5]$/.test(ev.key)){ ev.preventDefault(); ST.slot=Number(ev.key)-1; drawEditor(); renderSlots(); return; }
+  const t = it.targets[ST.slot]; if(!t) return;
+  const map={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]};
+  if(!map[ev.key]) return;
+  ev.preventDefault();
+  const step=ev.shiftKey?10:1;
+  setPoint(t.x + map[ev.key][0]*step/it.img.naturalWidth,
+           t.y + map[ev.key][1]*step/it.img.naturalHeight);
+});
+
+/* ---------- panels ---------- */
+function renderSlots(){
+  const it=ST.current, box=$('slots');
+  box.innerHTML='';
+  if(!it) return;
+  it.targets.forEach((t,i)=>{
+    const b=document.createElement('button');
+    b.className='slot';
+    b.setAttribute('aria-pressed', String(ST.slot===i));
+    const name = t ? (NAMES.length ? nameOf(rgbToLab(...hex2rgb(t.hex))) : '(names loading)') : 'empty';
+    const hint = t ? t.hex.toUpperCase() : (it.ghost ? 'not in the sheet' : 'click the photo');
+    b.innerHTML = `<div class="sw" style="background:${t?t.hex:'#2a2a2e'}"></div>
+      <div class="ix">${i+1}</div>
+      <div class="lb"><div class="nm">${name}</div><div class="hx">${hint}</div></div>
+      ${it.ghost ? '' : `<div class="re" data-re="${i}">Redraw</div>`}`;
+    b.onclick = ev => {
+      if(it.ghost) return;                       // published: nothing to re-pick
+      if(ev.target.dataset.re != null){
+        it.targets[i]=null;
+        fillTargets(it,false);
+        ST.slot=i;
+      } else ST.slot=i;
+      drawEditor(); renderSlots(); renderStrip(); rebuildExport();
+    };
+    box.appendChild(b);
+  });
+  renderCheck();
+}
+
+function renderCheck(){
+  const it=ST.current;
+  const full = it && it.targets.every(Boolean);
+  $('confirmBtn').disabled = !full || !it.date;
+  const m = it ? measure(it) : null;
+  if(!m){ $('mSep').textContent=$('mSize').textContent=$('mSpread').textContent='—'; $('checkNote').textContent=''; return; }
+
+  const tight = isFinite(m.closest) && m.closest < MIN_SEPARATION;
+  const tiny  = m.smallest < 0.004;
+  $('mSep').innerHTML   = isFinite(m.closest) ? `<span class="${tight?'warn':''}">ΔE ${m.closest.toFixed(1)}</span>` : '—';
+  $('mSize').innerHTML  = `<span class="${tiny?'warn':''}">${(m.smallest*100).toFixed(2)}% of frame</span>`;
+  $('mSpread').textContent = 'ΔE ' + m.spread.toFixed(0) + (m.spread<20?' (narrow)':'');
+
+  const notes=[];
+  if(!full) notes.push('Five colours needed before this photograph can be confirmed.');
+  if(it && !it.date) notes.push('Give it a date.');
+  if(tight) notes.push(`Two of the five are only ΔE ${m.closest.toFixed(1)} apart — close enough that they play as the same hunt twice. Redraw one.`);
+  if(tiny) notes.push('One colour covers almost none of the frame. Findable, but brutal.');
+  const el=$('checkNote');
+  el.className = 'note' + ((tight||tiny)?' warn':'');
+  el.textContent = notes.join(' ') || 'Five distinct colours, each with somewhere to be found. Good to go.';
+}
+
+function renderStrip(){
+  const strip=$('filmstrip');
+  strip.innerHTML='';
+  const dates = ST.items.map(i=>i.date).filter(Boolean);
+  ST.items.forEach((it,idx)=>{
+    const el=document.createElement('div');
+    el.className='thumb';
+    el.setAttribute('aria-selected', String(ST.current===it));
+    const dup = it.date && dates.filter(d=>d===it.date).length>1;
+    const n = it.targets.filter(Boolean).length;
+    const status = !it.date ? 'no date' : (dup ? 'DATE CLASH · '+it.date : it.date);
+    const day = idx + 1;
+    // A carried-over row has no photograph to show, so its own five
+    // colours stand in for the thumbnail.
+    const tile = it.ghost
+      ? `<div class="ghostTile">${it.targets.map(t=>`<i style="background:${t?t.hex:'#26262a'}"></i>`).join('')}</div>`
+      : `<img src="${it.dataURL}" alt="">`;
+    el.innerHTML=`${tile}<div style="min-width:0;flex:1">
+      <div class="nm"><span class="day">${day}</span>${it.title || it.filename}</div>
+      <div class="st ${it.confirmed?'done':''}">${it.ghost?'<span class="pin">SHEET</span> ':(it.pinned?'<span class="pin">PIN</span> ':'')}${status} · ${n}/${TARGETS}</div>
+      <div class="strip">${it.targets.map(t=>`<i style="background:${t?t.hex:'#26262a'}"></i>`).join('')}</div>
+      </div>`;
+    el.onclick=()=>select(it);
+    strip.appendChild(el);
+  });
+}
+
+$('titleInput').oninput = () => { if(!ST.current) return; ST.current.title=$('titleInput').value; renderStrip(); rebuildExport(); };
+$('dateInput').onchange = () => {
+  const it=ST.current, d=$('dateInput').value;
+  if(!it || !d) return;
+  insertAt(it, d);
+  afterSchedule('Placed on '+d+' — everything from that day shifted along.');
+};
+$('autoBtn').onclick  = () => { if(!ST.current || ST.current.ghost) return; fillTargets(ST.current,true); drawEditor(); renderSlots(); renderStrip(); rebuildExport(); };
+$('clearBtn').onclick = () => { if(!ST.current || ST.current.ghost) return; ST.current.targets=new Array(TARGETS).fill(null); drawEditor(); renderSlots(); renderStrip(); rebuildExport(); };
+
+$('confirmBtn').onclick=()=>{
+  const it=ST.current; if(!it) return;
+  it.confirmed=true;
+  renderStrip(); rebuildExport();
+  const next = ST.items.find(i=>!i.confirmed);
+  if(next) select(next); else toast('Every photograph confirmed. Download the sheet.');
+};
+$('skipBtn').onclick=()=>{
+  const it=ST.current; if(!it) return;
+  ST.items=ST.items.filter(i=>i!==it);
+  ST.current=null;
+  if(ST.items.length) select(ST.items[0]);
+  else {
+    $('empty').innerHTML = '<p>Add photographs to begin.</p>';
+    $('empty').classList.remove('hidden'); ectx.clearRect(0,0,fit.w,fit.h); renderSlots();
+  }
+  renderStrip(); rebuildExport();
+};
+
+/* ---------- the schedule ----------
+   The filmstrip order IS the running order, and dates are just that order
+   walked forward a day at a time from the first date. Everything below is
+   built on that one idea, which is what makes inserting a photograph a
+   single action rather than renumbering two dozen rows by hand.
+
+   A pinned photograph is the exception: it holds its date, and the
+   unpinned ones flow around it.
+   ----------------------------------------------------------------- */
+$('startInput').value = todayStr();
+
+const byDate = (a,b) => (a.date||'9999').localeCompare(b.date||'9999');
+const pinnedDates = () => new Set(ST.items.filter(i=>i.pinned && i.date).map(i=>i.date));
+
+/** Give every unpinned photograph the next free day, in list order. */
+function reflowDates(){
+  const claimed = pinnedDates();
+  let d = $('startInput').value || todayStr();
+  for(const it of ST.items){
+    if(it.pinned && it.date) continue;
+    while(claimed.has(d)) d = shiftDate(d,1);
+    it.date = d; claimed.add(d);
+    d = shiftDate(d,1);
+  }
+  ST.items.sort(byDate);
+}
+
+/** New photographs land on the next free days without disturbing anything
+ *  that already has a date — importing a sheet must not be undone by an
+ *  add. Only a deliberate Shuffle or Redate rewrites existing dates. */
+function fillUndated(){
+  const taken = new Set(ST.items.map(i=>i.date).filter(Boolean));
+  let d = $('startInput').value || todayStr();
+  let n = 0;
+  for(const it of ST.items){
+    if(it.date) continue;
+    while(taken.has(d)) d = shiftDate(d,1);
+    it.date = d; taken.add(d); n++;
+    d = shiftDate(d,1);
+  }
+  ST.items.sort(byDate);
+  return n;
+}
+
+/** Drop a photograph onto a day. Everything from that day onward shifts
+ *  along by one; earlier days are untouched, so slotting a birthday into
+ *  October cannot quietly rearrange August.
+ *
+ *  It is done as a reorder followed by a full reflow rather than by
+ *  shifting a range of dates directly, because shifting a range has two
+ *  failure modes that are easy to miss: run it twice on the same date and
+ *  it opens a gap in the calendar, and if a pinned photograph sits inside
+ *  the range it either gets dragged off its date or collides with the
+ *  photograph behind it. Rebuilding from the order can do neither — one
+ *  photograph per day, contiguous, pins honoured, however many times you
+ *  press it. */
+function insertAt(item, date){
+  item.date = date;
+  item.pinned = true;
+  ST.items.sort(byDate);     // put it in its new place in the running order
+  reflowDates();             // and rebuild every unpinned date around the pins
+}
+
+/** Shuffle, then space out the look of it. A plain shuffle of nine
+ *  paintings among twenty-five photographs still deals runs of three or
+ *  four, which is the very thing worth avoiding — so after shuffling we
+ *  hill-climb on the worst neighbouring pair, swapping to raise the
+ *  smallest gap between two consecutive frames. It stays random enough to
+ *  give a different answer every press. */
+function shuffleOrder(){
+  const free = ST.items.filter(i => !(i.pinned && i.date));
+  for(let i=free.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [free[i],free[j]]=[free[j],free[i]];
+  }
+  const gap = (a,b) => (a && b && a.sig && b.sig) ? deltaE00(a.sig,b.sig) : 999;
+  const worstPair = arr => {
+    let wi=0, wv=Infinity;
+    for(let i=0;i<arr.length-1;i++){ const v=gap(arr[i],arr[i+1]); if(v<wv){wv=v;wi=i;} }
+    return {i:wi, v:wv};
+  };
+  const minGap = arr => arr.length<2 ? 999 : worstPair(arr).v;
+  for(let pass=0; pass<300 && free.length>2; pass++){
+    const before = minGap(free);
+    const {i} = worstPair(free);
+    const j = Math.floor(Math.random()*free.length);
+    if(j===i) continue;
+    [free[i],free[j]]=[free[j],free[i]];
+    if(minGap(free) <= before) [free[i],free[j]]=[free[j],free[i]];   // no better, put it back
+  }
+  // Rebuild the list with pinned photographs left where they sit.
+  const out=[]; let k=0;
+  for(const it of ST.items) out.push((it.pinned && it.date) ? it : free[k++]);
+  ST.items = out;
+  reflowDates();
+}
+
+function afterSchedule(msg){
+  if(ST.current){
+    $('dateInput').value = ST.current.date || '';
+    $('pinBtn').setAttribute('aria-pressed', String(!!ST.current.pinned));
+    $('pinBtn').textContent = ST.current.pinned ? 'Pinned' : 'Pin';
+  }
+  renderStrip(); renderCheck(); rebuildExport();
+  if(msg) toast(msg);
+}
+
+$('shuffleBtn').onclick = () => {
+  if(ST.items.length < 2) return toast('Add a few photographs first.');
+  shuffleOrder();
+  const pins = ST.items.filter(i=>i.pinned).length;
+  afterSchedule(`Shuffled and redated${pins?`, ${pins} pinned date${pins===1?'':'s'} left alone`:''}.`);
+};
+$('reflowBtn').onclick = () => {
+  if(!ST.items.length) return;
+  reflowDates();
+  afterSchedule('Redated in filmstrip order.');
+};
+$('startInput').onchange = () => { if(ST.items.length){ reflowDates(); afterSchedule('Redated from '+$('startInput').value+'.'); } };
+
+$('pinBtn').onclick = () => {
+  const it=ST.current; if(!it) return;
+  if(!it.date) return toast('Give it a date before pinning it.');
+  it.pinned = !it.pinned;
+  afterSchedule(it.pinned ? 'Pinned to '+it.date+'.' : 'Unpinned — it will move on the next shuffle.');
+};
+
+/** Swap with the neighbour and redate, so the strip and the calendar never
+ *  disagree about what order things are in. */
+function nudge(dir){
+  const it=ST.current; if(!it) return;
+  const i=ST.items.indexOf(it), j=i+dir;
+  if(i<0 || j<0 || j>=ST.items.length) return;
+  if(it.pinned) return toast('Unpin it first, or set a date to move it.');
+  if(ST.items[j].pinned) return toast('The photograph next to it is pinned. Unpin that one, or set a date instead.');
+  // Trade dates rather than positions: sorting by date then puts them in
+  // the new order, and the strip and the calendar can never disagree.
+  const A=ST.items[i], B=ST.items[j], dA=A.date;
+  A.date=B.date; B.date=dA;
+  ST.items.sort(byDate);
+  afterSchedule();
+}
+$('upBtn').onclick   = () => nudge(-1);
+$('downBtn').onclick = () => nudge(1);
+
+/* ---------- export ---------- */
+function csvCell(v){
+  const s = String(v == null ? '' : v);
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+}
+function buildCSV(){
+  const rows = [['date','file','title','hex1','hex2','hex3','hex4','hex5']];
+  const ready = ST.items.filter(i => i.date && i.targets.every(Boolean))
+                        .sort((a,b)=> a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+  for(const it of ready){
+    rows.push([it.date, it.filename, it.title || it.filename.replace(/\.[^.]+$/,''),
+               ...it.targets.map(t=>t.hex)]);
+  }
+  return rows.map(r=>r.map(csvCell).join(',')).join('\n') + '\n';
+}
+
+function rebuildExport(){
+  const body = buildCSV();
+  const n = body.trim().split('\n').length - 1;
+  $('exportBox').value = n ? body : '';
+  $('exportBtn').disabled = !n;
+}
+
+$('copyBtn').onclick=async()=>{
+  if(!$('exportBox').value) return toast('Nothing ready yet — every row needs a date and five colours.');
+  try{ await navigator.clipboard.writeText($('exportBox').value); toast('Copied.'); }
+  catch(e){ $('exportBox').select(); document.execCommand('copy'); toast('Copied.'); }
+};
+function download(){
+  if(!$('exportBox').value) return toast('Nothing ready yet — every row needs a date and five colours.');
+  const blob=new Blob([$('exportBox').value],{type:'text/csv'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='levels.csv'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+$('downloadBtn').onclick=download;
+$('exportBtn').onclick=download;
+
+/* ---------- import an existing sheet ----------
+   Matched by filename against the images you've already added, so a sheet
+   that only carries dates and titles is enough to carry them over. Rows
+   with hexes bring those too; rows without leave the auto-drawn set alone. */
+function parseCSV(text){
+  const rows=[]; let row=[], field='', quoted=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(quoted){ if(c==='"'){ if(text[i+1]==='"'){field+='"';i++;} else quoted=false; } else field+=c; }
+    else if(c==='"') quoted=true;
+    else if(c===','){ row.push(field); field=''; }
+    else if(c==='\n'){ row.push(field); rows.push(row); row=[]; field=''; }
+    else if(c!=='\r') field+=c;
+  }
+  if(field.length||row.length){ row.push(field); rows.push(row); }
+  return rows.filter(r=>r.some(c=>c.trim()!==''));
+}
+const normHex = s => { const h=String(s||'').trim().replace('#',''); return /^[0-9a-f]{6}$/i.test(h)?'#'+h.toLowerCase():null; };
+
+/* A sheet that has been through Excel or Sheets comes back with 1/9/2026
+   where it went in as 2026-09-01. Read both, inferring day/month order
+   from the column — one row with a first field over 12 settles it, and
+   failing that day-first, which is what a sheet saved anywhere outside
+   the United States will have written. Export is always ISO. */
+const LOOSE_DATE = /^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})$/;
+function detectDateOrder(raw){
+  let dayFirst=false, monthFirst=false;
+  for(const s of raw){
+    const m=String(s).trim().match(LOOSE_DATE); if(!m) continue;
+    if(+m[1]>12) dayFirst=true;
+    if(+m[2]>12) monthFirst=true;
+  }
+  return (monthFirst && !dayFirst) ? 'MDY' : 'DMY';
+}
+function normaliseDate(s, order){
+  s=String(s||'').trim();
+  const iso=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if(iso) return `${iso[1]}-${pad2(+iso[2])}-${pad2(+iso[3])}`;
+  const m=s.match(LOOSE_DATE); if(!m) return null;
+  let y=+m[3]; if(y<100) y+=2000;
+  const day = order==='MDY' ? +m[2] : +m[1];
+  const mon = order==='MDY' ? +m[1] : +m[2];
+  if(mon<1||mon>12||day<1||day>31||y<1970) return null;
+  return `${y}-${pad2(mon)}-${pad2(day)}`;
+}
+
+$('importBtn').onclick=()=>$('importInput').click();
+$('importInput').onchange=async ev=>{
+  const f=ev.target.files[0]; if(!f) return;
+  ev.target.value='';
+  try{
+    const rows=parseCSV(await f.text());
+    if(rows.length<2) throw new Error('no rows under the header');
+    const head=rows[0].map(h=>h.trim().toLowerCase());
+    const at=n=>head.indexOf(n);
+    const iDate=at('date'), iFile=at('file'), iTitle=at('title');
+    const iHex=[]; for(let k=1;k<=TARGETS;k++) iHex.push(at('hex'+k));
+    if(iFile<0) throw new Error('no file column');
+
+    const body = rows.slice(1);
+    const order = detectDateOrder(body.map(r => (iDate>=0 && r[iDate]!=null ? r[iDate] : '')));
+
+    let matched=0, carried=0;
+    for(const r of body){
+      const cell=i=>(i>=0&&r[i]!=null?r[i].trim():'');
+      const file=cell(iFile); if(!file) continue;
+      const it = ST.items.find(i=>i.filename===file);
+      if(!it){
+        // No image for this row, so carry the row itself.
+        ST.items.push(makeGhost(file, normaliseDate(cell(iDate), order),
+                                cell(iTitle), iHex.map(cell).map(normHex)));
+        carried++;
+        continue;
+      }
+      const d = normaliseDate(cell(iDate), order);
+      if(d) it.date=d;
+      if(cell(iTitle)) it.title=cell(iTitle);
+      const hexes=iHex.map(cell).map(normHex);
+      if(hexes.every(Boolean)){
+        if(!it.analysis) analyse(it);
+        // The sheet carries no positions — position never scored — so find
+        // each colour in the photograph rather than parking every marker in
+        // the middle and drawing five lies on the canvas.
+        it.targets = hexes.map(hex => Object.assign(locateHex(it, hex), {hex}));
+        it.confirmed = true;
+      }
+      matched++;
+    }
+    ST.items.sort(byDate);
+    if(ST.current){ $('dateInput').value=ST.current.date||''; $('titleInput').value=ST.current.title||''; }
+    renderStrip(); renderSlots(); drawEditor(); rebuildExport();
+    const bits = [];
+    if(matched) bits.push(`Matched ${matched} row${matched===1?'':'s'} to a loaded photograph.`);
+    if(carried) bits.push(`Carried ${carried} published row${carried===1?'':'s'} through without their photographs — they export unchanged.`);
+    toast(bits.join(' ') || 'No rows in that sheet.');
+  }catch(e){ toast('Import failed: '+e.message); }
+};
+
+window.addEventListener('resize', ()=>{ if(ST.current) layout(); });
+rebuildExport();
+</script>
+</body>
+</html>
