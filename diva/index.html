@@ -174,6 +174,17 @@ button { font:inherit; cursor:pointer; border-radius:2px; }
   font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint);
 }
 
+/* a note you left yourself last time */
+.notecard {
+  border-left:2px solid var(--warm); background:var(--warm-soft);
+  padding:12px 14px; margin:18px 0 0;
+}
+.notecard .lbl {
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10px;
+  letter-spacing:.09em; text-transform:uppercase; color:var(--warm);
+}
+.notecard p { margin:4px 0 0; font-size:16px; white-space:pre-wrap; }
+
 /* segmented control inside the Guide tab */
 .seg { display:flex; margin-top:14px; border:1px solid var(--line-strong); }
 .seg button {
@@ -261,7 +272,6 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
     <span class="sw-time" id="swTime">0:00</span>
     <button id="swGo" class="go">Start</button>
     <button id="swReset">Reset</button>
-    <span class="sw-hint" id="swHint"></span>
   </div>
   <nav class="tabs">
     <button data-view="home" aria-current="true">Today</button>
@@ -671,7 +681,7 @@ const BLANK = {
   version:1,
   sessionsCompleted:0,
   lastSessionISO:null,
-  history:[],                 // {n, shape, date, done:[], skipped:[], note}
+  history:[],                 // {n, shape, date, done:[], skipped:[], load:[], note}
   tightList:[],               // {exId, addedAt, clearedAt}
   sideBias:{},                // pattern -> "L" | "R"
   measures:[],                // {id, n, date, value}
@@ -937,6 +947,14 @@ function firstMeasure(id) {
   const s = measureSeries(id);
   return s.length ? s[0] : null;
 }
+/* The note from the session immediately before this one — nothing older.
+   A session finished without a note carries nothing forward, so a blank
+   session clears the slate rather than leaving an old note hanging about. */
+function lastNote() {
+  const h = S.history[S.history.length - 1];
+  return (h && h.note) ? h : null;
+}
+
 function isAuditDue() {
   return S.sessionsCompleted > 0 && S.sessionsCompleted % 12 === 0;
 }
@@ -1085,6 +1103,12 @@ function renderSession() {
   html += '<p class="muted" style="margin:0 0 4px">Partials first. The whole movement is last — that is the point of the session, not a cool-down.</p>';
   html += '</div>';
 
+  const prev = lastNote();
+  if (prev) {
+    html += '<div class="notecard"><span class="lbl">You left this after session ' + prev.n + '</span>';
+    html += '<p>' + esc(prev.note) + '</p></div>';
+  }
+
   html += '<p class="tiny" style="margin:16px 0 4px">Warm up for four minutes first: easy movement until you are warm. ' +
           'The times on each side are the <strong>whole sequence for that side</strong> — settle, then contract, release and hold, ' +
           'repeated. The longest you hold still is ' + PROFILE.large.hold + ' seconds.</p>';
@@ -1107,7 +1131,9 @@ function renderSession() {
       item.passes.forEach(pass => {
         html += '<span class="pass' + (pass.first ? ' first' : '') + '">' +
                 (pass.side === "both" ? "both" : pass.side) +
-                (pass.short ? " short" : "") + ' &middot; ' + fmtClock(pass.seconds) + '</span>';
+                (pass.short ? " again" : "") + ' &middot; ' +
+                pass.cycles + (pass.cycles === 1 ? ' round' : ' rounds') +
+                ' &middot; ' + fmtClock(pass.seconds) + '</span>';
       });
       html += '</div>';
     }
@@ -1120,7 +1146,21 @@ function renderSession() {
       html += '<h4>Cues</h4><ul>' + ex.cues.map(c => '<li>' + esc(c) + '</li>').join("") + '</ul>';
       if (ex.gate) html += '<h4>Gate</h4><div class="gatebox">' + esc(ex.gate) + '</div>';
       if (!ex.warm) {
-        html += '<h4>Contract–relax</h4><div class="script">';
+        const cyc   = item.passes[0].cycles;
+        const total = item.passes.reduce((t, q) => t + q.cycles, 0);
+        const sides = item.passes.length;
+        html += '<h4>How many</h4>';
+        html += '<p style="font-size:16px;font-weight:600;margin-bottom:2px">' +
+                (item.ex.uni
+                  ? cyc + (cyc === 1 ? ' round' : ' rounds') + ' each side, ' + total + ' total'
+                  : cyc + (cyc === 1 ? ' round' : ' rounds') + ' in total') + '</p>';
+        html += '<p class="muted" style="font-size:14px">' +
+                (sides > 2
+                  ? 'Tighter side, looser side, then a short return to the tighter one. '
+                  : '') +
+                'About ' + fmtClock(item.passes.reduce((t, q) => t + q.seconds, 0)) +
+                ' altogether, then move on.</p>';
+        html += '<h4>One round is</h4><div class="script">';
         html += '<b>Settle</b> ' + p.enter + 's, then per cycle &times;' + item.passes[0].cycles + ':<br>';
         html += '<b>Contract</b> ' + p.contract + 's at 20–30% &mdash; ' + esc(ex.con) + '<br>';
         html += '<b>Breathe in, release</b> ' + p.release + 's<br>';
@@ -1143,6 +1183,11 @@ function renderSession() {
     html += '</div>';
   });
 
+  html += '<div class="card" style="margin-top:22px"><h3>Note to next time</h3>';
+  html += '<p class="muted" style="font-size:14px;margin-bottom:2px">Anything you want to read at the top of your next session. Saved as you type; leave it blank and nothing carries over.</p>';
+  html += '<label class="field"><span style="position:absolute;left:-9999px">Note to next time</span>' +
+          '<textarea id="sessionNote" placeholder="Left hip much tighter today. Chair was too low for ex.47.">' +
+          esc((S.draft && S.draft.note) || "") + '</textarea></label></div>';
   html += '<p class="tiny" style="margin-top:16px">Finish by lying down for two minutes. Laughlin is firm about this and it is easy to skip.</p>';
   html += '<button class="btn" data-act="finish">Finish session</button>';
   html += '<button class="btn quiet" data-act="abandon">Back without saving</button>';
@@ -1316,6 +1361,17 @@ html += '<div class="card"><h3>Backup</h3>';
     html += '</div></div>';
   }
 
+  const notes = S.history.filter(h => h.note);
+  if (notes.length) {
+    html += '<div class="card"><h3>Notes you have left</h3>';
+    for (const h of [...notes].reverse()) {
+      html += '<div class="notecard" style="margin:12px 0 0"><span class="lbl">Session ' + h.n +
+              ' &middot; ' + new Date(h.date).toLocaleDateString("en-AU") + '</span>';
+      html += '<p>' + esc(h.note) + '</p></div>';
+    }
+    html += '</div>';
+  }
+
   html += '<div class="card"><h3>The horizon</h3>';
   for (const h of HORIZON) {
     html += '<p style="margin:10px 0 2px"><strong>Ex. ' + h.num + ' &middot; ' + esc(h.name) + '</strong> <span class="tiny">' + esc(h.ref) + '</span></p>';
@@ -1404,7 +1460,8 @@ document.addEventListener("click", e => {
       .map(i => i.group);
     S.history.push({
       n, shape: s.shape.key, date: new Date().toISOString(),
-      done, skipped: all.filter(id => !done.includes(id)), load: loadGroups
+      done, skipped: all.filter(id => !done.includes(id)), load: loadGroups,
+      note: (S.draft.note || "").trim() || null
     });
     S.sessionsCompleted = Math.max(S.sessionsCompleted, n);
     S.lastSessionISO = new Date().toISOString();
@@ -1460,6 +1517,12 @@ document.addEventListener("click", e => {
   }
 });
 
+document.addEventListener("input", e => {
+  if (e.target.id !== "sessionNote" || !S.draft) return;
+  S.draft.note = e.target.value;
+  save();   // no re-render: that would drop the caret mid-sentence
+});
+
 document.addEventListener("change", e => {
   if (e.target.id !== "importfile") return;
   const file = e.target.files[0];
@@ -1493,7 +1556,6 @@ const sw = {
   el:    document.getElementById("swTime"),
   go:    document.getElementById("swGo"),
   reset: document.getElementById("swReset"),
-  hint:  document.getElementById("swHint"),
   base: 0,          // accumulated ms from previous runs
   startedAt: null,  // wall-clock ms when the current run began
   tick: null
@@ -1549,22 +1611,19 @@ async function keepAwake(on) {
   else wantAwake = (current === "session") || !!sw.startedAt;
 
   if (!("wakeLock" in navigator)) {
-    sw.hint.textContent = wantAwake ? "screen may sleep" : "";
     return;
   }
   try {
     if (wantAwake && !wakeLock) {
       wakeLock = await navigator.wakeLock.request("screen");
       wakeLock.addEventListener("release", () => { wakeLock = null; });
-      sw.hint.textContent = "screen on";
     } else if (!wantAwake && wakeLock) {
       await wakeLock.release();
       wakeLock = null;
-      sw.hint.textContent = "";
     }
   } catch (e) {
-    // Denied, or the device is in low power mode. Not worth interrupting for.
-    sw.hint.textContent = "screen may sleep";
+    // Denied, or the device is in low power mode. Silent — nothing the
+    // screen needs to say about it mid-stretch.
   }
 }
 
