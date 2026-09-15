@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Nerve — Geordie Crawley</title>
+<meta name="description" content="The Nerve — reviews of books, film, television, restaurants, games, theatre and music by Geordie Crawley.">
+<link rel="canonical" href="https://geordie.lol/nerve">
+<meta property="og:title" content="The Nerve">
+<meta property="og:description" content="Books, film, television, restaurants, games, theatre and music.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://geordie.lol/nerve">
+<meta property="og:image" content="https://geordie.lol/images/og/nerve.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* ground */
+    --bg:#171b21;
+    --bg-2:#1e232b;
+    --raised:#262d37;
+    --raised-2:#2f3742;
+    /* ink */
+    --ink:#eef2f7;
+    --ink-2:#a9b8c6;
+    --ink-3:#7a8797;
+    /* lines */
+    --line:rgba(169,184,198,.16);
+    --line-2:rgba(169,184,198,.32);
+    /* accents */
+    --star:#ffa23c;
+    --signal:#5ecfa4;
+    --signal-dim:rgba(94,207,164,.35);
+    /* type */
+    --serif:"IBM Plex Serif", Iowan Old Style, Georgia, serif;
+    --sans:"IBM Plex Sans", system-ui, -apple-system, Segoe UI, sans-serif;
+    --mono:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --r:6px;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:var(--sans);font-size:15px;line-height:1.6;font-weight:400;
+    padding:0 0 env(safe-area-inset-bottom,0px);
+    -webkit-font-smoothing:antialiased;
+  }
+  img{max-width:100%;display:block}
+  [hidden]{display:none!important}
+  a{color:inherit}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+  .label{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase}
+
+  /* ---------- header ---------- */
+  header.site{padding:52px 0 30px}
+  .eyebrow{color:var(--ink-3);margin:0 0 18px}
+  .eyebrow a{text-decoration:none;border-bottom:1px solid transparent;transition:color .15s,border-color .15s}
+  .eyebrow a:hover{color:var(--signal);border-bottom-color:var(--signal-dim)}
+  h1{
+    font-family:var(--serif);font-weight:600;font-size:clamp(36px,7vw,54px);
+    letter-spacing:-.015em;margin:0 0 12px;line-height:1.02;
+  }
+  .standfirst{color:var(--ink-2);max-width:56ch;margin:0;font-size:16px}
+  .banner{
+    margin:26px 0 0;padding:12px 16px;border-radius:var(--r);
+    background:var(--bg-2);border:1px solid var(--line);color:var(--ink-2);font-size:13.5px;
+  }
+  .banner code{font-family:var(--mono);font-size:12.5px;color:var(--signal)}
+
+  /* ---------- controls ---------- */
+  .controls{position:sticky;top:0;z-index:20;background:rgba(23,27,33,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:16px 0 14px}
+  .controls-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .search{
+    flex:1 1 240px;min-width:0;display:flex;align-items:center;gap:9px;
+    border:1px solid var(--line);border-radius:999px;padding:9px 16px;background:var(--bg-2);
+    transition:border-color .15s,background .15s;
+  }
+  .search:focus-within{border-color:var(--line-2);background:var(--raised)}
+  .search svg{flex:none;color:var(--ink-3)}
+  .search input{flex:1;min-width:0;background:none;border:0;color:var(--ink);font:inherit;font-size:14.5px;padding:0;outline:none}
+  .search input::placeholder{color:var(--ink-3)}
+  .sortwrap{display:flex;align-items:center;gap:9px;color:var(--ink-3)}
+  select{
+    font-family:var(--sans);font-size:14px;color:var(--ink);background:var(--bg-2);
+    border:1px solid var(--line);border-radius:999px;padding:9px 14px;outline:none;cursor:pointer;
+  }
+  select:hover{border-color:var(--line-2)}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;padding:14px 0 2px}
+  .chip{
+    font-family:var(--sans);font-size:13px;font-weight:500;color:var(--ink-2);
+    background:var(--bg-2);border:1px solid var(--line);border-radius:999px;
+    padding:6px 14px;cursor:pointer;transition:all .15s;
+  }
+  .chip:hover{color:var(--ink);border-color:var(--line-2);background:var(--raised)}
+  .chip[aria-pressed="true"]{color:#12201a;background:var(--signal);border-color:var(--signal);font-weight:500}
+  .chip .n{opacity:.55;margin-left:7px;font-size:12px}
+
+  /* ---------- grid ---------- */
+  .count{color:var(--ink-3);padding:26px 0 16px;margin:0}
+  .grid{display:grid;gap:30px 22px;padding:0 0 64px;grid-template-columns:repeat(auto-fill,minmax(152px,1fr))}
+  .card{display:flex;flex-direction:column;gap:11px;text-align:left;background:none;border:0;padding:0;color:inherit;font:inherit;cursor:pointer}
+  .cover{
+    position:relative;aspect-ratio:2/3;overflow:hidden;border-radius:var(--r);
+    background:var(--raised);border:1px solid var(--line);
+    transition:transform .2s cubic-bezier(.2,.7,.3,1),box-shadow .2s,border-color .2s;
+  }
+  .card:hover .cover,.card:focus-visible .cover{
+    transform:translateY(-4px);border-color:var(--line-2);
+    box-shadow:0 10px 28px rgba(0,0,0,.42);
+  }
+  .card:focus-visible{outline:none}
+  .card:focus-visible .cover{outline:2px solid var(--signal);outline-offset:3px}
+  .cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+  .cover .ph{
+    position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;
+    padding:13px;background:linear-gradient(155deg,hsl(var(--h) 11% 23%),hsl(var(--h) 13% 14%));
+  }
+  .ph-cat{font-family:var(--mono);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-3)}
+  .ph-title{font-family:var(--serif);font-size:16px;line-height:1.25;color:var(--ink-2)}
+  .meta{display:flex;flex-direction:column;gap:2px}
+  .m-title{font-family:var(--serif);font-weight:600;font-size:15.5px;line-height:1.25;letter-spacing:-.005em}
+  .m-sub{font-size:12.5px;color:var(--ink-3);line-height:1.4}
+  .m-foot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:5px}
+  .cat-tag{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);background:var(--bg-2);border:1px solid var(--line);border-radius:999px;padding:3px 9px}
+
+  /* ---------- ratings ---------- */
+  .stars{position:relative;display:inline-block;font-size:13px;line-height:1;letter-spacing:1.5px;color:rgba(169,184,198,.22)}
+  .stars .fill{position:absolute;left:0;top:0;overflow:hidden;white-space:nowrap;color:var(--star)}
+  .verdict{
+    font-family:var(--sans);font-size:11.5px;font-style:italic;color:var(--signal);
+    background:rgba(94,207,164,.1);border:1px solid var(--signal-dim);border-radius:999px;padding:2px 10px;
+  }
+
+  .empty{padding:56px 0 100px;color:var(--ink-3);text-align:center;font-family:var(--serif);font-style:italic;font-size:17px}
+
+  /* ---------- modal ---------- */
+  .scrim{position:fixed;inset:0;z-index:50;background:rgba(11,13,16,.84);backdrop-filter:blur(3px);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:max(28px,env(safe-area-inset-top,0px)) 16px 64px}
+  .sheet{
+    position:relative;width:100%;max-width:840px;background:var(--bg-2);
+    border:1px solid var(--line);border-radius:10px;padding:30px;box-shadow:0 24px 70px rgba(0,0,0,.5);
+  }
+  .sheet-close{
+    position:absolute;top:14px;right:14px;background:var(--raised);border:1px solid var(--line);
+    border-radius:999px;color:var(--ink-2);font:inherit;font-size:14px;line-height:1;
+    width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;
+  }
+  .sheet-close:hover{color:var(--ink);background:var(--raised-2);border-color:var(--line-2)}
+  .sheet-body{display:grid;grid-template-columns:208px 1fr;gap:32px}
+  .sheet h2{font-family:var(--serif);font-weight:600;font-size:clamp(25px,4.2vw,34px);line-height:1.1;margin:0 0 8px;letter-spacing:-.015em;padding-right:44px}
+  .sheet .byline{color:var(--ink-2);margin:0 0 16px;font-size:14.5px}
+  .sheet .rowline{display:flex;align-items:center;gap:13px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+  .sheet .rowline .stars{font-size:17px}
+  .prose{font-family:var(--serif);font-size:16.5px;line-height:1.72;color:#e2e8ef}
+  .prose p{margin:0 0 1em;max-width:64ch}
+  .prose p:last-child{margin-bottom:0}
+  .taglist{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}
+  .tag{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);background:var(--raised);border-radius:999px;padding:4px 10px}
+  .sheet .ext{display:inline-block;margin-top:22px;font-size:13.5px;color:var(--signal);text-decoration:none;border-bottom:1px solid var(--signal-dim)}
+  .sheet-nav{display:flex;justify-content:space-between;gap:12px;margin-top:28px;padding-top:20px;border-top:1px solid var(--line)}
+  .sheet-nav button{
+    background:var(--raised);border:1px solid var(--line);border-radius:999px;color:var(--ink-2);
+    font-family:var(--sans);font-size:13px;padding:8px 16px;cursor:pointer;transition:all .15s;
+  }
+  .sheet-nav button:hover:not(:disabled){color:var(--ink);background:var(--raised-2);border-color:var(--line-2)}
+  .sheet-nav button:disabled{opacity:.32;cursor:default}
+
+  footer.site{border-top:1px solid var(--line);padding:28px 0 56px;color:var(--ink-3)}
+  footer.site a{text-decoration:none;border-bottom:1px solid var(--line);transition:color .15s,border-color .15s}
+  footer.site a:hover{color:var(--signal);border-bottom-color:var(--signal-dim)}
+
+  @media (max-width:640px){
+    .controls{position:static;backdrop-filter:none}
+    .grid{grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:24px 16px}
+    .sheet{padding:22px}
+    .sheet-body{grid-template-columns:1fr;gap:22px}
+    .sheet-cover{max-width:168px}
+    header.site{padding:38px 0 24px}
+    .prose{font-size:16px}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="site">
+    <p class="eyebrow label"><a href="/">geordie.lol</a> / the nerve</p>
+    <h1>The Nerve</h1>
+    <p class="standfirst">Books, film, television, restaurants, games, theatre, music, and whatever else. Newest first, unless you tell it otherwise.</p>
+    <div class="banner" id="banner" hidden>
+      Showing placeholder entries. Replace the array in <code>reviews.js</code> and set <code>REVIEWS_ARE_SAMPLES = false</code> to hide this.
+    </div>
+  </header>
+</div>
+
+<div class="controls">
+  <div class="wrap">
+    <div class="controls-row">
+      <label class="search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
+        <input id="q" type="search" placeholder="Search titles, people, writing, tags" autocomplete="off" aria-label="Search The Nerve">
+      </label>
+      <div class="sortwrap">
+        <label class="label" for="sort">Sort</label>
+        <select id="sort">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="rating-desc">Highest rated</option>
+          <option value="rating-asc">Lowest rated</option>
+          <option value="title">Title A–Z</option>
+          <option value="creator">Creator A–Z</option>
+        </select>
+      </div>
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <p class="count label" id="count"></p>
+  <div class="grid" id="grid"></div>
+  <p class="empty" id="empty" hidden>Nothing matches that.</p>
+</div>
+
+<div class="wrap">
+  <footer class="site">
+    <a class="label" href="/">← geordie.lol</a>
+  </footer>
+</div>
+
+<div class="scrim" id="scrim" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+    <button class="sheet-close" id="sheet-close" aria-label="Close">✕</button>
+    <div class="sheet-body">
+      <div class="sheet-cover" id="sheet-cover"></div>
+      <div>
+        <h2 id="sheet-title"></h2>
+        <p class="byline" id="sheet-byline"></p>
+        <div class="rowline" id="sheet-rowline"></div>
+        <div class="prose" id="sheet-prose"></div>
+        <div class="taglist" id="sheet-tags"></div>
+        <div id="sheet-link"></div>
+      </div>
+    </div>
+    <div class="sheet-nav">
+      <button id="prev">← Previous</button>
+      <button id="next">Next →</button>
+    </div>
+  </div>
+</div>
+
+<script src="reviews.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var CATEGORIES = [
+    { id: "books",       label: "Books",       creatorLabel: "Author" },
+    { id: "film",        label: "Film",        creatorLabel: "Director" },
+    { id: "tv",          label: "TV",          creatorLabel: "Creator" },
+    { id: "restaurants", label: "Restaurants", creatorLabel: "Kitchen" },
+    { id: "games",       label: "Games",       creatorLabel: "Studio" },
+    { id: "theatre",     label: "Theatre",     creatorLabel: "Company" },
+    { id: "music",       label: "Music",       creatorLabel: "Artist" },
+    { id: "misc",        label: "Misc",        creatorLabel: "By" }
+  ];
+  var CAT_BY_ID = {};
+  CATEGORIES.forEach(function (c) { CAT_BY_ID[c.id] = c; });
+
+  var data = (typeof REVIEWS !== "undefined" && Array.isArray(REVIEWS)) ? REVIEWS.slice() : [];
+  var state = { q: "", cats: [], sort: "newest" };
+  var visible = [];
+  var openIndex = -1;
+  var lastFocus = null;
+
+  var $ = function (id) { return document.getElementById(id); };
+  var grid = $("grid"), empty = $("empty"), countEl = $("count"), chipsEl = $("chips");
+  var scrim = $("scrim");
+
+  if (typeof REVIEWS_ARE_SAMPLES !== "undefined" && REVIEWS_ARE_SAMPLES) $("banner").hidden = false;
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function hue(s) {
+    var h = 0, i;
+    for (i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360;
+    return h;
+  }
+  function catLabel(id) { return CAT_BY_ID[id] ? CAT_BY_ID[id].label : (id || "Misc"); }
+  function creatorLabel(id) { return CAT_BY_ID[id] ? CAT_BY_ID[id].creatorLabel : "By"; }
+
+  function fmtDate(iso) {
+    if (!iso) return "";
+    var d = new Date(iso + "T00:00:00");
+    if (isNaN(d)) return iso;
+    return d.toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" });
+  }
+
+  function starsHTML(r) {
+    if (r == null || isNaN(r)) return "";
+    var pct = Math.max(0, Math.min(5, Number(r))) / 5 * 100;
+    return '<span class="stars" title="' + r + ' out of 5" aria-label="' + r + ' out of 5">' +
+           '★★★★★<span class="fill" style="width:' + pct + '%" aria-hidden="true">★★★★★</span></span>';
+  }
+
+  function coverHTML(e) {
+    var ph = '<div class="ph"><span class="ph-cat">' + esc(catLabel(e.category)) + '</span>' +
+             '<span class="ph-title">' + esc(e.title) + '</span></div>';
+    var img = e.cover
+      ? '<img src="' + esc(e.cover) + '" alt="" loading="lazy" onerror="this.remove()">'
+      : "";
+    return '<div class="cover" style="--h:' + hue(e.slug || e.title || "x") + '">' + ph + img + "</div>";
+  }
+
+  function subline(e) {
+    var bits = [];
+    if (e.creator) bits.push(e.creator);
+    var second = [];
+    if (e.year) second.push(e.year);
+    if (e.where) second.push(e.where);
+    if (second.length) bits.push(second.join(" · "));
+    return bits.join(" — ");
+  }
+
+  function cardHTML(e, i) {
+    var mark = (e.rating != null ? starsHTML(e.rating) : "") +
+               (e.verdict ? '<span class="verdict">' + esc(e.verdict) + "</span>" : "");
+    return '<button class="card" data-i="' + i + '" type="button">' +
+      coverHTML(e) +
+      '<span class="meta">' +
+        '<span class="m-title">' + esc(e.title) + "</span>" +
+        '<span class="m-sub">' + esc(subline(e)) + "</span>" +
+        '<span class="m-foot">' + mark + '<span class="cat-tag">' + esc(catLabel(e.category)) + "</span></span>" +
+      "</span></button>";
+  }
+
+  function matches(e) {
+    if (state.cats.length && state.cats.indexOf(e.category) === -1) return false;
+    if (!state.q) return true;
+    var hay = [e.title, e.creator, e.review, e.verdict, e.where, e.year, catLabel(e.category)]
+      .concat(e.tags || []).join(" ").toLowerCase();
+    return state.q.toLowerCase().split(/\s+/).every(function (t) { return hay.indexOf(t) !== -1; });
+  }
+
+  function sortList(list) {
+    var by = state.sort;
+    var cmpStr = function (a, b) { return String(a || "").localeCompare(String(b || ""), "en-AU", { sensitivity: "base" }); };
+    return list.sort(function (a, b) {
+      if (by === "newest") return String(b.date || "").localeCompare(String(a.date || ""));
+      if (by === "oldest") return String(a.date || "").localeCompare(String(b.date || ""));
+      if (by === "title") return cmpStr(a.title, b.title);
+      if (by === "creator") return cmpStr(a.creator, b.creator) || cmpStr(a.title, b.title);
+      // rating sorts: unrated always to the end, never treated as zero
+      var ar = a.rating, br = b.rating;
+      if (ar == null && br == null) return String(b.date || "").localeCompare(String(a.date || ""));
+      if (ar == null) return 1;
+      if (br == null) return -1;
+      return by === "rating-desc" ? br - ar : ar - br;
+    });
+  }
+
+  function buildChips() {
+    var counts = {};
+    data.forEach(function (e) { counts[e.category] = (counts[e.category] || 0) + 1; });
+    chipsEl.innerHTML = CATEGORIES.filter(function (c) { return counts[c.id]; }).map(function (c) {
+      return '<button class="chip" type="button" data-cat="' + c.id + '" aria-pressed="false">' +
+             esc(c.label) + '<span class="n">' + counts[c.id] + "</span></button>";
+    }).join("");
+  }
+
+  function render() {
+    visible = sortList(data.filter(matches));
+    grid.innerHTML = visible.map(cardHTML).join("");
+    empty.hidden = visible.length > 0;
+    var total = data.length;
+    countEl.textContent = visible.length === total
+      ? total + (total === 1 ? " entry" : " entries")
+      : visible.length + " of " + total;
+  }
+
+  /* ----- modal ----- */
+  function openAt(i) {
+    if (i < 0 || i >= visible.length) return;
+    var e = visible[i];
+    openIndex = i;
+    $("sheet-cover").innerHTML = coverHTML(e);
+    $("sheet-title").textContent = e.title;
+    var by = [];
+    if (e.creator) by.push(creatorLabel(e.category) + ": " + e.creator);
+    if (e.year) by.push(e.year);
+    if (e.where) by.push(e.where);
+    $("sheet-byline").textContent = by.join(" · ");
+    var row = [];
+    if (e.rating != null) row.push(starsHTML(e.rating));
+    if (e.verdict) row.push('<span class="verdict">' + esc(e.verdict) + "</span>");
+    row.push('<span class="cat-tag">' + esc(catLabel(e.category)) + "</span>");
+    if (e.date) row.push('<span class="m-sub">Logged ' + esc(fmtDate(e.date)) + "</span>");
+    $("sheet-rowline").innerHTML = row.join("");
+    $("sheet-prose").innerHTML = String(e.review || "")
+      .split(/\n\s*\n/).map(function (p) { return "<p>" + esc(p.trim()).replace(/\n/g, "<br>") + "</p>"; }).join("");
+    $("sheet-tags").innerHTML = (e.tags || []).map(function (t) { return '<span class="tag">' + esc(t) + "</span>"; }).join("");
+    $("sheet-link").innerHTML = e.link
+      ? '<a class="ext" href="' + esc(e.link) + '" target="_blank" rel="noopener">Elsewhere ↗</a>' : "";
+    $("prev").disabled = i === 0;
+    $("next").disabled = i === visible.length - 1;
+    scrim.hidden = false;
+    document.body.style.overflow = "hidden";
+    if (location.hash.slice(1) !== e.slug) history.replaceState(null, "", "#" + e.slug);
+    $("sheet-close").focus();
+  }
+  function close() {
+    scrim.hidden = true;
+    document.body.style.overflow = "";
+    openIndex = -1;
+    history.replaceState(null, "", location.pathname + location.search);
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+
+  /* ----- events ----- */
+  grid.addEventListener("click", function (ev) {
+    var btn = ev.target.closest(".card");
+    if (!btn) return;
+    lastFocus = btn;
+    openAt(Number(btn.dataset.i));
+  });
+  chipsEl.addEventListener("click", function (ev) {
+    var chip = ev.target.closest(".chip");
+    if (!chip) return;
+    var cat = chip.dataset.cat, on = state.cats.indexOf(cat) !== -1;
+    if (on) state.cats.splice(state.cats.indexOf(cat), 1); else state.cats.push(cat);
+    chip.setAttribute("aria-pressed", on ? "false" : "true");
+    render();
+  });
+  $("q").addEventListener("input", function (ev) { state.q = ev.target.value.trim(); render(); });
+  $("sort").addEventListener("change", function (ev) { state.sort = ev.target.value; render(); });
+  $("sheet-close").addEventListener("click", close);
+  scrim.addEventListener("click", function (ev) { if (ev.target === scrim) close(); });
+  $("prev").addEventListener("click", function () { openAt(openIndex - 1); });
+  $("next").addEventListener("click", function () { openAt(openIndex + 1); });
+  document.addEventListener("keydown", function (ev) {
+    if (scrim.hidden) return;
+    if (ev.key === "Escape") close();
+    if (ev.key === "ArrowLeft" && openIndex > 0) openAt(openIndex - 1);
+    if (ev.key === "ArrowRight" && openIndex < visible.length - 1) openAt(openIndex + 1);
+  });
+
+  buildChips();
+  render();
+
+  // Deep link: /nerve#slug opens that entry.
+  if (location.hash.length > 1) {
+    var want = decodeURIComponent(location.hash.slice(1));
+    var idx = visible.findIndex(function (e) { return e.slug === want; });
+    if (idx !== -1) openAt(idx);
+  }
+})();
+</script>
+</body>
+</html>
