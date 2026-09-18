@@ -230,6 +230,15 @@ header.app {
 ul.ingredients { list-style: none; padding: 0; margin: 0; }
 ul.ingredients li { padding: 7px 0; border-bottom: 1px dashed var(--line-soft); font-size: 15px; }
 ul.ingredients li b { font-variant-numeric: tabular-nums; }
+/* Section headings inside the ingredient list — "For the pastry" and so on.
+   Set in small caps rather than orange, so the accent stays rare. */
+ul.ingredients li.ing-head {
+  border-bottom: none; border-top: 1px solid var(--line);
+  margin-top: 14px; padding: 14px 0 2px;
+  font-size: 12px; font-weight: 700; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--text);
+}
+ul.ingredients li.ing-head:first-child { margin-top: 0; padding-top: 0; border-top: none; }
 ol.steps { padding-left: 0; margin: 0; list-style: none; counter-reset: s; }
 ol.steps li { counter-increment: s; position: relative; padding: 0 0 16px 40px; }
 ol.steps li::before {
@@ -263,6 +272,15 @@ ol.steps li::before {
 .ing-row .handle:focus-visible, .step-row .handle:focus-visible {
   outline: 2px solid var(--accent); outline-offset: 1px;
 }
+/* A section-heading row in the editor, styled to read as a divider rather than
+   as another ingredient. */
+.heading-row { margin-top: 14px; }
+.heading-row .hdg {
+  flex: 1 1 0; min-width: 0;
+  font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  font-size: 13px; background: var(--surface-2);
+}
+.heading-row .hdg::placeholder { text-transform: none; letter-spacing: 0; font-weight: 400; }
 .step-row .handle { font-weight: 700; font-variant-numeric: tabular-nums; font-size: 13px; }
 .ing-row.dragging, .step-row.dragging {
   opacity: .9; box-shadow: 0 6px 22px rgba(0,0,0,.5);
@@ -292,12 +310,20 @@ ol.steps li::before {
   max-width: 90vw; text-align: center;
 }
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* The + is drawn as an SVG rather than typed as a "+" character. A text glyph
+   is positioned by the font's own metrics — it sits on a baseline, inside a
+   line box — so it lands slightly off dead centre and no amount of line-height
+   fiddling reliably fixes it across fonts and platforms. Two SVG strokes
+   through the middle of a square viewBox are exactly centred, always. */
 .fab {
   position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom));
-  width: 56px; height: 56px; border-radius: 50%; font-size: 27px; line-height: 1;
-  background: var(--accent); color: var(--accent-ink); border: none; font-weight: 600;
+  width: 56px; height: 56px; border-radius: 50%;
+  padding: 0; line-height: 0;
+  display: grid; place-items: center;
+  background: var(--accent); color: var(--accent-ink); border: none;
   box-shadow: 0 6px 20px rgba(0,0,0,.5); z-index: 30;
 }
+.fab svg { display: block; }
 .fab:hover { background: var(--accent); filter: brightness(1.08); }
 .panel {
   position: fixed; inset: 0; background: rgba(0,4,10,.65); z-index: 60;
@@ -456,9 +482,12 @@ ol.steps li::before {
 
         <div class="field">
           <label>Ingredients</label>
-          <p class="reorder-hint">Drag the ⠿ handle to reorder, or focus it and press ↑ / ↓.</p>
+          <p class="reorder-hint">Drag the ⠿ handle to reorder, or focus it and press ↑ / ↓. A section heading applies to everything below it.</p>
           <div id="ing-list"></div>
-          <button type="button" id="btn-add-ing">+ Add ingredient</button>
+          <div class="row" style="margin-top:2px">
+            <button type="button" id="btn-add-ing" style="flex:0 0 auto">+ Add ingredient</button>
+            <button type="button" id="btn-add-heading" style="flex:0 0 auto">+ Add section heading</button>
+          </div>
         </div>
 
         <div class="field">
@@ -521,7 +550,12 @@ ol.steps li::before {
     </section>
   </main>
 
-  <button class="fab" id="fab" aria-label="Add recipe">+</button>
+  <button class="fab" id="fab" aria-label="Add recipe">
+    <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false">
+      <path d="M12 5.5v13M5.5 12h13" fill="none" stroke="currentColor"
+            stroke-width="2.4" stroke-linecap="round"/>
+    </svg>
+  </button>
 </div>
 
 <!-- Menu sheet -->
@@ -1072,6 +1106,23 @@ function splitAmount(line) {
   return { amount: '', item: line.trim() };
 }
 
+/** Does this line look like a section label inside an ingredient list?
+ *  Catches the two shapes recipes actually use: "For the pastry", and a short
+ *  line ending in a colon like "Pastry:" or "To serve:". A line that starts
+ *  with a quantity is never a heading, whatever else it does. */
+function isIngredientHeading(text) {
+  const t = text.trim();
+  if (/^\s*[\d¼½¾⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]/.test(t)) return false;
+  if (/^for the\b/i.test(t)) return true;
+  if (!/[:：]$/.test(t)) return false;
+  return t.replace(/[:：]$/, '').trim().split(/\s+/).length <= 6;
+}
+
+/** Strip the trailing colon off a heading. */
+function cleanHeading(text) {
+  return text.trim().replace(/[:：]$/, '').trim();
+}
+
 /** Does this line look like an ingredient rather than an instruction? */
 function looksLikeIngredient(line) {
   if (/^\s*(?:step\s*)?\d{1,2}\s*[.):\]]\s+\S/i.test(line)) return false; // "1. Preheat…"
@@ -1112,7 +1163,10 @@ function parseRecipeText(raw) {
     if (/^https?:\/\/\S+$/i.test(line) && !out.source_url) { out.source_url = line; continue; }
 
     if (HEAD_ING.test(line))  { kept.push({ head: 'ing'  }); continue; }
-    if (HEAD_NOTE.test(line)) { kept.push({ head: 'note' }); continue; }
+    // Keep the original wording — "To serve:" is a notes heading at the end of
+    // a recipe but an ingredient sub-heading inside the ingredient list, and
+    // the second pass needs the text to use it either way.
+    if (HEAD_NOTE.test(line)) { kept.push({ head: 'note', label: line }); continue; }
     if (HEAD_STEP.test(line)) { kept.push({ head: 'step' }); continue; }
 
     kept.push({ text: stripBullet(line) });
@@ -1157,7 +1211,17 @@ function parseRecipeText(raw) {
   for (; i < kept.length; i++) {
     const k = kept[i];
     if (k.blank) continue;
-    if (k.head) { mode = k.head === 'ing' ? 'ing' : k.head === 'step' ? 'step' : 'note'; continue; }
+    if (k.head) {
+      // A "notes"-ish heading encountered while we're still reading the
+      // ingredient list is a section label for the ingredients ("To serve:"),
+      // not the start of the notes. Encountered after the method, it's notes.
+      if (k.head === 'note' && mode === 'ing' && cleanHeading(k.label || '')) {
+        out.ingredients.push({ heading: cleanHeading(k.label) });
+      } else {
+        mode = k.head === 'ing' ? 'ing' : k.head === 'step' ? 'step' : 'note';
+      }
+      continue;
+    }
     if (mode === null) continue;                       // text before any heading
 
     const text = k.text;
@@ -1166,8 +1230,10 @@ function parseRecipeText(raw) {
     if (mode === 'note') { noteBits.push(text); continue; }
 
     if (mode === 'ing') {
-      // An unannounced switch from list to prose ends the ingredient list.
-      if (out.ingredients.length >= 2 && !looksLikeIngredient(text)) {
+      if (isIngredientHeading(text)) {
+        out.ingredients.push({ heading: cleanHeading(text) });
+      } else if (out.ingredients.length >= 2 && !looksLikeIngredient(text)) {
+        // An unannounced switch from list to prose ends the ingredient list.
         mode = 'step';
         out.steps.push(stripStepNumber(text));
       } else {
@@ -1179,7 +1245,10 @@ function parseRecipeText(raw) {
     if (mode === 'step') { out.steps.push(stripStepNumber(text)); continue; }
 
     // mode === 'guess'
-    if (looksLikeIngredient(text) && stepStreak < 2) {
+    if (isIngredientHeading(text) && stepStreak < 2) {
+      out.ingredients.push({ heading: cleanHeading(text) });
+      stepStreak = 0;
+    } else if (looksLikeIngredient(text) && stepStreak < 2) {
       out.ingredients.push(splitAmount(text));
       stepStreak = 0;
     } else {
@@ -1212,7 +1281,9 @@ function visibleRecipes() {
     if (!q) return true;
     const hay = [
       r.title, r.description,
-      ...(r.ingredients || []).map(x => `${x.amount || ''} ${x.item || ''}`)
+      // Section headings are searchable too — "pastry" should find the recipe
+      // whose ingredient list has a "For the pastry" section.
+      ...(r.ingredients || []).map(x => `${x.amount || ''} ${x.item || ''} ${x.heading || ''}`)
     ].join(' ').toLowerCase();
     return hay.includes(q);
   });
@@ -1457,9 +1528,10 @@ async function openDetail(id) {
       <div>
         <h3>Ingredients ${factor !== 1 ? `<span class="scaled-note">×${factor}</span>` : ''}</h3>
         <ul class="ingredients">
-          ${(r.ingredients || []).map(x =>
-            `<li>${x.amount ? `<b>${esc(scaleText(x.amount, factor))}</b> ` : ''}${esc(x.item)}</li>`).join('')
-            || '<li style="color:var(--muted)">None listed</li>'}
+          ${(r.ingredients || []).map(x => x.heading
+            ? `<li class="ing-head">${esc(x.heading)}</li>`
+            : `<li>${x.amount ? `<b>${esc(scaleText(x.amount, factor))}</b> ` : ''}${esc(x.item)}</li>`
+          ).join('') || '<li style="color:var(--muted)">None listed</li>'}
         </ul>
         ${factor !== 1 ? `<p class="hint" style="margin-top:10px">Amounts without a number
           — "a pinch", "to taste" — are shown unchanged. Cooking times usually don't
@@ -1585,6 +1657,14 @@ function fillEditor() {
    --------------------------------------------------------------------------- */
 
 /* --- ingredient rows ------------------------------------------------------ */
+/* An entry in the ingredients list is one of two shapes:
+     { amount, item }   a normal ingredient
+     { heading }        a section label, e.g. "For the pastry"
+   Headings live in the same list as the ingredients rather than in a separate
+   field, which is what lets you drag one into position and have everything
+   below it belong to that section. No database change was needed — the column
+   is JSON, so it simply holds a slightly different object for those rows. */
+
 function makeIngredientRow(amount = '', item = '') {
   const row = document.createElement('div');
   row.className = 'ing-row';
@@ -1593,18 +1673,35 @@ function makeIngredientRow(amount = '', item = '') {
     <input class="amt" placeholder="2 cups" value="${esc(amount)}">
     <input class="itm" placeholder="plain flour" value="${esc(item)}">
     <button type="button" class="rm" title="Remove">✕</button>`;
+  wireIngredientRemove(row);
+  return row;
+}
+
+function makeHeadingRow(text = '') {
+  const row = document.createElement('div');
+  row.className = 'ing-row heading-row';
+  row.innerHTML = `
+    <button type="button" class="handle" title="Drag to reorder" aria-label="Reorder section heading">⠿</button>
+    <input class="hdg" placeholder="For the pastry" value="${esc(text)}">
+    <button type="button" class="rm" title="Remove">✕</button>`;
+  wireIngredientRemove(row);
+  return row;
+}
+
+function wireIngredientRemove(row) {
   row.querySelector('.rm').addEventListener('click', () => {
     row.remove();
     if (!$('#ing-list').children.length) $('#ing-list').appendChild(makeIngredientRow());
   });
-  return row;
 }
 
 function renderIngredients() {
   const box = $('#ing-list');
   box.innerHTML = '';
   const list = draft.ingredients.length ? draft.ingredients : [{ amount: '', item: '' }];
-  list.forEach(ing => box.appendChild(makeIngredientRow(ing.amount, ing.item)));
+  list.forEach(ing => box.appendChild(
+    ing.heading ? makeHeadingRow(ing.heading) : makeIngredientRow(ing.amount, ing.item)
+  ));
 }
 
 $('#btn-add-ing').addEventListener('click', () => {
@@ -1613,12 +1710,24 @@ $('#btn-add-ing').addEventListener('click', () => {
   row.querySelector('.amt').focus();
 });
 
+$('#btn-add-heading').addEventListener('click', () => {
+  const row = makeHeadingRow();
+  $('#ing-list').appendChild(row);
+  row.querySelector('.hdg').focus();
+});
+
 /** Read the ingredient rows back out, in their current on-screen order. */
 function collectIngredients() {
-  return $$('#ing-list .ing-row').map(r => ({
-    amount: r.querySelector('.amt').value.trim(),
-    item:   r.querySelector('.itm').value.trim()
-  })).filter(x => x.item || x.amount);
+  return $$('#ing-list .ing-row').map(r => {
+    const hdg = r.querySelector('.hdg');
+    if (hdg) {
+      const text = hdg.value.trim();
+      return text ? { heading: text } : null;
+    }
+    const amount = r.querySelector('.amt').value.trim();
+    const item   = r.querySelector('.itm').value.trim();
+    return (amount || item) ? { amount, item } : null;
+  }).filter(Boolean);
 }
 
 /* --- step rows ------------------------------------------------------------ */
@@ -1972,7 +2081,7 @@ window.addEventListener('beforeunload', (e) => {
   if ($('#view-edit').hidden) return;
   const started = $('#ed-title').value.trim() ||
                   $('#paste').value.trim() ||
-                  Array.from($$('#ing-list .itm')).some(i => i.value.trim()) ||
+                  $$('#ing-list .itm, #ing-list .hdg').some(i => i.value.trim()) ||
                   Array.from($$('#step-list textarea')).some(t => t.value.trim());
   if (!started) return;
   e.preventDefault();
