@@ -179,6 +179,7 @@ form.guess { margin: 0 0 12px; }
 .tool.spent { background: var(--panel2); color: var(--muted); cursor: default; box-shadow: 4px 4px 0 var(--shadow); }
 .tool .used { font-size: 16px; font-weight: 400; text-transform: none; letter-spacing: 0; }
 .tool .used:empty { display: none; }
+.tool .used .us { display: none; }
 .tool.clunk { animation: clunk .3s steps(3, end) 1; }
 @keyframes clunk { 0% { transform: translateY(0); } 50% { transform: translateY(5px); } 100% { transform: translateY(0); } }
 
@@ -376,10 +377,17 @@ body.fx::after { content: ""; position: fixed; inset: 0; z-index: 30; pointer-ev
   .tries-k { margin: 10px 0 4px; }
   .try { font-size: 16px; padding: 0 6px; }
 
-  /* gear */
-  .gear-label { font-size: 16px; margin: 10px 0 6px; }
-  .tool { min-height: 0; padding: 6px 4px; gap: 2px; border-width: 3px; font-size: 16px; }
-  .tool canvas { width: 24px; height: 24px; }
+  /* Order on a phone: clue, typing box, latest result, gear, then the dial and guess history */
+  #screenPlay:not([hidden]) { display: flex; flex-direction: column; }
+  #screenPlay .hud { order: 1; } #screenPlay .case { order: 2; } #screenPlay form.guess { order: 3; }
+  #screenPlay .gear-label { order: 4; } #screenPlay .gear-tray { order: 5; } #screenPlay .result { order: 6; margin-top: 12px; }
+
+  /* gear: one slim row of buttons, no explainer line (the pause card explains) */
+  .gear-label { display: none; }
+  .gear-tray { margin-top: 2px; }
+  .tool { min-height: 64px; padding: 6px 4px; gap: 2px; border-width: 3px; font-size: 16px; line-height: 1.15; letter-spacing: 0; }
+  .tool canvas { width: 20px; height: 20px; flex: none; }
+  .tool .used .ul { display: none; } .tool .used .us { display: inline; }
 
   /* between safes */
   .outcome-title { font-size: 22px; margin-bottom: 6px; }
@@ -1247,7 +1255,7 @@ function renderGear() {
   document.querySelectorAll(".tool").forEach((b) => {
     const key = b.dataset.tool, spentOn = game.gear[key], spent = spentOn != null;
     b.classList.toggle("spent", spent);
-    b.querySelector(".used").textContent = spent ? "used on safe " + (spentOn + 1) : "";
+    b.querySelector(".used").innerHTML = spent ? `<span class="ul">used on safe ${spentOn + 1}</span><span class="us">✓ safe ${spentOn + 1}</span>` : "";
     b.setAttribute("aria-label", TOOLS[key].name + (spent ? ", used on safe " + (spentOn + 1) : ". " + TOOLS[key].desc));
   });
 }
