@@ -135,6 +135,10 @@ header.top { display: flex; align-items: center; justify-content: space-between;
 .case-head .tag { color: var(--paper-red); white-space: nowrap; }
 .case-body { padding: 6px 16px 16px 22px; }
 .definition { font-family: var(--sans); font-size: clamp(21px, 5.9vw, 25px); line-height: 1.42; margin: 0; font-weight: 400; overflow-wrap: break-word; }
+.rootdef { margin: 10px 0 0; padding-top: 8px; border-top: 2px dashed rgba(27,23,38,.25); font-size: 18px; line-height: 1.45; color: var(--paper-ink); }
+.rootdef .rb { font-family: var(--mono); font-weight: 600; letter-spacing: 1px; }
+.reveal .rootline { margin-top: 6px; color: var(--paper-muted); }
+.reveal .rootline b { font-family: var(--mono); text-transform: uppercase; letter-spacing: .04em; color: var(--paper-ink); }
 .intel { display: grid; gap: 8px; margin-top: 14px; }
 .intel:empty { display: none; }
 .intel-item { background: rgba(27,23,38,.07); border-left: 6px solid var(--paper-muted); padding: 8px 12px; }
@@ -365,6 +369,7 @@ body.fx::after { content: ""; position: fixed; inset: 0; z-index: 30; pointer-ev
   .case-head { padding: 6px 12px 0 20px; }
   .case-body { padding: 2px 12px 12px 20px; }
   .definition { font-size: 20px; line-height: 1.38; }
+  .rootdef { font-size: 17px; margin-top: 8px; padding-top: 6px; }
   .intel { gap: 6px; margin-top: 10px; }
   .intel-item { padding: 4px 10px; border-left-width: 5px; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; }
   .intel-item .flavour { display: none; }
@@ -505,6 +510,7 @@ body.fx::after { content: ""; position: fixed; inset: 0; z-index: 30; pointer-ev
       <div class="case-head"><span id="casePos">Password · noun</span><span class="tag" id="caseTier">Tier 1</span></div>
       <div class="case-body">
         <p class="definition" id="playDef"></p>
+        <p class="rootdef" id="playRoot" hidden><span class="rb">____</span> means: <span id="playRootText"></span></p>
         <div class="intel" id="intel"></div>
       </div>
     </div>
@@ -548,6 +554,7 @@ body.fx::after { content: ""; position: fixed; inset: 0; z-index: 30; pointer-ev
         <p class="k">The password was</p>
         <p class="w" id="outWord"></p>
         <p class="d" id="outDef"></p>
+        <p class="d rootline" id="outRoot" hidden><b id="outRootWord"></b>: <span id="outRootText"></span></p>
         <p class="c" id="outClosest"></p>
       </div>
     </div>
@@ -1214,6 +1221,8 @@ function renderPlay(fresh) {
   $("casePos").textContent = "Password · " + d.pos;
   $("caseTier").textContent = "Tier " + d.tier;
   $("playDef").textContent = d.def;
+  // Some definitions lean on a relative of the password; its own meaning is shown underneath
+  $("playRoot").hidden = !d.root; $("playRootText").textContent = d.root || "";
   $("formMsg").textContent = "";
   renderIntel(); renderResult(false); renderGear();
   const last = t.guesses[t.guesses.length - 1];
@@ -1224,7 +1233,7 @@ function renderPlay(fresh) {
   // Focus straight away (not after a delay) so phones open the keyboard from the button tap
   if (fresh || !COARSE()) { try { $("guessInput").focus({ preventScroll: true }); } catch (e) {} }
   startClock();
-  if (fresh) say("Safe " + (game.current + 1) + ". " + d.pos + ". " + d.def + ". " + TUMBLER_SECONDS + " seconds.");
+  if (fresh) say("Safe " + (game.current + 1) + ". " + d.pos + ". " + d.def + (d.root ? " Blank means: " + d.root : "") + ". " + TUMBLER_SECONDS + " seconds.");
 }
 function closeness(a, b) { return (b.pay - a.pay) || ((a.angle || 0) - (b.angle || 0)); }
 function renderLast(r, animate) {
@@ -1403,6 +1412,7 @@ function renderBetween(fresh) {
   $("outMoney").textContent = key === "click" ? money(t.best) + " in the bag" : t.best > 0 ? "You walk away with " + money(t.best) : "Not a dime";
   $("outWord").textContent = d.w;
   $("outDef").textContent = d.def;
+  $("outRoot").hidden = !d.root; $("outRootWord").textContent = d.rw || ""; $("outRootText").textContent = d.root || "";
   const n = t.guesses.length, top = t.guesses.slice().sort(closeness)[0];
   $("outClosest").textContent = key === "click" ? (n === 1 ? "Cracked on your first guess." : "Cracked on guess " + n + ".")
     : !n ? "No guesses entered." : (n === 1 ? "1 guess" : n + " guesses") + ". Closest: " + top.word.toUpperCase() + " (" + top.label.toLowerCase() + ").";
