@@ -7,6 +7,7 @@
 <meta name="theme-color" content="#0b0d1a">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect x='1' y='1' width='14' height='13' fill='%2304050d'/%3E%3Crect x='2' y='2' width='12' height='11' fill='%234a5078'/%3E%3Crect x='6' y='5' width='4' height='4' fill='%23ffd23f'/%3E%3Crect x='7' y='3' width='2' height='1' fill='%23ff5a4e'/%3E%3Crect x='2' y='14' width='3' height='2' fill='%2304050d'/%3E%3Crect x='11' y='14' width='3' height='2' fill='%2304050d'/%3E%3C/svg%3E">
 <title>Safe Word</title>
+<script defer src="https://cloud.umami.is/script.js" data-website-id="6e8639e8-bf58-459d-9a37-5f0f82788902"></script>
 <style>
 /* ---------- Fonts (SIL Open Font Licence, embedded) ---------- */
 @font-face { font-family: "IBM Plex Sans"; font-weight: 400; font-display: swap;
@@ -315,6 +316,80 @@ body.fx::after { content: ""; position: fixed; inset: 0; z-index: 30; pointer-ev
 .fx #dial { filter: drop-shadow(0 0 6px rgba(255,210,63,.45)); }
 .fx .case, .fx .reveal, .fx .file { box-shadow: 4px 4px 0 var(--shadow), 0 0 24px rgba(241,231,204,.18); }
 
+/* =========================================================================
+   PHONES: tighter and calmer, so the clue, the typing box and the latest result fit
+   on screen with the keyboard up. Computers are unaffected.
+   ========================================================================= */
+@media (max-width: 600px) {
+  header.top { padding: 8px 16px; }
+  .icon-btn { min-width: 44px; min-height: 44px; }
+  .panel { padding: 14px; margin-bottom: 12px; }
+  .scene { margin-bottom: 12px; }
+  .lede { font-size: 18px; }
+  .btn.big { min-height: 54px; font-size: 18px; }
+  .btn.go { min-height: 64px; font-size: 22px; }
+
+  /* clock bar */
+  .hud { gap: 6px; padding: 6px 16px 6px; margin-bottom: 8px; }
+  .hud-box { padding: 2px 6px; border-width: 2px; box-shadow: 2px 2px 0 var(--shadow); flex-direction: row; align-items: baseline; justify-content: center; gap: 6px; }
+  .hud-box .k { font-size: 16px; }
+  .hud-box .v { margin-top: 0; font-size: 16px; }
+  .timer { min-width: 0; padding: 2px 10px; }
+  .timer .k { display: none; }
+  .timer .v { font-size: 22px; line-height: 1.5; }
+
+  /* the clue */
+  .case { margin-bottom: 8px; border-width: 3px; box-shadow: 3px 3px 0 var(--shadow); }
+  .case-head { padding: 6px 12px 0 20px; }
+  .case-body { padding: 2px 12px 12px 20px; }
+  .definition { font-size: 20px; line-height: 1.38; }
+  .intel { gap: 6px; margin-top: 10px; }
+  .intel-item { padding: 4px 10px; border-left-width: 5px; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; }
+  .intel-item .flavour { display: none; }
+  /* on a phone each piece of gear is one compact line; the long wording stays for screen readers */
+  .intel { display: flex; flex-wrap: wrap; }
+  .intel-item { flex: 1 1 auto; }
+  .intel-item .what { display: none; }
+  .intel-item { font-size: 16px; }
+  .intel-item .detail { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+  .intel-item .blanks { font-size: 20px; letter-spacing: 3px; }
+  .intel-item .tipword { font-size: 20px; }
+  .tiles { margin: 2px 0; gap: 4px; }
+  .tile { width: 28px; height: 32px; font-size: 18px; border-width: 2px; }
+
+  /* typing */
+  form.guess { margin-bottom: 8px; }
+  .guess-row input { min-height: 52px; font-size: 22px; padding: 4px 10px; border-width: 3px; }
+  .guess-row input::placeholder { font-size: 18px; }
+  .guess-row .btn { min-width: 84px; min-height: 52px; padding: 8px 12px; font-size: 16px; }
+  .form-msg { font-size: 16px; margin-top: 6px; }
+  .last { min-height: 34px; margin-top: 6px; font-size: 16px; }
+  .last.hint { font-size: 16px; }
+
+  /* dial and guesses */
+  .result { padding: 10px; margin-bottom: 8px; border-width: 3px; box-shadow: 3px 3px 0 var(--shadow); }
+  .readout { gap: 10px; }
+  #dial { width: 114px !important; height: 114px !important; }
+  .best-k { font-size: 16px; }
+  .best-v { margin: 2px 0 4px; font-size: 16px; }
+  .best-w { font-size: 16px; }
+  .tries-k { margin: 10px 0 4px; }
+  .try { font-size: 16px; padding: 0 6px; }
+
+  /* gear */
+  .gear-label { font-size: 16px; margin: 10px 0 6px; }
+  .tool { min-height: 0; padding: 6px 4px; gap: 2px; border-width: 3px; font-size: 16px; }
+  .tool canvas { width: 24px; height: 24px; }
+
+  /* between safes */
+  .outcome-title { font-size: 22px; margin-bottom: 6px; }
+  .outcome-sub { font-size: 18px; }
+  .money-big { margin: 8px 0 10px; font-size: 16px; }
+  .reveal { padding: 10px 12px; }
+  .reveal .w { font-size: 24px; }
+  .next-up { margin-bottom: 8px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .timer.urgent { outline: 4px solid #fff; outline-offset: -8px; }
@@ -569,6 +644,7 @@ body.fx::after { content: ""; position: fixed; inset: 0; z-index: 30; pointer-ev
       <li>Press Start 2P by CodeMan38, SIL Open Font License 1.1.</li>
     </ul>
     <h3>Privacy</h3>
+    <p>Visits to this page are counted with Umami, a privacy-friendly analytics service that doesn't use cookies.</p>
     <p>Your stats stay in this browser. When crew stats are switched on, the game sends only a random ID made in your browser, the date, your seven payouts (which show which safes you cracked), and which safe each piece of gear was used on. Results are deleted after 14 days. The crew's numbers are self-reported and can be faked. It's a heist, not a court of law.</p>
   </div>
 </dialog>
@@ -593,6 +669,8 @@ const SUPABASE_ANON_KEY = "";
 //                      "off"  = off to start with, players can switch it on
 //                      "none" = no effects at all, and the setting disappears
 const SCREEN_EFFECTS = "on";
+// Sound effects: true = on to start with (players can switch them off in Settings), false = off to start with
+const SOUND_DEFAULT = true;
 
 const TUMBLERS = 7;
 // Payouts. Every safe is worth the same; only the closest try counts.
@@ -663,7 +741,7 @@ function show(id) {
 
 /* ---------- Profile ---------- */
 const PROFILE_KEY = "safeword:profile";
-const profile = Object.assign({ sound: false, fx: null, history: {}, id: null }, store.get(PROFILE_KEY, {}));
+const profile = Object.assign({ snd: null, fx: null, history: {}, id: null }, store.get(PROFILE_KEY, {}));
 function uuid4() {
   const b = new Uint8Array(16);
   try { crypto.getRandomValues(b); } catch (e) { for (let i = 0; i < 16; i++) b[i] = Math.floor(Math.random() * 256); }
@@ -789,8 +867,14 @@ function scramble(w) {
 
 /* ---------- Sound (off by default) ---------- */
 let actx = null;
+function SOUND() { return profile.snd == null ? SOUND_DEFAULT : !!profile.snd; }
+// Phones only allow sound after a tap, so wake the audio on any tap
+document.addEventListener("pointerdown", () => {
+  if (!SOUND()) return;
+  try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === "suspended") actx.resume(); } catch (e) {}
+}, true);
 function beep(freq, dur = 0.06, type = "square", vol = 0.05, when = 0) {
-  if (!profile.sound) return;
+  if (!SOUND()) return;
   try {
     actx = actx || new (window.AudioContext || window.webkitAudioContext)();
     const t0 = actx.currentTime + when, o = actx.createOscillator(), g = actx.createGain();
@@ -1140,7 +1224,7 @@ function renderIntel() {
   if (t.gear.includes("blueprint")) {
     const blanks = d.w.toUpperCase()[0] + " " + Array(d.w.length - 1).fill("_").join(" ");
     box.insertAdjacentHTML("beforeend", `<div class="intel-item blueprint"><div class="what">Blueprint</div><div class="blanks" aria-hidden="true">${blanks}</div>
-      <div>${d.w.length} letters, starting with ${d.w[0].toUpperCase()}</div><div class="flavour">Lifted from the safe maker's files.</div></div>`);
+      <div class="detail">${d.w.length} letters, starting with ${d.w[0].toUpperCase()}</div><div class="flavour">Lifted from the safe maker's files.</div></div>`);
   }
   if (t.gear.includes("walkie")) {
     const el = document.createElement("div"); el.className = "intel-item walkie";
@@ -1548,8 +1632,8 @@ function renderSettings() {
   const box = $("soundChoices"); box.innerHTML = "";
   [["off", "Off"], ["on", "On"]].forEach(([k, n]) => {
     const w = document.createElement("div"); w.className = "choice";
-    w.innerHTML = `<input type="radio" name="sound" id="sound-${k}" ${(profile.sound ? "on" : "off") === k ? "checked" : ""}><label for="sound-${k}">${n}</label>`;
-    w.querySelector("input").addEventListener("change", () => { profile.sound = k === "on"; saveProfile(); if (profile.sound) sfx.coin(); });
+    w.innerHTML = `<input type="radio" name="sound" id="sound-${k}" ${(SOUND() ? "on" : "off") === k ? "checked" : ""}><label for="sound-${k}">${n}</label>`;
+    w.querySelector("input").addEventListener("change", () => { profile.snd = k === "on"; saveProfile(); if (SOUND()) sfx.coin(); });
     box.appendChild(w);
   });
 }
