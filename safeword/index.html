@@ -5,6 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#0b0d1a">
+<!-- Link previews (iMessage, WhatsApp, Facebook, Slack, X...). The images live next to index.html. -->
+<meta name="description" content="Seven safes. One-word passwords. Thirty seconds each. A daily word-guessing heist.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="geordie.lol">
+<meta property="og:title" content="Safe Word">
+<meta property="og:description" content="Seven safes. One-word passwords. Thirty seconds each. A daily word-guessing heist.">
+<meta property="og:url" content="https://geordie.lol/safeword/">
+<meta property="og:image" content="https://geordie.lol/safeword/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Safe Word: a pixel-art bank at night, with seven safes inside.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Safe Word">
+<meta name="twitter:description" content="Seven safes. One-word passwords. Thirty seconds each. A daily word-guessing heist.">
+<meta name="twitter:image" content="https://geordie.lol/safeword/og-image.png">
+<!-- Home-screen icon on iPhone and iPad -->
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Safe Word">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect x='1' y='1' width='14' height='13' fill='%2304050d'/%3E%3Crect x='2' y='2' width='12' height='11' fill='%234a5078'/%3E%3Crect x='6' y='5' width='4' height='4' fill='%23ffd23f'/%3E%3Crect x='7' y='3' width='2' height='1' fill='%23ff5a4e'/%3E%3Crect x='2' y='14' width='3' height='2' fill='%2304050d'/%3E%3Crect x='11' y='14' width='3' height='2' fill='%2304050d'/%3E%3C/svg%3E">
 <title>Safe Word</title>
 <script defer src="https://cloud.umami.is/script.js" data-website-id="6e8639e8-bf58-459d-9a37-5f0f82788902"></script>
@@ -1485,7 +1503,7 @@ function renderGetaway(fresh) {
 function shareText() { return SHARE_URL + "\n💎💸Heist " + heistNumber(STUB ? localDate() : gameDate) + "💸💎\n💰Made it out with " + money(haul()) + "💰"; }
 async function share(msgEl) {
   const text = shareText(); msgEl.textContent = "";
-  try { if (navigator.share && COARSE()) { await navigator.share({ text }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
+  // Always copy straight to the clipboard (no share sheet), on phones and computers alike
   let ok = false;
   try { if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); ok = true; } } catch (e) {}
   if (!ok) { try { const ta = document.createElement("textarea"); ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
