@@ -648,7 +648,7 @@ h4.sub{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var
       </table>
 
       <h3>The archive</h3>
-      <p>Every photograph that's had its day goes into the archive. Play one at random, with five fresh colours each time. Archive rounds don't touch your record.</p>
+      <p>Every photograph bar today's is in the archive. Play one at random, with five fresh colours each time. Archive rounds don't touch your record.</p>
 
       <h3>Credits</h3>
       <p>Colours come thanks to the <a href="https://github.com/meodai/color-names" target="_blank" rel="noopener">Color Name List</a> by David Aerne and contributors. A human-curated set of 4,959 names, MIT licensed.</p>
@@ -927,20 +927,25 @@ function prettyDate(s){
 
 /* =====================================================================
    4. THE MANIFEST
-   A plain spreadsheet, fetched at load. One row per day:
+   A plain spreadsheet, fetched at load. One row per photograph:
 
-       date       YYYY-MM-DD — the day this photograph is the puzzle
+       date       optional, and only an ordering hint — see below
        file       image filename, resolved against IMAGE_BASE
        url        a full URL instead, if the images live elsewhere
        title      your name for it (optional)
        hex1..5    the five target colours, in playing order
 
+   This is a pool, not a calendar. The day counts forward from EPOCH and
+   takes the photograph at that position, wrapping round at the end, so
+   the game keeps running on its own with nobody adding rows. Dates, if
+   present, only put the pool in order; a sheet with no date column runs
+   in the order its rows are written.
+
    The hexes are written into the sheet rather than derived at runtime
    on purpose. Browsers do not decode JPEGs or downscale canvases
    identically, so clustering the photograph in the player's browser
    would hand different people slightly different colours and quietly
-   break the one promise the daily makes. Editing the sheet and
-   committing is still the whole publishing step.
+   break the one promise the daily makes.
    ===================================================================== */
 const PACK_CSV   = 'levels.csv';
 const IMAGE_BASE = 'images/';
@@ -1015,7 +1020,6 @@ function csvToPuzzles(text, base){
   const iDate = at('date'), iFile = at('file'), iUrl = at('url'), iTitle = at('title');
   const iHex = [];
   for (let k = 1; k <= TARGETS_PER_DAY; k++) iHex.push(at('hex' + k));
-  if (iDate < 0) throw new Error('the sheet needs a date column');
   if (iFile < 0 && iUrl < 0) throw new Error('the sheet needs a file or url column');
 
   const body = rows.slice(1);
@@ -1024,8 +1028,8 @@ function csvToPuzzles(text, base){
   const out = [];
   body.forEach(r => {
     const cell = i => (i >= 0 && r[i] != null ? r[i].trim() : '');
-    const date = normaliseDate(cell(iDate), order), file = cell(iFile), url = cell(iUrl);
-    if (!date) return;
+    const date = iDate >= 0 ? normaliseDate(cell(iDate), order) : '';
+    const file = cell(iFile), url = cell(iUrl);
     const src = url || (file ? base + file : '');
     if (!src) return;
     const hexes = iHex.map(cell).map(normHex).filter(Boolean);
@@ -1035,7 +1039,11 @@ function csvToPuzzles(text, base){
       hexes: hexes.length === TARGETS_PER_DAY ? hexes : null
     });
   });
-  out.sort((a,b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+  // Dates are only an ordering hint now. A fully dated sheet keeps the
+  // running order it already had — which is what makes the photographs
+  // already published stay on the days they were published. A sheet with
+  // no dates simply runs in the order its rows are written.
+  if (out.every(p => p.date)) out.sort((a,b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
   return out;
 }
 
@@ -1109,7 +1117,7 @@ function buildFallbackPuzzles(){
    5. STATE
    ===================================================================== */
 const S = {
-  puzzles: [], firstDate: null, today: null, todayPuzzle: null, archive: [],
+  puzzles: [], today: null, todayPuzzle: null, archive: [],
   mode: 'standard',
   session: null,          // {kind, date, puzzleNo, level, targets, index, results}
   target: null,           // the colour currently being hunted
@@ -1901,22 +1909,37 @@ function renderStats(){
 /* =====================================================================
    14. SESSION FLOW
    ===================================================================== */
-function puzzleNumber(date){
-  return S.firstDate ? daysBetween(S.firstDate, date) + 1 : 1;
+/* Day one. Pinned in the code rather than read off the sheet, because the
+   puzzle number is the thing people quote at each other — moving it would
+   rewrite every result anyone has already shared. */
+const EPOCH = '2026-08-22';
+
+function dayIndex(date){ return Math.max(0, daysBetween(EPOCH, date)); }
+function puzzleNumber(date){ return dayIndex(date) + 1; }
+
+/* A deterministic shuffle: the same seed gives the same order in every
+   browser, which is the whole requirement for a daily puzzle. */
+function shuffledBy(arr, seed){
+  const out = arr.slice(), rnd = seededRng(seed);
+  for (let i = out.length - 1; i > 0; i--){
+    const j = Math.floor(rnd() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
 }
 
-/** The row for a date, or — if you've missed a day of authoring — a
- *  deterministic pick out of the archive, with colours re-rolled from
- *  the same date seed. Everyone still gets the same puzzle; it just
- *  isn't a new photograph. */
+/** The day picks a photograph out of the pool by counting, so the game
+ *  runs on indefinitely without anyone adding a row. The first lap is the
+ *  sheet in its own order — which keeps every photograph already
+ *  published on the day it was published — and each lap after that is
+ *  reshuffled from the lap number, so the second hundred days are not the
+ *  first hundred again in the same order. */
 function puzzleFor(date){
-  const exact = S.puzzles.find(p => p.date === date);
-  if (exact) return exact;
-  const past = S.puzzles.filter(p => p.date < date);
-  if (!past.length) return null;
-  const rnd = seededRng('fallback:' + date);
-  const pick = past[Math.floor(rnd() * past.length)];
-  return {date, file: pick.file, src: pick.src, title: pick.title, hexes: null, reused: true};
+  const pool = S.puzzles;
+  if (!pool.length) return null;
+  const d = dayIndex(date), n = pool.length, lap = Math.floor(d / n);
+  const order = lap === 0 ? pool : shuffledBy(pool, 'lap:' + lap);
+  return order[d % n];
 }
 
 /* opts.replay — today's puzzle again, same photograph and the same five
@@ -2124,8 +2147,8 @@ async function beginSession(kind, opts = {}){
 
   S.session = {
     kind, level, replay: !!opts.replay,
-    date: spectrum ? S.today : (kind === 'daily' ? S.today : level.date),
-    puzzleNo: spectrum ? 0 : puzzleNumber(kind === 'daily' ? S.today : level.date),
+    date: S.today,
+    puzzleNo: kind === 'daily' ? puzzleNumber(S.today) : 0,
     // Always Standard: with a spectrum on screen, a swatch would turn the
     // whole thing into a colour picker.
     mode: spectrum ? 'standard' : S.mode,
@@ -2794,7 +2817,7 @@ window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 260)
     } else {
       const parsed = csvToPuzzles(await res.text(), IMAGE_BASE);
       if (parsed.length){ S.puzzles = parsed; source = PACK_CSV; }
-      else problem = `${PACK_CSV} loaded but no row was usable — every row needs a date and a file.`;
+      else problem = `${PACK_CSV} loaded but no row was usable — every row needs a file.`;
     }
   } catch(e){
     problem = /^file:/.test(location.protocol)
@@ -2804,9 +2827,10 @@ window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 260)
 
   if (!source) S.puzzles = buildFallbackPuzzles();
 
-  S.firstDate = S.puzzles.length ? S.puzzles[0].date : S.today;
   S.todayPuzzle = puzzleFor(S.today);
-  S.archive = S.puzzles.filter(p => p.date < S.today);
+  // Everything in the pool but today's, so the archive can never hand you
+  // the photograph you are in the middle of.
+  S.archive = S.puzzles.filter(p => p !== S.todayPuzzle);
 
   /* Nothing about the size of the pack goes on the title card — it's
      bookkeeping for whoever maintains the sheet, not for the player. The
