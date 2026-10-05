@@ -767,7 +767,9 @@ function inflections(w) {
 function isAnswer(g, t) { for (const form of [t.w, ...(t.alt || [])]) if (g === form || inflections(form).has(g)) return true; return false; }
 function evaluate(g, t) {
   if (isAnswer(g, t)) return { word: g, rank: 0, key: "click", label: "Click", pay: PAY_CLICK, angle: 0, side: "" };
-  const idx = t.near.indexOf(g), rank = idx < 0 ? Infinity : idx + 1;
+  // Common words rank by their place in the dial list; rarer words carry their own slotted-in rank
+  const idx = t.near.indexOf(g);
+  const rank = idx >= 0 ? idx + 1 : (t.more && Object.prototype.hasOwnProperty.call(t.more, g) ? t.more[g] : Infinity);
   const band = BANDS.find((b) => rank <= b.maxRank);
   const h = hash32(g + "|" + t.w), frac = (h % 10000) / 10000;
   const angle = Math.round(band.deg[0] + frac * (band.deg[1] - band.deg[0]));
