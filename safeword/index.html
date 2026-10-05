@@ -1529,7 +1529,7 @@ async function share(msgEl) {
   try { if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); ok = true; } } catch (e) {}
   if (!ok) ok = legacyCopy(text, msgEl);
   if (ok) {
-    msgEl.textContent = "Copied! Paste it anywhere.";
+    msgEl.textContent = "Copied!";
     setTimeout(() => { msgEl.textContent = ""; }, 3000);
   } else {
     // Last resort: show the result so it can be copied by hand
