@@ -283,6 +283,7 @@ dialog.sheet::backdrop { background: rgba(4, 5, 13, .75); }
 .dlg-body ul { padding-left: 22px; margin: 0 0 12px; }
 .dlg-body li { margin-bottom: 4px; }
 .dlg-body a { color: var(--cyan); }
+.made-by { margin: 20px 0 0; padding-top: 14px; border-top: 2px solid var(--panel2); }
 .file { background: var(--paper); color: var(--paper-ink); border: 4px solid var(--frame); padding: 12px 16px; margin-bottom: 12px; }
 .file .stamp { font-family: var(--pixel); font-size: 16px; color: var(--paper-red); margin-bottom: 4px; }
 .file .muted { color: var(--paper-muted); }
@@ -671,7 +672,10 @@ body.fx::after { content: ""; position: fixed; inset: 0; z-index: 30; pointer-ev
     </ul>
     <h3>Privacy</h3>
     <p>Visits to this page are counted with Umami, a privacy-friendly analytics service that doesn't use cookies.</p>
-    <p>Your stats stay in this browser. When crew stats are switched on, the game sends only a random ID made in your browser, the date, your seven payouts (which show which safes you cracked), and which safe each piece of gear was used on. Results are deleted after 14 days. The crew's numbers are self-reported and can be faked. It's a heist, not a court of law.</p>
+    <p>Your dossier (your own stats and history) stays in this browser.</p>
+    <p>When you finish a day's job, the game sends your result to the crew-stats database, which is hosted by Supabase. It sends only a random ID made in your browser, the date, your seven payouts (which show which safes you cracked), and which safe each piece of gear was used on. No names, guesses or contact details are sent. Results are deleted after 14 days. Like most web services, Supabase may briefly keep standard server logs, such as IP addresses.</p>
+    <p>The crew's numbers are self-reported and can be faked. It's a heist, not a court of law.</p>
+    <p class="made-by">Made by Geordie Crawley (<a href="https://geordie.lol" target="_blank" rel="noopener">geordie.lol</a>) with assistance from Claude by Anthropic.</p>
   </div>
 </dialog>
 
