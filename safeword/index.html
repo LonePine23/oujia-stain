@@ -238,6 +238,8 @@ form.guess { margin: 0 0 12px; }
 .gw-line { text-align: center; font-size: 20px; margin: 0 0 4px; }
 .copied { text-align: center; color: var(--green); margin: 6px 0 0; font-weight: 600; }
 .copied:empty { display: none; }
+.share-text { display: block; white-space: pre-wrap; text-align: left; margin-top: 8px; padding: 10px 12px; background: var(--bg); color: var(--text);
+  border: 2px solid var(--panel2); font-weight: 400; -webkit-user-select: all; user-select: all; }
 .section-title { font-family: var(--pixel); font-size: 16px; display: flex; align-items: center; gap: 12px; margin: 0 0 12px; }
 .section-title::after { content: ""; flex: 1; border-top: 3px dashed var(--panel2); }
 .breakdown { width: 100%; border-collapse: collapse; font-size: 18px; }
@@ -1504,16 +1506,36 @@ function renderGetaway(fresh) {
 }
 
 /* ---------- Share ---------- */
-function shareText() { return SHARE_URL + "\n💎💸Heist " + heistNumber(STUB ? localDate() : gameDate) + "💸💎\n💰Made it out with " + money(haul()) + "💰"; }
+function shareText() {   // starts with the game's name, not the link: iPhones treat text that starts with a link as one long web address
+  return GAME_NAME + "\n💎💸Heist " + heistNumber(STUB ? localDate() : gameDate) + "💸💎\n💰Made it out with " + money(haul()) + "💰\n" + SHARE_URL; }
+function legacyCopy(text, near) {
+  // Older browsers and some iPhone set-ups: copy from a hidden text box placed next to the button
+  // (inside any open dialog, so it isn't blocked), with the whole text selected the way iOS needs.
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.contentEditable = "true";
+    ta.style.cssText = "position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;font-size:16px;border:0;padding:0";
+    (near && near.parentNode ? near.parentNode : document.body).appendChild(ta);
+    ta.focus({ preventScroll: true }); ta.select(); ta.setSelectionRange(0, text.length);
+    const ok = document.execCommand("copy");
+    ta.remove();
+    return ok;
+  } catch (e) { return false; }
+}
 async function share(msgEl) {
   const text = shareText(); msgEl.textContent = "";
-  // Always copy straight to the clipboard (no share sheet), on phones and computers alike
+  // Always copy the whole result straight to the clipboard (no share sheet), on phones and computers alike
   let ok = false;
   try { if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); ok = true; } } catch (e) {}
-  if (!ok) { try { const ta = document.createElement("textarea"); ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
-    document.body.appendChild(ta); ta.select(); ok = document.execCommand("copy"); ta.remove(); } catch (e) {} }
-  msgEl.textContent = ok ? "Copied!" : "Couldn't copy. Your browser blocked it.";
-  setTimeout(() => { msgEl.textContent = ""; }, 2500);
+  if (!ok) ok = legacyCopy(text, msgEl);
+  if (ok) {
+    msgEl.textContent = "Copied! Paste it anywhere.";
+    setTimeout(() => { msgEl.textContent = ""; }, 3000);
+  } else {
+    // Last resort: show the result so it can be copied by hand
+    msgEl.innerHTML = '<span>Couldn\'t copy automatically. Press and hold to copy:</span><span class="share-text"></span>';
+    msgEl.querySelector(".share-text").textContent = text;
+  }
 }
 
 /* ---------- Personal stats ---------- */
