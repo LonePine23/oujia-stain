@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Safe Word — Geordie Crawley</title>
+  <meta name="description" content="A daily word heist. Seven safes, seven single-word passwords, and the only clue is the dictionary definition. Get close and you still walk away with something.">
+  <link rel="canonical" href="https://geordie.lol/safe-word">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Geordie Crawley">
+  <meta property="og:locale" content="en_AU">
+  <meta property="og:title" content="Safe Word — Geordie Crawley">
+  <meta property="og:description" content="A daily word heist. Seven safes, seven single-word passwords, and the only clue is the dictionary definition. Get close and you still walk away with something.">
+  <meta property="og:url" content="https://geordie.lol/safe-word">
+  <meta property="og:image" content="https://geordie.lol/images/og/safe-word.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Safe Word: the Owe &amp; Behold First National Bank at night">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "Safe Word",
+    "url": "https://geordie.lol/safeword",
+    "description": "A daily word heist: crack seven safes by guessing each single-word password from its dictionary definition.",
+    "image": "https://geordie.lol/images/og/safe-word.jpg",
+    "author": { "@id": "https://geordie.lol/#geordie" },
+    "applicationCategory": "Game",
+    "gamePlatform": "Web browser",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "AUD" }
+  }
+  </script>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="6e8639e8-bf58-459d-9a37-5f0f82788902"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Spectral:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body {
+      min-height:100%;
+      font-family:'IBM Plex Mono',monospace;
+      background:#0a0a0a;
+      color:#f4f2ee;
+    }
+
+    .bg { position:fixed; inset:0; z-index:0; background:#0a0a0a; }
+    .bg img {
+      width:100%; height:100%; object-fit:cover;
+      object-position:center center;
+      opacity:0; transition:opacity 1.4s ease;
+    }
+    .bg img.loaded { opacity:1; }
+    .bg::after {
+      content:""; position:absolute; inset:0;
+      background:linear-gradient(180deg, rgba(8,9,12,0.50) 0%, rgba(8,9,12,0.42) 35%, rgba(8,9,12,0.70) 100%);
+    }
+
+    .page {
+      position:relative; z-index:1;
+      min-height:100vh;
+      display:flex; align-items:center; justify-content:center;
+      padding:clamp(80px,10vh,140px) clamp(20px,5vw,60px) clamp(120px,16vh,180px);
+    }
+
+    .wrap {
+      display:flex;
+      gap:clamp(28px,4vw,56px);
+      align-items:flex-start;
+      max-width:1100px;
+      width:100%;
+      opacity:0; transform:translateY(16px);
+      transition:opacity 0.9s ease 0.3s, transform 0.9s ease 0.3s;
+    }
+    .wrap.visible { opacity:1; transform:translateY(0); }
+
+    /* Screenshot — clickable into lightbox */
+    .shot {
+      flex:0 0 clamp(240px,34%,380px);
+      padding:0; cursor:pointer; background:none;
+      border-radius:16px; overflow:hidden;
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow:0 8px 32px rgba(0,0,0,0.32);
+    }
+    .shot img { width:100%; height:auto; display:block;
+      transition:transform 0.6s cubic-bezier(0.2,0.8,0.3,1); }
+    .shot:hover img { transform:scale(1.03); }
+
+    .info {
+      flex:1 1 auto;
+      padding:clamp(28px,3.5vw,46px);
+      border-radius:18px;
+      background:rgba(18,18,20,0.42);
+      backdrop-filter:blur(20px) saturate(1.2);
+      -webkit-backdrop-filter:blur(20px) saturate(1.2);
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow:0 8px 32px rgba(0,0,0,0.3);
+    }
+    .info .eyebrow {
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.72rem; letter-spacing:0.16em; text-transform:uppercase;
+      color:rgba(244,242,238,0.6); margin-bottom:14px;
+    }
+    .info h1 {
+      font-family:'IBM Plex Mono',monospace;
+      font-weight:700;
+      font-size:clamp(1.9rem,3.6vw,2.6rem);
+      letter-spacing:-0.02em;
+      line-height:1.05;
+      margin-bottom:8px;
+    }
+    .info .tagline {
+      font-family:'Spectral',serif; font-style:italic;
+      font-size:clamp(1.05rem,1.8vw,1.25rem);
+      color:rgba(244,242,238,0.85);
+      margin-bottom:clamp(20px,2.4vw,28px);
+    }
+    .info p {
+      font-family:'Spectral',serif;
+      font-size:clamp(1.02rem,1.5vw,1.15rem);
+      line-height:1.65;
+      margin-bottom:1em;
+      color:#ebe9e4;
+      text-shadow:0 1px 10px rgba(0,0,0,0.35);
+    }
+    .info p:last-of-type { margin-bottom:0; }
+    .info em { font-style:italic; }
+
+    /* Tabs */
+    .tabs {
+      display:flex; gap:8px;
+      margin-bottom:clamp(18px,2.4vh,24px);
+    }
+    .tab {
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.78rem;
+      letter-spacing:0.05em;
+      color:rgba(244,242,238,0.7);
+      background:rgba(20,20,22,0.30);
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius:10px;
+      padding:9px 18px;
+      cursor:pointer;
+      transition:background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    .tab:hover { color:#fff; border-color:rgba(255,255,255,0.25); }
+    .tab.active {
+      background:rgba(244,242,238,0.92);
+      color:#14140f;
+      border-color:rgba(244,242,238,0.92);
+    }
+    .tab-content { display:none; }
+    .tab-content.active { display:block; animation:fade 0.4s ease; }
+    @keyframes fade { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+    .play-btn {
+      display:inline-flex; align-items:center; gap:10px;
+      margin-top:clamp(22px,2.6vw,30px);
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.92rem; font-weight:500; letter-spacing:0.04em;
+      color:#14140f;
+      background:#f4f2ee;
+      border:1px solid #f4f2ee;
+      border-radius:12px;
+      padding:14px 28px;
+      text-decoration:none;
+      transition:background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .play-btn:hover {
+      background:#fff;
+      transform:translateY(-2px);
+      box-shadow:0 8px 24px rgba(0,0,0,0.3);
+    }
+    .play-btn .arr { font-size:1.05rem; }
+
+    /* Lightbox */
+    .lightbox {
+      position:fixed; inset:0; z-index:50;
+      background:rgba(6,6,8,0.94);
+      backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+      display:flex; align-items:center; justify-content:center;
+      padding:clamp(20px,4vw,60px);
+      opacity:0; pointer-events:none;
+      transition:opacity 0.35s ease; cursor:zoom-out;
+    }
+    .lightbox.open { opacity:1; pointer-events:auto; }
+    .lightbox img {
+      max-width:100%; max-height:100%; border-radius:8px;
+      box-shadow:0 20px 60px rgba(0,0,0,0.6);
+      transform:scale(0.97); transition:transform 0.35s ease;
+    }
+    .lightbox.open img { transform:scale(1); }
+    .lightbox .close {
+      position:absolute; top:clamp(16px,3vw,28px); right:clamp(16px,3vw,28px);
+      font-family:'IBM Plex Mono',monospace; font-size:1.5rem;
+      color:rgba(244,242,238,0.8); background:none; border:none; cursor:pointer;
+      width:44px; height:44px; line-height:1; transition:color 0.3s ease;
+    }
+    .lightbox .close:hover { color:#fff; }
+
+    nav {
+      position:fixed;
+      bottom:clamp(20px,4vw,44px);
+      left:50%; transform:translateX(-50%);
+      display:flex; justify-content:center; align-items:center;
+      gap:clamp(14px,3vw,40px);
+      flex-wrap:wrap;
+      z-index:3;
+      padding:14px clamp(20px,4vw,36px);
+      border-radius:16px;
+      background:rgba(20,20,22,0.28);
+      backdrop-filter:blur(16px) saturate(1.2);
+      -webkit-backdrop-filter:blur(16px) saturate(1.2);
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow:0 8px 32px rgba(0,0,0,0.25);
+      max-width:calc(100% - 32px);
+      opacity:0;
+      transition:opacity 0.6s ease 0.6s;
+    }
+    nav.visible { opacity:1; }
+    nav a {
+      font-family:'Spectral',serif; font-style:italic; font-weight:400;
+      font-size:clamp(0.95rem,2vw,1.2rem);
+      color:#f4f2ee; text-decoration:none; letter-spacing:0.01em;
+      padding:2px 0; border-bottom:1.5px solid transparent;
+      transition:border-color 0.3s ease, opacity 0.3s ease;
+      text-shadow:0 1px 8px rgba(0,0,0,0.4); white-space:nowrap;
+    }
+    nav a:hover { border-bottom-color:currentColor; opacity:0.85; }
+
+    .nav-toggle { display:none; }
+    .nav-links { display:contents; }
+
+    @media (max-width:760px){
+      .wrap { flex-direction:column; align-items:center; }
+      .shot { flex:0 0 auto; max-width:320px; width:100%; }
+    }
+    @media (max-width:600px){
+      nav {
+        flex-direction:column; gap:0; padding:0; width:auto;
+        max-width:calc(100% - 32px); overflow:hidden;
+      }
+      .nav-toggle {
+        display:flex; align-items:center; justify-content:center; gap:9px;
+        font-family:'IBM Plex Mono',monospace; font-size:0.82rem; letter-spacing:0.06em;
+        color:#f4f2ee; background:none; border:none; cursor:pointer;
+        padding:13px 26px; width:100%; text-shadow:0 1px 8px rgba(0,0,0,0.4);
+      }
+      .nav-toggle .bars { display:inline-flex; flex-direction:column; gap:3px; }
+      .nav-toggle .bars span {
+        display:block; width:16px; height:1.6px; background:currentColor;
+        transition:transform 0.3s ease, opacity 0.3s ease;
+      }
+      nav.open .nav-toggle .bars span:nth-child(1){ transform:translateY(4.6px) rotate(45deg); }
+      nav.open .nav-toggle .bars span:nth-child(2){ opacity:0; }
+      nav.open .nav-toggle .bars span:nth-child(3){ transform:translateY(-4.6px) rotate(-45deg); }
+      .nav-links {
+        display:flex; flex-direction:column; align-items:center; gap:0;
+        max-height:0; overflow:hidden; width:100%; transition:max-height 0.4s ease;
+      }
+      nav.open .nav-links { max-height:60vh; }
+      .nav-links a {
+        padding:13px 26px; width:100%; text-align:center;
+        border-top:1px solid rgba(255,255,255,0.10); border-bottom:none;
+      }
+      .nav-links a:hover { border-bottom:none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg"><img id="bgImg" src="/images/F1010025.jpg" alt=""></div>
+
+  <div class="page">
+    <div class="wrap" id="wrap">
+
+      <button class="shot" data-full="/images/safe-word/safe-word-screenshot.jpg">
+        <img src="/images/safe-word/safe-word-screenshot.jpg" alt="A safe in Safe Word, with its definition clue, the dial and the gear tray" loading="lazy">
+      </button>
+
+      <div class="info">
+        <div class="eyebrow">A daily word heist</div>
+        <h1>Safe Word</h1>
+        <div class="tagline">Say the magic word.</div>
+
+        <div class="tabs">
+          <button class="tab active" data-tab="about">About</button>
+          <button class="tab" data-tab="ai">AI Declaration</button>
+        </div>
+
+        <div class="tab-content active" id="about">
+          <p>We're at the Owe &amp; Behold First National Bank. Inside are the seven hardest safes in the world. Each holds $50,000, locked behind a single-word password.</p>
+          <p>Your only clue is the password's dictionary definition. Read it, then start guessing. You've got thirty seconds a safe and as many guesses as you can type. Every guess turns the dial, and the closer your word is in meaning, the closer the dial stops to the click.</p>
+          <p>Crack the password and the safe pops open. Get close and you still walk away with something — your best guess sets the take, and bad guesses never cost you a cent.</p>
+          <p>You've got three pieces of gear for the job: a <em>Blueprint</em>, a <em>Walkie Talkie</em> and a <em>Kaleidoscope</em>. Each one works once a day, on any safe, so choose your moment.</p>
+          <p>There's a new heist every day, and everyone gets the same seven safes. They get harder as you go. The most you can take home is $350,000, which is either a very good day at the office or a very bad day for the bank.</p>
+          <p>Good luck. Don't get caught.</p>
+        </div>
+
+        <div class="tab-content" id="ai">
+          <p>Safe Word was made by Geordie Crawley with the assistance of Claude (by Anthropic). I'd never written code before I started making games; Claude wrote the code, working from my decisions about how the game should look, feel, and play.</p>
+          <p><strong>The human part:</strong> the heist, the bank, the gear, the scoring rules, the thirty-second clock, the rules for which words are fair game, the pixel-art look, the tone of the writing — all mine. So is the editorial responsibility for what's in the game and how it plays.</p>
+          <p><strong>The AI part:</strong> Claude wrote and debugged the game's code, including the pixel art (which is drawn in code) and the scripts that build the word list. It suggested technical tradeoffs and helped shape the structure of the page. When something didn't work or didn't feel right, I asked for changes; Claude made them.</p>
+          <p><strong>What isn't AI:</strong> none of the clues were written by a chatbot. Every definition comes from Wiktionary and its human contributors. How close a guess is gets measured with ConceptNet Numberbatch, a published, fixed set of word vectors, not a language model judging you in real time. The words themselves are picked automatically from common English, so no password should be impossible to guess.</p>
+          <p>I think of the relationship as closer to "I directed, Claude implemented" than "I used a tool." It's a collaboration that wouldn't have produced this game without both halves, and I'd rather be honest about that than pretend otherwise.</p>
+        </div>
+
+        <a class="play-btn" href="/safeword">Play the game <span class="arr">→</span></a>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="lightbox" id="lightbox">
+    <button class="close" id="lightboxClose" aria-label="Close">✕</button>
+    <img id="lightboxImg" src="" alt="">
+  </div>
+
+  <nav id="nav">
+    <button class="nav-toggle" aria-label="Menu"><span class="bars"><span></span><span></span><span></span></span>Menu</button>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/games">Games</a>
+      <a href="/scripts">Creative Works</a>
+      <a href="/bio">Bio</a>
+      <a href="/contact">Contact</a>
+    </div>
+  </nav>
+
+  <script>
+    const img = document.getElementById('bgImg');
+    const wrap = document.getElementById('wrap');
+    const nav = document.getElementById('nav');
+    function reveal() { wrap.classList.add('visible'); nav.classList.add('visible'); }
+    if (img.complete) { img.classList.add('loaded'); reveal(); }
+    else {
+      img.addEventListener('load', () => { img.classList.add('loaded'); reveal(); });
+      img.addEventListener('error', reveal);
+    }
+
+    // Lightbox
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+    const lightboxClose = document.getElementById('lightboxClose');
+    document.querySelectorAll('[data-full]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        lightboxImg.src = btn.dataset.full; lightbox.classList.add('open');
+      });
+    });
+    function closeLightbox() {
+      lightbox.classList.remove('open');
+      setTimeout(() => { lightboxImg.src = ''; }, 350);
+    }
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox || e.target === lightboxClose) closeLightbox();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && lightbox.classList.contains('open')) closeLightbox();
+    });
+
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const target = tab.dataset.tab;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(target).classList.add('active');
+      });
+    });
+
+    // Mobile nav toggle
+    (function(){
+      const toggle = nav.querySelector('.nav-toggle');
+      if (toggle) {
+        toggle.addEventListener('click', () => nav.classList.toggle('open'));
+        nav.querySelectorAll('.nav-links a').forEach(a =>
+          a.addEventListener('click', () => nav.classList.remove('open')));
+      }
+    })();
+  </script>
+</body>
+</html>
