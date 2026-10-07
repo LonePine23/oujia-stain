@@ -146,6 +146,10 @@ header.top { display: flex; align-items: center; justify-content: space-between;
 .intel-item .what { font-family: var(--mono); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; font-size: 16px; }
 .intel-item .flavour { font-size: 16px; color: var(--paper-muted); }
 .intel-item .blanks { font-family: var(--mono); font-size: 26px; font-weight: 600; letter-spacing: 4px; white-space: nowrap; overflow-x: auto; }
+.intel-item .exline { font-size: 18px; line-height: 1.45; }
+.intel-item .exlead { color: var(--paper-muted); }
+.intel-item q.ex { quotes: "“" "”"; font-style: italic; }
+.tool[disabled] { cursor: default; }
 .intel-item .tipword { font-family: var(--mono); font-weight: 600; font-size: 22px; color: var(--t-walkie); text-transform: uppercase; letter-spacing: .05em; }
 .tiles { display: flex; flex-wrap: wrap; gap: 5px; margin: 6px 0; }
 .tile { font-family: var(--mono); font-weight: 600; font-size: 22px; width: 34px; height: 40px; display: grid; place-items: center; background: #fffaf0; color: var(--paper-ink);
@@ -625,7 +629,7 @@ body.fx::after { content: ""; position: fixed; inset: 0; z-index: 30; pointer-ev
     <h3>Gear</h3>
     <ul>
       <li><b>Blueprint</b> shows how long the password is and its first letter.</li>
-      <li><b>Walkie Talkie</b> gives you one word that's close on the dial.</li>
+      <li><b>Walkie Talkie</b> gives you the password used in a sentence, with the password bleeped out. Not every safe has one; when it doesn't, the card says so.</li>
       <li><b>Kaleidoscope</b> gives you the password's letters, jumbled.</li>
       <li>Each works once a day, on any safe. Choosing gear stops the clock while you decide. Using it resets the clock to <span class="sec">30</span> seconds.</li>
     </ul>
@@ -668,6 +672,7 @@ body.fx::after { content: ""; position: fixed; inset: 0; z-index: 30; pointer-ev
     <h3>Words and definitions</h3>
     <ul>
       <li>Definitions from <a href="https://en.wiktionary.org" target="_blank" rel="noopener">Wiktionary</a> (© Wiktionary contributors), licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>. The password is blanked out of some definitions.</li>
+      <li>Walkie Talkie sentences written by Geordie Crawley, with help from Claude.</li>
       <li>Extracted with Wiktextract (Tatu Ylonen, LREC 2022), via <a href="https://kaikki.org" target="_blank" rel="noopener">kaikki.org</a>.</li>
       <li>The dial and the Walkie Talkie use semantic vectors from <a href="https://github.com/commonsense/conceptnet-numberbatch" target="_blank" rel="noopener">ConceptNet Numberbatch</a>, by Luminoso Technologies, Inc., licensed CC BY-SA 4.0 (Speer, Chin &amp; Havasi, 2017).</li>
       <li>Word frequencies from <a href="https://github.com/rspeer/wordfreq" target="_blank" rel="noopener">wordfreq</a> by Robyn Speer (CC BY-SA 4.0), which includes SUBTLEX and Google Books Ngrams data.</li>
@@ -881,7 +886,11 @@ function inflections(w) {
   if (w.endsWith("y")) { f.add(w.slice(0, -1) + "ies"); f.add(w.slice(0, -1) + "ied"); }
   return f;
 }
-function isAnswer(g, t) { for (const form of [t.w, ...(t.alt || [])]) if (g === form || inflections(form).has(g)) return true; return false; }
+function isAnswer(g, t) {
+  if ((t.forms || []).includes(g)) return true;          // irregular forms from Wiktionary: mown, ran, mice
+  for (const form of [t.w, ...(t.alt || [])]) if (g === form || inflections(form).has(g)) return true;
+  return false;
+}
 function evaluate(g, t) {
   if (isAnswer(g, t)) return { word: g, rank: 0, key: "click", label: "Click", pay: PAY_CLICK, angle: 0, side: "" };
   // Common words rank by their place in the dial list; rarer words carry their own slotted-in rank
@@ -1269,8 +1278,14 @@ function renderIntel() {
   }
   if (t.gear.includes("walkie")) {
     const el = document.createElement("div"); el.className = "intel-item walkie";
-    el.innerHTML = `<div class="what">Walkie Talkie</div><div>Your inside man: <span class="tipword"></span></div><div class="flavour">Static, then one word. It's close on the dial.</div>`;
-    el.querySelector(".tipword").textContent = "“" + d.tip + "”"; box.appendChild(el);
+    if (d.ex) {          // the password used in a sentence, password bleeped out
+      el.innerHTML = `<div class="what">Walkie Talkie</div><div class="exline"><span class="exlead">Your inside man:</span> <q class="ex"></q></div><div class="flavour">Static, then a voice. He used it in a sentence.</div>`;
+      el.querySelector(".ex").textContent = d.ex;
+    } else {             // older days: one word close on the dial
+      el.innerHTML = `<div class="what">Walkie Talkie</div><div>Your inside man: <span class="tipword"></span></div><div class="flavour">Static, then one word. It's close on the dial.</div>`;
+      el.querySelector(".tipword").textContent = "“" + d.tip + "”";
+    }
+    box.appendChild(el);
   }
   if (t.gear.includes("kaleido")) {
     const letters = scramble(d.w), el = document.createElement("div"); el.className = "intel-item kaleido";
@@ -1281,23 +1296,32 @@ function renderIntel() {
 }
 const TOOLS = {
   blueprint: { name: "Blueprint", desc: "Shows how long the password is and its first letter." },
-  walkie: { name: "Walkie Talkie", desc: "Your inside man radios in one word that's close on the dial." },
+  walkie: { name: "Walkie Talkie", desc: "Your inside man radios in the password, used in a sentence, with the password itself bleeped out." },
   kaleido: { name: "Kaleidoscope", desc: "Gives you every letter of the password, jumbled up." },
 };
 function renderGear() {
   document.querySelectorAll(".tool").forEach((b) => {
-    const key = b.dataset.tool, spentOn = game.gear[key], spent = spentOn != null;
-    b.classList.toggle("spent", spent);
-    b.querySelector(".used").innerHTML = spent ? `<span class="ul">used on safe ${spentOn + 1}</span><span class="us">✓ safe ${spentOn + 1}</span>` : "";
-    b.setAttribute("aria-label", TOOLS[key].name + (spent ? ", used on safe " + (spentOn + 1) : ". " + TOOLS[key].desc));
+    const key = b.dataset.tool, spentOn = game.gear[key], spent = spentOn != null, none = !spent && !toolAvailable(key);
+    b.classList.toggle("spent", spent || none);
+    b.disabled = none;
+    b.querySelector(".used").innerHTML = spent ? `<span class="ul">used on safe ${spentOn + 1}</span><span class="us">✓ safe ${spentOn + 1}</span>`
+      : none ? `<span class="ul">no intel on this safe</span><span class="us">no intel here</span>` : "";
+    b.setAttribute("aria-label", TOOLS[key].name + (spent ? ", used on safe " + (spentOn + 1) : none ? ", no intel on this safe" : ". " + TOOLS[key].desc));
   });
+}
+
+// The Walkie Talkie needs a sentence (or, on older days, a tip word) for this safe
+function toolAvailable(key) {
+  if (key !== "walkie" || !DAY || !game) return true;
+  const d = DAY.tumblers[game.current];
+  return !!(d && (d.ex || d.tip));
 }
 
 /* Gear decision: covers the screen and stops the clock */
 let pendingTool = null;
 function openTool(key, restoring) {
   const t = cur();
-  if (game.phase !== "active" || game.gear[key] != null) return;
+  if (game.phase !== "active" || game.gear[key] != null || !toolAvailable(key)) return;
   if (!restoring) { const left = t.deadline - Date.now(); if (left <= 0) return; t.paused = key; t.remaining = left; saveGame(); }
   stopClock(); pendingTool = key;
   const secs = Math.ceil(t.remaining / 1000);
@@ -1329,7 +1353,7 @@ function closeTool(use) {
   if (use) {
     const d = data(), tail = " Clock back to " + TUMBLER_SECONDS + " seconds.";
     say(key === "blueprint" ? "Blueprint: " + d.w.length + " letters, starting with " + d.w[0].toUpperCase() + "." + tail
-      : key === "walkie" ? "Walkie Talkie: " + d.tip + "." + tail : "Kaleidoscope: " + scramble(d.w).join(", ") + "." + tail);
+      : key === "walkie" ? "Walkie Talkie: " + (d.ex ? d.ex.replace(/____/g, "blank") : d.tip + ".") + tail : "Kaleidoscope: " + scramble(d.w).join(", ") + "." + tail);
   }
   window.scrollTo(0, 0);
   try { $("guessInput").focus({ preventScroll: true }); } catch (e) {}   // straight back to typing (reopens a phone keyboard)
