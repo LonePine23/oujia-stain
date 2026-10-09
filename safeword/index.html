@@ -886,11 +886,7 @@ function inflections(w) {
   if (w.endsWith("y")) { f.add(w.slice(0, -1) + "ies"); f.add(w.slice(0, -1) + "ied"); }
   return f;
 }
-function isAnswer(g, t) {
-  if ((t.forms || []).includes(g)) return true;          // irregular forms from Wiktionary: mown, ran, mice
-  for (const form of [t.w, ...(t.alt || [])]) if (g === form || inflections(form).has(g)) return true;
-  return false;
-}
+function isAnswer(g, t) { for (const form of [t.w, ...(t.alt || [])]) if (g === form || inflections(form).has(g)) return true; return false; }
 function evaluate(g, t) {
   if (isAnswer(g, t)) return { word: g, rank: 0, key: "click", label: "Click", pay: PAY_CLICK, angle: 0, side: "" };
   // Common words rank by their place in the dial list; rarer words carry their own slotted-in rank
