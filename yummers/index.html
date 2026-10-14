@@ -227,6 +227,15 @@ header.app {
 .scaled-note { color: var(--accent); font-size: 12px; font-weight: 600; }
 .cols { display: grid; gap: 28px; grid-template-columns: minmax(0,1fr); }
 @media (min-width: 720px) { .cols { grid-template-columns: 300px minmax(0,1fr); } }
+
+/* A section heading with its copy button sitting on the right. */
+.sec-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: .4em; }
+.sec-head h3 { margin: 0; flex: 1; }
+.btn-copy {
+  flex: none; font-size: 12px; font-weight: 600;
+  padding: 5px 11px; border-radius: 8px; color: var(--muted);
+}
+.btn-copy.done { color: var(--accent); border-color: var(--accent); }
 ul.ingredients { list-style: none; padding: 0; margin: 0; }
 ul.ingredients li { padding: 7px 0; border-bottom: 1px dashed var(--line-soft); font-size: 15px; }
 ul.ingredients li b { font-variant-numeric: tabular-nums; }
@@ -343,6 +352,13 @@ ol.steps li::before {
 .imgpreview { max-width: 100%; border-radius: 10px; margin-bottom: 10px; max-height: 220px; object-fit: cover; display: block; }
 .toolbar { display: flex; gap: 8px; align-items: center; padding: 14px 0; flex-wrap: wrap; }
 .toolbar .spacer { flex: 1; }
+
+/* On a phone, give the recipe title the full width and let the action buttons
+   drop onto their own line beneath it. Otherwise a long title gets squeezed
+   into a narrow column by the buttons sitting beside it, and the last button
+   wraps on its own — which looks broken. Wider screens share one line. */
+.detail .toolbar h2 { flex: 1 1 100%; margin: 0; }
+@media (min-width: 560px) { .detail .toolbar h2 { flex: 1 1 auto; } }
 </style>
 </head>
 <body>
@@ -1479,6 +1495,110 @@ function isScalable(recipe) {
 
 
 /* ===========================================================================
+   10c. COPY TO CLIPBOARD
+   ===========================================================================
+   Three copy buttons: the ingredients on their own (for a shopping list or a
+   message to whoever's at the shops), the method on its own, and the whole
+   recipe.
+
+   The copied text reflects whatever scale you're currently viewing. If you've
+   doubled the recipe on screen, you copy the doubled amounts — copying the
+   original would be surprising, given the screen says 4 cups.
+*/
+
+/** The ingredient list as plain text, with a blank line before each section. */
+function ingredientsToText(r, factor) {
+  const lines = [];
+  (r.ingredients || []).forEach(x => {
+    if (x.heading) {
+      if (lines.length) lines.push('');
+      lines.push(x.heading);
+    } else {
+      lines.push([x.amount ? scaleText(x.amount, factor) : '', x.item]
+        .filter(Boolean).join(' '));
+    }
+  });
+  return lines.join('\n');
+}
+
+/** The method as a numbered list. */
+function stepsToText(r) {
+  return (r.steps || []).map((s, i) => `${i + 1}. ${s}`).join('\n');
+}
+
+/** The whole thing, laid out so it reads properly pasted into Notes, an email
+ *  or a message — no markdown, since most places won't render it. */
+function recipeToText(r, factor) {
+  const out = [r.title];
+
+  const facts = [
+    r.servings  ? scaleText(r.servings, factor) : '',
+    r.prep_time ? `Prep ${r.prep_time}` : '',
+    r.cook_time ? `Cook ${r.cook_time}` : ''
+  ].filter(Boolean);
+  if (facts.length) out.push(facts.join(' · '));
+  if (r.description) out.push('', r.description);
+
+  const ing = ingredientsToText(r, factor);
+  if (ing) out.push('', 'INGREDIENTS', '', ing);
+
+  const steps = stepsToText(r);
+  if (steps) out.push('', 'METHOD', '', steps);
+
+  if (r.notes) out.push('', 'NOTES', '', r.notes);
+  if (r.source_url) out.push('', `Source: ${r.source_url}`);
+
+  return out.join('\n');
+}
+
+/** Put text on the clipboard.
+ *
+ *  Tries the modern Clipboard API first. It needs a secure context (HTTPS, or
+ *  localhost) and to be called from a real tap — both true here. If it's
+ *  unavailable or refused, falls back to the old trick: drop the text into an
+ *  invisible textarea, select it, and ask the browser to copy the selection.
+ *  Between the two, this works everywhere worth worrying about. */
+async function copyToClipboard(text, button, what) {
+  let ok = false;
+
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      ok = true;
+    }
+  } catch { /* fall through to the old way */ }
+
+  if (!ok) {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;';
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, text.length);   // iOS ignores select() without this
+      ok = document.execCommand('copy');
+      ta.remove();
+    } catch { ok = false; }
+  }
+
+  // Confirm on the button itself as well as in the toast — on a phone your
+  // thumb is often sitting right where the toast appears.
+  if (button) {
+    const original = button.textContent;
+    button.textContent = ok ? 'Copied ✓' : 'Blocked';
+    button.classList.toggle('done', ok);
+    setTimeout(() => {
+      button.textContent = original;
+      button.classList.remove('done');
+    }, 1700);
+  }
+  toast(ok ? `${what} copied` : 'Your browser wouldn\'t let the page copy that.');
+  return ok;
+}
+
+
+/* ===========================================================================
    11. DETAIL VIEW
    =========================================================================== */
 async function openDetail(id) {
@@ -1512,8 +1632,9 @@ async function openDetail(id) {
   $('#view-detail').innerHTML = `
     ${src ? `<img class="hero" src="${esc(src)}" alt="">` : ''}
     <div class="toolbar">
-      <h2 style="flex:1;margin:0">${esc(r.title)}</h2>
+      <h2>${esc(r.title)}</h2>
       <button id="d-fav" class="ghost" title="Favourite" style="font-size:22px;color:${r.is_favourite ? 'var(--star)' : 'var(--muted)'}">${r.is_favourite ? '★' : '☆'}</button>
+      <button id="d-copy" title="Copy the whole recipe">Copy all</button>
       <button id="d-edit">Edit</button>
     </div>
     ${r.description ? `<p class="lede">${esc(r.description)}</p>` : ''}
@@ -1526,7 +1647,10 @@ async function openDetail(id) {
     </div>
     <div class="cols">
       <div>
-        <h3>Ingredients ${factor !== 1 ? `<span class="scaled-note">×${factor}</span>` : ''}</h3>
+        <div class="sec-head">
+          <h3>Ingredients ${factor !== 1 ? `<span class="scaled-note">×${factor}</span>` : ''}</h3>
+          ${(r.ingredients || []).length ? `<button class="btn-copy" id="cp-ing">Copy</button>` : ''}
+        </div>
         <ul class="ingredients">
           ${(r.ingredients || []).map(x => x.heading
             ? `<li class="ing-head">${esc(x.heading)}</li>`
@@ -1538,7 +1662,10 @@ async function openDetail(id) {
           scale linearly either; use your judgement.</p>` : ''}
       </div>
       <div>
-        <h3>Method</h3>
+        <div class="sec-head">
+          <h3>Method</h3>
+          ${(r.steps || []).length ? `<button class="btn-copy" id="cp-steps">Copy</button>` : ''}
+        </div>
         <ol class="steps">
           ${(r.steps || []).map(s => `<li>${esc(s)}</li>`).join('')
             || '<li style="color:var(--muted)">No steps listed</li>'}
@@ -1560,6 +1687,15 @@ async function openDetail(id) {
   if ($('#sc-down')) $('#sc-down').addEventListener('click', () => {
     scaleIdx = Math.max(0, scaleIdx - 1); openDetail(id);
   });
+
+  // Copy buttons. Each one reads the recipe as it's currently shown, so the
+  // scale factor carries through.
+  $('#d-copy').addEventListener('click', (e) =>
+    copyToClipboard(recipeToText(r, factor), e.currentTarget, 'Recipe'));
+  if ($('#cp-ing')) $('#cp-ing').addEventListener('click', (e) =>
+    copyToClipboard(ingredientsToText(r, factor), e.currentTarget, 'Ingredients'));
+  if ($('#cp-steps')) $('#cp-steps').addEventListener('click', (e) =>
+    copyToClipboard(stepsToText(r), e.currentTarget, 'Method'));
 
   $('#d-edit').addEventListener('click', () => openEditor(r));
   $('#d-fav').addEventListener('click', async () => {
