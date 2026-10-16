@@ -23,7 +23,7 @@
 <meta property="og:image" content="https://geordie.lol/earthling/earthling_share.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="A small purple alien at an immigration counter, being examined by a human official with a rubber stamp.">
+<meta property="og:image:alt" content="A small alien at an immigration counter, being examined by a human official with a rubber stamp.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Earthling — a daily word game">
 <meta name="twitter:description" content="Seven words a day. Prove you belong on Earth.">
@@ -130,32 +130,38 @@ button{font:inherit;color:inherit}
 #ticketTongue{transform-box:fill-box;transform-origin:center top}
 #ticketTongue.fly{animation:tongue .6s ease-in forwards}
 
-/* alien states */
+/* the applicant: parts are hidden until an expression shows them (see EXPR in the script) */
 #alien{transform-box:view-box;transform-origin:110px 300px}
-#alien .a-eyes{display:none}
-#alien .a-normal{display:inline}
-#alien.happy .a-normal,#alien.sad .a-normal{display:none}
-#alien.happy .a-happy{display:inline}
-#alien.sad .a-sadeyes{display:inline}
-#alien .a-sweat{display:none}
-#alien.sweat .a-sweat{display:inline}
-#alien.sweat .a-sweat path{transform-box:fill-box;animation:drip 1s ease-in infinite}
-#alien.sweat .a-sweat path:nth-child(2){animation-delay:.45s}
-#alien .a-mouth-o{display:none}
-#alien.squeak .a-mouth{display:none}
-#alien.squeak .a-mouth-o{display:inline}
-#alien.sad .a-mouth{display:none}
-#alien.sad .a-mouth-sad{display:inline}
-#alien .a-mouth-sad{display:none}
-#alien .a-bulb{transform-box:fill-box;transform-origin:center;animation:glow 2.4s ease-in-out infinite}
-#alien .a-body{transform-box:view-box;transform-origin:110px 320px;animation:breathe 3.2s ease-in-out infinite}
-#alien.perk .a-body{animation:perk .5s cubic-bezier(.3,1.7,.5,1)}
-#alien.wobble .a-body{animation:wobble .55s ease-in-out}
-#alien.sad .a-body{animation:none;transform:scale(1.03,.94)}
-#alien.celebrate .a-body{animation:hop .42s cubic-bezier(.3,.9,.4,1) 3}
-#alien.celebrate .a-hands{animation:hop .42s cubic-bezier(.3,.9,.4,1) 3}
-#alien.nervous .a-body{animation:shiver .12s linear infinite}
 #alien.gone{visibility:hidden}
+.alien .e,.alien .b,.alien .m,.alien .x{display:none}
+.alien.squeak .m{display:none!important}
+.alien.squeak .m-talk{display:inline!important}
+.alien .tk{transform-box:fill-box;transform-origin:center;animation:talk .17s ease-in-out infinite alternate}
+.alien .ab{transform-box:fill-box;transform-origin:50% 100%;animation:breathe 3.2s ease-in-out infinite}
+.alien.alien.perk .ab{animation:perk .5s cubic-bezier(.3,1.7,.5,1)}
+.alien.alien.wobble .ab{animation:wobble .55s ease-in-out}
+.alien.alien.celebrate .ab{animation:hop .42s cubic-bezier(.3,.9,.4,1) 3}
+.alien .bulb{transform-box:fill-box;transform-origin:center;animation:glow 2.4s ease-in-out infinite}
+.alien .wig{transform-box:fill-box;animation:wig 2.8s ease-in-out infinite;transition:transform .35s}
+.alien .wigL{transform-origin:100% 100%}
+.alien .wigR{transform-origin:0 100%;animation-delay:-1.4s}
+.alien[data-x="happy"] .wig,.alien[data-x="elated"] .wig,.alien[data-x="eager"] .wig{animation-duration:.5s}
+.alien[data-x="worried"] .wig,.alien[data-x="panic"] .wig{animation-duration:.3s}
+.alien[data-x="frustrated"] .wig{animation:none;transform:none}
+.alien[data-x="ashamed"] .wigL,.alien[data-x="oops"] .wigL,.alien[data-x="sulk"] .wigL,.alien[data-x="crushed"] .wigL{animation:none;transform:rotate(-24deg)}
+.alien[data-x="ashamed"] .wigR,.alien[data-x="oops"] .wigR,.alien[data-x="sulk"] .wigR,.alien[data-x="crushed"] .wigR{animation:none;transform:rotate(24deg)}
+.alien .e-open .ball{transform-box:fill-box;transform-origin:center;animation:blink 4.8s infinite}
+.alien .pup{transition:transform .3s}
+.alien.look .pup{transform:translate(var(--lx),var(--ly))}
+.alien[data-x="panic"] .pup{animation:dart .5s steps(1) infinite}
+.alien .sweat path{transform-box:fill-box;animation:drip 1s ease-in infinite}
+.alien .sweat path:nth-child(2){animation-delay:.45s}
+.alien .steam{transform-box:fill-box;transform-origin:50% 100%;animation:steam 1.1s ease-out infinite}
+.alien .vein{transform-box:fill-box;transform-origin:center;animation:throb .45s ease-in-out infinite alternate}
+.alien .tear{animation:tear 1.2s ease-in infinite}
+.alien .qmark{transform-box:fill-box;transform-origin:50% 100%;animation:jiggle .8s ease-in-out infinite}
+.alien .spk{animation:twinkle 1s ease-in-out infinite}
+.alien.still,.alien.still *{animation:none!important;transition:none!important}
 
 /* ---------- content ---------- */
 .content{padding:0 12px;flex:1}
@@ -178,6 +184,8 @@ button{font:inherit;color:inherit}
 .how{list-style:none;padding:0;margin:20px auto 6px;max-width:420px;text-align:left;display:grid;gap:8px}
 .how li{display:flex;gap:10px;align-items:flex-start;font:700 15.5px/1.35 var(--text);background:var(--paper);border:2.5px solid var(--ink);border-radius:14px;padding:9px 12px}
 .how b{flex:none;width:24px;height:24px;border-radius:8px;background:var(--lilac);border:2px solid var(--ink);display:grid;place-items:center;font:700 13px/1 var(--display)}
+.applicant{font:600 clamp(14px,3.6vw,16px)/1.35 var(--display);color:var(--ink-soft);margin:-4px 0 14px}
+.applicant b{color:var(--ink)}
 .hint{font:600 13px/1.4 var(--display);color:var(--ink-soft);margin:10px 0 0}
 
 /* question card */
@@ -244,7 +252,7 @@ mark.tw{background:var(--hl);color:#1c1424;font-weight:900;padding:.02em .28em .
 .photo::after{content:"";position:absolute;right:-6px;top:-8px;width:26px;height:12px;background:rgba(255,236,170,.85);transform:rotate(25deg);border:1px solid rgba(0,0,0,.08)}
 .fields{margin:0;display:grid;grid-template-columns:auto 1fr;gap:3px 8px;font:800 14px/1.25 var(--text);flex:1;min-width:0}
 .fields dt{font:600 11px/1.6 var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
-.fields dd{margin:0;overflow-wrap:anywhere}
+.fields dd{margin:0;overflow-wrap:break-word;hyphens:auto}
 .p-slots{display:flex;gap:5px;margin-top:11px;justify-content:flex-start}
 .p-slots span{width:26px;height:26px;border-radius:50%;border:2.5px solid var(--ink);display:grid;place-items:center}
 .p-slots span.ok{background:#bdeedb}.p-slots span.no{background:#ffd3cc}
@@ -333,6 +341,13 @@ mark.tw{background:var(--hl);color:#1c1424;font-weight:900;padding:.02em .28em .
 @keyframes ufo{0%{transform:translate(0,0)}25%{transform:translate(28vw,10px)}50%{transform:translate(56vw,-2px)}75%{transform:translate(84vw,8px)}100%{transform:translate(min(112vw,900px),0)}}
 @keyframes permitin{from{opacity:0;transform:translateY(30px) rotate(4deg) scale(.95)}}
 @keyframes imprint{0%{transform:translate(-50%,-50%) rotate(-11deg) scale(1.35);opacity:0}40%{opacity:1}100%{transform:translate(-50%,-50%) rotate(-11deg) scale(1)}}
+@keyframes wig{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+@keyframes slump{to{transform:translateY(6px) scale(1.04,.92) rotate(-2.5deg)}}
+@keyframes stomp{0%,100%{transform:none}25%{transform:translateY(-6px) rotate(2deg)}50%{transform:translateY(2px) scale(1.04,.96)}75%{transform:translateY(-3px) rotate(-2deg)}}
+@keyframes dart{0%{transform:translate(-2px,1px)}33%{transform:translate(2.5px,-1px)}66%{transform:translate(0,2.5px)}}
+@keyframes steam{0%{transform:translateY(4px) scale(.5);opacity:0}30%{opacity:1}100%{transform:translateY(-14px) scale(1.15);opacity:0}}
+@keyframes throb{from{transform:scale(.8)}to{transform:scale(1.15)}}
+@keyframes tear{0%{transform:translateY(-4px);opacity:0}20%{opacity:1}100%{transform:translateY(18px);opacity:0}}
 @keyframes sulk{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg) translateY(2px)}}
 
 @media (prefers-reduced-motion: reduce){
@@ -357,44 +372,6 @@ mark.tw{background:var(--hl);color:#1c1424;font-weight:900;padding:.02em .28em .
     <symbol id="i-saucer" viewBox="-60 -30 120 56"><ellipse cx="0" cy="-6" rx="22" ry="18" fill="#bfefff" stroke="#33263b" stroke-width="3.5"/><ellipse cx="-7" cy="-12" rx="6" ry="4" fill="#fff" opacity=".8"/><ellipse cx="0" cy="7" rx="52" ry="14" fill="#a7b2d6" stroke="#33263b" stroke-width="4"/><ellipse cx="0" cy="3" rx="36" ry="5" fill="#cdd5ee"/><circle cx="-30" cy="11" r="3.6" fill="#ffe36e" stroke="#33263b" stroke-width="2"/><circle cx="0" cy="14" r="3.6" fill="#ff9fc0" stroke="#33263b" stroke-width="2"/><circle cx="30" cy="11" r="3.6" fill="#9be7c4" stroke="#33263b" stroke-width="2"/></symbol>
     <symbol id="i-tick" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10.5" fill="#1f8a5b" stroke="#33263b" stroke-width="2"/><path d="M7 12.5l3.2 3.2L17 8.8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-cross" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10.5" fill="#d6463a" stroke="#33263b" stroke-width="2"/><path d="M8 8l8 8M16 8l-8 8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/></symbol>
-    <!-- Alien head-and-shoulders portraits, used for the ID photo and the share sticker -->
-    <symbol id="alienBase" viewBox="0 0 100 120">
-      <path d="M50 30 C46 18 36 16 38 6" fill="none" stroke="#33263b" stroke-width="3" stroke-linecap="round"/>
-      <circle cx="38" cy="6" r="6" fill="#ffe36e" stroke="#33263b" stroke-width="2.6"/>
-      <path d="M8 124 C4 70 20 30 50 29 C80 30 96 70 92 124 Z" fill="#cbbcff" stroke="#33263b" stroke-width="3.2"/>
-      <circle cx="27" cy="52" r="4" fill="#b29ff3"/><circle cx="21" cy="66" r="2.6" fill="#b29ff3"/><circle cx="76" cy="50" r="3" fill="#b29ff3"/>
-      <ellipse cx="25" cy="84" rx="6" ry="4" fill="#ff9fc0" opacity=".75"/><ellipse cx="75" cy="84" rx="6" ry="4" fill="#ff9fc0" opacity=".75"/>
-    </symbol>
-    <symbol id="alienPhoto" viewBox="0 0 100 120">
-      <use href="#alienBase"/>
-      <ellipse cx="36" cy="64" rx="11" ry="13" fill="#fff" stroke="#33263b" stroke-width="2.6"/><ellipse cx="64" cy="64" rx="11" ry="13" fill="#fff" stroke="#33263b" stroke-width="2.6"/>
-      <circle cx="36" cy="66" r="5.5" fill="#2a1f33"/><circle cx="64" cy="66" r="5.5" fill="#2a1f33"/>
-      <circle cx="38" cy="63" r="1.8" fill="#fff"/><circle cx="66" cy="63" r="1.8" fill="#fff"/>
-      <path d="M43 92 h14" stroke="#33263b" stroke-width="3" stroke-linecap="round"/>
-      <path d="M84 40 q-4 7 0 10 q4 -3 0 -10z" fill="#9fe0ff" stroke="#33263b" stroke-width="1.8"/>
-    </symbol>
-    <symbol id="alienHappy" viewBox="0 0 100 120">
-      <use href="#alienBase"/>
-      <path d="M26 66 q10 -13 20 0 M54 66 q10 -13 20 0" fill="none" stroke="#33263b" stroke-width="3.6" stroke-linecap="round"/>
-      <path d="M38 86 q12 14 24 0 z" fill="#7a2f3b" stroke="#33263b" stroke-width="2.8" stroke-linejoin="round"/>
-      <path d="M4 70 q-8 -16 4 -26 M96 70 q8 -16 -4 -26" fill="none" stroke="#33263b" stroke-width="3" stroke-linecap="round"/>
-      <circle cx="8" cy="42" r="6" fill="#cbbcff" stroke="#33263b" stroke-width="2.8"/><circle cx="92" cy="42" r="6" fill="#cbbcff" stroke="#33263b" stroke-width="2.8"/>
-    </symbol>
-    <symbol id="alienMeh" viewBox="0 0 100 120">
-      <use href="#alienBase"/>
-      <ellipse cx="36" cy="64" rx="11" ry="13" fill="#fff" stroke="#33263b" stroke-width="2.6"/><ellipse cx="64" cy="64" rx="11" ry="13" fill="#fff" stroke="#33263b" stroke-width="2.6"/>
-      <circle cx="35" cy="69" r="5" fill="#2a1f33"/><circle cx="63" cy="69" r="5" fill="#2a1f33"/>
-      <path d="M24 60 q12 -8 24 -2 L48 52 L24 52Z M52 58 q12 -6 24 2 L76 52 L52 52Z" fill="#cbbcff" stroke="#33263b" stroke-width="2.6" stroke-linejoin="round"/>
-      <path d="M42 93 q8 -4 16 0" fill="none" stroke="#33263b" stroke-width="3" stroke-linecap="round"/>
-    </symbol>
-    <symbol id="alienSulk" viewBox="0 0 100 120">
-      <use href="#alienBase"/>
-      <path d="M26 62 l20 5 M74 62 l-20 5" stroke="#33263b" stroke-width="3.4" stroke-linecap="round"/>
-      <ellipse cx="36" cy="72" rx="8" ry="7" fill="#fff" stroke="#33263b" stroke-width="2.6"/><ellipse cx="64" cy="72" rx="8" ry="7" fill="#fff" stroke="#33263b" stroke-width="2.6"/>
-      <circle cx="37" cy="74" r="3.6" fill="#2a1f33"/><circle cx="63" cy="74" r="3.6" fill="#2a1f33"/>
-      <path d="M41 96 q9 -8 18 0" fill="none" stroke="#33263b" stroke-width="3" stroke-linecap="round"/>
-      <path d="M28 82 q-3 6 0 9 q3 -3 0 -9z" fill="#9fe0ff" stroke="#33263b" stroke-width="1.6"/>
-    </symbol>
   </defs>
 </svg>
 
@@ -588,39 +565,7 @@ mark.tw{background:var(--hl);color:#1c1424;font-weight:900;padding:.02em .28em .
       <text x="350" y="266" text-anchor="middle" font-family="Fredoka, sans-serif" font-weight="700" font-size="13" fill="#33263b" letter-spacing="1">ARRIVALS</text>
 
       <!-- the applicant -->
-      <g id="alien">
-        <g class="a-body"><g transform="translate(0 -8)">
-          <path d="M98 172 C93 148 74 146 80 124" fill="none" stroke="#33263b" stroke-width="4" stroke-linecap="round"/>
-          <circle class="a-bulb" cx="80" cy="120" r="10" fill="#ffe36e" stroke="#33263b" stroke-width="3.5"/>
-          <path d="M38 380 C34 244 56 170 110 168 C162 170 184 244 180 380 Z" fill="#cbbcff" stroke="#33263b" stroke-width="4.5"/>
-          <path d="M60 320 C56 272 66 236 88 220" fill="none" stroke="#b29ff3" stroke-width="7" stroke-linecap="round" opacity=".7"/>
-          <circle cx="74" cy="200" r="6" fill="#b29ff3"/><circle cx="64" cy="226" r="4" fill="#b29ff3"/><circle cx="86" cy="186" r="3" fill="#b29ff3"/>
-          <g class="a-eyes a-normal">
-            <ellipse cx="116" cy="212" rx="16" ry="19" fill="#fff" stroke="#33263b" stroke-width="3.5"/>
-            <ellipse cx="151" cy="208" rx="13" ry="17" fill="#fff" stroke="#33263b" stroke-width="3.5"/>
-            <circle cx="121" cy="208" r="8" fill="#2a1f33"/><circle cx="155" cy="204" r="7" fill="#2a1f33"/>
-            <circle cx="124" cy="204" r="2.8" fill="#fff"/><circle cx="158" cy="200" r="2.4" fill="#fff"/>
-          </g>
-          <g class="a-eyes a-happy">
-            <path d="M101 214 q15 -18 30 0 M139 210 q12 -16 24 0" fill="none" stroke="#33263b" stroke-width="4.5" stroke-linecap="round"/>
-          </g>
-          <g class="a-eyes a-sadeyes">
-            <ellipse cx="116" cy="214" rx="16" ry="17" fill="#fff" stroke="#33263b" stroke-width="3.5"/>
-            <ellipse cx="151" cy="210" rx="13" ry="15" fill="#fff" stroke="#33263b" stroke-width="3.5"/>
-            <circle cx="118" cy="220" r="7" fill="#2a1f33"/><circle cx="152" cy="216" r="6" fill="#2a1f33"/>
-            <path d="M99 212 q17 -10 34 -2 L133 196 L99 196Z M137 206 q14 -8 28 2 L165 192 L137 192Z" fill="#cbbcff" stroke="#33263b" stroke-width="3.2" stroke-linejoin="round"/>
-          </g>
-          <ellipse cx="164" cy="234" rx="8" ry="5" fill="#ff9fc0" opacity=".75"/>
-          <ellipse cx="100" cy="238" rx="7" ry="4.5" fill="#ff9fc0" opacity=".6"/>
-          <path class="a-mouth" d="M130 240 q5 5 10 0 q5 5 10 0" fill="none" stroke="#33263b" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <ellipse class="a-mouth-o" cx="140" cy="242" rx="6" ry="7" fill="#7a2f3b" stroke="#33263b" stroke-width="3"/>
-          <path class="a-mouth-sad" d="M131 246 q9 -8 18 0" fill="none" stroke="#33263b" stroke-width="3.5" stroke-linecap="round"/>
-          <g class="a-sweat">
-            <path d="M180 178 q-6 10 0 14 q6 -4 0 -14z" fill="#9fe0ff" stroke="#33263b" stroke-width="2.5"/>
-            <path d="M170 160 q-4 7 0 10 q4 -3 0 -10z" fill="#9fe0ff" stroke="#33263b" stroke-width="2.2"/>
-          </g>
-        </g></g>
-      </g>
+      <g id="alien" class="alien" data-x="neutral"></g>
 
       <!-- saucer (for being sent home) -->
       <g id="saucer" opacity="0" transform="translate(-200 -100)">
@@ -637,6 +582,7 @@ mark.tw{background:var(--hl);color:#1c1424;font-weight:900;padding:.02em .28em .
     <section class="intro panel" id="intro" hidden>
       <h1 class="logo">EARTH<span class="ling">LING</span></h1>
       <p class="sub">Earth Arrivals · Landing Permit oral exam</p>
+      <p class="applicant" id="applicant"></p>
       <button class="ticketbtn" id="ticketBtn" type="button"><span id="ticketLabel">Take a ticket</span><span class="num" id="ticketNum">#–</span></button>
       <ul class="how">
         <li><b>1</b><span>The examiner reads you a sentence with one word highlighted.</span></li>
@@ -758,13 +704,294 @@ const pick = arr => arr[Math.floor(R() * arr.length)];
 const KEY_GAME = 'lp:game', KEY_STATS = 'lp:stats', KEY_MUTE = 'lp:muted';
 if (DEV && params.has('reset')) { store.del(KEY_GAME); if (params.get('reset') === 'all') store.del(KEY_STATS); }
 
-const ALIEN_NAME = (() => {
-  const a = ['Zib', 'Plim', 'Quo', 'Blor', 'Fen', 'Vex', 'Mib', 'Tuv', 'Glo', 'Skee', 'Wub', 'Nox', 'Pib', 'Yorp', 'Dree'];
-  const b = ['bo', 'rp', 'zle', 'nix', 'ble', 'ty', 'mo', 'lo', 'wick', 'pa'];
-  const c = ['Vrask', 'Quell', 'Oonth', 'Brix', 'Zarnaby', 'Plook', 'Yembril', 'Fizzwick', 'Glorm', 'Tanniver'];
-  return `${pick(a)}${pick(b)} ${pick(c)}`;
+/* =========================================================
+   The applicants: five aliens on a five-day rotation.
+   They're all built from the same parts, so every one of them
+   can pull every face: the eyes, brows, mouths and extras are
+   drawn once per species, and the expression table below just
+   decides which of those parts are showing.
+   To add a sixth, add an entry to SPECIES. Nothing else changes.
+   ========================================================= */
+const INK = '#33263b', PUPIL = '#2a1f33', MOUTH = '#7a2f3b';
+const f1 = n => +(+n).toFixed(1);
+
+const SPECIES = [
+  {
+    key: 'pibble', name: 'Pibble Vrask', origin: 'Third rock past the big one',
+    body: '#cbbcff', shade: '#b29ff3', bub: '#f3eeff', bubInk: '#6a52c0', voice: 560,
+    outline: 'M38 380 C34 244 56 170 110 168 C162 170 184 244 180 380 Z',
+    back: `<g class="wig wigL"><path d="M98 172 C93 148 74 146 80 124" fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round"/><circle class="bulb" cx="80" cy="120" r="10" fill="#ffe36e" stroke="${INK}" stroke-width="3.5"/></g>`,
+    marks: `<path d="M60 320 C56 272 66 236 88 220" fill="none" stroke="#b29ff3" stroke-width="7" stroke-linecap="round" opacity=".7"/><circle cx="74" cy="200" r="6" fill="#b29ff3"/><circle cx="64" cy="226" r="4" fill="#b29ff3"/><circle cx="86" cy="186" r="3" fill="#b29ff3"/>`,
+    eyes: [{ x: 116, y: 212, rx: 16, ry: 19 }, { x: 151, y: 208, rx: 13, ry: 17 }], fx: 133,
+    mouth: { x: 140, y: 241, s: 1 }, blush: [[100, 238, 7, 4.5], [164, 234, 8, 5]],
+    sweat: [178, 184], steam: [[70, 188], [158, 176]], vein: [168, 192],
+    crop: [30, 98, 160, 192],
+    greet: `Ticket ${TICKET}? Pibble Vrask. Lovely. Please be seated, and mind the antenna.`,
+    say: {
+      ready: ['Bip! Ready!', 'Eep. Okay!', 'Ready-bip!'], right: ['Yip!', 'Bip-bip!', 'Hee!'], wow: ['Bip?! Really?!', 'Wheee!'],
+      shame: ['Eep… sorry.', 'Oh no…', 'Bip…'], cross: ['Grr-bip!', 'Bwuh?!', 'Hrmph!'], late: ['Too slow…', 'Erp!'],
+      win: ['Yay! Earth!', 'Bip! Earth!'], defer: ['Tomorrow, then…'], lose: ['Bip… bye…']
+    }
+  },
+  {
+    key: 'gloop', name: 'Gloop Oonth', origin: 'The Outer Wobble',
+    body: '#a6ecc4', shade: '#7fd6a8', bub: '#e8fbf0', bubInk: '#2b7d53', voice: 360,
+    outline: 'M30 380 C26 262 52 186 112 184 C172 186 196 262 192 380 Z',
+    back: `<g class="wig wigL"><path d="M94 196 Q82 178 76 162" fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round"/><circle cx="75" cy="157" r="7.5" fill="#ff9fc0" stroke="${INK}" stroke-width="3.2"/></g>` +
+          `<g class="wig wigR"><path d="M134 194 Q146 174 150 158" fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round"/><circle cx="151" cy="153" r="7.5" fill="#ff9fc0" stroke="${INK}" stroke-width="3.2"/></g>`,
+    marks: `<ellipse cx="112" cy="336" rx="50" ry="44" fill="#c9f5dc"/><circle cx="62" cy="244" r="7" fill="#7fd6a8"/><circle cx="52" cy="268" r="4.5" fill="#7fd6a8"/><circle cx="80" cy="214" r="4" fill="#7fd6a8"/><circle cx="170" cy="232" r="3.5" fill="#7fd6a8"/>`,
+    eyes: [{ x: 118, y: 226, rx: 25, ry: 24 }], fx: 118,
+    mouth: { x: 119, y: 266, s: 1.15 }, blush: [[82, 258, 8, 5], [158, 258, 8, 5]],
+    sweat: [180, 206], steam: [[66, 204], [166, 198]], vein: [160, 200],
+    crop: [38, 132, 160, 192],
+    greet: `Ticket ${TICKET}. Gloop Oonth? Please keep your eye on the paper. Your one eye.`,
+    say: {
+      ready: ['Blorp. Ready.', 'Mm. Sure.', 'Yeah, go on.'], right: ['Blorp!', 'Nice.', 'Easy.'], wow: ['Whoa. Blorp!', 'No way. Nice.'],
+      shame: ['Whoops…', 'My bad.', 'Blorp…'], cross: ['Ugh. Come on.', 'Pfft. Rigged.', 'Blorp?!'], late: ['Huh? Oh.', 'Was thinking…'],
+      win: ['Earth. Sweet.', 'Blorp! Earth!'], defer: ['Eh. Tomorrow.'], lose: ['Bye, I guess.']
+    }
+  },
+  {
+    key: 'trix', name: 'Trixabel Quell', origin: 'A small moon (rented)',
+    body: '#ffc28a', shade: '#f39d5d', bub: '#fff1e3', bubInk: '#b35f17', voice: 660,
+    outline: 'M46 380 C42 248 60 160 112 156 C164 160 182 248 178 380 Z',
+    back: `<path d="M86 192 C70 168 62 146 70 116 C82 140 98 154 108 172 Z" fill="#fff3d6" stroke="${INK}" stroke-width="3.5" stroke-linejoin="round"/>` +
+          `<path d="M118 170 C130 150 146 136 168 124 C168 152 158 172 144 192 Z" fill="#fff3d6" stroke="${INK}" stroke-width="3.5" stroke-linejoin="round"/>` +
+          `<path d="M72 136 l9 -3 M76 150 l10 -4" stroke="#e9c79a" stroke-width="3" stroke-linecap="round"/><path d="M156 136 l8 5 M150 150 l9 5" stroke="#e9c79a" stroke-width="3" stroke-linecap="round"/>`,
+    marks: `<path d="M64 322 C60 274 70 238 90 222" fill="none" stroke="#f39d5d" stroke-width="7" stroke-linecap="round" opacity=".6"/>` +
+           `<circle cx="84" cy="232" r="2" fill="#c97a3a"/><circle cx="90" cy="238" r="2" fill="#c97a3a"/><circle cx="80" cy="240" r="1.6" fill="#c97a3a"/><circle cx="166" cy="230" r="2" fill="#c97a3a"/><circle cx="160" cy="236" r="1.6" fill="#c97a3a"/>`,
+    eyes: [{ x: 94, y: 212, rx: 11, ry: 13 }, { x: 124, y: 199, rx: 13, ry: 15 }, { x: 154, y: 212, rx: 10, ry: 12 }], fx: 124,
+    mouth: { x: 124, y: 240, s: 1 }, blush: [[88, 238, 7, 4], [161, 236, 7, 4]],
+    sweat: [178, 182], steam: [[66, 184], [160, 166]], vein: [162, 182],
+    crop: [32, 100, 160, 192],
+    greet: `Ticket ${TICKET}, Trixabel Quell. No, you may not bring flashcards to the counter.`,
+    say: {
+      ready: ['I made flashcards!', 'Ready! Ask me!', 'Prepared!'], right: ['Knew it!', 'Obviously.', 'Textbook!'], wow: ['Yes! YES!', 'I studied that!'],
+      shame: ['I KNEW that…', 'Mortifying.', 'Oh no no no…'], cross: ['That was a trick!', 'Unfair!', 'Argh!'], late: ['I was checking!', 'Wait, wait—'],
+      win: ['Top marks!', 'Studying pays!'], defer: ['I want a recount.'], lose: ['I demand an appeal!']
+    }
+  },
+  {
+    key: 'zorbo', name: 'Zorbo Plook', origin: 'Undisclosed nebula',
+    body: '#9fd8ff', shade: '#72bcef', bub: '#e8f6ff', bubInk: '#2a6fae', voice: 760,
+    outline: 'M36 380 C32 276 58 220 112 218 C166 220 192 276 188 380 Z',
+    back: `<path d="M96 232 Q90 204 84 184" fill="none" stroke="${INK}" stroke-width="15" stroke-linecap="round"/><path d="M96 232 Q90 204 84 184" fill="none" stroke="#9fd8ff" stroke-width="8" stroke-linecap="round"/>` +
+          `<path d="M130 230 Q138 200 146 178" fill="none" stroke="${INK}" stroke-width="15" stroke-linecap="round"/><path d="M130 230 Q138 200 146 178" fill="none" stroke="#9fd8ff" stroke-width="8" stroke-linecap="round"/>` +
+          `<circle cx="84" cy="170" r="19" fill="#9fd8ff" stroke="${INK}" stroke-width="4"/><circle cx="146" cy="164" r="19" fill="#9fd8ff" stroke="${INK}" stroke-width="4"/>`,
+    fuzz: { cx: 112, cy: 300, pts: [[46, 268], [58, 246], [74, 230], [92, 221], [132, 220], [150, 226], [166, 240], [178, 258]] },
+    marks: `<ellipse cx="112" cy="330" rx="48" ry="40" fill="#c8eaff"/><circle cx="64" cy="290" r="5" fill="#72bcef"/><circle cx="160" cy="300" r="4" fill="#72bcef"/>`,
+    eyes: [{ x: 84, y: 170, rx: 12.5, ry: 12.5 }, { x: 146, y: 164, rx: 12.5, ry: 12.5 }], fx: 115,
+    mouth: { x: 115, y: 252, s: 1.25 }, blush: [[84, 250, 9, 5], [146, 250, 9, 5]],
+    sweat: [172, 150], steam: [[56, 152], [174, 138]], vein: [164, 146],
+    crop: [32, 128, 160, 192],
+    greet: `Ticket ${TICKET}? Zorbo Plook. Please stop waving your eyes at me.`,
+    say: {
+      ready: ['Hiii! Ready!', 'Ooh! Me! Me!', 'Let’s gooo!'], right: ['Woohoo!', 'Yay yay!', 'I’m SMART!'], wow: ['WHAAAT! YES!', 'Genius alert!'],
+      shame: ['Oopsie…', 'Hehe… oops.', 'Aw, beans.'], cross: ['Nooo!', 'Bah!', 'Hmph!'], late: ['Is it over?', 'Eep! Time?'],
+      win: ['EARTH! Wheee!', 'Best day EVER!'], defer: ['Aww. Tomorrow!'], lose: ['Wheee… bye!']
+    }
+  },
+  {
+    key: 'moopsie', name: 'Moopsie Yembril', origin: 'Planet Hrrmph',
+    body: '#ffb3cf', shade: '#f78fb6', bub: '#fff0f6', bubInk: '#b8366f', voice: 480,
+    outline: 'M42 380 C38 268 46 198 112 178 C178 198 186 268 182 380 Z',
+    back: `<path class="wig wigL" d="M66 248 C40 238 22 216 20 188 C40 196 62 210 80 230 Z" fill="#ffd1e2" stroke="${INK}" stroke-width="3.5" stroke-linejoin="round"/>` +
+          `<path class="wig wigR" d="M158 248 C184 238 202 216 204 188 C184 196 162 210 144 230 Z" fill="#ffd1e2" stroke="${INK}" stroke-width="3.5" stroke-linejoin="round"/>`,
+    front: `<path d="M112 180 C104 166 112 152 124 158 C130 162 126 170 120 168" fill="none" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>`,
+    marks: `<path d="M64 330 C58 286 64 250 82 230" fill="none" stroke="#f78fb6" stroke-width="7" stroke-linecap="round" opacity=".6"/><circle cx="96" cy="200" r="3.5" fill="#f78fb6"/><circle cx="114" cy="194" r="2.6" fill="#f78fb6"/><circle cx="132" cy="200" r="3.5" fill="#f78fb6"/>`,
+    eyes: [{ x: 100, y: 227, rx: 14, ry: 16 }, { x: 138, y: 227, rx: 14, ry: 16 }], fx: 119, lashes: true,
+    mouth: { x: 119, y: 257, s: 1 }, blush: [[84, 251, 8, 5], [154, 251, 8, 5]],
+    sweat: [170, 202], steam: [[62, 210], [164, 200]], vein: [154, 198],
+    crop: [32, 140, 160, 192],
+    greet: `Ticket ${TICKET}. Moopsie Yembril. This is a counter, not a stage. Please sit.`,
+    say: {
+      ready: ['Darling, I’m ready.', 'My moment!', 'Proceed, dear.'], right: ['Naturally.', 'Divine.', 'As expected.'], wow: ['Brava, me!', 'A triumph!'],
+      shame: ['How embarrassing.', 'We never speak of this.', 'Ugh, cringe.'], cross: ['Outrageous!', 'The audacity!', 'I object!'], late: ['Dramatic pause!', 'I was savouring it!'],
+      win: ['A star arrives!', 'Earth, I’m here!'], defer: ['The tragedy…'], lose: ['Remember me!']
+    }
+  }
+];
+
+// Ticket 1 is Pibble, ticket 2 Gloop, and so on round the cast.
+const AL = SPECIES[(TICKET - 1) % SPECIES.length];
+const ALIEN_NAME = AL.name;
+const ORIGIN = AL.origin;
+
+/* Which parts each expression shows. e = eyes, b = brows, m = mouth,
+   x = extras, a = how the whole body moves while the face is held. */
+const EXPR = {
+  neutral:    { e: 'open',    b: '',       m: 'smile',  x: [] },
+  eager:      { e: 'open',    b: 'raised', m: 'grin',   x: [] },
+  nervous:    { e: 'open',    b: 'worry',  m: 'wobble', x: [],                   a: 'shiver .14s linear infinite' },
+  worried:    { e: 'wide',    b: 'worry',  m: 'wobble', x: ['sweat'],            a: 'shiver .1s linear infinite' },
+  panic:      { e: 'wide',    b: 'worry',  m: 'o',      x: ['sweat', 'sweat2'],  a: 'shiver .06s linear infinite' },
+  happy:      { e: 'happy',   b: '',       m: 'grin',   x: [] },
+  elated:     { e: 'star',    b: 'raised', m: 'big',    x: ['sparkle'] },
+  frustrated: { e: 'glare',   b: 'angry',  m: 'grit',   x: ['steam', 'vein'],    a: 'stomp .42s ease-in-out 2' },
+  ashamed:    { e: 'shy',     b: 'sad',    m: 'squig',  x: ['shy'],              a: 'slump .5s ease-out forwards' },
+  oops:       { e: 'shy',     b: 'worry',  m: 'o',      x: ['shy', 'sweat', 'q'], a: 'slump .5s ease-out forwards' },
+  sulk:       { e: 'sad',     b: 'sad',    m: 'pout',   x: [],                   a: 'slump .6s ease-out forwards' },
+  crushed:    { e: 'squeeze', b: 'sad',    m: 'frown',  x: ['tears'],            a: 'slump .6s ease-out forwards' }
+};
+
+/* ---------- eyes ---------- */
+const sideOf = (sp, e) => Math.abs(e.x - sp.fx) < 4 ? 0 : e.x < sp.fx ? -1 : 1;
+function lashes(e, rx, ry, side) {
+  const angs = side === 0 ? [-120, -90, -60] : side < 0 ? [-150, -128, -106] : [-30, -52, -74];
+  return angs.map(a => {
+    const r = a * Math.PI / 180, x1 = e.x + rx * Math.cos(r), y1 = e.y + ry * Math.sin(r);
+    return `<path d="M${f1(x1)} ${f1(y1)} L${f1(x1 + 6.5 * Math.cos(r))} ${f1(y1 + 6.5 * Math.sin(r))}" stroke="${INK}" stroke-width="2.8" stroke-linecap="round"/>`;
+  }).join('');
+}
+function eyeOpen(sp, e, side, wide) {
+  const k = wide ? 1.14 : 1, rx = e.rx * k, ry = e.ry * k, m = Math.min(e.rx, e.ry);
+  const pr = wide ? m * .3 : m * .5;
+  const px = e.x + (wide ? 0 : e.rx * .22), py = e.y - (wide ? 0 : e.ry * .08);
+  return `<g class="ball"><ellipse cx="${e.x}" cy="${e.y}" rx="${f1(rx)}" ry="${f1(ry)}" fill="#fff" stroke="${INK}" stroke-width="3.5"/>` +
+    (sp.lashes ? lashes(e, rx, ry, side) : '') +
+    `<g class="pup" style="--lx:${f1(-e.rx * .3)}px;--ly:${f1(e.ry * .4)}px"><circle cx="${f1(px)}" cy="${f1(py)}" r="${f1(pr)}" fill="${PUPIL}"/>` +
+    `<circle cx="${f1(px + pr * .4)}" cy="${f1(py - pr * .45)}" r="${f1(Math.max(1.5, pr * .34))}" fill="#fff"/></g></g>`;
+}
+// An open eye with a body-coloured lid drawn over the top: glaring, sad or shy.
+function eyeLid(sp, e, side, type) {
+  const { x, y, rx, ry } = e, t = ry * .45, m = Math.min(rx, ry);
+  const base = type === 'shy' ? y - ry * .1 : type === 'sad' ? y - ry * .02 : y - ry * .22;
+  let L, M, R;
+  if (type === 'shy') { L = M = R = base; }
+  else {
+    const dir = type === 'glare' ? 1 : -1;               // glare: inner corner drops; sad: inner corner lifts
+    if (side === 0) { L = R = base - dir * t * .35; M = base + dir * t * .55; }
+    else {
+      const inner = base + dir * t * .5, outer = base - dir * t * .5;
+      if (side < 0) { L = outer; R = inner; } else { L = inner; R = outer; }
+      M = (L + R) / 2;
+    }
+  }
+  const half = yy => rx * Math.sqrt(Math.max(0, 1 - ((yy - y) / ry) ** 2));
+  const xl = x - half(L) + .8, xr = x + half(R) - .8, cy = 2 * M - (L + R) / 2;
+  const [ppx, ppy, prr] = type === 'shy' ? [x - rx * .36, y + ry * .42, m * .42] : type === 'glare' ? [x, y + ry * .4, m * .34] : [x, y + ry * .34, m * .42];
+  const lid = sp.lid || sp.body;
+  return `<g><ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="#fff" stroke="${INK}" stroke-width="3.5"/>` +
+    `<circle cx="${f1(ppx)}" cy="${f1(ppy)}" r="${f1(prr)}" fill="${PUPIL}"/>` +
+    `<path d="M${f1(x - rx - 5)} ${f1(y - ry - 7)} H${f1(x + rx + 5)} V${f1(R)} H${f1(xr)} Q${f1(x)} ${f1(cy)} ${f1(xl)} ${f1(L)} H${f1(x - rx - 5)} Z" fill="${lid}"/>` +
+    `<path d="M${f1(xl)} ${f1(L)} Q${f1(x)} ${f1(cy)} ${f1(xr)} ${f1(R)}" fill="none" stroke="${INK}" stroke-width="3.6" stroke-linecap="round"/>` +
+    (sp.lashes && type !== 'glare' ? lashes({ x, y: L + 2 }, rx * .9, 2, side) : '') + '</g>';
+}
+function star(cx, cy, r) {
+  let d = '';
+  for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * .46 : r; d += (i ? 'L' : 'M') + f1(cx + rr * Math.cos(a)) + ' ' + f1(cy + rr * Math.sin(a)); }
+  return `<path d="${d}Z" fill="#ffd23f" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>`;
+}
+const EYE = {
+  open: (sp, e, s) => eyeOpen(sp, e, s, false),
+  wide: (sp, e, s) => eyeOpen(sp, e, s, true),
+  glare: (sp, e, s) => eyeLid(sp, e, s, 'glare'),
+  sad: (sp, e, s) => eyeLid(sp, e, s, 'sad'),
+  shy: (sp, e, s) => eyeLid(sp, e, s, 'shy'),
+  happy: (sp, e) => `<path d="M${f1(e.x - e.rx * .85)} ${f1(e.y + e.ry * .25)} Q${e.x} ${f1(e.y - e.ry * 1.15)} ${f1(e.x + e.rx * .85)} ${f1(e.y + e.ry * .25)}" fill="none" stroke="${INK}" stroke-width="4.5" stroke-linecap="round"/>`,
+  star: (sp, e) => star(e.x, e.y, Math.min(e.rx, e.ry) * 1.12),
+  squeeze: (sp, e, s) => {
+    const { x, y, rx, ry } = e;
+    const d = s === 0 ? `M${f1(x - rx * .8)} ${y} L${f1(x - rx * .28)} ${f1(y - ry * .38)} L${f1(x + rx * .28)} ${f1(y + ry * .38)} L${f1(x + rx * .8)} ${y}`
+      : `M${f1(x - s * rx * .6)} ${f1(y - ry * .5)} L${f1(x + s * rx * .5)} ${y} L${f1(x - s * rx * .6)} ${f1(y + ry * .5)}`;
+    return `<path d="${d}" fill="none" stroke="${INK}" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+  }
+};
+
+/* ---------- brows ---------- */
+function brow(e, type, side, raise) {
+  const w = e.rx * .9, by = e.y - e.ry * 1.2 - 5 - raise, d = 6;
+  let L, R, M;
+  if (type === 'raised') { L = R = by + 2; M = by - 7; }
+  else {
+    const dir = type === 'angry' ? 1 : -1;
+    if (side === 0) { L = R = by - dir * d * .6; M = by + dir * d; }
+    else {
+      const inner = by + dir * d, outer = by - dir * d * .5;
+      if (side < 0) { L = outer; R = inner; } else { L = inner; R = outer; }
+      M = (L + R) / 2 - (type === 'sad' ? 2 : 0);
+    }
+  }
+  return `<path d="M${f1(e.x - w)} ${f1(L)} Q${e.x} ${f1(2 * M - (L + R) / 2)} ${f1(e.x + w)} ${f1(R)}" fill="none" stroke="${INK}" stroke-width="4.5" stroke-linecap="round"/>`;
+}
+
+/* ---------- mouths (drawn round 0,0, then placed and scaled per species) ---------- */
+const sk = `stroke="${INK}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"`;
+const MOUTHS = {
+  smile: `<path d="M-10 0 q5 5 10 0 q5 5 10 0" fill="none" ${sk}/>`,
+  wobble: `<path d="M-12 2 q3 -4 6 0 t6 0 t6 0 t6 0" fill="none" ${sk}/>`,
+  o: `<ellipse cx="0" cy="2" rx="6" ry="7.5" fill="${MOUTH}" ${sk}/>`,
+  talk: `<ellipse class="tk" cx="0" cy="2" rx="5.5" ry="6" fill="${MOUTH}" ${sk}/>`,
+  grin: `<path d="M-11 -2 q11 15 22 0 z" fill="${MOUTH}" ${sk}/>`,
+  big: `<path d="M-15 -4 q15 24 30 0 z" fill="${MOUTH}"/><ellipse cx="2" cy="4.5" rx="7" ry="3.2" fill="#ff8fa8"/><path d="M-15 -4 q15 24 30 0 z" fill="none" ${sk}/>`,
+  grit: `<rect x="-12" y="-5" width="24" height="11" rx="3.5" fill="#fff" ${sk}/><path d="M-12 .5 h24 M-4 -5 v11 M4 -5 v11" stroke="${INK}" stroke-width="2"/>`,
+  squig: `<path d="M-10 3 c3 -5 6 3 9 -1 s6 -3 10 1" fill="none" ${sk}/>`,
+  frown: `<path d="M-10 6 q10 -11 20 0" fill="none" ${sk}/>`,
+  pout: `<path d="M-6 4 q6 -6 12 0" fill="none" ${sk}/><path d="M-3 7 q3 2 6 0" fill="none" stroke="${INK}" stroke-width="2.2" stroke-linecap="round"/>`
+};
+
+/* ---------- extras ---------- */
+const drop = (x, y, s = 1) => `<path d="M${x} ${y} q${-6 * s} ${10 * s} 0 ${14 * s} q${6 * s} ${-4 * s} 0 ${-14 * s}z" fill="#9fe0ff" stroke="${INK}" stroke-width="2.4"/>`;
+function extras(sp) {
+  const [sx, sy] = sp.sweat, mx = 2 * sp.fx - sx;
+  const puff = (x, y, dl) => `<g class="steam" style="animation-delay:${dl}s"><circle cx="${x - 7}" cy="${y}" r="5.5"/><circle cx="${x}" cy="${y - 5}" r="7.5"/><circle cx="${x + 7}" cy="${y}" r="5.5"/></g>`;
+  const [vx, vy] = sp.vein;
+  const tears = sp.eyes.map((e, i) => {
+    const tx = e.x + (sideOf(sp, e) || 1) * e.rx * .2, ty = e.y + e.ry * .45;
+    return `<path d="M${f1(tx)} ${f1(ty)} q-2 12 1 26" fill="none" stroke="#8fd8ff" stroke-width="5.5" stroke-linecap="round"/><g class="tear" style="animation-delay:${i * .35}s">${drop(f1(tx + 1), f1(ty + 18), .8)}</g>`;
+  }).join('');
+  const shy = sp.blush.map(([x, y, rx, ry]) => `<ellipse cx="${x}" cy="${y}" rx="${f1(rx * 1.55)}" ry="${f1(ry * 1.4)}" fill="#ff7aa5" opacity=".7"/><path d="M${x - 6} ${y + 3} l4 -6 M${x} ${y + 3} l4 -6 M${x + 6} ${y + 3} l4 -6" stroke="#d94f7f" stroke-width="2" stroke-linecap="round"/>`).join('');
+  const [s1x, s1y] = [sp.steam[0][0], sp.steam[0][1]];
+  return `<g class="x x-sweat"><g class="sweat">${drop(sx, sy)}${drop(sx - 11, sy - 16, .7)}</g></g>` +
+    `<g class="x x-sweat2"><g class="sweat">${drop(f1(mx), sy + 6)}${drop(f1(mx + 10), sy - 10, .7)}</g></g>` +
+    `<g class="x x-steam" fill="#fff" stroke="${INK}" stroke-width="2.4">${puff(sp.steam[0][0], sp.steam[0][1], 0)}${puff(sp.steam[1][0], sp.steam[1][1], .5)}</g>` +
+    `<g class="x x-vein"><g transform="translate(${vx} ${vy})"><g class="vein"><path d="M-8 -2 q6 0 6 -6 M2 -8 q0 6 6 6 M8 2 q-6 0 -6 6 M-2 8 q0 -6 -6 -6" fill="none" stroke="#e8574a" stroke-width="3.4" stroke-linecap="round"/></g></g></g>` +
+    `<g class="x x-shy">${shy}</g>` +
+    `<g class="x x-tears">${tears}</g>` +
+    `<g class="x x-q"><text x="${f1(s1x + 2)}" y="${f1(s1y + 4)}" font-family="Fredoka, sans-serif" font-weight="700" font-size="26" fill="${INK}" class="qmark">?</text></g>` +
+    `<g class="x x-sparkle"><use href="#i-sparkle" x="${f1(s1x - 8)}" y="${f1(s1y - 16)}" width="20" height="20" class="spk"/><use href="#i-sparkle" x="${f1(sp.steam[1][0] - 2)}" y="${f1(sp.steam[1][1] - 18)}" width="16" height="16" class="spk" style="animation-delay:.4s"/></g>`;
+}
+
+function fuzz(sp) {
+  if (!sp.fuzz) return '';
+  const { cx, cy, pts } = sp.fuzz;
+  return pts.map(([x, y], i) => {
+    const dx = x - cx, dy = y - cy, l = Math.hypot(dx, dy), nx = dx / l, ny = dy / l, tx = -ny, ty = nx, c = i % 2 ? 3 : -3;
+    return `<path d="M${f1(x - nx * 3)} ${f1(y - ny * 3)} q${f1(nx * 4 + tx * c)} ${f1(ny * 4 + ty * c)} ${f1(nx * 9)} ${f1(ny * 9)}" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>`;
+  }).join('');
+}
+
+function buildAlien(sp) {
+  const eyes = st => `<g class="e e-${st}">` + sp.eyes.map(e => EYE[st](sp, e, sideOf(sp, e))).join('') + '</g>';
+  const brows = (t, r) => `<g class="b b-${t}">` + sp.eyes.map(e => brow(e, t, sideOf(sp, e), r)).join('') + '</g>';
+  const { x: mx, y: my, s } = sp.mouth;
+  const mouths = Object.entries(MOUTHS).map(([k, d]) => `<g class="m m-${k}" transform="translate(${mx} ${my}) scale(${s})">${d}</g>`).join('');
+  const blush = sp.blush.map(([x, y, rx, ry]) => `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="#ff9fc0" opacity=".65"/>`).join('');
+  return `<g class="ab"><g transform="translate(0 -8)">${sp.back}` +
+    `<path d="${sp.outline}" fill="${sp.body}" stroke="${INK}" stroke-width="4.5" stroke-linejoin="round"/>${sp.marks}${fuzz(sp)}${sp.front || ''}${blush}` +
+    ['open', 'wide', 'happy', 'star', 'glare', 'shy', 'sad', 'squeeze'].map(eyes).join('') +
+    brows('worry', 4) + brows('angry', -3) + brows('sad', -2) + brows('raised', 3) +
+    mouths + extras(sp) + '</g></g>';
+}
+const ALIEN_SVG = buildAlien(AL);
+
+// A head-and-shoulders crop of today's applicant, for the ID photo and the result sticker.
+function alienPortrait(x, cls = '', label = '') {
+  const [cx, cy, w, h] = AL.crop;
+  const a11y = label ? `role="img" aria-label="${label}"` : 'aria-hidden="true"';
+  return `<svg class="${cls}" viewBox="${cx} ${cy} ${w} ${h}" ${a11y}><g class="alien still" data-x="${x}">${ALIEN_SVG}</g></svg>`;
+}
+
+// Turn the expression table into CSS once, so adding a face is one line above.
+(function exprCSS() {
+  let css = '';
+  for (const [k, v] of Object.entries(EXPR)) {
+    const parts = [`.e-${v.e}`, `.m-${v.m}`, v.b && `.b-${v.b}`, ...v.x.map(x => `.x-${x}`)].filter(Boolean);
+    css += parts.map(p => `.alien[data-x="${k}"] ${p}`).join(',') + '{display:inline}';
+    if (v.a) css += `.alien[data-x="${k}"] .ab{animation:${v.a}}`;
+  }
+  const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
 })();
-const ORIGIN = pick(['Somewhere quite far', 'The Outer Wobble', 'A small moon (rented)', 'Undisclosed nebula', 'Planet Unpronounceable', 'Planet 9', 'The Great Void', 'A distant star system', 'Grimbolo', 'Unidentified Celestial Body', 'A tiny asteroid', 'New New Earth', 'Zorp', 'Spheroid 33/B/∆M', 'THE ORB', 'Nevertune']);
 
 /* =========================================================
    Audio: everything synthesised, nothing loaded
@@ -822,7 +1049,7 @@ const Snd = {
   // babble voices
   voices: {
     examiner: { base: 205, scale: [0, 2, 4, 5, 7, 9], every: 3, speed: 25, space: 12, comma: 95, stop: 170, gap: 70 },
-    alien:    { base: 560, scale: [0, 3, 5, 7, 10, 12], every: 2, speed: 34, space: 20, comma: 120, stop: 180, gap: 60 }
+    alien:    { base: AL.voice, scale: [0, 3, 5, 7, 10, 12], every: 2, speed: 34, space: 20, comma: 120, stop: 180, gap: 60 }
   },
   blip(who, semis) {
     if (!this.ok) return;
@@ -917,11 +1144,16 @@ const alTyper = new Typer(abubble, 'alien', () => alienEl.classList.add('squeak'
 
 function mood(m) { examinerEl.dataset.mood = m; }
 function setTapping(on) { examinerEl.classList.toggle('tapping', on); $('#eHandR').classList.toggle('tapping', on); }
-function alienState(...cls) {
-  const keep = alienEl.classList.contains('gone') ? ['gone'] : [];
-  alienEl.setAttribute('class', '');
-  [...keep, ...cls].forEach(c => c && alienEl.classList.add(c));
+// alienState('worried', 'look'): an expression from EXPR, plus any one-off movement classes.
+function alienState(x = 'neutral', ...cls) {
+  const gone = alienEl.classList.contains('gone');
+  alienEl.setAttribute('class', 'alien' + (gone ? ' gone' : ''));
+  alienEl.dataset.x = EXPR[x] ? x : 'neutral';
+  cls.forEach(c => c && alienEl.classList.add(c));
 }
+alienEl.innerHTML = ALIEN_SVG;
+abubble.style.background = AL.bub; abubble.style.color = AL.bubInk;
+$('#applicant').innerHTML = `Today’s applicant: <b>${esc(AL.name)}</b>, from ${esc(AL.origin)}`;
 function alienFlash(cls, ms = 600) {
   alienEl.classList.remove(cls); void alienEl.getBoundingClientRect(); alienEl.classList.add(cls);
   setTimeout(() => alienEl.classList.remove(cls), ms);
@@ -1058,7 +1290,7 @@ function highlight(sentence, word) {
 const N = ['one', 'two', 'three', 'four', 'five', 'six', 'seven'];
 const LINES = {
   greet: [
-    `Ticket ${TICKET}? Lovely. Please be seated, and mind the antenna.`,
+    AL.greet, AL.greet,
     `Next! Ah, ticket ${TICKET}. Do sit down. The chair doesn't bite.`,
     `Good day. Ticket ${TICKET}. Please keep all appendages where I can see them.`,
     `Ticket ${TICKET}, step forward. Welcome to Earth Arrivals.`
@@ -1068,7 +1300,6 @@ const LINES = {
     'Seven words. You tell me what each one means. Thirty seconds apiece.',
     'Standard procedure: seven words, thirty seconds each. Begin when you hear the question.'
   ],
-  alienReady: ['Bip! Ready!', 'Eep. Okay!', 'Ready-bip!', 'Yes! Hello!'],
   lead: [
     ['Question one.', 'First question.'],
     ['Next question, please.', 'Question two.'],
@@ -1088,9 +1319,6 @@ const LINES = {
   rightHard: ['Oh! Very good indeed.', 'Goodness. Correct!', 'Well I never. Correct!', 'Impressive. For a visitor.'],
   wrong: ['Hmm. No.', 'Not quite, I’m afraid.', 'Oh dear. No.', 'I’ll write that down as “no”.', 'Incorrect. Moving on.'],
   timeout: ['Time’s up, I’m afraid.', 'I’ll take that silence as a no.', 'Pens down. Well. Tentacles down.'],
-  aRight: ['Yip!', 'Bip-bip!', 'Hee!', 'Yes!'],
-  aWrong: ['Eep…', 'Oh no.', 'Hrmm.', 'Bwuh?'],
-  aTimeout: ['Too slow…', 'Erp!'],
   lookup: ['Right. Let’s see how you did.', 'Right, then. Let’s tally up.', 'Let me just check my sheet…'],
   verdict: {
     distinction: ['Seven from seven. Remarkable. Welcome to Earth, with distinction.', 'Flawless. I may need to sit down. Welcome to Earth.'],
@@ -1160,8 +1388,9 @@ async function runExam() {
     await wait(420);
     await say(pick(LINES.rules), 'neutral');
     await wait(260);
-    alienFlash('perk', 520);
-    await alienSay(pick(LINES.alienReady), 380);
+    alienState('eager', 'perk');
+    await alienSay(pick(AL.say.ready), 380);
+    alienState('neutral');
   } else if (game.current >= 0 && !game.answers[game.current]) {
     game.answers[game.current] = { choice: -1, correct: false, ms: 30000 };
     saveGame(); renderSlots(game.answers.length);
@@ -1182,7 +1411,7 @@ async function runQuestion(i) {
   phase = 'talk';
   renderSlots(i);
   card.hidden = true; optsEl.className = 'opts'; optsEl.innerHTML = ''; revealBox.innerHTML = '';
-  alienState(i >= 3 ? 'nervous' : '');
+  alienState(i >= 3 ? 'nervous' : 'neutral');
   skiphint.textContent = i === 0 ? 'Tap or press any key to skip ahead' : '';
   await say(`${pick(LINES.lead[i])} ${pick(LINES.ask)(it.word)}`, 'neutral');
 
@@ -1197,6 +1426,7 @@ async function runQuestion(i) {
   optsEl.querySelectorAll('.opt').forEach((b, k) => b.setAttribute('aria-label', `${'ABCD'[k]}: ${it.options[k]}`));
   void optsEl.offsetWidth; optsEl.classList.add('show');
   skiphint.textContent = 'Answer with a tap, 1–4 or A–D';
+  alienEl.classList.add('look');
   srLive.textContent = `${it.sentence} Options: ${it.options.map((o, k) => 'ABCD'[k] + ', ' + o).join('. ')}.`;
 
   phase = 'question';
@@ -1222,11 +1452,11 @@ function runTimer() {
       }
       if (left <= 10000 && warned < 1) {
         warned = 1; card.classList.add('warn'); mood('sceptical');
-        setTapping(true); alienState('sweat');
+        setTapping(true); alienState('worried', 'look');
       }
       if (left <= 5000 && warned < 2) {
         warned = 2; card.classList.add('danger'); mood('impatient');
-        alienState('sweat', 'nervous');
+        alienState('panic', 'look');
         bubble.classList.add('ahem');
         exTyper.type('Ahem.');
       }
@@ -1274,19 +1504,22 @@ async function revealAnswer(i, choice, correct) {
   if (correct) {
     Snd.correct(hard);
     mood(hard ? 'delighted' : 'pleased');
-    alienState('happy', 'perk');
+    alienState(hard ? 'elated' : 'happy', 'perk');
     sparkles(19, 55, hard ? 10 : 6, 60);
-    line = pick(hard ? LINES.rightHard : LINES.right); aLine = pick(LINES.aRight);
+    line = pick(hard ? LINES.rightHard : LINES.right); aLine = pick(hard ? AL.say.wow : AL.say.right);
   } else if (choice === -1) {
     Snd.timeout();
     mood('sceptical');
-    alienState('sad', 'wobble');
-    line = pick(LINES.timeout); aLine = pick(LINES.aTimeout);
+    alienState('oops');
+    line = pick(LINES.timeout); aLine = pick(AL.say.late);
   } else {
     Snd.wrong();
     mood('sceptical');
-    alienState('sad', 'wobble');
-    line = pick(LINES.wrong); aLine = pick(LINES.aWrong);
+    // A miss on the hard words, or a second miss in a row, makes them cross. Otherwise, sheepish.
+    const prev = game.answers[i - 1];
+    const cross = hard || (prev && !prev.correct);
+    alienState(cross ? 'frustrated' : 'ashamed');
+    line = pick(LINES.wrong); aLine = pick(cross ? AL.say.cross : AL.say.shame);
   }
   srLive.textContent = `${correct ? 'Correct' : choice === -1 ? 'Time up' : 'Incorrect'}. ${it.word} means ${it.options[it.answer]}.`;
   setTimeout(() => { if (phase === 'reveal') { abubble.textContent = aLine; abubble.classList.add('show'); Snd.blip('alien', 5); setTimeout(() => abubble.classList.remove('show'), 700); } }, 120);
@@ -1294,7 +1527,7 @@ async function revealAnswer(i, choice, correct) {
   const hold = (correct ? 2000 : 2600) - (performance.now() - t0);
   await wait(Math.max(500, hold));
   abubble.classList.remove('show');
-  alienState('');
+  alienState('neutral');
 }
 
 /* ---------- the verdict ---------- */
@@ -1364,22 +1597,26 @@ function splats(permit) {
 async function reaction(v) {
   const line = pick(LINES.verdict[v]);
   if (v === 'distinction') {
-    Snd.fanfare(); mood('delighted'); alienState('happy', 'celebrate');
+    Snd.fanfare(); mood('delighted'); alienState('elated', 'celebrate');
     confetti(40); sparkles(19, 50, 12, 90);
     setTimeout(() => sparkles(19, 45, 10, 80), 450);
   } else if (v === 'granted') {
     Snd.cheer(); mood('pleased'); alienState('happy', 'celebrate');
     sparkles(19, 50, 12, 80);
   } else if (v === 'deferred') {
-    Snd.sigh(); mood('sympathetic'); alienState('sad');
+    Snd.sigh(); mood('sympathetic'); alienState('sulk');
   } else {
-    Snd.wahwah(); mood('sympathetic'); alienState('sad');
+    Snd.wahwah(); mood('sympathetic'); alienState('crushed');
   }
   await say(line);
-  if (v === 'denied') { await wait(700); bubble.classList.remove('show'); await sendHome(); }
+  if (v === 'denied') {
+    abubble.textContent = pick(AL.say.lose); abubble.classList.add('show'); Snd.blip('alien', 2);
+    await wait(1100); abubble.classList.remove('show'); bubble.classList.remove('show'); await sendHome();
+  }
   setTimeout(() => {
-    if (v === 'distinction' || v === 'granted') { abubble.textContent = v === 'distinction' ? 'Wheee! Earth!' : 'Yay! Earth!'; }
-    else if (v === 'deferred') abubble.textContent = 'Tomorrow, then…';
+    if (v === 'distinction') abubble.textContent = pick(AL.say.wow);
+    else if (v === 'granted') abubble.textContent = pick(AL.say.win);
+    else if (v === 'deferred') abubble.textContent = pick(AL.say.defer);
     else return;
     abubble.classList.add('show'); Snd.blip('alien', 7); setTimeout(() => Snd.blip('alien', 9), 90);
     setTimeout(() => abubble.classList.remove('show'), 1500);
@@ -1415,7 +1652,7 @@ function showResults(animate) {
   const passRate = s.played ? Math.round(s.passes / s.played * 100) : 0;
   const maxD = Math.max(1, ...s.dist);
   const dateTxt = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
-  const sticker = v === 'distinction' || v === 'granted' ? 'alienHappy' : v === 'deferred' ? 'alienMeh' : 'alienSulk';
+  const sticker = v === 'distinction' ? 'elated' : v === 'granted' ? 'happy' : v === 'deferred' ? 'sulk' : 'crushed';
   const stars = Array.from({ length: 26 }, () => `<i style="left:${(Math.random() * 100).toFixed(1)}%;top:${(Math.random() * 100).toFixed(1)}%;animation-delay:${(Math.random() * 2.6).toFixed(2)}s"></i>`).join('') +
     [[6, 14, 16], [88, 10, 20], [93, 58, 14], [4, 70, 18], [70, 88, 12]].map(([x, y, w], i) => `<svg style="left:${x}%;top:${y}%;width:${w}px;height:${w}px;animation-delay:${i * .37}s" viewBox="0 0 24 24"><use href="#i-sparkle"/></svg>`).join('');
 
@@ -1438,7 +1675,7 @@ function showResults(animate) {
           <div><div class="p-title">EARTH LANDING PERMIT</div><span class="p-small">Dept. of Arrivals · Form LP-7</span></div>
         </div>
         <div class="p-body">
-          <div class="photo"><svg viewBox="0 0 100 120" aria-label="ID photo of the applicant" role="img"><use href="#alienPhoto"/></svg></div>
+          <div class="photo">${alienPortrait('neutral', '', 'ID photo of ' + esc(AL.name))}</div>
           <dl class="fields">
             <dt>Applicant</dt><dd>${esc(ALIEN_NAME)}</dd>
             <dt>Origin</dt><dd>${esc(ORIGIN)}</dd>
@@ -1451,7 +1688,7 @@ function showResults(animate) {
         <div class="imprint ${animate ? '' : 'on'}" id="imprint" role="img" aria-label="${esc((V.pre ? V.pre + ' ' : '') + V.stamp + (V.sub ? ' — ' + V.sub : ''))}">${V.pre ? `<small class="pre">${esc(V.pre)}</small>` : ''}${esc(V.stamp)}${V.sub ? `<small>${esc(V.sub)}</small>` : ''}</div>
         ${stampSVG}</div>
       </div>
-      <div class="scoreline"><svg class="sticker ${v === 'distinction' || v === 'granted' ? 'bounce' : 'sulk'}" viewBox="0 0 100 120" aria-hidden="true"><use href="#${sticker}"/></svg>
+      <div class="scoreline">${alienPortrait(sticker, 'sticker ' + (v === 'distinction' || v === 'granted' ? 'bounce' : 'sulk'))}
         <div class="bigscore">${score}<small>/7</small></div>
         <div class="verdict">${esc(V.short)}</div>
         <div class="meta">Ticket #${TICKET} · ${fmtTime(game.totalMs)} at the counter</div>
@@ -1492,7 +1729,7 @@ function showResults(animate) {
   show(results);
   $('#shareBtn').addEventListener('click', copyShare);
   startCountdown();
-  if (!animate) { if (v === 'denied') alienEl.classList.add('gone'); else alienState(v === 'deferred' ? 'sad' : 'happy'); }
+  if (!animate) { if (v === 'denied') alienEl.classList.add('gone'); else alienState(v === 'deferred' ? 'sulk' : v === 'distinction' ? 'elated' : 'happy'); }
 }
 
 async function copyShare() {
@@ -1558,7 +1795,7 @@ document.addEventListener('pointerdown', e => {
 
 /* dev helpers: only on localhost */
 if (DEV) {
-  window.LP = { game: () => game, correctIndex: i => ITEMS[i].answer, items: () => ITEMS, itemsForDay, stats: loadStats, shareText: () => game && shareText(), ticket: TICKET, answer, trySkip, phase: () => phase };
+  window.LP = { alienState, species: AL.key, game: () => game, correctIndex: i => ITEMS[i].answer, items: () => ITEMS, itemsForDay, stats: loadStats, shareText: () => game && shareText(), ticket: TICKET, answer, trySkip, phase: () => phase };
 }
 
 boot();
