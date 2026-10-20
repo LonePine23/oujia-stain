@@ -717,7 +717,7 @@ const f1 = n => +(+n).toFixed(1);
 
 const SPECIES = [
   {
-    key: 'pibble', name: 'Pibble Vrask', origin: 'Rock G/∆-7',
+    key: 'pibble', name: 'Pibble Vrask', origin: 'Third rock past the big one',
     body: '#cbbcff', shade: '#b29ff3', bub: '#f3eeff', bubInk: '#6a52c0', voice: 560,
     outline: 'M38 380 C34 244 56 170 110 168 C162 170 184 244 180 380 Z',
     back: `<g class="wig wigL"><path d="M98 172 C93 148 74 146 80 124" fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round"/><circle class="bulb" cx="80" cy="120" r="10" fill="#ffe36e" stroke="${INK}" stroke-width="3.5"/></g>`,
@@ -780,10 +780,11 @@ const SPECIES = [
           `<circle cx="84" cy="170" r="19" fill="#9fd8ff" stroke="${INK}" stroke-width="4"/><circle cx="146" cy="164" r="19" fill="#9fd8ff" stroke="${INK}" stroke-width="4"/>`,
     fuzz: { cx: 112, cy: 300, pts: [[46, 268], [58, 246], [74, 230], [92, 221], [132, 220], [150, 226], [166, 240], [178, 258]] },
     marks: `<ellipse cx="112" cy="330" rx="48" ry="40" fill="#c8eaff"/><circle cx="64" cy="290" r="5" fill="#72bcef"/><circle cx="160" cy="300" r="4" fill="#72bcef"/>`,
-    eyes: [{ x: 84, y: 170, rx: 12.5, ry: 12.5 }, { x: 146, y: 164, rx: 12.5, ry: 12.5 }], fx: 115,
+    // Eyes live in the bulbs, so the brows float just clear of them (bulb radius 19 + stroke + a small gap).
+    eyes: [{ x: 84, y: 170, rx: 12.5, ry: 12.5 }, { x: 146, y: 164, rx: 12.5, ry: 12.5 }], fx: 115, browClear: 26,
     mouth: { x: 115, y: 252, s: 1.25 }, blush: [[84, 250, 9, 5], [146, 250, 9, 5]],
-    sweat: [172, 150], steam: [[56, 152], [174, 138]], vein: [164, 146],
-    crop: [32, 128, 160, 192],
+    sweat: [178, 158], steam: [[56, 152], [178, 132]], vein: [178, 154],
+    crop: [32, 112, 160, 192],
     greet: `Ticket ${TICKET}? Zorbo Plook. Please stop waving your eyes at me.`,
     say: {
       ready: ['Hiii! Ready!', 'Ooh! Me! Me!', 'Let’s gooo!'], right: ['Woohoo!', 'Yay yay!', 'I’m SMART!'], wow: ['WHAAAT! YES!', 'Genius alert!'],
@@ -871,9 +872,15 @@ function eyeLid(sp, e, side, type) {
   const xl = x - half(L) + .8, xr = x + half(R) - .8, cy = 2 * M - (L + R) / 2;
   const [ppx, ppy, prr] = type === 'shy' ? [x - rx * .36, y + ry * .42, m * .42] : type === 'glare' ? [x, y + ry * .4, m * .34] : [x, y + ry * .34, m * .42];
   const lid = sp.lid || sp.body;
+  // The lid follows the eye's own outline (just outside its stroke), so it never
+  // spills past the eye. That matters for anyone whose eyes aren't sitting on skin.
+  const RX = rx + 3.5, RY = ry + 3.5;                   // well past the stroke, or a hairline seam shows
+  const halfO = yy => RX * Math.sqrt(Math.max(0, 1 - ((yy - y) / RY) ** 2));
+  const ol = x - halfO(L), or = x + halfO(R);
+  const big = (L + R) / 2 > y ? 1 : 0;                  // lid line below centre: the top arc is the long way round
   return `<g><ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="#fff" stroke="${INK}" stroke-width="3.5"/>` +
     `<circle cx="${f1(ppx)}" cy="${f1(ppy)}" r="${f1(prr)}" fill="${PUPIL}"/>` +
-    `<path d="M${f1(x - rx - 5)} ${f1(y - ry - 7)} H${f1(x + rx + 5)} V${f1(R)} H${f1(xr)} Q${f1(x)} ${f1(cy)} ${f1(xl)} ${f1(L)} H${f1(x - rx - 5)} Z" fill="${lid}"/>` +
+    `<path d="M${f1(ol)} ${f1(L)} A${f1(RX)} ${f1(RY)} 0 ${big} 1 ${f1(or)} ${f1(R)} L${f1(xr)} ${f1(R)} Q${f1(x)} ${f1(cy)} ${f1(xl)} ${f1(L)} Z" fill="${lid}"/>` +
     `<path d="M${f1(xl)} ${f1(L)} Q${f1(x)} ${f1(cy)} ${f1(xr)} ${f1(R)}" fill="none" stroke="${INK}" stroke-width="3.6" stroke-linecap="round"/>` +
     (sp.lashes && type !== 'glare' ? lashes({ x, y: L + 2 }, rx * .9, 2, side) : '') + '</g>';
 }
@@ -899,8 +906,11 @@ const EYE = {
 };
 
 /* ---------- brows ---------- */
-function brow(e, type, side, raise) {
-  const w = e.rx * .9, by = e.y - e.ry * 1.2 - 5 - raise, d = 6;
+// Lowest point of each brow shape below its baseline, so floating brows can clear whatever the eye sits in.
+const BROW_LOW = { raised: 2, worry: 3, angry: 6, sad: 3 };
+function brow(e, type, side, raise, clear) {
+  const w = e.rx * .9, d = 6;
+  const by = clear ? e.y - clear - BROW_LOW[type] : e.y - e.ry * 1.2 - 5 - raise;
   let L, R, M;
   if (type === 'raised') { L = R = by + 2; M = by - 7; }
   else {
@@ -963,7 +973,7 @@ function fuzz(sp) {
 
 function buildAlien(sp) {
   const eyes = st => `<g class="e e-${st}">` + sp.eyes.map(e => EYE[st](sp, e, sideOf(sp, e))).join('') + '</g>';
-  const brows = (t, r) => `<g class="b b-${t}">` + sp.eyes.map(e => brow(e, t, sideOf(sp, e), r)).join('') + '</g>';
+  const brows = (t, r) => `<g class="b b-${t}">` + sp.eyes.map(e => brow(e, t, sideOf(sp, e), r, sp.browClear)).join('') + '</g>';
   const { x: mx, y: my, s } = sp.mouth;
   const mouths = Object.entries(MOUTHS).map(([k, d]) => `<g class="m m-${k}" transform="translate(${mx} ${my}) scale(${s})">${d}</g>`).join('');
   const blush = sp.blush.map(([x, y, rx, ry]) => `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="#ff9fc0" opacity=".65"/>`).join('');
