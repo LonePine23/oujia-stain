@@ -254,11 +254,13 @@ main { padding-bottom: 40px; }
 .card .extra { font-size: 13.5px; color: var(--muted); line-height: 1.35; margin-top: 4px; }
 .card.is-peak { border-color: var(--peak); box-shadow: inset 0 4px 0 var(--peak); }
 
-/* Status badges: Peak is solid, In season is tinted, Shoulder is dashed, Out is faint */
+/* Status badges: Peak is solid, In season is tinted, Coming in / Going out are dashed, Out is faint */
 .badge { display: inline-flex; align-items: center; font-family: var(--font-mono); font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .05em; padding: 3px 8px; border-radius: 999px; line-height: 1.2; white-space: nowrap; border: 1px solid transparent; }
 .badge.peak { background: var(--peak); color: var(--on-accent); }
 .badge.in { background: var(--tint); color: var(--ink); border-color: var(--in); }
 .badge.shoulder { color: var(--ink); border: 1px dashed var(--in); }
+.badge.shoulder.arriving { border-color: var(--peak); }
+.badge.shoulder.leaving { color: var(--muted); border-color: var(--in); }
 .badge.out { color: var(--muted); border: 1px dashed var(--line); }
 .when { white-space: nowrap; }
 .when.up { color: var(--accent); font-weight: 500; }
@@ -447,7 +449,8 @@ html.flipped .page { transform: rotate(180deg); }
     <ul class="legend mono" aria-label="Key">
       <li title="At its best, cheapest and tastiest"><span class="badge peak">Peak</span><span class="sr">: at its best, cheapest and tastiest</span></li>
       <li title="Good and easy to find"><span class="badge in">In season</span><span class="sr">: good and easy to find</span></li>
-      <li title="Just starting or just finishing"><span class="badge shoulder">Shoulder</span><span class="sr">: just starting or finishing</span></li>
+      <li title="Season just starting: getting better from here"><span class="badge shoulder arriving">Coming in</span><span class="sr">: season just starting</span></li>
+      <li title="Season finishing: get it while you can"><span class="badge shoulder leaving">Going out</span><span class="sr">: season finishing</span></li>
       <li><span aria-hidden="true">↗</span><span class="sr">Up arrow:</span> heading for peak</li>
       <li><span aria-hidden="true">↘</span><span class="sr">Down arrow:</span> fading</li>
       <li><button type="button" class="legend-out" id="legend-out" aria-label="Out of season"><span class="badge out">Out</span></button></li>
@@ -1266,6 +1269,20 @@ function seasonPhase(m) {
   return ['Early', 'Mid', 'Late'][pos] + ' ' + seasonOf(m);
 }
 
+// A shoulder month is either the start of a season (“coming in”) or the end
+// of one (“going out”). Whichever side of the shoulder is nearer decides:
+// just after the good months = going out; just after an out-of-season gap = coming in.
+function shoulderWay(f, m) {
+  let back = 1; while (back < 12 && stateAt(f, m - back) === 'shoulder') back++;
+  let fwd = 1;  while (fwd < 12 && stateAt(f, m + fwd) === 'shoulder') fwd++;
+  const before = stateAt(f, m - back), after = stateAt(f, m + fwd);
+  if (back < fwd) return before === 'out' ? 'in' : 'out';
+  if (fwd < back) return after === 'out' ? 'out' : 'in';
+  return after === 'out' ? 'out' : 'in';
+}
+const SHOULDER_LABEL = { in: 'Coming in', out: 'Going out' };
+const stateLabel = (f, m) => { const s = stateAt(f, m); return s === 'shoulder' ? SHOULDER_LABEL[shoulderWay(f, m)] : STATE_LABEL[s]; };
+
 // Works out how in-season a food is in month m: its badge, a short note
 // (“peak from Dec”, “until Jan”, “winding down”), an arrow direction, and a
 // score used by “Most in season first”. `day` is only passed for the real
@@ -1286,6 +1303,19 @@ function statusInfo(f, m, day) {
     const k = ahead(x => x !== 'peak');                  // months until the peak ends
     if (k === 1) { detail = day ? (late ? 'ending soon' : 'last month of peak') : 'last month of peak'; dir = 'down'; }
     else if (k > 1) detail = `until ${MON[mod(m + k - 1, 12)]}`;
+  } else if (s === 'shoulder') {
+    // Say when: “good from Jan” / “peak from Jan” on the way in, “gone by Mar” on the way out.
+    const way = shoulderWay(f, m);
+    if (way === 'in') {
+      const kp = ahead(x => x === 'peak'), kg = ahead(x => RANK[x] >= 2);
+      detail = kp > 0 && kp <= 2 ? `peak from ${MON[mod(m + kp, 12)]}` : kg > 0 ? `good from ${MON[mod(m + kg, 12)]}` : '';
+      dir = 'up';
+    } else {
+      const ko = ahead(x => x === 'out'), kg = ahead(x => RANK[x] >= 2);
+      if (kg > 0 && (ko < 0 || kg < ko)) detail = `better again from ${MON[mod(m + kg, 12)]}`;   // a dip, not an exit
+      else detail = ko === 1 ? (day && late ? 'gone any day' : `gone by ${MON[mod(m + 1, 12)]}`) : `gone by ${MON[mod(m + ko, 12)]}`;
+      dir = 'down';
+    }
   } else {
     const kp = ahead(x => x === 'peak'), ko = ahead(x => x === 'out');
     if (kp > 0 && kp <= 3 && next >= cur && (ko < 0 || kp < ko)) { detail = `peak from ${MON[mod(m + kp, 12)]}`; dir = 'up'; }
@@ -1297,10 +1327,11 @@ function statusInfo(f, m, day) {
     // ending, and things on their way up beat things on their way down.
     const nb = s === 'peak' ? (next === 3 ? 20 : 0) + (prev === 3 ? 10 : 0)
              : s === 'in'   ? (next === 3 ? 20 : next === 2 ? 10 : 0) + (prev >= 2 ? 5 : 0)
-             :                (next >= 2 ? 20 : 0) + (prev >= 2 ? 5 : 0);
+             :                (shoulderWay(f, m) === 'in' ? 20 : 0);
     score = cur * 100 + nb;
   }
-  return { s, label: s === 'out' ? 'Out' : STATE_LABEL[s], detail, dir, score };
+  const way = s === 'shoulder' ? shoulderWay(f, m) : '';
+  return { s, way, label: s === 'out' ? 'Out' : stateLabel(f, m), detail, dir, score };
 }
 const statusNow = (f, m) => statusInfo(f, m, m === NOW.month ? NOW.day : 0);
 const byScore = m => (a, b) => statusNow(b, m).score - statusNow(a, m).score || a.name.localeCompare(b.name);
@@ -1428,9 +1459,9 @@ function renderHero() {
   $('#month-title').textContent = MONTHS[m];
   $('#summary').textContent = summaryLine(m);
   const list = visibleFoods();
-  const c = { peak: 0, in: 0, shoulder: 0 };
-  list.forEach(f => { const s = stateAt(f, m); if (s in c) c[s]++; });
-  $('#stats').innerHTML = `<span><b>${c.peak}</b> at their peak</span><span><b>${c.in}</b> in season</span><span><b>${c.shoulder}</b> on the shoulder</span>`;
+  const c = { peak: 0, in: 0, arriving: 0, leaving: 0 };
+  list.forEach(f => { const s = stateAt(f, m); if (s === 'shoulder') c[shoulderWay(f, m) === 'in' ? 'arriving' : 'leaving']++; else if (s in c) c[s]++; });
+  $('#stats').innerHTML = `<span><b>${c.peak}</b> at their peak</span><span><b>${c.in}</b> in season</span><span><b>${c.arriving}</b> coming in</span><span><b>${c.leaving}</b> going out</span>`;
   syncThemeColor();
 }
 
@@ -1469,11 +1500,11 @@ function card(f, m, i, extra) {
   const st = statusNow(f, m), s = st.s;
   const arrow = st.dir === 'up' ? '↗ ' : st.dir === 'down' ? '↘ ' : '';
   const flag = f.rating === 'sayno' ? '<span class="flag">avoid</span>' : (f.origin ? '<span class="flag">interstate</span>' : '');
-  const spoken = s === 'out' ? 'Out of season' : STATE_LABEL[s];
+  const spoken = s === 'out' ? 'Out of season' : st.label;
   return `<button type="button" class="card${s === 'out' ? ' is-out' : ''}${s === 'peak' ? ' is-peak' : ''}" data-id="${f.id}" style="--i:${Math.min(i, 24)}" aria-label="${esc(f.name)}: ${spoken}${st.detail ? ', ' + st.detail : ''}${f.rating === 'sayno' ? ', sustainability warning' : ''}. Open details.">
     ${flag}<span class="em" aria-hidden="true">${f.emoji}</span>
     <span class="nm">${esc(f.name)}</span>
-    <span class="st"><span class="badge ${s}">${st.label}</span>${st.detail ? `<span class="when${st.dir === 'up' ? ' up' : ''}">${arrow}${esc(st.detail)}</span>` : ''}</span>
+    <span class="st"><span class="badge ${s}${st.way ? ' ' + (st.way === 'in' ? 'arriving' : 'leaving') : ''}">${st.label}</span>${st.detail ? `<span class="when${st.dir === 'up' ? ' up' : ''}">${arrow}${esc(st.detail)}</span>` : ''}</span>
     ${extra ? `<span class="extra">${esc(extra)}</span>` : ''}
     ${spark(f, m)}
   </button>`;
@@ -1505,20 +1536,29 @@ function renderList() {
     main.innerHTML = html;
     announce = main.querySelectorAll('.card').length + ' search results.';
   } else if (state.sort === 'season') {
-    // One ranked list, most in season first. Nothing is hidden: out-of-season
-    // foods sit at the bottom, ordered by how soon they come back.
-    const list = visibleFoods().slice().sort(byScore(m));
-    const BANDS = [['peak', 'At their peak'], ['in', 'In season'], ['shoulder', 'On the shoulder'], ['out', 'Out of season']];
-    const hasAnimal = list.some(f => f.kind === 'animal');
-    if (hasAnimal) html += `<p class="caveat" style="margin-top:22px">${CAVEAT}</p>`;
+    // Ranked list, most in season first, in four tiers:
+    //   1. fruit, veg and herbs that are genuinely seasonal
+    //   2. meat and seafood that are genuinely seasonal
+    //   3. anything good in every month of the year (produce first, then meat and seafood)
+    //   4. out of season, soonest back first
+    // Nothing is hidden: everything in the current filter appears somewhere.
+    const yearRound = f => f.cal.every(st => RANK[st] >= 2);   // good (in season or better) all 12 months
+    const ranked = visibleFoods().slice().sort(byScore(m));
+    const now = ranked.filter(f => rankAt(f, m) > 0);
+    const single = state.filter !== 'all' ? CAT[state.filter].label : '';
+    const TIERS = [
+      { id: 'produce', title: single || 'Fruit, veg & herbs', tag: 'Produce', note: '', items: now.filter(f => f.kind === 'produce' && !yearRound(f)) },
+      { id: 'animal', title: single || 'Meat, seafood & eggs', tag: 'Animal product', note: CAVEAT, items: now.filter(f => f.kind === 'animal' && !yearRound(f)) },
+      { id: 'allyear', title: 'Around all year', tag: '', note: 'Good in any month, so there’s no rush.', items: [...now.filter(f => f.kind === 'produce' && yearRound(f)), ...now.filter(f => f.kind === 'animal' && yearRound(f))] },
+      { id: 'out', title: 'Out of season', tag: '', note: '', count: ' · soonest back first', items: ranked.filter(f => rankAt(f, m) === 0) }
+    ];
     let n = 0;
-    for (const [st, title] of BANDS) {
-      const items = list.filter(f => stateAt(f, m) === st);
-      if (!items.length) continue;
-      html += `<section class="cat" aria-labelledby="band-${st}"><div class="cat-head"><h2 id="band-${st}">${title}</h2><span class="count mono">${items.length}${st === 'out' ? ' · soonest back first' : ''}</span></div><div class="grid">${items.map(f => card(f, m, n++)).join('')}</div></section>`;
+    for (const t of TIERS) {
+      if (!t.items.length) continue;
+      html += `<section class="cat" aria-labelledby="tier-${t.id}"><div class="cat-head"><h2 id="tier-${t.id}">${t.title}</h2>${t.tag ? `<span class="kind-tag ${t.id}">${t.tag}</span>` : ''}<span class="count mono">${t.items.length}${t.count || ''}</span></div>${t.note ? `<p class="caveat">${t.note}</p>` : ''}<div class="grid">${t.items.map(f => card(f, m, n++)).join('')}</div></section>`;
     }
     main.innerHTML = html;
-    announce = `${list.length} foods, most in season first.`;
+    announce = `${ranked.length} foods, most in season first.`;
   } else {
     const list = visibleFoods().filter(f => rankAt(f, m) > 0);
     const cats = CATEGORIES.filter(c => state.filter === 'all' || c.id === state.filter);
@@ -1585,7 +1625,7 @@ function openDetail(id) {
   if (f.rating === 'sayno') buy.push(['Caution', '', 'Available any month, but see the sustainability note below.']);
 
   const ratingName = { better: 'Better Choice', eatless: 'Eat Less', sayno: 'Say No' };
-  const chart = f.cal.map((x, i) => `<li class="${x}${i === m ? ' sel' : ''}${i === NOW.month ? ' now' : ''}"><span class="bar" aria-hidden="true"><i></i></span><span class="m" aria-hidden="true">${MON[i][0]}<span class="m-rest">${MON[i].slice(1)}</span></span><span class="sr">${MONTHS[i]}: ${STATE_LABEL[x]}${i === NOW.month ? ' (this month)' : ''}</span></li>`).join('');
+  const chart = f.cal.map((x, i) => `<li class="${x}${i === m ? ' sel' : ''}${i === NOW.month ? ' now' : ''}"><span class="bar" aria-hidden="true"><i></i></span><span class="m" aria-hidden="true">${MON[i][0]}<span class="m-rest">${MON[i].slice(1)}</span></span><span class="sr">${MONTHS[i]}: ${stateLabel(f, i)}${i === NOW.month ? ' (this month)' : ''}</span></li>`).join('');
 
   $('#detail-body').innerHTML = `
     <div class="d-em" aria-hidden="true">${f.emoji}</div>
@@ -1593,9 +1633,9 @@ function openDetail(id) {
     <h2 class="d-name" id="d-name">${esc(f.name)}</h2>
     <p class="d-note">${esc(f.note)}</p>
     <p class="d-summary">${esc(describeSeason(f))}</p>
-    <p class="d-now mono"><strong>${esc(MONTHS[m])}: ${esc(STATE_LABEL[s])}.</strong> ${esc(nextMoves(f, m))}</p>
+    <p class="d-now mono"><strong>${esc(MONTHS[m])}: ${esc(stateLabel(f, m))}.</strong> ${esc(nextMoves(f, m))}</p>
     <ol class="chart" aria-label="Month by month">${chart}</ol>
-    <ul class="chart-key mono" aria-hidden="true"><li><span class="dot peak"></span>Peak</li><li><span class="dot in"></span>In season</li><li><span class="dot shoulder"></span>Shoulder</li><li><span class="dot out"></span>Out</li></ul>
+    <ul class="chart-key mono" aria-hidden="true"><li><span class="dot peak"></span>Peak</li><li><span class="dot in"></span>In season</li><li><span class="dot shoulder"></span>Coming in or going out</li><li><span class="dot out"></span>Out</li></ul>
     <div class="d-section"><h3>When to buy</h3><ul class="buy">${buy.map(([k, cls, v]) => `<li><span class="k ${cls}">${k}</span><span>${esc(v)}</span></li>`).join('')}</ul></div>
     ${(f.rating || f.ratingNote) ? `<div class="d-section"><h3>Sustainability</h3><p class="callout">${f.rating ? `<span class="rating ${f.rating}">GoodFish: ${ratingName[f.rating]}</span><br>` : ''}${esc(f.ratingNote || '')}</p></div>` : ''}
     ${animal ? `<div class="d-section"><p class="callout">${CAVEAT}</p></div>` : ''}
