@@ -1,0 +1,1883 @@
+<!DOCTYPE html>
+<html lang="en-AU" data-season="spring">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Seasons · What’s in season in Melbourne right now</title>
+<meta name="description" content="What’s in season in Melbourne and Victoria this month: fruit, vegetables, herbs, nuts, seafood, meat and poultry, with peak months and the best time to buy.">
+<link rel="canonical" href="https://geordie.lol/seasons">
+<meta name="theme-color" content="#f6f7f0">
+<script>
+  /* Light or dark? Decided before the page draws, so there's no flash.
+     The visitor's choice (Auto / Light / Dark) is remembered; Auto follows their device. */
+  (function () {
+    var pref = 'auto';
+    try { pref = localStorage.getItem('seasons.theme') || 'auto'; } catch (e) {}
+    var dark = pref === 'dark' || (pref !== 'light' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme-pref', pref);
+    // Palette: a saved season, or (Auto) the current Melbourne season.
+    var pal = 'auto';
+    try { pal = localStorage.getItem('seasons.palette') || 'auto'; } catch (e) {}
+    var season = pal;
+    if (pal === 'auto') {
+      var mo = new Date().getMonth();
+      try { mo = +new Intl.DateTimeFormat('en-AU', { timeZone: 'Australia/Melbourne', month: 'numeric' }).format(new Date()) - 1; } catch (e) {}
+      season = ['summer','summer','autumn','autumn','autumn','winter','winter','winter','spring','spring','spring','summer'][mo];
+    }
+    document.documentElement.setAttribute('data-season', season);
+  })();
+</script>
+
+<!-- Open Graph / social share. Swap the image path for your own 1200x630 image. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="geordie.lol">
+<meta property="og:title" content="Seasons: what’s in season in Melbourne">
+<meta property="og:description" content="A month-by-month guide to Melbourne and Victorian produce, seafood and meat. What’s at its peak, what’s arriving, and what to skip.">
+<meta property="og:url" content="https://geordie.lol/seasons">
+<meta property="og:image" content="https://geordie.lol/images/og/seasons.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Seasons: a Melbourne seasonal produce guide">
+<meta property="og:locale" content="en_AU">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Seasons: what’s in season in Melbourne">
+<meta name="twitter:description" content="What’s at its peak, what’s arriving and what to skip, month by month.">
+<meta name="twitter:image" content="https://geordie.lol/images/og/seasons.jpg">
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍑</text></svg>">
+
+<!-- Fonts.
+     PP Migra (headings) and PP Neue Montreal (body) by Pangram Pangram live in the
+     fonts/ folder next to this file. IBM Plex Mono comes from Google Fonts.
+     If any of them can't load, the page falls back to system fonts. -->
+<link rel="preload" href="fonts/PPMigra-BlackItalic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/PPNeueMontreal-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* =====================================================================
+   0. FONTS. Each file is tried at fonts/… first, then at /seasons/fonts/…
+   so it works both when opened locally and when served at geordie.lol/seasons.
+   ===================================================================== */
+@font-face { font-family: "PP Migra"; font-weight: 400; font-style: normal; font-display: swap; src: url("fonts/PPMigra-Regular.woff2") format("woff2"), url("/seasons/fonts/PPMigra-Regular.woff2") format("woff2"); }
+@font-face { font-family: "PP Migra"; font-weight: 400; font-style: italic; font-display: swap; src: url("fonts/PPMigra-Italic.woff2") format("woff2"), url("/seasons/fonts/PPMigra-Italic.woff2") format("woff2"); }
+@font-face { font-family: "PP Migra"; font-weight: 800; font-style: normal; font-display: swap; src: url("fonts/PPMigra-Extrabold.woff2") format("woff2"), url("/seasons/fonts/PPMigra-Extrabold.woff2") format("woff2"); }
+@font-face { font-family: "PP Migra"; font-weight: 800; font-style: italic; font-display: swap; src: url("fonts/PPMigra-ExtraboldItalic.woff2") format("woff2"), url("/seasons/fonts/PPMigra-ExtraboldItalic.woff2") format("woff2"); }
+@font-face { font-family: "PP Migra"; font-weight: 900; font-style: italic; font-display: swap; src: url("fonts/PPMigra-BlackItalic.woff2") format("woff2"), url("/seasons/fonts/PPMigra-BlackItalic.woff2") format("woff2"); }
+@font-face { font-family: "PP Neue Montreal"; font-weight: 400; font-style: normal; font-display: swap; src: url("fonts/PPNeueMontreal-Regular.woff2") format("woff2"), url("/seasons/fonts/PPNeueMontreal-Regular.woff2") format("woff2"); }
+@font-face { font-family: "PP Neue Montreal"; font-weight: 400; font-style: italic; font-display: swap; src: url("fonts/PPNeueMontreal-Italic.woff2") format("woff2"), url("/seasons/fonts/PPNeueMontreal-Italic.woff2") format("woff2"); }
+@font-face { font-family: "PP Neue Montreal"; font-weight: 500 700; font-style: normal; font-display: swap; src: url("fonts/PPNeueMontreal-Medium.woff2") format("woff2"), url("/seasons/fonts/PPNeueMontreal-Medium.woff2") format("woff2"); }
+
+/* =====================================================================
+   1. COLOUR: one palette per season, light and dark.
+   The page sets data-season on <html> to match the month being viewed.
+   ===================================================================== */
+:root {
+  --font-display: "PP Migra", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-body: "PP Neue Montreal", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --radius: 14px;
+  --pad: clamp(18px, 4.5vw, 40px);
+  --max: 1120px;
+  color-scheme: light;
+}
+
+html[data-season="summer"] { --bg:#fbf6f0; --surface:#fffdfa; --ink:#1d1712; --muted:#6b5e54; --line:#e8ddd2; --accent:#bf3a1d; --on-accent:#fff; --peak:#bf3a1d; --in:#e8957a; --shoulder:#f6d3c4; --tint:#fbe5da; }
+html[data-season="autumn"] { --bg:#f8f2e9; --surface:#fffcf6; --ink:#211a12; --muted:#6a5e50; --line:#e6dbcc; --accent:#9b4d13; --on-accent:#fff; --peak:#9b4d13; --in:#d69a63; --shoulder:#efdbc3; --tint:#f4e4d0; }
+html[data-season="winter"] { --bg:#f1f4f2; --surface:#fbfcfb; --ink:#131a17; --muted:#54615c; --line:#d8e0dc; --accent:#2a5a4c; --on-accent:#fff; --peak:#2a5a4c; --in:#7ea899; --shoulder:#cde0d8; --tint:#dde9e4; }
+html[data-season="spring"] { --bg:#f6f7f0; --surface:#fdfefa; --ink:#161b11; --muted:#59614e; --line:#dfe3d2; --accent:#45702a; --on-accent:#fff; --peak:#45702a; --in:#98bf73; --shoulder:#dae8c8; --tint:#e5eed9; }
+
+/* Dark mode: applied when <html data-theme="dark"> (set by the theme switch). */
+html[data-theme="dark"][data-season="summer"] { --bg:#17110e; --surface:#211915; --ink:#f7ede5; --muted:#b9a99b; --line:#3b2f28; --accent:#f28d6d; --on-accent:#1b0f0a; --peak:#f28d6d; --in:#a85d46; --shoulder:#4e3128; --tint:#2e1f19; }
+html[data-theme="dark"][data-season="autumn"] { --bg:#16120d; --surface:#201a13; --ink:#f5ece0; --muted:#b7a793; --line:#3a3024; --accent:#e5a564; --on-accent:#1a1008; --peak:#e5a564; --in:#9a6a3c; --shoulder:#4a3a28; --tint:#2c2217; }
+html[data-theme="dark"][data-season="winter"] { --bg:#0f1513; --surface:#17201d; --ink:#e8f1ed; --muted:#a2b3ac; --line:#2b3733; --accent:#86c2ad; --on-accent:#0b1512; --peak:#86c2ad; --in:#4f7a6c; --shoulder:#2b433b; --tint:#1b2925; }
+html[data-theme="dark"][data-season="spring"] { --bg:#11140f; --surface:#191e15; --ink:#eef3e6; --muted:#aab39c; --line:#2f3727; --accent:#addb83; --on-accent:#10170a; --peak:#addb83; --in:#668a48; --shoulder:#34442a; --tint:#1f2a18; }
+
+/* =====================================================================
+   2. BASE
+   ===================================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 16px/1.55 var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color .5s ease, color .5s ease;
+}
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--pad); padding-left: max(var(--pad), env(safe-area-inset-left)); padding-right: max(var(--pad), env(safe-area-inset-right)); }
+.page { overflow-x: clip; }
+button, input { font: inherit; color: inherit; }
+b, strong { font-weight: 500; }
+button { cursor: pointer; }
+a { color: var(--accent); text-underline-offset: 3px; }
+:focus-visible { outline: 2.5px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+.mono { font-family: var(--font-mono); font-size: 12.5px; letter-spacing: .02em; }
+.sr { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+.skip { position: absolute; left: 12px; top: -60px; background: var(--ink); color: var(--bg); padding: 10px 14px; border-radius: 8px; z-index: 50; }
+.skip:focus { top: 12px; }
+
+/* =====================================================================
+   3. MASTHEAD
+   ===================================================================== */
+.masthead { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; padding-top: max(22px, env(safe-area-inset-top)); padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.wordmark { margin: 0; font: 800 clamp(30px, 6vw, 42px)/1 var(--font-display); letter-spacing: -.02em; }
+.wordmark button { font-style: normal; }
+.wordmark button { background: none; border: 0; padding: 0; font: inherit; letter-spacing: inherit; text-align: left; }
+.kicker { margin: 0; color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; align-items: baseline; text-transform: uppercase; }
+.kicker button { background: none; border: 0; padding: 2px 0; color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit; }
+.kicker button:hover { color: var(--ink); }
+.wordmark { margin-right: auto !important; }
+/* ---- Rotary dials ----
+   A round disc with the options around its rim sits behind a half-donut
+   window. Clicking turns the disc clockwise to bring the next option to the
+   top, under the little marker. */
+.dials { display: flex; gap: 6px; align-self: center; }
+.dial { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: 0; padding: 4px 4px 2px; border-radius: 10px; color: var(--muted); -webkit-tap-highlight-color: transparent; }
+.dial-window { position: relative; width: 52px; height: 26px; overflow: hidden; border-radius: 26px 26px 0 0; background: var(--tint); }
+.dial-window::after { content: ""; position: absolute; inset: 0; border: 1.5px solid var(--ink); border-radius: inherit; pointer-events: none; opacity: .85; }
+.dial-disc { position: absolute; left: 0; top: 0; width: 52px; height: 52px; transition: transform .7s cubic-bezier(.3, 1.45, .55, 1); }
+.dial-slot { position: absolute; left: 50%; top: 50%; width: 13px; height: 13px; margin: -6.5px 0 0 -6.5px; transform: rotate(var(--a)) translateY(-16.5px); color: var(--muted); opacity: .5; transition: opacity .4s ease, color .4s ease; }
+.dial-slot.on { opacity: 1; color: var(--ink); }
+.dial-slot svg { display: block; width: 13px; height: 13px; }
+.dial-hub { position: absolute; left: 50%; bottom: -9px; width: 18px; height: 18px; margin-left: -9px; border-radius: 50%; background: var(--bg); box-shadow: 0 0 0 1.5px var(--ink); opacity: .95; }
+.dial-tick { position: absolute; top: 0; left: 50%; width: 2px; height: 3.5px; margin-left: -1px; border-radius: 0 0 2px 2px; background: var(--accent); z-index: 2; }
+.dial-label { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase; line-height: 1; min-width: 52px; text-align: center; }
+@media (hover: hover) { .dial:hover { color: var(--ink); } .dial:hover .dial-window { background: var(--shoulder); } }
+.dial:active .dial-window { transform: scale(.96); }
+@media (max-width: 640px) {
+  .dials { order: 1; }
+  .kicker { order: 2; flex-basis: 100%; }
+}
+.sep { opacity: .5; }
+
+/* =====================================================================
+   4. HERO: big month name and the summary line
+   ===================================================================== */
+.hero { padding-top: clamp(28px, 6vw, 64px); padding-bottom: clamp(18px, 3vw, 30px); }
+.greeting { margin: 0 0 18px; color: var(--muted); }
+.eyebrow { margin: 0; color: var(--accent); text-transform: uppercase; font-weight: 500; }
+.month-title { margin: 16px 0 10px; font: italic 900 clamp(68px, 18vw, 188px)/.86 var(--font-display); letter-spacing: -.035em; color: var(--accent); margin-left: -.04em; }
+.summary { margin: 14px 0 0; max-width: 30ch; font: 400 clamp(23px, 3.6vw, 34px)/1.18 var(--font-display); letter-spacing: -.01em; }
+.tagline { margin: 16px 0 0; color: var(--muted); max-width: 60ch; }
+.stats { margin: 18px 0 0; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.stats b { color: var(--ink); font-weight: 500; }
+
+/* =====================================================================
+   5. MONTH STRIP (sticky)
+   ===================================================================== */
+.monthbar { position: sticky; top: 0; z-index: 20; background: var(--bg); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); transition: background-color .5s ease; }
+.monthbar .wrap { display: flex; align-items: stretch; gap: 8px; padding-top: 8px; padding-bottom: 8px; }
+.today-btn { flex: 0 0 auto; border: 1px solid var(--ink); background: var(--ink); color: var(--bg); border-radius: 999px; padding: 0 14px; min-height: 44px; font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+.today-btn[aria-disabled="true"] { background: transparent; color: var(--muted); border-color: var(--line); cursor: default; }
+.months { flex: 1 1 auto; display: flex; gap: 4px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; margin: 0; padding: 0; list-style: none; }
+.months::-webkit-scrollbar { display: none; }
+.months li { flex: 1 0 54px; display: flex; }
+.month-btn { position: relative; flex: 1 1 auto; width: 100%; scroll-snap-align: center; min-height: 48px; border: 0; border-radius: 10px; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 5px; padding: 6px 4px 7px; font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+@media (hover: hover) { .month-btn:hover { background: var(--tint); color: var(--ink); } }
+.month-btn[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+.meter { width: 8px; height: 16px; display: flex; align-items: flex-end; }
+.meter i { display: block; width: 100%; border-radius: 2px; background: currentColor; opacity: .45; min-height: 2px; }
+.month-btn[aria-pressed="true"] .meter i { opacity: .8; }
+.month-btn.is-now::after { content: ""; position: absolute; top: 5px; right: 7px; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+.month-btn.is-now[aria-pressed="true"]::after { background: var(--on-accent); }
+
+/* =====================================================================
+   6. TOOLS: search, surprise, filters, legend
+   ===================================================================== */
+.tools { padding-top: 22px; padding-bottom: 6px; display: grid; gap: 16px; }
+.search-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.search { flex: 1 1 260px; position: relative; }
+.search input { -webkit-appearance: none; appearance: none; width: 100%; min-height: 48px; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 0 44px 0 46px; font-size: 16px; }
+.search input::placeholder { color: var(--muted); }
+.search input::-webkit-search-cancel-button, .search input::-webkit-search-decoration { -webkit-appearance: none; display: none; }
+.search input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--tint); }
+.search svg { position: absolute; left: 17px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--muted); pointer-events: none; }
+.clear { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; border: 0; border-radius: 50%; background: transparent; color: var(--muted); font-size: 20px; line-height: 1; }
+.clear:hover { background: var(--tint); color: var(--ink); }
+.btn { min-height: 48px; border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 0 18px; font-weight: 400; color: var(--muted); display: inline-flex; align-items: center; gap: 8px; }
+.btn:hover { border-color: var(--ink); color: var(--ink); }
+.filter-row { display: flex; align-items: center; justify-content: space-between; gap: 12px 24px; flex-wrap: wrap; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.chip-divider { width: 1px; height: 22px; background: var(--line); margin: 0 6px; }
+.chip { min-height: 40px; border: 1px solid transparent; background: transparent; border-radius: 999px; padding: 0 13px; font-size: 14.5px; color: var(--muted); display: inline-flex; align-items: center; }
+@media (hover: hover) { .chip:hover { color: var(--ink); border-color: var(--line); } }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+/* Two-way sort switch */
+.seg { display: inline-flex; padding: 3px; border: 1px solid var(--line); border-radius: 999px; flex: 0 0 auto; }
+.seg button { min-height: 36px; border: 0; background: transparent; border-radius: 999px; padding: 0 13px; font-family: var(--font-mono); font-size: 12px; letter-spacing: .02em; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--tint); color: var(--ink); font-weight: 500; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; color: var(--muted); margin: 0; padding: 0; list-style: none; font-size: 12px; }
+.legend li { display: inline-flex; align-items: center; gap: 6px; }
+.legend-out { background: none; border: 0; padding: 4px 0; color: inherit; font: inherit; letter-spacing: inherit; opacity: .55; display: inline-flex; align-items: center; gap: 7px; }
+.legend-out:hover { opacity: 1; }
+
+/* State markers: shape AND colour, so they work without colour vision */
+.dot { width: 11px; height: 11px; border-radius: 50%; flex: 0 0 auto; display: inline-block; }
+.dot.peak { background: var(--peak); }
+.dot.in { background: var(--in); }
+.dot.shoulder { background: transparent; box-shadow: inset 0 0 0 2px var(--in); }
+.dot.out { background: transparent; box-shadow: inset 0 0 0 1.5px var(--line); }
+
+/* Surprise card */
+.surprise { display: none; align-items: center; gap: 14px; padding: 14px 16px; border-radius: var(--radius); background: var(--tint); }
+.surprise.show { display: flex; animation: rise .45s ease both; }
+.surprise .em { font-size: 34px; line-height: 1; }
+.surprise p { margin: 0; flex: 1; }
+.surprise .x { border: 0; background: transparent; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; color: var(--muted); }
+.link-btn { border: 0; background: none; padding: 0; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; font-weight: 500; }
+
+/* =====================================================================
+   7. LISTS AND CARDS
+   ===================================================================== */
+main { padding-bottom: 40px; }
+.notice { margin: 18px 0 0; padding: 14px 16px; border-left: 3px solid var(--accent); background: var(--tint); border-radius: 0 10px 10px 0; }
+.notice p { margin: 0; }
+.notice p + p { margin-top: 6px; }
+.cat { margin-top: clamp(30px, 5vw, 48px); }
+.cat-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--line); padding-bottom: 8px; margin-bottom: 14px; }
+.cat-head h2 { margin: 0; font: 800 clamp(32px, 5.4vw, 48px)/1 var(--font-display); letter-spacing: -.02em; }
+.kind-tag { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+.kind-tag.animal { border-style: dashed; }
+.cat-head .count { margin-left: auto; color: var(--muted); }
+.caveat { margin: -4px 0 14px; color: var(--muted); font-size: 14.5px; max-width: 70ch; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 10px; }
+.card { position: relative; text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius); padding: 14px 14px 12px; min-height: 132px; display: flex; flex-direction: column; gap: 4px; transition: transform .2s ease, border-color .2s ease; animation: rise .5s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--i, 0) * 22ms); }
+@media (hover: hover) { .card:hover { border-color: var(--ink); transform: translateY(-2px); } }
+.card .em { font-size: 28px; line-height: 1; margin-bottom: 6px; }
+.card .nm { font-weight: 500; line-height: 1.25; }
+.card .st { display: flex; align-items: center; flex-wrap: wrap; gap: 5px 8px; font-size: 13px; color: var(--muted); line-height: 1.3; }
+.card .extra { font-size: 13.5px; color: var(--muted); line-height: 1.35; margin-top: 4px; }
+.card.is-peak { border-color: var(--peak); box-shadow: inset 0 4px 0 var(--peak); }
+
+/* Status badges: Peak is solid, In season is tinted, Shoulder is dashed, Out is faint */
+.badge { display: inline-flex; align-items: center; font-family: var(--font-mono); font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .05em; padding: 3px 8px; border-radius: 999px; line-height: 1.2; white-space: nowrap; border: 1px solid transparent; }
+.badge.peak { background: var(--peak); color: var(--on-accent); }
+.badge.in { background: var(--tint); color: var(--ink); border-color: var(--in); }
+.badge.shoulder { color: var(--ink); border: 1px dashed var(--in); }
+.badge.out { color: var(--muted); border: 1px dashed var(--line); }
+.when { white-space: nowrap; }
+.when.up { color: var(--accent); font-weight: 500; }
+.card .flag { position: absolute; top: 12px; right: 12px; font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.card.is-out { border-style: dashed; }
+.card.is-out .em, .card.is-out .spark { opacity: .45; }
+.spark { display: flex; align-items: flex-end; gap: 2px; height: 16px; margin-top: auto; padding-top: 10px; }
+.spark i { flex: 1; background: var(--line); border-radius: 1.5px; min-height: 2px; }
+.spark i.peak { background: var(--peak); height: 100%; }
+.spark i.in { background: var(--in); height: 62%; }
+.spark i.shoulder { background: var(--shoulder); height: 34%; }
+.spark i.out { height: 14%; }
+.spark i.sel { outline: 1.5px solid var(--ink); outline-offset: 1px; }
+.empty { margin-top: 36px; padding: 28px; border: 1px dashed var(--line); border-radius: var(--radius); text-align: center; }
+.empty p { margin: 0; font: italic 400 clamp(22px, 3.4vw, 28px)/1.3 var(--font-display); }
+.empty .mono { margin-top: 10px; color: var(--muted); font-family: var(--font-mono); font-size: 12.5px; }
+
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.hero > * { animation: rise .7s cubic-bezier(.2,.7,.2,1) both; }
+.hero > :nth-child(2) { animation-delay: .06s; }
+.hero > :nth-child(3) { animation-delay: .12s; }
+.hero > :nth-child(4) { animation-delay: .18s; }
+.hero > :nth-child(5) { animation-delay: .24s; }
+.hero > :nth-child(6) { animation-delay: .30s; }
+
+/* =====================================================================
+   8. DETAIL VIEW (dialog)
+   ===================================================================== */
+dialog.detail { width: min(680px, calc(100% - 20px)); max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px); border: 0; padding: 0; border-radius: 20px; background: var(--surface); color: var(--ink); box-shadow: 0 30px 80px rgba(0,0,0,.25); overflow: hidden; }
+dialog.detail[open] { animation: rise .35s cubic-bezier(.2,.7,.2,1) both; }
+dialog.detail::backdrop { background: rgba(15,12,10,.45); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
+.sheet { max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px); overflow-y: auto; overscroll-behavior: contain; padding: 26px clamp(20px, 4vw, 34px) 30px; }
+.sheet-close { position: sticky; top: 0; float: right; margin: -10px -14px 0 0; width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--surface); font-size: 24px; line-height: 1; color: var(--muted); z-index: 2; }
+.sheet-close:hover { background: var(--tint); color: var(--ink); }
+.d-em { font-size: 46px; line-height: 1; }
+.d-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 14px; }
+.d-name { margin: 10px 0 4px; font: italic 800 clamp(40px, 8vw, 62px)/.95 var(--font-display); letter-spacing: -.025em; }
+.d-note { margin: 10px 0 0; color: var(--muted); max-width: 56ch; }
+.d-summary { margin: 22px 0 4px; font: 400 clamp(21px, 3.4vw, 26px)/1.22 var(--font-display); }
+.d-now { margin: 0; color: var(--muted); }
+.chart { list-style: none; margin: 18px 0 6px; padding: 0; display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; align-items: end; }
+.chart li { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.chart .bar { width: 100%; height: 64px; display: flex; align-items: flex-end; }
+.chart .bar i { display: block; width: 100%; border-radius: 4px 4px 2px 2px; background: var(--line); height: 8%; }
+.chart .peak .bar i { background: var(--peak); height: 100%; }
+.chart .in .bar i { background: var(--in); height: 64%; }
+.chart .shoulder .bar i { background: var(--shoulder); height: 34%; }
+.chart .m { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; color: var(--muted); padding: 2px 0; border-radius: 4px; width: 100%; text-align: center; }
+.chart .sel .m { background: var(--ink); color: var(--bg); }
+.chart .now .m { box-shadow: inset 0 -2px 0 var(--accent); }
+.chart .peak .m { color: var(--ink); font-weight: 500; }
+.chart .sel.peak .m { color: var(--bg); }
+.m-rest { display: none; }
+@media (min-width: 520px) { .m-rest { display: inline; } }
+.chart-key { display: flex; gap: 14px; flex-wrap: wrap; color: var(--muted); margin: 6px 0 0; padding: 0; list-style: none; }
+.chart-key li { display: inline-flex; gap: 6px; align-items: center; }
+.d-section { margin-top: 26px; }
+.d-section h3 { margin: 0 0 10px; font-family: var(--font-mono); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.buy { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.buy li { display: grid; grid-template-columns: 96px 1fr; gap: 12px; align-items: baseline; padding: 10px 12px; border-radius: 10px; background: var(--bg); }
+.buy .k { font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+.buy .k.good { color: var(--accent); font-weight: 500; }
+.callout { margin: 0; padding: 12px 14px; border-radius: 10px; background: var(--tint); }
+.callout + .callout { margin-top: 8px; }
+.rating { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; padding: 4px 9px; border-radius: 999px; border: 1px solid currentColor; }
+.rating.better { color: #2f7a3a; }
+.rating.eatless { color: #9a6a00; }
+.rating.sayno { color: #b3261e; }
+html[data-theme="dark"] { color-scheme: dark; }
+html[data-theme="dark"] .rating.better { color: #8fd49a; } html[data-theme="dark"] .rating.eatless { color: #f0c25e; } html[data-theme="dark"] .rating.sayno { color: #ff9b8f; }
+.idea { font: italic 400 22px/1.3 var(--font-display); margin: 0; }
+
+/* =====================================================================
+   9. FOOTER AND THE LITTLE SECRETS
+   ===================================================================== */
+footer { border-top: 1px solid var(--line); padding-top: 26px; padding-bottom: max(40px, env(safe-area-inset-bottom)); color: var(--muted); font-size: 14.5px; }
+footer p { margin: 0 0 8px; max-width: 72ch; }
+.psst { background: none; border: 0; padding: 6px 0; color: var(--muted); opacity: .5; font-family: var(--font-mono); font-size: 12px; letter-spacing: .1em; }
+.psst:hover, .psst[aria-expanded="true"] { opacity: 1; color: var(--ink); }
+.secrets { display: none; margin-top: 10px; padding: 16px 18px; border: 1px dashed var(--line); border-radius: var(--radius); max-width: 560px; }
+.secrets.show { display: block; animation: rise .4s ease both; }
+.secrets h2 { margin: 0 0 8px; font: 800 24px/1.1 var(--font-display); color: var(--ink); }
+.secrets ol { margin: 0; padding-left: 20px; }
+.secrets li { margin: 4px 0; }
+.secrets li.found { color: var(--ink); }
+.secrets li.found::marker { content: "✓  "; color: var(--accent); }
+
+.toast { position: fixed; left: 50%; bottom: max(18px, env(safe-area-inset-bottom)); transform: translate(-50%, 20px); opacity: 0; pointer-events: none; z-index: 60; max-width: min(520px, calc(100% - 28px)); background: var(--ink); color: var(--bg); padding: 12px 18px; border-radius: 14px; font-size: 15px; transition: opacity .3s ease, transform .3s ease; text-align: center; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+.rain { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 70; }
+.rain span { position: absolute; top: -60px; font-size: 30px; animation: fall linear forwards; will-change: transform; }
+@keyframes fall { to { transform: translateY(calc(100vh + 120px)) rotate(var(--r, 180deg)); } }
+.shout { position: fixed; inset: 0; display: grid; place-items: center; pointer-events: none; z-index: 71; font: italic 900 clamp(56px, 14vw, 150px)/1 var(--font-display); color: var(--accent); text-align: center; padding: 20px; animation: shout 2.6s ease both; text-shadow: 0 2px 30px var(--bg); }
+@keyframes shout { 0% { opacity: 0; transform: scale(.9); } 15%, 75% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.04); } }
+.page { transition: transform .9s cubic-bezier(.6,0,.3,1); }
+html.flipped .page { transform: rotate(180deg); }
+
+/* =====================================================================
+   10. RESPONSIVE + REDUCED MOTION
+   ===================================================================== */
+@media (min-width: 820px) {
+  .months { overflow: visible; }
+  .months li { flex: 1 1 0; min-width: 0; }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+}
+@media (max-width: 819px) {
+  .search-row { flex-wrap: nowrap; }
+  .search { flex: 1 1 auto; min-width: 0; }
+  #surprise-btn { width: 48px; padding: 0; justify-content: center; flex: 0 0 auto; font-size: 20px; }
+  #surprise-btn .lbl { display: none; }
+  .filter-row { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; -webkit-mask-image: linear-gradient(to right, #000 85%, transparent); mask-image: linear-gradient(to right, #000 85%, transparent); margin: 0 calc(-1 * var(--pad)); padding: 0 var(--pad); -webkit-overflow-scrolling: touch; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip { flex: 0 0 auto; }
+  .seg { justify-self: start; }
+}
+@media (max-width: 420px) {
+  .grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .card { padding: 12px 12px 10px; min-height: 124px; }
+  .buy li { grid-template-columns: 1fr; gap: 2px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-delay: 0ms !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+  .card:hover { transform: none; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#list">Skip to the list</a>
+<div class="page" id="page">
+
+  <header class="wrap masthead">
+    <h1 class="wordmark"><button type="button" id="title">Seasons</button></h1>
+    <p class="kicker mono">
+      <span>Melbourne · Naarm</span><span class="sep">/</span>
+      <button type="button" id="coords" title="Where on Earth are we?">37.8° S</button><span class="sep">/</span>
+      <span id="clock"></span>
+    </p>
+    <!-- Two rotary dials: light/dark mode, and the colour palette. Built by script. -->
+    <div class="dials">
+      <button type="button" class="dial" id="theme-dial"></button>
+      <button type="button" class="dial" id="palette-dial"></button>
+    </div>
+  </header>
+
+  <section class="wrap hero" aria-labelledby="month-title">
+    <p class="greeting mono" id="greeting"></p>
+    <p class="eyebrow mono" id="eyebrow"></p>
+    <h2 class="month-title" id="month-title"></h2>
+    <p class="summary" id="summary"></p>
+    <p class="tagline" id="tagline"></p>
+    <p class="stats mono" id="stats"></p>
+  </section>
+
+  <nav class="monthbar" aria-label="Choose a month">
+    <div class="wrap">
+      <button type="button" class="today-btn" id="today">Today</button>
+      <ul class="months" id="months"></ul>
+    </div>
+  </nav>
+
+  <section class="wrap tools" aria-label="Search and filters">
+    <div class="search-row">
+      <div class="search" role="search">
+        <label for="q" class="sr">Search foods</label>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Search foods">
+        <button type="button" class="clear" id="clear" aria-label="Clear search" hidden>×</button>
+      </div>
+      <button type="button" class="btn" id="surprise-btn" aria-label="Surprise me" title="Surprise me"><span aria-hidden="true">🎲</span><span class="lbl" aria-hidden="true">Surprise me</span></button>
+    </div>
+    <div class="surprise" id="surprise" aria-live="polite"></div>
+
+    <!-- Category filters on the left, sort switch on the right -->
+    <div class="filter-row">
+      <div class="chips" id="chips" role="group" aria-label="Filter by category"></div>
+      <div class="seg" role="group" aria-label="Sort the list">
+        <button type="button" data-sort="category">Category</button>
+        <button type="button" data-sort="season">Most in season</button>
+      </div>
+    </div>
+
+    <!-- The key. The faint “Out” at the end is a secret (contrarian mode). -->
+    <ul class="legend mono" aria-label="Key">
+      <li title="At its best, cheapest and tastiest"><span class="badge peak">Peak</span><span class="sr">: at its best, cheapest and tastiest</span></li>
+      <li title="Good and easy to find"><span class="badge in">In season</span><span class="sr">: good and easy to find</span></li>
+      <li title="Just starting or just finishing"><span class="badge shoulder">Shoulder</span><span class="sr">: just starting or finishing</span></li>
+      <li><span aria-hidden="true">↗</span><span class="sr">Up arrow:</span> heading for peak</li>
+      <li><span aria-hidden="true">↘</span><span class="sr">Down arrow:</span> fading</li>
+      <li><button type="button" class="legend-out" id="legend-out" aria-label="Out of season"><span class="badge out">Out</span></button></li>
+    </ul>
+  </section>
+
+  <main class="wrap" id="list" tabindex="-1"></main>
+  <p class="sr" id="announce" aria-live="polite"></p>
+
+  <footer class="wrap">
+    <p><strong>About the data.</strong> This is a guide for Melbourne and Victoria. Growing seasons shift a little each year with the weather, so trust your greengrocer and fishmonger over any chart, this one included.</p>
+    <p>Compiled from CERES Fair Food, Queen Victoria Market, Environment Victoria, South Melbourne Market, the Victorian Fisheries Authority, AFMA, Chestnuts Australia, the Victorian Cherry Association and the GoodFish sustainable seafood guide.</p>
+    <p><button type="button" class="psst" id="psst" aria-expanded="false" aria-controls="secrets">psst…</button></p>
+    <div class="secrets" id="secrets"></div>
+  </footer>
+</div>
+
+<dialog class="detail" id="detail" aria-labelledby="d-name">
+  <div class="sheet">
+    <button type="button" class="sheet-close" id="detail-close" aria-label="Close">×</button>
+    <div id="detail-body"></div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+'use strict';
+
+/* =====================================================================
+   ███  THE DATA  ███  (edit this block; nothing else needs to change)
+   =====================================================================
+
+   HOW EACH FOOD IS WRITTEN
+   ------------------------
+   {
+     name:     'Asparagus',          // what people see
+     cat:      'veg',                // fruit | veg | herbs | seafood | meat | poultry
+     emoji:    '🌱',
+     peak:     'Oct Nov',            // months at its best
+     season:   'Sep Dec',            // good and easy to find
+     shoulder: 'Aug Jan Feb Mar',    // just starting or finishing
+                                      // any month not listed = out of season
+                                      // write 'all' to fill every month not listed elsewhere
+     note:     'One line: flavour, what to look for, or how to store it.',
+     idea:     'One line used by the “Surprise me” button.',
+
+     // Optional extras:
+     aka:      'other names people might search for',
+     group:    'stone',              // lets the summary say “stone fruit is arriving”
+     hero:     true,                 // a headline item the summary prefers to mention
+     proper:   true,                 // keep the capital letter mid-sentence (e.g. King George whiting)
+     origin:   'Mostly QLD',         // shown when it isn’t a Victorian crop
+     rating:   'better',             // seafood only: better | eatless | sayno (GoodFish traffic lights)
+     ratingNote: 'Short sustainability note.',
+     recipes:  [ { title: 'Asparagus with brown butter', url: 'https://…' } ]
+                                      // reserved for later: add links here, no other changes needed
+   }
+
+   Month names only need their first three letters (Jan, Feb, Mar…).
+   ===================================================================== */
+
+const CATEGORIES = [
+  { id: 'fruit',   label: 'Fruit',           kind: 'produce' },
+  { id: 'veg',     label: 'Vegetables',      kind: 'produce' },
+  { id: 'herbs',   label: 'Herbs & nuts',    kind: 'produce' },
+  { id: 'seafood', label: 'Fish & seafood',  kind: 'animal'  },
+  { id: 'meat',    label: 'Meat',            kind: 'animal'  },
+  { id: 'poultry', label: 'Poultry & eggs',  kind: 'animal'  }
+];
+
+// Families of foods the summary line can talk about as a group.
+const GROUPS = {
+  stone:    { label: 'stone fruit',      plural: false },
+  citrus:   { label: 'citrus',           plural: false },
+  berries:  { label: 'berries',          plural: true  },
+  pome:     { label: 'apples and pears', plural: true  },
+  melons:   { label: 'melons',           plural: true  },
+  brassica: { label: 'the brassicas',    plural: true  },
+  roots:    { label: 'root veg',         plural: false },
+  nuts:     { label: 'new-season nuts',  plural: true  },
+  oysters:  { label: 'oysters',          plural: true  }
+};
+
+const FOODS = [
+
+  /* ---------------------------------- FRUIT ---------------------------------- */
+  { name: 'Apples', cat: 'fruit', emoji: '🍎', group: 'pome', hero: true, aka: 'pink lady granny smith royal gala fuji',
+    peak: 'Mar Apr May', season: 'Feb Jun Jul Aug', shoulder: 'Jan Sep Oct',
+    note: 'Victorian apples are picked February to May, then cold-stored. New-season fruit is crisp; by late spring it turns floury.',
+    idea: 'Slice thin into a fennel and walnut salad with sharp cheddar.' },
+  { name: 'Packham pears', cat: 'fruit', emoji: '🍐', group: 'pome', hero: true, proper: true, aka: 'pear',
+    peak: 'Apr May Jun', season: 'Mar Jul Aug Sep', shoulder: 'Feb Oct Nov',
+    note: 'The Goulburn Valley grows about 90% of Australia’s pears, and Packhams are most of them. Ripen on the bench; ready when the neck gives.',
+    idea: 'Poach in red wine with a bay leaf and serve with thick cream.' },
+  { name: 'Williams pears', cat: 'fruit', emoji: '🍐', group: 'pome', proper: true, aka: 'bartlett pear',
+    peak: 'Feb Mar', season: 'Apr', shoulder: 'Jan May',
+    note: 'The first pears of the year, buttery and perfumed. They turn green to yellow as they ripen, then go quickly.',
+    idea: 'Eat over the sink with a wedge of blue cheese.' },
+  { name: 'Nashi', cat: 'fruit', emoji: '🍐', group: 'pome', aka: 'asian pear nashi pear',
+    peak: 'Mar Apr', season: 'Feb May', shoulder: 'Jun Jul',
+    note: 'Crisp, juicy and eaten firm. They’re picked ripe, so don’t wait for them to soften.',
+    idea: 'Matchstick into a slaw with cabbage, mint and lime.' },
+  { name: 'Quinces', cat: 'fruit', emoji: '🍐', group: 'pome', aka: 'quince',
+    peak: 'Apr May', season: 'Mar Jun', shoulder: 'Jul',
+    note: 'Rock hard and astringent raw. Hours of slow cooking turn them perfumed and ruby red.',
+    idea: 'Slow-roast with sugar and lemon until they blush, then make a tart.' },
+  { name: 'Feijoas', cat: 'fruit', emoji: '🟢', aka: 'feijoa pineapple guava',
+    peak: 'Apr', season: 'Mar May', shoulder: 'Jun',
+    note: 'A short autumn crop that arrives all at once. Ripe when they drop and give slightly; scoop out the flesh.',
+    idea: 'Halve, scoop and eat with a teaspoon, or stew into a crumble.' },
+  { name: 'Persimmons', cat: 'fruit', emoji: '🟠', aka: 'persimmon fuyu hachiya',
+    peak: 'Apr May', season: 'Jun', shoulder: 'Mar Jul',
+    note: 'Fuyu types are eaten crisp like an apple. Astringent Hachiya types must go jelly-soft first.',
+    idea: 'Slice crisp fuyu with prosciutto, rocket and balsamic.' },
+  { name: 'Pomegranates', cat: 'fruit', emoji: '🔴', aka: 'pomegranate',
+    peak: 'Apr May', season: 'Mar Jun', shoulder: 'Jul Aug',
+    note: 'Heavy for its size means juicy. Whack the halves with a wooden spoon to free the seeds.',
+    idea: 'Scatter over hummus with mint and good olive oil.' },
+  { name: 'Figs', cat: 'fruit', emoji: '🟣', aka: 'fig',
+    peak: 'Feb Mar', season: 'Jan Apr', shoulder: 'Dec May',
+    note: 'They don’t ripen after picking. Buy soft, slightly droopy fruit and eat within a day or two.',
+    idea: 'Tear over burrata with honey and torn basil.' },
+  { name: 'Cherries', cat: 'fruit', emoji: '🍒', group: 'stone', hero: true, aka: 'cherry',
+    peak: 'Dec', season: 'Nov Jan', shoulder: 'Feb',
+    note: 'Roughly a 100-day season that starts in November. Choose firm, glossy fruit with green stems.',
+    idea: 'Eat cold from the fridge, or pit and macerate with a splash of kirsch.' },
+  { name: 'Apricots', cat: 'fruit', emoji: '🍑', group: 'stone', aka: 'apricot',
+    peak: 'Dec Jan', season: '', shoulder: 'Nov Feb',
+    note: 'The first stone fruit of summer and the shortest season. Look for fragrant fruit with no green at the shoulder.',
+    idea: 'Halve, grill cut-side down and serve with yoghurt and pistachios.' },
+  { name: 'Peaches', cat: 'fruit', emoji: '🍑', group: 'stone', hero: true, aka: 'peach white peach flat peach',
+    peak: 'Jan Feb', season: 'Dec Mar', shoulder: 'Nov Apr',
+    note: 'Smell is the best test. They soften after picking but won’t get any sweeter, so buy them fragrant.',
+    idea: 'Slice into a tomato salad with basil and a pinch of salt.' },
+  { name: 'Nectarines', cat: 'fruit', emoji: '🍑', group: 'stone', aka: 'nectarine',
+    peak: 'Jan Feb', season: 'Dec Mar', shoulder: 'Nov Apr',
+    note: 'Smooth-skinned peaches, more or less. White flesh is sweeter; yellow is tangier.',
+    idea: 'Grill wedges and toss with rocket, prosciutto and torn mozzarella.' },
+  { name: 'Plums', cat: 'fruit', emoji: '🟣', group: 'stone', aka: 'plum',
+    peak: 'Jan Feb', season: 'Dec Mar', shoulder: 'Nov Apr',
+    note: 'Early Japanese varieties come first; the dark, dense European types (better for baking) arrive later.',
+    idea: 'Bake into a frangipane tart, or roast with star anise.' },
+  { name: 'Strawberries', cat: 'fruit', emoji: '🍓', group: 'berries', hero: true, aka: 'strawberry',
+    peak: 'Nov Dec', season: 'Oct Jan Feb Mar', shoulder: 'Sep Apr May',
+    note: 'Yarra Valley and Mornington Peninsula fruit peaks in late spring, with a smaller autumn flush. Red right to the stem.',
+    idea: 'Quarter, sugar lightly and leave 20 minutes before spooning over ice-cream.' },
+  { name: 'Raspberries', cat: 'fruit', emoji: '🍓', group: 'berries', aka: 'raspberry',
+    peak: 'Jan Feb', season: 'Dec Mar', shoulder: 'Nov Apr',
+    note: 'Fragile and short-lived. Check the bottom of the punnet for juice stains and don’t wash until you eat.',
+    idea: 'Crush into whipped cream with broken meringue for an instant mess.' },
+  { name: 'Blueberries', cat: 'fruit', emoji: '🫐', group: 'berries', aka: 'blueberry',
+    peak: 'Jan Feb', season: 'Dec Mar', shoulder: 'Nov Apr',
+    note: 'Off-season punnets come from interstate or overseas. Look for a dusty silver bloom.',
+    idea: 'Bake into a lemon-yoghurt loaf, or freeze some for winter.' },
+  { name: 'Blackberries', cat: 'fruit', emoji: '🫐', group: 'berries', aka: 'blackberry bramble',
+    peak: 'Feb Mar', season: 'Jan Apr', shoulder: 'Dec May',
+    note: 'Wild brambles are a declared weed and often sprayed, so buy cultivated fruit or forage only where it’s safe.',
+    idea: 'Stew with apple under a crumble lid.' },
+  { name: 'Mulberries', cat: 'fruit', emoji: '🫐', group: 'berries', aka: 'mulberry',
+    peak: 'Dec', season: '', shoulder: 'Nov Jan',
+    note: 'One of the first fruits of the Victorian summer and rarely sold. You’ll spot a neighbour’s tree by the purple footpath.',
+    idea: 'Eat by the handful and accept the stained fingers.' },
+  { name: 'Grapes', cat: 'fruit', emoji: '🍇', aka: 'grape table grapes',
+    peak: 'Feb Mar Apr', season: 'Jan May', shoulder: 'Dec Jun',
+    note: 'Mostly from Sunraysia around Mildura. Stems should be green and flexible, not brown and brittle.',
+    idea: 'Roast on the vine with olive oil and serve with cheese.' },
+  { name: 'Watermelon', cat: 'fruit', emoji: '🍉', group: 'melons', aka: 'melon',
+    peak: 'Jan Feb', season: 'Dec Mar', shoulder: 'Nov Apr',
+    note: 'Pick one that’s heavy for its size with a creamy yellow field spot.',
+    idea: 'Cube with feta, mint and lime.' },
+  { name: 'Rockmelon', cat: 'fruit', emoji: '🍈', group: 'melons', aka: 'cantaloupe melon',
+    peak: 'Jan Feb', season: 'Dec Mar', shoulder: 'Nov Apr',
+    note: 'Should smell sweet at the stem end and give slightly when pressed.',
+    idea: 'Wrap wedges in prosciutto. It’s a cliché because it works.' },
+  { name: 'Passionfruit', cat: 'fruit', emoji: '🟣', origin: 'Mostly QLD and northern NSW',
+    peak: 'Jan Feb Mar', season: 'Dec Apr', shoulder: 'Nov May',
+    note: 'Wrinkly skin means ripe, not old.',
+    idea: 'Spoon over pavlova. Non-negotiable.' },
+  { name: 'Mangoes', cat: 'fruit', emoji: '🥭', hero: true, aka: 'mango', origin: 'QLD, NT and WA',
+    peak: 'Dec Jan', season: 'Nov Feb', shoulder: 'Oct Mar',
+    note: 'Not a Victorian crop, but the arrival of the first trays is a summer ritual. Smell the stem end.',
+    idea: 'Cheeks straight from the fridge, eaten over the sink.' },
+  { name: 'Navel oranges', cat: 'fruit', emoji: '🍊', group: 'citrus', hero: true, aka: 'orange',
+    peak: 'Jun Jul Aug', season: 'May Sep', shoulder: 'Apr Oct',
+    note: 'The seedless winter orange, mostly from the Murray Valley. Heavier fruit holds more juice.',
+    idea: 'Slice into rounds with fennel, black olives and red onion.' },
+  { name: 'Valencia oranges', cat: 'fruit', emoji: '🍊', group: 'citrus', proper: true, aka: 'orange juicing',
+    peak: 'Dec Jan Feb', season: 'Nov Mar', shoulder: 'Oct Apr',
+    note: 'The summer juicing orange. A green tinge at the stem is regreening in the heat, not unripeness.',
+    idea: 'Juice a bagful and freeze it in ice-cube trays.' },
+  { name: 'Blood oranges', cat: 'fruit', emoji: '🍊', group: 'citrus', hero: true, aka: 'blood orange moro',
+    peak: 'Aug Sep', season: 'Jul Oct', shoulder: 'Jun Nov',
+    note: 'Cold nights deepen the red. Flesh colour varies a lot, even within one box.',
+    idea: 'Segment over burrata, or make a syrup for spritzes.' },
+  { name: 'Mandarins', cat: 'fruit', emoji: '🍊', group: 'citrus', hero: true, aka: 'mandarin imperial afourer murcott',
+    peak: 'May Jun Jul', season: 'Apr Aug Sep', shoulder: 'Mar Oct',
+    note: 'Imperials start in autumn, then Afourers and Murcotts carry the season into spring.',
+    idea: 'Keep a bowl on the bench. That’s the whole recipe.' },
+  { name: 'Lemons', cat: 'fruit', emoji: '🍋', group: 'citrus', aka: 'lemon meyer',
+    peak: 'Jun Jul Aug Sep', season: 'all',
+    note: 'Around all year, but juiciest and cheapest in winter. Meyer lemons are sweeter and thinner-skinned.',
+    idea: 'Salt-preserve a jar now and use it all summer.' },
+  { name: 'Limes', cat: 'fruit', emoji: '🍋', group: 'citrus', aka: 'lime tahitian', origin: 'Mostly QLD',
+    peak: 'Apr May Jun', season: 'Mar Jul Aug', shoulder: 'Feb Sep Oct',
+    note: 'Tahitian limes are mostly grown up north. They get scarce and pricey in summer, just when you want them.',
+    idea: 'Zest and juice into a quick lime pickle.' },
+  { name: 'Finger limes', cat: 'fruit', emoji: '🥒', group: 'citrus', aka: 'native lime caviar lime', origin: 'Native to QLD and NSW rainforests',
+    peak: 'Feb Mar Apr', season: 'Jan May Jun', shoulder: 'Dec Jul',
+    note: 'Native citrus with caviar-like pearls. Firm, unwrinkled fruit keeps for weeks in the fridge.',
+    idea: 'Squeeze the pearls over freshly shucked oysters.' },
+  { name: 'Grapefruit', cat: 'fruit', emoji: '🍊', group: 'citrus', aka: 'ruby',
+    peak: 'Jun Jul Aug', season: 'May Sep', shoulder: 'Apr Oct',
+    note: 'Ruby varieties are sweeter. Thin skin and a heavy feel mean juicy fruit.',
+    idea: 'Brûlée halves under the grill with brown sugar.' },
+  { name: 'Kiwifruit', cat: 'fruit', emoji: '🥝', aka: 'kiwi',
+    peak: 'Jun Jul Aug', season: 'May Sep', shoulder: 'Apr Oct',
+    note: 'Ripens off the vine. Store with an apple to speed things up; ready when it gives like a ripe avocado.',
+    idea: 'Halve and scoop out with a teaspoon, like a soft-boiled egg.' },
+  { name: 'Rhubarb', cat: 'fruit', emoji: '🌿',
+    peak: 'Jul Aug Sep', season: 'Apr May Jun Oct Nov', shoulder: 'Dec Jan Feb Mar',
+    note: 'Technically a vegetable. Buy crisp, glossy stalks and never eat the leaves, which are toxic.',
+    idea: 'Roast with orange zest and sugar, then swirl through yoghurt.' },
+  { name: 'Avocados', cat: 'fruit', emoji: '🥑', aka: 'avocado avo hass', origin: 'QLD, WA, NSW and the Murray',
+    peak: 'Sep Oct Nov', season: 'all',
+    note: 'Supply moves around the country, so they’re always about. Spring Hass is the creamy benchmark.',
+    idea: 'On toast with lemon, chilli and salt. Melbourne would riot otherwise.' },
+  { name: 'Bananas', cat: 'fruit', emoji: '🍌', aka: 'banana', origin: 'Far north Queensland',
+    season: 'all',
+    note: 'Always around and never really ‘in season’ down here. Brown spots mean sweeter, not spoiled.',
+    idea: 'Freeze overripe ones for banana bread later.' },
+  { name: 'Loquats', cat: 'fruit', emoji: '🟠', aka: 'loquat',
+    peak: 'Nov', season: '', shoulder: 'Oct Dec',
+    note: 'A spring backyard fruit you’ll rarely see in shops. Tart, sweet and apricot-ish; peel and pit.',
+    idea: 'Poach in vanilla syrup and serve over yoghurt.' },
+
+  /* -------------------------------- VEGETABLES -------------------------------- */
+  { name: 'Asparagus', cat: 'veg', emoji: '🌱', hero: true, aka: 'spears',
+    peak: 'Oct Nov', season: 'Sep Dec', shoulder: 'Aug Jan Feb Mar',
+    note: 'Koo Wee Rup, an hour south-east of Melbourne, grows over 90% of Australia’s crop. Look for tight tips and glossy spears.',
+    idea: 'Blanch for a minute, then dress with butter, lemon and a soft egg.' },
+  { name: 'Globe artichokes', cat: 'veg', emoji: '🌿', hero: true, aka: 'artichoke',
+    peak: 'Oct', season: 'Sep Nov', shoulder: 'Aug Dec',
+    note: 'Tight, heavy heads that squeak when squeezed are the freshest.',
+    idea: 'Braise with lemon, garlic, mint and white wine, Roman-style.' },
+  { name: 'Broad beans', cat: 'veg', emoji: '🫘', hero: true, aka: 'fava beans',
+    peak: 'Oct', season: 'Sep Nov', shoulder: 'Aug Dec',
+    note: 'Young pods hold sweet beans that don’t need double-peeling. Big, late beans go starchy.',
+    idea: 'Smash with mint, lemon, pecorino and olive oil, then pile on toast.' },
+  { name: 'Peas', cat: 'veg', emoji: '🟢', aka: 'garden peas pea',
+    peak: 'Oct Nov', season: 'Sep Dec', shoulder: 'Aug Jan',
+    note: 'Sugar starts turning to starch once they’re picked. Buy crisp, bright pods and cook them the same day.',
+    idea: 'Cook briefly with butter, spring onion and shredded lettuce.' },
+  { name: 'Snow peas', cat: 'veg', emoji: '🟢', aka: 'sugar snap peas mangetout',
+    peak: 'Sep Oct Nov', season: 'Aug Dec', shoulder: 'Jul Jan',
+    note: 'They should snap cleanly. Sugar snaps are plumper and sweeter.',
+    idea: 'Stir-fry hot with garlic, ginger and a splash of soy.' },
+  { name: 'Green beans', cat: 'veg', emoji: '🫘', aka: 'beans french beans runner',
+    peak: 'Dec Jan Feb', season: 'Nov Mar Apr', shoulder: 'Oct May',
+    note: 'Fresh beans snap rather than bend, with velvety skin and no bulging seeds.',
+    idea: 'Blanch and toss with toasted almonds, brown butter and lemon.' },
+  { name: 'Zucchini', cat: 'veg', emoji: '🥒', aka: 'courgette',
+    peak: 'Dec Jan Feb', season: 'Nov Mar', shoulder: 'Oct Apr',
+    note: 'Smaller is sweeter and less watery. Glossy, firm skin with no soft spots.',
+    idea: 'Shave raw into ribbons with lemon, mint and parmesan.' },
+  { name: 'Zucchini flowers', cat: 'veg', emoji: '🌼',
+    peak: 'Dec Jan', season: 'Nov Feb', shoulder: 'Oct Mar',
+    note: 'They wilt within a day. Buy them with baby zucchini attached and use them straight away.',
+    idea: 'Stuff with ricotta and lemon zest, then shallow fry.' },
+  { name: 'Tomatoes', cat: 'veg', emoji: '🍅', hero: true, aka: 'tomato heirloom cherry tomatoes',
+    peak: 'Jan Feb Mar', season: 'Dec Apr', shoulder: 'Nov May',
+    note: 'Victorian field tomatoes hit their stride in late summer. Never refrigerate them; it kills the flavour.',
+    idea: 'Thick slices, salt, olive oil and torn basil. Nothing else.' },
+  { name: 'Sweet corn', cat: 'veg', emoji: '🌽', aka: 'corn sweetcorn',
+    peak: 'Jan Feb', season: 'Dec Mar', shoulder: 'Nov Apr',
+    note: 'The sugar fades fast after picking. Look for green, tight husks and moist, pale silk.',
+    idea: 'Grill in the husk, then smother in chilli-lime butter.' },
+  { name: 'Capsicum', cat: 'veg', emoji: '🫑', aka: 'bell pepper peppers',
+    peak: 'Jan Feb Mar', season: 'Dec Apr', shoulder: 'Nov May',
+    note: 'Red ones are ripe green ones, and sweeter for it. Choose glossy, heavy fruit.',
+    idea: 'Char whole over a flame, peel, then dress with garlic and vinegar.' },
+  { name: 'Eggplant', cat: 'veg', emoji: '🍆', aka: 'aubergine',
+    peak: 'Jan Feb Mar', season: 'Dec Apr', shoulder: 'Nov May',
+    note: 'Taut, shiny skin and a fresh green cap. Light-for-size eggplants are spongy and seedy.',
+    idea: 'Roast whole until it collapses, then make baba ghanoush.' },
+  { name: 'Cucumbers', cat: 'veg', emoji: '🥒', aka: 'cucumber lebanese',
+    peak: 'Dec Jan Feb', season: 'Nov Mar', shoulder: 'Oct Apr',
+    note: 'Firm from end to end. Lebanese cucumbers have thin skin and few seeds.',
+    idea: 'Smash, salt, and dress with chilli oil, black vinegar and garlic.' },
+  { name: 'Chillies', cat: 'veg', emoji: '🌶️', aka: 'chilli chili',
+    peak: 'Feb Mar Apr', season: 'Jan May', shoulder: 'Dec Jun',
+    note: 'Late-summer gluts are the time to ferment or dry them. Heat varies even on one plant.',
+    idea: 'Ferment a jar of hot sauce with garlic and salt.' },
+  { name: 'Lettuce', cat: 'veg', emoji: '🥬', aka: 'cos butter iceberg',
+    peak: 'Oct Nov Dec', season: 'all',
+    note: 'Grown year-round around Melbourne. Cos and butter lettuce are sweetest in mild spring weather.',
+    idea: 'Grill cos halves and dress with anchovy, lemon and parmesan.' },
+  { name: 'Rocket', cat: 'veg', emoji: '🥬', aka: 'arugula roquette',
+    peak: 'Apr May Sep Oct', season: 'all',
+    note: 'Peppery in heat and mild in cool weather. Wild rocket has the sharper bite.',
+    idea: 'Pile onto a pizza straight out of the oven.' },
+  { name: 'Spinach', cat: 'veg', emoji: '🥬', aka: 'english spinach',
+    peak: 'Aug Sep Oct', season: 'Apr May Jun Jul Nov', shoulder: 'Mar Dec',
+    note: 'English spinach bolts in the heat. Buy perky bunches and wash well; soil hides in the stems.',
+    idea: 'Wilt into dal with garlic and cumin.' },
+  { name: 'Silverbeet', cat: 'veg', emoji: '🥬', aka: 'swiss chard rainbow chard',
+    peak: 'May Jun Jul Aug Sep', season: 'all',
+    note: 'The hardy backyard green that never quite stops. Stems take longer to cook than leaves.',
+    idea: 'Bake into a pie with feta, dill and filo.' },
+  { name: 'Cavolo nero', cat: 'veg', emoji: '🥬', group: 'brassica', hero: true, aka: 'tuscan kale black kale kale',
+    peak: 'Jun Jul Aug', season: 'Apr May Sep Oct', shoulder: 'Mar Nov',
+    note: 'Frost sweetens it. Strip the leaves from the tough central stem before cooking.',
+    idea: 'Braise with garlic and chilli, then stir through ribollita.' },
+  { name: 'Fennel', cat: 'veg', emoji: '🌿', hero: true, aka: 'florence fennel',
+    peak: 'May Jun Jul Aug', season: 'Apr Sep Oct', shoulder: 'Mar Nov',
+    note: 'Bright white, heavy bulbs with fresh fronds. Rounder bulbs are sweeter.',
+    idea: 'Shave raw with orange, olives and a sharp dressing.' },
+  { name: 'Leeks', cat: 'veg', emoji: '🥬', aka: 'leek',
+    peak: 'May Jun Jul Aug', season: 'Mar Apr Sep', shoulder: 'Feb Oct',
+    note: 'Slim leeks are the most tender. Split and rinse; grit hides between the layers.',
+    idea: 'Braise slowly in butter until meltingly soft, then pile on toast.' },
+  { name: 'Broccoli', cat: 'veg', emoji: '🥦', group: 'brassica', aka: 'broccolini',
+    peak: 'Jun Jul Aug', season: 'Apr May Sep Oct', shoulder: 'Nov Dec Jan Feb Mar',
+    note: 'Tight, dark green heads; yellowing florets mean it’s old. Don’t bin the stalk.',
+    idea: 'Roast very hot until charred, then hit with chilli and lemon.' },
+  { name: 'Cauliflower', cat: 'veg', emoji: '🥦', group: 'brassica', hero: true, aka: 'cauli',
+    peak: 'Jun Jul Aug', season: 'Apr May Sep', shoulder: 'Mar Oct',
+    note: 'Creamy white, tight curds and fresh wrapper leaves. Brown spots spread fast.',
+    idea: 'Roast whole, brushed with spiced butter, and carve it at the table.' },
+  { name: 'Brussels sprouts', cat: 'veg', emoji: '🥬', group: 'brassica', proper: true, aka: 'sprouts',
+    peak: 'Jun Jul', season: 'May Aug', shoulder: 'Apr Sep',
+    note: 'Small, tight and bright green. A frost makes them sweeter; overcooking makes them smell.',
+    idea: 'Halve and fry cut-side down until blackened, then add honey and chilli.' },
+  { name: 'Cabbage', cat: 'veg', emoji: '🥬', group: 'brassica', aka: 'savoy red cabbage wombok',
+    peak: 'Jun Jul Aug', season: 'Apr May Sep Oct', shoulder: 'Nov Dec Jan Feb Mar',
+    note: 'Heavy, tight heads. Savoy and red cabbage love winter; sugarloaf is the spring one.',
+    idea: 'Ferment into sauerkraut or kimchi while it’s cheap.' },
+  { name: 'Radicchio', cat: 'veg', emoji: '🥬', aka: 'treviso chicory',
+    peak: 'Jun Jul Aug', season: 'May Sep', shoulder: 'Apr Oct',
+    note: 'Bitter and beautiful. Cold weather deepens the colour and tames the bite.',
+    idea: 'Grill wedges and drizzle with aged balsamic and honey.' },
+  { name: 'Celeriac', cat: 'veg', emoji: '🥔', group: 'roots', aka: 'celery root',
+    peak: 'May Jun Jul', season: 'Apr Aug', shoulder: 'Mar Sep',
+    note: 'Ugly but brilliant. Choose heavy roots without hollow centres and peel generously.',
+    idea: 'Purée with butter, or shred raw into a mustardy remoulade.' },
+  { name: 'Parsnips', cat: 'veg', emoji: '🥕', group: 'roots', aka: 'parsnip',
+    peak: 'Jun Jul Aug', season: 'Apr May Sep', shoulder: 'Mar Oct',
+    note: 'Cold snaps convert starch to sugar. Small to medium ones have less woody core.',
+    idea: 'Roast with maple and thyme until sticky at the edges.' },
+  { name: 'Jerusalem artichokes', cat: 'veg', emoji: '🥔', group: 'roots', proper: true, aka: 'sunchokes',
+    peak: 'Jun Jul', season: 'May Aug', shoulder: 'Apr Sep',
+    note: 'A knobbly tuber, not an artichoke at all. Firm, smoother ones are easier to scrub.',
+    idea: 'Roast until crisp, or blend into a silky soup.' },
+  { name: 'Turnips & swedes', cat: 'veg', emoji: '🥔', group: 'roots', aka: 'turnip swede rutabaga',
+    peak: 'Jun Jul Aug', season: 'May Sep', shoulder: 'Apr Oct',
+    note: 'Small turnips are sweet and peppery; swedes are sweeter and earthier. Both should feel heavy.',
+    idea: 'Mash swede with lots of butter and black pepper.' },
+  { name: 'Beetroot', cat: 'veg', emoji: '🟣', group: 'roots', aka: 'beets beet',
+    peak: 'Apr May Jun', season: 'all',
+    note: 'Around all year but sweetest in autumn. Buy with leaves on and cook those like silverbeet.',
+    idea: 'Roast in foil, then dress with yoghurt, dill and walnuts.' },
+  { name: 'Carrots', cat: 'veg', emoji: '🥕', group: 'roots', aka: 'carrot',
+    peak: 'May Jun Jul Aug', season: 'all',
+    note: 'Always about. Bunched carrots are freshest; twist the tops off at home or they draw moisture.',
+    idea: 'Roast whole with cumin and honey, then serve on labneh.' },
+  { name: 'Potatoes', cat: 'veg', emoji: '🥔', aka: 'potato spuds kipfler dutch cream',
+    peak: 'Mar Apr May', season: 'all',
+    note: 'Thorpdale and the Ballarat district are big Victorian growers. Store in the dark so they don’t go green.',
+    idea: 'Boil, smash, then roast until crisp with rosemary and salt.' },
+  { name: 'Sweet potatoes', cat: 'veg', emoji: '🍠', aka: 'sweet potato kumara', origin: 'Mostly QLD and NSW',
+    peak: 'Mar Apr May Jun', season: 'all',
+    note: 'Firm, unwrinkled skin. Store somewhere cool, but never in the fridge.',
+    idea: 'Roast wedges and finish with lime, chilli and coriander.' },
+  { name: 'Pumpkin', cat: 'veg', emoji: '🎃', hero: true, aka: 'butternut kent jap queensland blue squash',
+    peak: 'Apr May Jun', season: 'Mar Jul Aug', shoulder: 'Sep Oct Nov Dec Jan Feb',
+    note: 'Victorian pumpkins rarely have a bad year. Choose heavy ones with a dry, corky stem.',
+    idea: 'Roast wedges with sage and brown butter.' },
+  { name: 'Garlic', cat: 'veg', emoji: '🧄', aka: 'garlic',
+    peak: 'Dec Jan Feb', season: 'Nov Mar Apr May', shoulder: 'Jun Jul',
+    note: 'Australian garlic is harvested in early summer. By late winter most of it is imported; look for purple-streaked local bulbs.',
+    idea: 'Roast whole heads and squeeze onto everything.' },
+  { name: 'Onions', cat: 'veg', emoji: '🧅', aka: 'onion brown red',
+    peak: 'Feb Mar Apr', season: 'all',
+    note: 'Stored year-round. New-season onions in late summer are juicier and sweeter.',
+    idea: 'Caramelise a big batch slowly and freeze it in portions.' },
+  { name: 'Radishes', cat: 'veg', emoji: '🔴', aka: 'radish',
+    peak: 'Sep Oct Nov', season: 'all',
+    note: 'Quick to grow and best in mild weather. Summer heat makes them woody and fiery.',
+    idea: 'Serve whole with soft butter and flaky salt.' },
+  { name: 'Asian greens', cat: 'veg', emoji: '🥬', proper: true, aka: 'bok choy pak choy choy sum gai lan',
+    peak: 'May Jun Jul Aug', season: 'all',
+    note: 'Bok choy, choy sum and gai lan grow all year on Melbourne’s fringe, and they’re crispest in cool weather.',
+    idea: 'Blanch, then drizzle with oyster sauce and garlic oil.' },
+  { name: 'Pine mushrooms', cat: 'veg', emoji: '🍄', aka: 'saffron milk caps slippery jacks wild mushrooms mushroom',
+    peak: 'Apr May', season: 'Jun', shoulder: 'Mar Jul',
+    note: 'Wild autumn mushrooms from pine forests. Buy from a trusted seller and never forage without an expert.',
+    idea: 'Fry hot in butter with garlic and parsley, then pile onto toast.' },
+  { name: 'Black truffles', cat: 'veg', emoji: '⚫', aka: 'truffle perigord',
+    peak: 'Jul', season: 'Jun Aug', shoulder: 'May Sep',
+    note: 'Victoria has around 45 truffle farms. Best after the winter solstice; use within a week.',
+    idea: 'Store with eggs for a day, then shave over the scrambled result.' },
+
+  /* ------------------------------- HERBS & NUTS ------------------------------- */
+  { name: 'Basil', cat: 'herbs', emoji: '🌿', aka: 'herb',
+    peak: 'Dec Jan Feb', season: 'Nov Mar', shoulder: 'Oct Apr',
+    note: 'A heat lover that blackens in the cold. Don’t refrigerate; keep the stems in water on the bench.',
+    idea: 'Blitz with pine nuts, parmesan and garlic for a proper pesto.' },
+  { name: 'Mint', cat: 'herbs', emoji: '🌿', aka: 'herb',
+    peak: 'Nov Dec Jan Feb', season: 'Oct Mar Apr', shoulder: 'Sep May',
+    note: 'Grows like a weed in summer. Wrap in damp paper towel in the fridge.',
+    idea: 'Make a quick mint sauce for lamb: mint, sugar and vinegar.' },
+  { name: 'Parsley', cat: 'herbs', emoji: '🌿', aka: 'herb flat-leaf',
+    peak: 'Sep Oct Nov', season: 'all',
+    note: 'Flat-leaf for flavour, curly for garnish and tabouli loyalists. Available all year.',
+    idea: 'Make tabouli where the parsley, not the burghul, is the star.' },
+  { name: 'Coriander', cat: 'herbs', emoji: '🌿', aka: 'cilantro herb',
+    peak: 'Apr May Sep Oct', season: 'Mar Jun Jul Aug Nov', shoulder: 'Dec Jan Feb',
+    note: 'Bolts to seed in summer heat, so the leafiest bunches come in autumn and spring. The roots are gold in curry paste.',
+    idea: 'Pound the roots with garlic and chilli for a quick curry paste.' },
+  { name: 'Chestnuts', cat: 'herbs', emoji: '🌰', group: 'nuts', hero: true, aka: 'chestnut nut',
+    peak: 'Apr May', season: 'Jun', shoulder: 'Mar Jul',
+    note: 'About three-quarters of Australia’s crop comes from around Bright and Myrtleford. Score them before roasting or they explode.',
+    idea: 'Score, roast at 200°C and eat hot from a paper bag.' },
+  { name: 'Walnuts', cat: 'herbs', emoji: '🥜', group: 'nuts', aka: 'walnut nut',
+    peak: 'Apr May', season: 'Jun Jul Aug', shoulder: 'Mar Sep',
+    note: 'New-season walnuts are sweet and creamy; old ones turn bitter. Keep shelled nuts in the freezer.',
+    idea: 'Toast and toss through roast beetroot with blue cheese.' },
+  { name: 'Hazelnuts', cat: 'herbs', emoji: '🌰', group: 'nuts', aka: 'hazelnut nut filbert',
+    peak: 'Apr May', season: 'Jun', shoulder: 'Mar Jul',
+    note: 'A small but growing north-east Victorian crop. Toast, then rub the skins off in a tea towel.',
+    idea: 'Toast, crush and scatter over roast pumpkin with brown butter.' },
+  { name: 'Green almonds', cat: 'herbs', emoji: '🫒', aka: 'almond nut',
+    peak: 'Oct', season: 'Nov', shoulder: 'Sep',
+    note: 'Fuzzy unripe almonds with a jelly-like centre, sold briefly in spring at Middle Eastern grocers.',
+    idea: 'Eat whole with a little salt.' },
+  { name: 'Pistachios', cat: 'herbs', emoji: '🥜', group: 'nuts', aka: 'pistachio nut', origin: 'Mostly SA and north-west Victoria',
+    peak: 'Mar Apr', season: 'May', shoulder: 'Feb Jun',
+    note: 'Fresh-harvested pistachios are softer and sweeter than you’d expect. Split shells mean ripe.',
+    idea: 'Blitz with lemon and olive oil into a pistachio pesto.' },
+
+  /* ------------------------------ FISH & SEAFOOD ------------------------------ */
+  { name: 'Snapper', cat: 'seafood', emoji: '🐟', hero: true, aka: 'port phillip bay snapper pinkie big red fish', rating: 'better',
+    ratingNote: 'GoodFish rates Victorian snapper a Better Choice. Commercial netting ended in Port Phillip Bay in 2022, leaving a handful of line fishers.',
+    peak: 'Oct Nov', season: 'Sep Dec Mar Apr', shoulder: 'Jan Feb May Jun',
+    note: 'Big reds run into Port Phillip Bay to spawn as the water warms in spring, and there’s a second run in autumn.',
+    idea: 'Bake whole with lemon, fennel and a splash of white wine.' },
+  { name: 'King George whiting', cat: 'seafood', emoji: '🐟', hero: true, proper: true, aka: 'whiting fish', rating: 'better',
+    ratingNote: 'GoodFish rates it a Better Choice. Victoria’s catch is mostly haul-netted in Corner Inlet, with low habitat impact.',
+    peak: 'Dec Jan Feb Mar', season: 'Nov Apr May', shoulder: 'Oct Jun Jul Aug Sep',
+    note: 'Melbourne’s most prized bay fish: delicate, sweet and not cheap. The bay fishing is best through summer and autumn.',
+    idea: 'Crumb lightly and shallow fry. Lemon, chips, done.' },
+  { name: 'Southern calamari', cat: 'seafood', emoji: '🦑', aka: 'squid calamari', rating: 'better',
+    ratingNote: 'GoodFish lists Victorian southern calamari among its sustainable picks. They live less than a year and breed fast.',
+    peak: 'May Jun Jul Aug', season: 'all',
+    note: 'Around all year in the bay. The cooler months bring clearer water and the biggest squid.',
+    idea: 'Score, salt-and-pepper, and fry fast in very hot oil.' },
+  { name: 'Flathead', cat: 'seafood', emoji: '🐟', aka: 'sand flathead rock flathead fish', rating: 'better',
+    ratingNote: 'GoodFish rates rock flathead from Corner Inlet a Better Choice. Port Phillip sand flathead stocks are still recovering.',
+    peak: 'Nov Dec Jan Feb Mar', season: 'Oct Apr May', shoulder: 'Jun Jul Aug Sep',
+    note: 'Firm, white and fuss-free. Flathead move into the shallows and feed harder in the warm months.',
+    idea: 'Beer-batter fillets for the best fish and chips you’ll make.' },
+  { name: 'Gummy shark', cat: 'seafood', emoji: '🦈', aka: 'flake shark fish and chips', rating: 'sayno',
+    ratingNote: 'GoodFish rates gummy shark Say No, citing bycatch of endangered school shark. Much of what’s sold as ‘flake’ isn’t gummy at all.',
+    season: 'all',
+    note: 'The classic Victorian fish-and-chip fish, usually sold as ‘flake’. If you buy it, ask what it is and where it’s from.',
+    idea: 'Swap for local flathead in your next fish and chips.' },
+  { name: 'Australian salmon', cat: 'seafood', emoji: '🐟', proper: true, aka: 'salmon fish',
+    peak: 'Apr May Jun', season: 'Mar Jul Aug', shoulder: 'Sep Oct Nov Dec Jan Feb',
+    note: 'Not a true salmon. Cheap and strong-flavoured, and much better bled and eaten fresh.',
+    idea: 'Brine and hot-smoke it, or grill with plenty of lemon.' },
+  { name: 'Garfish', cat: 'seafood', emoji: '🐟', aka: 'gar fish',
+    peak: 'Feb Mar Apr', season: 'Jan May', shoulder: 'Dec Jun',
+    note: 'A slender bay fish with sweet, fine flesh and a fiddly needle of a backbone.',
+    idea: 'Butterfly, dust in flour and pan fry for a couple of minutes.' },
+  { name: 'Sardines', cat: 'seafood', emoji: '🐟', aka: 'pilchards fish', origin: 'Mostly SA', rating: 'better',
+    ratingNote: 'GoodFish rates South Australian sardines a Better Choice. One of the most sustainable fish going.',
+    peak: 'Feb Mar Apr May', season: 'Jan Jun', shoulder: 'Dec Jul',
+    note: 'Cheap and oily. Look for bright eyes and firm bellies, and cook them the day you buy them.',
+    idea: 'Grill whole on the barbecue and squeeze over lemon.' },
+  { name: 'Rock lobster', cat: 'seafood', emoji: '🦞', aka: 'crayfish cray southern rock lobster', rating: 'eatless',
+    ratingNote: 'GoodFish rates Victorian rock lobster amber: Eat Less.',
+    peak: 'Dec Jan Feb Mar', season: 'Apr May', shoulder: 'Nov Jun Jul Aug Sep',
+    note: 'Victoria closes the fishery to females from 1 June and to all lobster from 15 September to 15 November. Most of the catch is exported.',
+    idea: 'Split, grill and baste with garlic butter for a once-a-year feast.' },
+  { name: 'Abalone', cat: 'seafood', emoji: '🐚', aka: 'blacklip greenlip',
+    season: 'all',
+    note: 'Wild blacklip is tightly quota-managed; farmed Victorian abalone is available all year.',
+    idea: 'Slice paper-thin and flash-fry in butter for seconds only.' },
+  { name: 'Port Phillip mussels', cat: 'seafood', emoji: '🐚', hero: true, proper: true, aka: 'blue mussels mussel', rating: 'better',
+    ratingNote: 'Farmed mussels are a GoodFish Better Choice: they filter the water and need no feed.',
+    peak: 'Jun Jul Aug Sep', season: 'all',
+    note: 'Rope-grown in the bay on Melbourne’s doorstep. Shells should be closed, or close when tapped.',
+    idea: 'Steam with white wine, garlic and parsley, then mop up with bread.' },
+  { name: 'Pacific oysters', cat: 'seafood', emoji: '🦪', group: 'oysters', proper: true, aka: 'oyster oysters',
+    peak: 'May Jun Jul Aug', season: 'Apr Sep', shoulder: 'Mar Oct Nov Dec Jan Feb',
+    note: 'Creamiest in the cooler months. They spawn in summer and go thin and milky, though non-breeding triploids help.',
+    idea: 'Shuck to order and finish with finger lime or a shallot mignonette.' },
+  { name: 'Angasi oysters', cat: 'seafood', emoji: '🦪', group: 'oysters', proper: true, aka: 'native flat oyster oysters',
+    peak: 'Jun Jul Aug', season: 'Apr May Sep', shoulder: 'Mar Oct',
+    note: 'Australia’s native flat oyster, whose reefs once covered much of Port Phillip’s floor. Intense, coppery and pricey.',
+    idea: 'Eat natural, with nothing but a crack of pepper.' },
+  { name: 'Scallops', cat: 'seafood', emoji: '🐚', aka: 'scallop bass strait',
+    ratingNote: 'Bass Strait commercial scallop stocks are classified as sustainable.',
+    peak: 'Aug Sep Oct Nov', season: 'Jul Dec', shoulder: 'Jun',
+    note: 'The Bass Strait season opens in winter and closes on 31 December. Outside that, it’s frozen or imported.',
+    idea: 'Sear hard in a smoking pan for a minute a side, then add brown butter.' },
+  { name: 'Murray cod', cat: 'seafood', emoji: '🐟', proper: true, aka: 'cod fish farmed', rating: 'better',
+    ratingNote: 'GoodFish lists farmed Murray cod among its top sustainable picks.',
+    season: 'all',
+    note: 'Farmed Murray cod is rich and clean-tasting all year. Wild cod has a closed season from 1 September to 30 November in most northern waters.',
+    idea: 'Pan-roast skin-side down until the skin crackles.' },
+  { name: 'Barramundi', cat: 'seafood', emoji: '🐟', aka: 'barra fish farmed', rating: 'better',
+    ratingNote: 'GoodFish points to Australian-farmed barramundi; wild-caught barra from the north can come with endangered-species bycatch.',
+    season: 'all',
+    note: 'Some of Australia’s best farmed barra is grown in Victoria. Choose Australian-farmed over imported.',
+    idea: 'Grill with lemongrass, chilli and lime.' },
+  { name: 'Rainbow trout', cat: 'seafood', emoji: '🐟', aka: 'trout fish',
+    season: 'all',
+    note: 'Farmed in Victoria’s cool upland waters. Look for bright skin and a clean smell.',
+    idea: 'Bake whole with almonds and brown butter.' },
+  { name: 'Atlantic salmon', cat: 'seafood', emoji: '🐟', proper: true, aka: 'salmon tasmanian salmon', origin: 'Farmed in Tasmania', rating: 'sayno',
+    ratingNote: 'GoodFish says avoid Tasmanian farmed Atlantic salmon because of its environmental impact, especially in Macquarie Harbour.',
+    season: 'all',
+    note: 'On every menu all year, with no seasonality to speak of.',
+    idea: 'Swap for Murray cod or trout when you can.' },
+  { name: 'Prawns', cat: 'seafood', emoji: '🦐', aka: 'king prawns shrimp spencer gulf', origin: 'Mostly SA (Spencer Gulf)',
+    peak: 'Mar Apr May', season: 'Nov Dec Jun', shoulder: 'Feb Jul',
+    note: 'Southern king prawns are fished in short windows. Christmas demand spikes prices; autumn is better value.',
+    idea: 'Butterfly and grill with garlic, chilli and parsley.' },
+  { name: 'Yabbies', cat: 'seafood', emoji: '🦞', aka: 'yabby freshwater crayfish',
+    peak: 'Dec Jan Feb Mar', season: 'Nov Apr', shoulder: 'Oct May',
+    note: 'Freshwater crayfish from farm dams, at their most active (and fattest) in warm weather.',
+    idea: 'Boil briefly, peel and toss through a dill and lemon mayo.' },
+
+  /* ----------------------------------- MEAT ----------------------------------- */
+  { name: 'Lamb', cat: 'meat', emoji: '🐑', hero: true, aka: 'spring lamb new season lamb',
+    peak: 'Sep Oct Nov', season: 'all',
+    note: 'Good all year, but spring brings the new-season flush: mild, tender and plentiful.',
+    idea: 'Butterfly a leg, marinate in garlic and lemon, and barbecue it.' },
+  { name: 'Flinders Island lamb', cat: 'meat', emoji: '🐑', proper: true, aka: 'saltgrass lamb flinders',
+    peak: 'Oct Nov Dec', season: 'all',
+    note: 'Saltgrass lamb from the Bass Strait island, prized by Melbourne chefs for its seasoned, mineral flavour.',
+    idea: 'Roast a rack simply, with salt and pepper and nothing else.' },
+  { name: 'Hogget', cat: 'meat', emoji: '🐑', aka: 'mutton sheep',
+    peak: 'Jun Jul Aug', season: 'all',
+    note: 'Sheep aged one to two years: older than lamb, younger than mutton, with more flavour than either. Sold all year, best in winter.',
+    idea: 'Slow-braise a shoulder with anchovy, rosemary and white beans.' },
+  { name: 'Beef', cat: 'meat', emoji: '🐄', aka: 'steak grass-fed',
+    peak: 'Nov Dec Jan', season: 'all',
+    note: 'Grass-fed beef is at its best after lush spring pasture. Grain-fed is consistent all year.',
+    idea: 'Sear a thick rump steak, rest it well, and slice against the grain.' },
+  { name: 'Pork', cat: 'meat', emoji: '🐖', aka: 'pig crackling',
+    season: 'all',
+    note: 'No real season these days. Free-range pork with a decent fat cap is worth paying for.',
+    idea: 'Score the rind, salt it overnight and roast for proper crackling.' },
+  { name: 'Venison', cat: 'meat', emoji: '🦌', aka: 'deer game',
+    peak: 'Apr May Jun Jul', season: 'all',
+    note: 'Farmed deer is available all year; wild venison is best in the cooler months. Very lean, so cook it pink.',
+    idea: 'Sear a backstrap rare and serve with a red wine and juniper sauce.' },
+  { name: 'Rabbit', cat: 'meat', emoji: '🐇', aka: 'bunny game wild rabbit',
+    peak: 'Apr May Jun Jul Aug', season: 'Mar Sep', shoulder: 'Oct Nov Dec Jan Feb',
+    note: 'Farmed rabbit is consistent; wild rabbit is plumpest in the cooler months.',
+    idea: 'Braise in mustard, cream and white wine.' },
+  { name: 'Kangaroo', cat: 'meat', emoji: '🦘', aka: 'roo',
+    season: 'all',
+    note: 'Wild-harvested year-round and very lean. Cook hot and fast to rare, or it toughens.',
+    idea: 'Sear fillets rare and serve with a pepperberry sauce.' },
+
+  /* ------------------------------ POULTRY & EGGS ------------------------------ */
+  { name: 'Chicken', cat: 'poultry', emoji: '🐔', aka: 'chook free range',
+    season: 'all',
+    note: 'No season, but free-range birds from small Victorian farms taste noticeably better.',
+    idea: 'Spatchcock and roast over lemons and garlic.' },
+  { name: 'Duck', cat: 'poultry', emoji: '🦆', aka: 'duckling',
+    peak: 'May Jun Jul', season: 'all',
+    note: 'Farmed all year, with Nhill in western Victoria a big producer. Traditionally a cold-weather dish.',
+    idea: 'Render the breast skin-side down slowly, then rest it well.' },
+  { name: 'Quail', cat: 'poultry', emoji: '🐦', aka: 'quails',
+    season: 'all',
+    note: 'Small, quick-cooking and farmed year-round. Allow two per person for a main.',
+    idea: 'Marinate in pomegranate molasses and grill.' },
+  { name: 'Turkey', cat: 'poultry', emoji: '🦃', aka: 'christmas',
+    peak: 'Dec', season: 'Nov', shoulder: 'Oct Jan',
+    note: 'Fresh birds are mostly a Christmas thing; order early in December. Frozen ones exist all year.',
+    idea: 'Brine overnight for a juicier Christmas bird.' },
+  { name: 'Eggs', cat: 'poultry', emoji: '🥚', aka: 'egg free range',
+    peak: 'Sep Oct Nov Dec', season: 'Jan Feb Mar Apr', shoulder: 'May Jun Jul Aug',
+    note: 'Hens lay more as the days lengthen. Free-range supply dips in winter, so prices creep up.',
+    idea: 'Make a big spring frittata with asparagus and herbs.' }
+];
+
+/* =====================================================================
+   NOTES ON DATA: the items I was least sure about. Worth a check.
+   ---------------------------------------------------------------------
+   • Finger limes: growers' figures say January to June; other sources say
+     late July to early January. Went with Jan–Jun (peak Feb–Apr).
+   • Plums: QVM lists Nov–Jan as peak (that's early interstate fruit).
+     Victorian plums are modelled later, peaking Jan–Feb.
+   • Passionfruit: QVM says Nov–Jan, CERES says Dec–May. Used Jan–Mar peak.
+   • Tomatoes: QVM peak Nov–Feb; Victorian field crops run later.
+     Used Jan–Mar peak.
+   • Rhubarb: QVM says Apr–Sep, CERES Sep–May, Environment Victoria lists
+     it in every season. Modelled as nearly year-round, best Jul–Sep.
+   • Jerusalem artichokes: CERES lists Sep–Feb, Environment Victoria lists
+     winter. Used the winter harvest (May–Aug).
+   • Lemons and limes: one market report has Yarra Valley lemons peaking
+     towards Christmas; most guides say winter. Summer lime scarcity is a
+     judgement call.
+   • Apples, pears, potatoes, onions, pumpkin: cold-stored crops. The
+     'shoulder' and 'out' months reflect quality, not total absence.
+   • Avocados and bananas: interstate supply rotates all year.
+   • King George whiting, flathead, calamari, Australian salmon, garfish:
+     timing follows Port Phillip fishing patterns; commercial supply is
+     steadier than the chart suggests.
+   • Mussels and oysters: condition peaks are general guidance; farmed
+     supply is year-round.
+   • Prawns: modelled on Spencer Gulf fishing windows. Low confidence.
+   • Hogget: Victorian producers sell it year-round; the winter peak is
+     traditional rather than sourced.
+   • Flinders Island lamb: no published season found; mirrors the spring
+     lamb flush shifted slightly later. Low confidence.
+   • Beef, duck and venison peaks are traditional rather than sourced.
+   • Gummy shark: GoodFish's Say No rating covers the Commonwealth and WA
+     fisheries; Victoria's own small fishery isn't separately rated.
+   ===================================================================== */
+
+
+/* =====================================================================
+   COPY: small pieces of text, kept together so they're easy to edit
+   ===================================================================== */
+const TAGLINES = [ // one per month, January first
+  'Peak stone fruit, peak beach, peak sunscreen.',
+  'Tomatoes finally taste like tomatoes again.',
+  'Figs, grapes and the first cool change.',
+  'Autumn leaves, new apples and pine mushrooms.',
+  'Quince-poaching weather.',
+  'Citrus, brassicas and the start of truffle season.',
+  'Soup season. Lean in.',
+  'Blood oranges, and the last of the winter roots.',
+  'The asparagus is coming. Act natural.',
+  'Broad beans, artichokes and snapper in the bay.',
+  'Cherries on the way, and four seasons in one day.',
+  'Cherries, mangoes and prawns. December, you legend.'
+];
+
+const GREETINGS = [ // [from hour, line]
+  [0,  'Up late? The fish market opens in a few hours.'],
+  [5,  'Early start. The market traders are already on their second coffee.'],
+  [8,  'Morning. A good time to plan dinner and pretend you’ll stick to it.'],
+  [12, 'Lunchtime. Here’s what’s actually worth eating.'],
+  [14, 'Afternoon. Still time to beat the market close.'],
+  [17, 'Evening. What’s for dinner? Start here.'],
+  [21, 'Late-night fridge contemplation? Here’s what’s good this week.']
+];
+
+const ALT_TITLES = ['Seasons', 'Thyme Machine', 'Peas & Quiet', 'Lettuce Begin', 'Kale-endar', 'Beet the Clock', 'Season’s Eatings', 'Romaine Calm', 'Pear-ennial', 'Orange You Glad', 'Seasons'];
+
+const NO_RESULTS = [
+  'Nothing by that name. Either we don’t grow it here, or you’ve invented a vegetable. (We’d try it.)',
+  'No luck. The greengrocer shrugs politely.',
+  'Not on the list. Try ‘broad beans’, ‘snapper’ or ‘quince’.',
+  'Zero results, infinite possibilities. Check the spelling?'
+];
+
+// Searches the box has opinions about.
+const ORACLE = [
+  { match: /pumpkin spice/, say: 'Wrong hemisphere, friend. Pumpkins peak here in April and May. Ask again in autumn.' },
+  { match: /potato scallop/, say: 'Sir, this is Melbourne. They’re called potato cakes.' },
+  { match: /potato cake/, say: 'Correct terminology. Potatoes are fine all year; potato cakes are eternal.' },
+  { match: /smashed avo|avo toast|avocado toast/, say: 'Avocados are always around. Your house deposit was never their fault.' },
+  { match: /dim sim/, say: 'In season all year, peaking around 1am. South Melbourne has opinions.' },
+  { match: /jam do(ugh)?nut/, say: 'Hot jam doughnuts at the Queen Vic van transcend the seasons.' },
+  { match: /coffee/, say: 'Always in season. This is Melbourne.' },
+  { match: /weather/, say: 'Four seasons in one day. Bring a jacket.' },
+  { match: /^snow$/, say: 'Snow peas: spring. Actual snow: Mt Buller, July and August.' },
+  { match: /christmas|xmas/, say: 'Cherries, mangoes, prawns and a fresh turkey. December delivers.' },
+  { match: /footy|grand final/, say: 'Grand Final day lands in peak broad bean season. Coincidence? Yes.' }
+];
+
+// Sarcastic commentary for the hidden “out of season” mode.
+const SNARK_PRODUCE = [
+  (f, m, back) => `${f.name} in ${m}? Bold. The good ones are back around ${back}.`,
+  () => 'Technically available. Spiritually absent.',
+  () => 'Whatever’s on the shelf has more frequent-flyer points than you do.',
+  (f, m, back) => `You’d be paying airfare for disappointment. Wait for ${back}.`,
+  () => 'Pale, pricey and quietly judging you from the supermarket shelf.',
+  (f, m, back) => `Future you, in ${back}, is begging present you to wait.`,
+  () => 'If you find a good one this month, buy a lottery ticket while you’re at it.',
+  () => 'It isn’t out of season, it’s ‘imported with confidence’.'
+];
+const SNARK_ANIMAL = [
+  (f, m, back) => `Scarce until ${back}. Whatever’s in the cabinet has probably met a freezer.`,
+  (f) => `Not the time. Your ${f.cat === 'seafood' ? 'fishmonger' : 'butcher'} knows it, and now so do you.`,
+  (f, m, back) => `Closed season, short supply or both. Back around ${back}.`
+];
+const SNARK_SPECIAL = {
+  'tomatoes': 'A winter tomato is a pale pink rumour of a tomato.',
+  'asparagus': 'Flown in from the other side of the Pacific. Koo Wee Rup weeps.',
+  'cherries': 'Winter cherries come from the northern hemisphere, with a price tag to match.',
+  'strawberries': 'Crunchy, white-shouldered and tasting faintly of refrigerator.',
+  'mangoes': 'A winter mango is a sour little lie.',
+  'black-truffles': 'In summer those are just very expensive rocks.',
+  'scallops': 'The Bass Strait boats are tied up. Anything glistening is frozen or flown.',
+  'rock-lobster': 'Closed season. The lobsters are busy. Leave them be.',
+  'garlic': 'Most of it’s imported right now. Look for purple-streaked local bulbs, or wait for summer.',
+  'turkey': 'Out of season it’s just a very large chicken with ambitions.',
+  'basil': 'Cold basil turns black the moment you look at it.',
+  'pine-mushrooms': 'The pine forests are bare. Anything labelled ‘wild’ is being optimistic.'
+};
+
+// Clues revealed by the faint “psst” in the footer.
+const SECRETS = [
+  { id: 'title',      clue: 'The title is ticklish.' },
+  { id: 'konami',     clue: 'An old cheat code still works: ↑ ↑ ↓ ↓ ← → ← → B A.' },
+  { id: 'shout',      clue: 'Shout a food’s name into the search. Capitals, and an exclamation mark.' },
+  { id: 'flip',       clue: 'Find out where we are on the globe, then tap it.' },
+  { id: 'contrarian', clue: 'The key has a quiet fourth member. Ask it what’s not in season.' },
+  { id: 'oracle',     clue: 'The search box has strong opinions about potato cakes.' }
+];
+
+
+/* =====================================================================
+   ENGINE: turns the data above into calendars. No need to edit below.
+   ===================================================================== */
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MON = MONTHS.map(m => m.slice(0, 3));
+const RANK = { out: 0, shoulder: 1, in: 2, peak: 3 };
+const STATE_LABEL = { peak: 'Peak', in: 'In season', shoulder: 'Shoulder', out: 'Out of season' };
+const CAT = Object.fromEntries(CATEGORIES.map(c => [c.id, c]));
+
+const slug = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const norm = s => (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const mod = (n, m) => ((n % m) + m) % m;
+
+function parseMonths(str, food, field) {
+  if (!str) return [];
+  if (str.trim().toLowerCase() === 'all') return 'all';
+  return str.split(/[\s,]+/).filter(Boolean).map(tok => {
+    const i = MON.findIndex(m => m.toLowerCase() === tok.slice(0, 3).toLowerCase());
+    if (i < 0) console.warn(`Seasons data: “${tok}” in ${food}.${field} isn’t a month name.`);
+    return i;
+  }).filter(i => i >= 0);
+}
+
+function buildCalendar(f) {
+  const lists = [['peak', parseMonths(f.peak, f.name, 'peak')], ['in', parseMonths(f.season, f.name, 'season')], ['shoulder', parseMonths(f.shoulder, f.name, 'shoulder')]];
+  const cal = new Array(12).fill(null);
+  for (const [state, list] of lists) {
+    if (list === 'all') continue;
+    for (const i of list) {
+      if (cal[i] && cal[i] !== state) console.warn(`Seasons data: ${f.name} lists ${MON[i]} twice; keeping “${cal[i]}”.`);
+      if (!cal[i]) cal[i] = state;
+    }
+  }
+  for (const [state, list] of lists) if (list === 'all') cal.forEach((v, i) => { if (!v) cal[i] = state; });
+  return cal.map(v => v || 'out');
+}
+
+const seenIds = new Set();
+const foods = FOODS.map(f => {
+  if (!CAT[f.cat]) console.warn(`Seasons data: ${f.name} has an unknown category “${f.cat}”.`);
+  let id = slug(f.name);
+  while (seenIds.has(id)) id += '-2';
+  seenIds.add(id);
+  return {
+    ...f,
+    id,
+    cal: buildCalendar(f),
+    kind: (CAT[f.cat] || {}).kind || 'produce',
+    recipes: f.recipes || [],
+    haystack: norm([f.name, f.aka, f.cat === 'herbs' ? '' : (CAT[f.cat] || {}).label, f.group && GROUPS[f.group] && GROUPS[f.group].label].join(' '))
+  };
+});
+const byId = Object.fromEntries(foods.map(f => [f.id, f]));
+
+/* ---------- language helpers ---------- */
+const isPlural = f => f.plural !== undefined ? f.plural : (/s$/.test(f.name) && !/asparagus$/i.test(f.name)) || /&/.test(f.name);
+const inSentence = f => f.proper ? f.name : f.name.charAt(0).toLowerCase() + f.name.slice(1);
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+function listJoin(arr) { return arr.length <= 1 ? (arr[0] || '') : arr.slice(0, -1).join(', ') + ' and ' + arr[arr.length - 1]; }
+
+// Group a set of month indices into readable runs, wrapping round December→January.
+function monthRuns(idxs, anchor = 0) {
+  const set = new Set(idxs);
+  if (set.size === 0) return [];
+  if (set.size === 12) return [[0, 11]];
+  let start = anchor;
+  while (set.has(mod(start - 1, 12)) || !set.has(start)) start = mod(start + 1, 12); // first month of a run
+  const runs = [];
+  for (let k = 0, i = start; k < 12; k++, i = mod(i + 1, 12)) {
+    if (!set.has(i)) continue;
+    if (runs.length && mod(runs[runs.length - 1][1] + 1, 12) === i) runs[runs.length - 1][1] = i;
+    else runs.push([i, i]);
+  }
+  return runs;
+}
+const runLen = r => mod(r[1] - r[0], 12) + 1;
+// The month a food's season begins (just after its longest gap), so ranges read in season order.
+function seasonStart(f) {
+  for (let i = 0; i < 12; i++) if (f.cal[i] !== 'out' && f.cal[mod(i - 1, 12)] === 'out') return i;
+  return 0;
+}
+function runsText(idxs, anchor = 0) {
+  const names = MON;
+  return monthRuns(idxs, anchor).map(([a, b]) => a === b ? names[a] : (runLen([a, b]) === 12 ? 'all year' : `${names[a]}–${names[b]}`)).join(', ');
+}
+
+/* ---------- season maths ---------- */
+const stateAt = (f, m) => f.cal[mod(m, 12)];
+const rankAt = (f, m) => RANK[stateAt(f, m)];
+
+function seasonOf(m) { return ['summer', 'summer', 'autumn', 'autumn', 'autumn', 'winter', 'winter', 'winter', 'spring', 'spring', 'spring', 'summer'][m]; }
+function seasonPhase(m) {
+  const pos = { 11: 0, 0: 1, 1: 2, 2: 0, 3: 1, 4: 2, 5: 0, 6: 1, 7: 2, 8: 0, 9: 1, 10: 2 }[m];
+  return ['Early', 'Mid', 'Late'][pos] + ' ' + seasonOf(m);
+}
+
+// Works out how in-season a food is in month m: its badge, a short note
+// (“peak from Dec”, “until Jan”, “winding down”), an arrow direction, and a
+// score used by “Most in season first”. `day` is only passed for the real
+// current month, so the note can say “ending soon” late in the month.
+function statusInfo(f, m, day) {
+  const s = stateAt(f, m), cur = RANK[s], prev = rankAt(f, m - 1), next = rankAt(f, m + 1);
+  const ahead = test => { for (let k = 1; k <= 11; k++) if (test(stateAt(f, m + k))) return k; return -1; };
+  const late = day >= 18;
+  let detail = '', dir = '', score;
+
+  if (s === 'out') {
+    const k = ahead(x => x !== 'out');
+    detail = k < 0 ? 'not grown here' : `back in ${MON[mod(m + k, 12)]}`;
+    score = k < 0 ? 0 : 12 - k;                          // sooner back = higher
+  } else if (new Set(f.cal).size === 1) {
+    detail = 'all year';
+  } else if (s === 'peak') {
+    const k = ahead(x => x !== 'peak');                  // months until the peak ends
+    if (k === 1) { detail = day ? (late ? 'ending soon' : 'last month of peak') : 'last month of peak'; dir = 'down'; }
+    else if (k > 1) detail = `until ${MON[mod(m + k - 1, 12)]}`;
+  } else {
+    const kp = ahead(x => x === 'peak'), ko = ahead(x => x === 'out');
+    if (kp > 0 && kp <= 3 && next >= cur && (ko < 0 || kp < ko)) { detail = `peak from ${MON[mod(m + kp, 12)]}`; dir = 'up'; }
+    else if (next < cur) { detail = next === 0 ? 'last of the season' : 'winding down'; dir = 'down'; }
+    else if (prev < cur) { detail = 'just arrived'; dir = 'up'; }
+  }
+  if (score === undefined) {
+    // State first (peak > in season > shoulder), then: mid-peak beats a peak that is
+    // ending, and things on their way up beat things on their way down.
+    const nb = s === 'peak' ? (next === 3 ? 20 : 0) + (prev === 3 ? 10 : 0)
+             : s === 'in'   ? (next === 3 ? 20 : next === 2 ? 10 : 0) + (prev >= 2 ? 5 : 0)
+             :                (next >= 2 ? 20 : 0) + (prev >= 2 ? 5 : 0);
+    score = cur * 100 + nb;
+  }
+  return { s, label: s === 'out' ? 'Out' : STATE_LABEL[s], detail, dir, score };
+}
+const statusNow = (f, m) => statusInfo(f, m, m === NOW.month ? NOW.day : 0);
+const byScore = m => (a, b) => statusNow(b, m).score - statusNow(a, m).score || a.name.localeCompare(b.name);
+
+// e.g. “Best from late November to February; peak in January.”
+function describeSeason(f) {
+  const good = f.cal.map((s, i) => RANK[s] >= 2 ? i : -1).filter(i => i >= 0);
+  const peaks = f.cal.map((s, i) => s === 'peak' ? i : -1).filter(i => i >= 0);
+  const peakText = () => {
+    const runs = monthRuns(peaks);
+    if (!runs.length) return '';
+    if (runs.length > 1) return `peaks in ${listJoin(runs.map(([a, b]) => a === b ? MONTHS[a] : `${MONTHS[a]}–${MONTHS[b]}`))}`;
+    const parts = runs.map(([a, b]) => a === b ? MONTHS[a] : (runLen([a, b]) === 2 ? `${MONTHS[a]} and ${MONTHS[b]}` : `${MONTHS[a]} to ${MONTHS[b]}`));
+    return runs.length === 1 && runLen(runs[0]) > 2 ? `peak from ${parts[0]}` : `peak in ${listJoin(parts)}`;
+  };
+  if (f.cal.every(s => s !== 'out')) {
+    if (!peaks.length) return 'Around all year, with no real peak.';
+    return `Around all year; ${peakText()}.`;
+  }
+  if (!good.length) return 'Only ever a fleeting visitor.';
+  const runs = monthRuns(good).sort((a, b) => runLen(b) - runLen(a));
+  const [s, e] = runs[0];
+  const startLbl = stateAt(f, s - 1) === 'shoulder' ? `late ${MONTHS[mod(s - 1, 12)]}` : MONTHS[s];
+  const endLbl = stateAt(f, e + 1) === 'shoulder' ? `early ${MONTHS[mod(e + 1, 12)]}` : MONTHS[e];
+  let out = s === e && startLbl === MONTHS[s] && endLbl === MONTHS[e] ? `Best in ${MONTHS[s]}` : `Best from ${startLbl} to ${endLbl}`;
+  const pt = peakText();
+  out += pt ? `; ${pt}.` : '.';
+  if (runs.length > 1) out += ` There’s a second window from ${MONTHS[runs[1][0]]} to ${MONTHS[runs[1][1]]}.`;
+  return out;
+}
+
+// What happens next, relative to month m.
+function nextMoves(f, m) {
+  const cur = stateAt(f, m);
+  const firstFrom = (test) => { for (let k = 1; k <= 12; k++) if (test(stateAt(f, m + k))) return mod(m + k, 12); return -1; };
+  if (cur === 'out') {
+    const back = firstFrom(s => s !== 'out'), good = firstFrom(s => RANK[s] >= 2);
+    if (back < 0) return 'Not grown here at all.';
+    return good >= 0 && good !== back ? `Starts creeping back in ${MONTHS[back]}; properly good from ${MONTHS[good]}.` : `Back around ${MONTHS[back]}.`;
+  }
+  const bits = [];
+  if (cur === 'peak') {
+    const endPeak = firstFrom(s => s !== 'peak');
+    if (endPeak >= 0 && endPeak !== mod(m + 1, 12)) bits.push(`Stays at its peak until ${MONTHS[mod(endPeak - 1, 12)]}.`);
+  } else {
+    const np = firstFrom(s => s === 'peak');
+    if (np >= 0) bits.push(`Peaks in ${MONTHS[np]}.`);
+  }
+  const leaves = firstFrom(s => s === 'out');
+  bits.push(leaves < 0 ? 'Never really leaves.' : `Leaves around ${MONTHS[leaves]}.`);
+  return bits.join(' ');
+}
+
+/* ---------- Melbourne time, from the visitor's own clock ---------- */
+function melbourneNow() {
+  const d = new Date();
+  try {
+    const parts = new Intl.DateTimeFormat('en-AU', { timeZone: 'Australia/Melbourne', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', hourCycle: 'h23', weekday: 'short' }).formatToParts(d);
+    const get = t => (parts.find(p => p.type === t) || {}).value;
+    return { year: +get('year'), month: +get('month') - 1, day: +get('day'), hour: (+get('hour')) % 24, weekday: get('weekday') };
+  } catch (e) {
+    return { year: d.getFullYear(), month: d.getMonth(), day: d.getDate(), hour: d.getHours(), weekday: d.toLocaleDateString('en-AU', { weekday: 'short' }) };
+  }
+}
+
+
+/* =====================================================================
+   PAGE STATE AND RENDERING
+   ===================================================================== */
+const $ = s => document.querySelector(s);
+const NOW = melbourneNow();
+const state = { month: NOW.month, filter: 'all', query: '', contrarian: false, sort: 'category' };
+try { if (localStorage.getItem('seasons.sort') === 'season') state.sort = 'season'; } catch (e) {}
+let paletteChoice = 'auto';   // 'auto' follows the month being viewed; otherwise a fixed season
+try { const p = localStorage.getItem('seasons.palette'); if (['summer', 'autumn', 'winter', 'spring'].includes(p)) paletteChoice = p; } catch (e) {}
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+function visibleFoods() { return state.filter === 'all' ? foods : foods.filter(f => f.cat === state.filter); }
+
+/* ---------- masthead + hero ---------- */
+function renderMasthead() {
+  $('#clock').textContent = `${NOW.weekday} ${NOW.day} ${MON[NOW.month]}`;
+  const g = GREETINGS.filter(([h]) => NOW.hour >= h).pop();
+  $('#greeting').textContent = g ? g[1] : '';
+  $('#tagline').textContent = TAGLINES[NOW.month];
+}
+
+function summaryLine(m) {
+  const arriving = [], peaking = [], leaving = [];
+  for (const f of foods) {
+    const cur = rankAt(f, m), prev = rankAt(f, m - 1), next = rankAt(f, m + 1);
+    if (cur === 0) continue;
+    if ((prev === 0) || (cur >= 2 && prev <= 1)) arriving.push(f);
+    else if (cur === 3) peaking.push({ f, fresh: prev < 3 });
+    if (next === 0 || (cur >= 2 && next <= 1)) leaving.push(f);
+  }
+  const used = new Set();
+  // Pick the best thing to mention: a family of foods if two or more share the news, else a headline item.
+  function pick(list, getF = x => x, bonus = () => 0) {
+    const groups = {};
+    list.forEach(x => { const f = getF(x); if (f.group) (groups[f.group] = groups[f.group] || []).push(f); });
+    const cands = [];
+    for (const [g, members] of Object.entries(groups)) if (members.length >= 2) cands.push({ score: 3 + members.length, text: GROUPS[g].label, plural: GROUPS[g].plural, members });
+    list.forEach(x => { const f = getF(x); cands.push({ score: (f.hero ? 2 : 0) + (f.kind === 'produce' ? .5 : 0) + bonus(x), text: inSentence(f), plural: isPlural(f), members: [f] }); });
+    cands.sort((a, b) => b.score - a.score);
+    const c = cands.find(c => !used.has('label:' + c.text) && c.members.every(mf => !used.has(mf.id)));
+    if (c) { used.add('label:' + c.text); c.members.forEach(mf => used.add(mf.id)); }
+    return c;
+  }
+  const a = pick(arriving);
+  const p = pick(peaking, x => x.f, x => x.fresh ? 1 : 0);
+  const l = pick(leaving);
+  const clauses = [];
+  if (a) clauses.push(`${a.text} ${a.plural ? 'are' : 'is'} arriving`);
+  if (p) clauses.push(`${p.text} ${p.plural ? 'are' : 'is'} at ${p.plural ? 'their' : 'its'} peak`);
+  if (l) clauses.push(`${l.text} ${l.plural ? 'are' : 'is'} winding down`);
+  if (!clauses.length) return 'A steady month. Everything that’s good is simply carrying on.';
+  return cap(clauses.length > 1 ? clauses.slice(0, -1).join(', ') + ', and ' + clauses[clauses.length - 1] : clauses[0]) + '.';
+}
+
+function renderHero() {
+  const m = state.month, isNow = m === NOW.month;
+  document.documentElement.dataset.season = paletteChoice === 'auto' ? seasonOf(m) : paletteChoice;
+  $('#eyebrow').textContent = `${isNow ? 'Right now' : 'Looking at'} · ${seasonPhase(m)}`;
+  $('#month-title').textContent = MONTHS[m];
+  $('#summary').textContent = summaryLine(m);
+  const list = visibleFoods();
+  const c = { peak: 0, in: 0, shoulder: 0 };
+  list.forEach(f => { const s = stateAt(f, m); if (s in c) c[s]++; });
+  $('#stats').innerHTML = `<span><b>${c.peak}</b> at their peak</span><span><b>${c.in}</b> in season</span><span><b>${c.shoulder}</b> on the shoulder</span>`;
+  syncThemeColor();
+}
+
+/* ---------- month strip ---------- */
+function renderMonths() {
+  const list = visibleFoods();
+  const scores = MON.map((_, m) => list.reduce((n, f) => n + (stateAt(f, m) === 'peak' ? 1 : stateAt(f, m) === 'in' ? .5 : 0), 0));
+  const max = Math.max(...scores, 1);
+  $('#months').innerHTML = MON.map((abbr, m) => {
+    const peaks = list.filter(f => stateAt(f, m) === 'peak').length;
+    return `<li><button type="button" class="month-btn${m === NOW.month ? ' is-now' : ''}" data-m="${m}" aria-pressed="${m === state.month}" ${m === NOW.month ? 'aria-current="date"' : ''} aria-label="${MONTHS[m]}${m === NOW.month ? ' (this month)' : ''}, ${peaks} at their peak"><span class="meter" aria-hidden="true"><i style="height:${Math.round(18 + 82 * scores[m] / max)}%"></i></span><span aria-hidden="true">${abbr}</span></button></li>`;
+  }).join('');
+  const t = $('#today');
+  t.setAttribute('aria-disabled', String(state.month === NOW.month));
+  t.setAttribute('aria-label', state.month === NOW.month ? `Showing this month, ${MONTHS[NOW.month]}` : `Back to this month, ${MONTHS[NOW.month]}`);
+}
+function scrollMonthIntoView(smooth) {
+  const btn = document.querySelector(`.month-btn[data-m="${state.month}"]`), strip = $('#months');
+  if (!btn || strip.scrollWidth <= strip.clientWidth) return;
+  const left = btn.offsetLeft - strip.offsetLeft - (strip.clientWidth - btn.offsetWidth) / 2;
+  strip.scrollTo({ left, behavior: smooth && !reduceMotion.matches ? 'smooth' : 'auto' });
+}
+
+/* ---------- filter chips ---------- */
+function renderChips() {
+  // A thin divider separates produce (left) from animal products (right).
+  const chip = (id, label, kind) => `<button type="button" class="chip" data-cat="${id}" aria-pressed="${state.filter === id}"${kind ? ` aria-label="${esc(label)} (${kind === 'produce' ? 'produce' : 'animal product'})"` : ''}>${esc(label)}</button>`;
+  const group = kind => CATEGORIES.filter(c => c.kind === kind).map(c => chip(c.id, c.label, kind)).join('');
+  $('#chips').innerHTML = chip('all', 'All') + group('produce') + '<span class="chip-divider" aria-hidden="true"></span>' + group('animal');
+}
+
+/* ---------- cards ---------- */
+function spark(f, m) { return `<span class="spark" aria-hidden="true">${f.cal.map((s, i) => `<i class="${s}${i === m ? ' sel' : ''}"></i>`).join('')}</span>`; }
+
+function card(f, m, i, extra) {
+  const st = statusNow(f, m), s = st.s;
+  const arrow = st.dir === 'up' ? '↗ ' : st.dir === 'down' ? '↘ ' : '';
+  const flag = f.rating === 'sayno' ? '<span class="flag">avoid</span>' : (f.origin ? '<span class="flag">interstate</span>' : '');
+  const spoken = s === 'out' ? 'Out of season' : STATE_LABEL[s];
+  return `<button type="button" class="card${s === 'out' ? ' is-out' : ''}${s === 'peak' ? ' is-peak' : ''}" data-id="${f.id}" style="--i:${Math.min(i, 24)}" aria-label="${esc(f.name)}: ${spoken}${st.detail ? ', ' + st.detail : ''}${f.rating === 'sayno' ? ', sustainability warning' : ''}. Open details.">
+    ${flag}<span class="em" aria-hidden="true">${f.emoji}</span>
+    <span class="nm">${esc(f.name)}</span>
+    <span class="st"><span class="badge ${s}">${st.label}</span>${st.detail ? `<span class="when${st.dir === 'up' ? ' up' : ''}">${arrow}${esc(st.detail)}</span>` : ''}</span>
+    ${extra ? `<span class="extra">${esc(extra)}</span>` : ''}
+    ${spark(f, m)}
+  </button>`;
+}
+
+const CAVEAT = 'For meat and seafood, ‘season’ is looser than for plants. It’s about supply, sustainability and quality rather than harvest.';
+
+function renderList() {
+  const m = state.month, main = $('#list');
+  let html = '';
+  let announce = '';
+
+  if (state.contrarian) {
+    const outs = visibleFoods().filter(f => stateAt(f, m) === 'out').map(f => {
+      let k = 1; while (k < 12 && rankAt(f, m + k) < 2) k++;
+      return { f, wait: k, back: MONTHS[mod(m + k, 12)] };
+    }).sort((a, b) => b.wait - a.wait || a.f.name.localeCompare(b.f.name)).slice(0, 12);
+    html += `<div class="notice"><p><strong>Contrarian mode.</strong> Here’s what is most definitely <em>not</em> in season in ${MONTHS[m]}.</p><p><button type="button" class="link-btn" id="exit-contrarian">Back to reality</button></p></div>`;
+    if (!outs.length) html += `<div class="empty"><p>Annoyingly, everything here is in season in ${MONTHS[m]}. Nothing to sneer at.</p></div>`;
+    else html += `<section class="cat"><div class="cat-head"><h2>Don’t even think about it</h2><span class="count mono">${outs.length}</span></div><div class="grid">${outs.map(({ f, back }, i) => {
+      const pool = f.kind === 'animal' ? SNARK_ANIMAL : SNARK_PRODUCE;
+      const line = SNARK_SPECIAL[f.id] || pool[(f.id.length + m) % pool.length](f, MONTHS[m], back);
+      return card(f, m, i, line);
+    }).join('')}</div></section>`;
+    main.innerHTML = html;
+    announce = `Contrarian mode: ${outs.length} foods that are out of season in ${MONTHS[m]}.`;
+  } else if (state.query) {
+    html += renderSearch(m);
+    main.innerHTML = html;
+    announce = main.querySelectorAll('.card').length + ' search results.';
+  } else if (state.sort === 'season') {
+    // One ranked list, most in season first. Nothing is hidden: out-of-season
+    // foods sit at the bottom, ordered by how soon they come back.
+    const list = visibleFoods().slice().sort(byScore(m));
+    const BANDS = [['peak', 'At their peak'], ['in', 'In season'], ['shoulder', 'On the shoulder'], ['out', 'Out of season']];
+    const hasAnimal = list.some(f => f.kind === 'animal');
+    if (hasAnimal) html += `<p class="caveat" style="margin-top:22px">${CAVEAT}</p>`;
+    let n = 0;
+    for (const [st, title] of BANDS) {
+      const items = list.filter(f => stateAt(f, m) === st);
+      if (!items.length) continue;
+      html += `<section class="cat" aria-labelledby="band-${st}"><div class="cat-head"><h2 id="band-${st}">${title}</h2><span class="count mono">${items.length}${st === 'out' ? ' · soonest back first' : ''}</span></div><div class="grid">${items.map(f => card(f, m, n++)).join('')}</div></section>`;
+    }
+    main.innerHTML = html;
+    announce = `${list.length} foods, most in season first.`;
+  } else {
+    const list = visibleFoods().filter(f => rankAt(f, m) > 0);
+    const cats = CATEGORIES.filter(c => state.filter === 'all' || c.id === state.filter);
+    let n = 0;
+    for (const c of cats) {
+      const items = list.filter(f => f.cat === c.id).sort(byScore(m));
+      if (!items.length) {
+        if (state.filter !== 'all') html += `<div class="empty"><p>Nothing from this lot is in season in ${MONTHS[m]}.</p><p class="mono">Try another month, or embrace the freezer.</p></div>`;
+        continue;
+      }
+      html += `<section class="cat" aria-labelledby="h-${c.id}"><div class="cat-head"><h2 id="h-${c.id}">${esc(c.label)}</h2><span class="kind-tag ${c.kind}">${c.kind === 'produce' ? 'Produce' : 'Animal product'}</span><span class="count mono">${items.length} in season</span></div>${c.kind === 'animal' ? `<p class="caveat">${CAVEAT}</p>` : ''}<div class="grid">${items.map(f => card(f, m, n++)).join('')}</div></section>`;
+    }
+    main.innerHTML = html;
+    announce = `${list.length} foods in season in ${MONTHS[m]}.`;
+  }
+  $('#announce').textContent = announce;
+}
+
+/* ---------- search ---------- */
+// A query matches when every word it contains starts a word in the food's name, aliases or category.
+function matches(f, q) {
+  const hay = f.haystack.split(' ');
+  return q.split(' ').filter(Boolean).every(w => {
+    const stem = w.length > 3 ? w.replace(/(es|s)$/, '') : w;
+    return hay.some(h => h.startsWith(w) || h.startsWith(stem));
+  });
+}
+function renderSearch(m) {
+  const raw = state.query, q = norm(raw);
+  let html = '';
+  const oracle = ORACLE.find(o => o.match.test(q));
+  if (oracle) { html += `<div class="notice"><p>${esc(oracle.say)}</p></div>`; found('oracle'); }
+  const results = q ? foods.filter(f => matches(f, q)).sort(byScore(m)) : [];
+  if (results.length) {
+    html += `<section class="cat"><div class="cat-head"><h2>Results</h2><span class="count mono">${results.length} · all categories · ${MON[m]}</span></div><div class="grid">${results.map((f, i) => card(f, m, i)).join('')}</div></section>`;
+  } else if (!oracle) {
+    const line = NO_RESULTS[[...q].reduce((n, c) => n + c.charCodeAt(0), 0) % NO_RESULTS.length];
+    html += `<div class="empty"><p>${esc(line)}</p><p class="mono">Searched ${foods.length} foods for “${esc(raw)}”</p></div>`;
+  }
+  return html;
+}
+
+/* ---------- detail view ---------- */
+const dlg = $('#detail');
+let lastFocus = null;
+
+function openDetail(id) {
+  const f = byId[id];
+  if (!f) return;
+  const m = state.month, s = stateAt(f, m), c = CAT[f.cat];
+  const peaks = f.cal.map((x, i) => x === 'peak' ? i : -1).filter(i => i >= 0);
+  const okay = f.cal.map((x, i) => x === 'in' || x === 'shoulder' ? i : -1).filter(i => i >= 0);
+  const outs = f.cal.map((x, i) => x === 'out' ? i : -1).filter(i => i >= 0);
+  const inMonths = f.cal.map((x, i) => x === 'in' ? i : -1).filter(i => i >= 0);
+  const animal = f.kind === 'animal';
+  const anc = seasonStart(f);
+
+  const buy = [];
+  if (peaks.length) buy.push(['Buy', 'good', `${runsText(peaks, anc)}. At its peak: best flavour, most supply, lowest prices.`]);
+  else if (inMonths.length) buy.push(['Buy', 'good', `${runsText(inMonths, anc)}. No standout peak; it’s consistently good.`]);
+  if (okay.length && peaks.length) buy.push(['Fine', '', `${runsText(okay, anc)}. Perfectly good, just not at its very best.`]);
+  else if (okay.length && !peaks.length && f.cal.some(x => x === 'shoulder')) buy.push(['Fine', '', `${runsText(f.cal.map((x, i) => x === 'shoulder' ? i : -1).filter(i => i >= 0), anc)}. Early or late in the season.`]);
+  buy.push(['Skip', '', outs.length ? `${runsText(outs, anc)}. ${animal ? 'Closed season, scarce, or frozen and imported.' : 'Usually imported or cold-stored: pricier and blander.'}` : 'No bad month to buy it.']);
+  if (f.rating === 'sayno') buy.push(['Caution', '', 'Available any month, but see the sustainability note below.']);
+
+  const ratingName = { better: 'Better Choice', eatless: 'Eat Less', sayno: 'Say No' };
+  const chart = f.cal.map((x, i) => `<li class="${x}${i === m ? ' sel' : ''}${i === NOW.month ? ' now' : ''}"><span class="bar" aria-hidden="true"><i></i></span><span class="m" aria-hidden="true">${MON[i][0]}<span class="m-rest">${MON[i].slice(1)}</span></span><span class="sr">${MONTHS[i]}: ${STATE_LABEL[x]}${i === NOW.month ? ' (this month)' : ''}</span></li>`).join('');
+
+  $('#detail-body').innerHTML = `
+    <div class="d-em" aria-hidden="true">${f.emoji}</div>
+    <div class="d-tags"><span class="kind-tag ${f.kind}">${animal ? 'Animal product' : 'Produce'}</span><span class="kind-tag">${esc(c.label)}</span>${f.origin ? `<span class="kind-tag">${esc(f.origin)}</span>` : ''}</div>
+    <h2 class="d-name" id="d-name">${esc(f.name)}</h2>
+    <p class="d-note">${esc(f.note)}</p>
+    <p class="d-summary">${esc(describeSeason(f))}</p>
+    <p class="d-now mono"><strong>${esc(MONTHS[m])}: ${esc(STATE_LABEL[s])}.</strong> ${esc(nextMoves(f, m))}</p>
+    <ol class="chart" aria-label="Month by month">${chart}</ol>
+    <ul class="chart-key mono" aria-hidden="true"><li><span class="dot peak"></span>Peak</li><li><span class="dot in"></span>In season</li><li><span class="dot shoulder"></span>Shoulder</li><li><span class="dot out"></span>Out</li></ul>
+    <div class="d-section"><h3>When to buy</h3><ul class="buy">${buy.map(([k, cls, v]) => `<li><span class="k ${cls}">${k}</span><span>${esc(v)}</span></li>`).join('')}</ul></div>
+    ${(f.rating || f.ratingNote) ? `<div class="d-section"><h3>Sustainability</h3><p class="callout">${f.rating ? `<span class="rating ${f.rating}">GoodFish: ${ratingName[f.rating]}</span><br>` : ''}${esc(f.ratingNote || '')}</p></div>` : ''}
+    ${animal ? `<div class="d-section"><p class="callout">${CAVEAT}</p></div>` : ''}
+    <div class="d-section"><h3>Try</h3><p class="idea">${esc(f.idea)}</p></div>
+    ${f.recipes.length ? `<div class="d-section"><h3>Recipes</h3><ul>${f.recipes.map(r => `<li><a href="${esc(r.url)}">${esc(r.title)}</a></li>`).join('')}</ul></div>` : ''}
+  `;
+  lastFocus = document.activeElement;
+  dlg.querySelector('.sheet').scrollTop = 0;
+  if (typeof dlg.showModal === 'function') { if (!dlg.open) dlg.showModal(); } else dlg.setAttribute('open', '');
+  document.body.style.overflow = 'hidden';
+  $('#detail-close').focus();
+}
+function closeDetail() {
+  if (typeof dlg.close === 'function' && dlg.open) dlg.close(); else dlg.removeAttribute('open');
+}
+dlg.addEventListener('close', () => { document.body.style.overflow = ''; if (lastFocus && document.contains(lastFocus)) lastFocus.focus(); });
+dlg.addEventListener('click', e => { if (e.target === dlg) closeDetail(); });
+$('#detail-close').addEventListener('click', closeDetail);
+
+/* ---------- surprise me ---------- */
+$('#surprise-btn').addEventListener('click', () => {
+  const m = state.month;
+  const pool = visibleFoods().filter(f => rankAt(f, m) >= 2 && f.rating !== 'sayno');
+  const box = $('#surprise');
+  if (!pool.length) { box.innerHTML = `<p>Nothing to suggest from here in ${MONTHS[m]}. Try “Everything”.</p>`; box.classList.add('show'); return; }
+  const weighted = pool.flatMap(f => stateAt(f, m) === 'peak' ? [f, f] : [f]);
+  let pick = weighted[Math.floor(Math.random() * weighted.length)];
+  if (box.dataset.last === pick.id && pool.length > 1) pick = pool.find(f => f.id !== pick.id);
+  box.dataset.last = pick.id;
+  box.innerHTML = `<span class="em" aria-hidden="true">${pick.emoji}</span><p><strong>${esc(pick.name)}.</strong> ${esc(pick.idea)} <button type="button" class="link-btn" data-open="${pick.id}">More</button></p><button type="button" class="x" aria-label="Dismiss suggestion">×</button>`;
+  box.classList.remove('show'); void box.offsetWidth; box.classList.add('show');
+});
+$('#surprise').addEventListener('click', e => {
+  if (e.target.closest('.x')) { $('#surprise').classList.remove('show'); $('#surprise-btn').focus(); }
+  const o = e.target.closest('[data-open]'); if (o) openDetail(o.dataset.open);
+});
+
+/* ---------- wiring ---------- */
+function setMonth(m, opts = {}) {
+  state.month = mod(m, 12);
+  try { history.replaceState(null, '', state.month === NOW.month ? location.pathname + location.search : '#' + MON[state.month].toLowerCase()); } catch (e) {}
+  renderAll();
+  scrollMonthIntoView(true);
+  if (opts.focus) { const b = document.querySelector(`.month-btn[data-m="${state.month}"]`); if (b) b.focus(); }
+}
+function renderSort() { document.querySelectorAll('[data-sort]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.sort === state.sort))); }
+function renderAll() { renderHero(); renderMonths(); renderChips(); renderSort(); renderList(); }
+document.querySelector('.seg').addEventListener('click', e => {
+  const b = e.target.closest('[data-sort]'); if (!b || b.dataset.sort === state.sort) return;
+  state.sort = b.dataset.sort;
+  try { localStorage.setItem('seasons.sort', state.sort); } catch (e) {}
+  renderSort(); renderList();
+});
+
+$('#months').addEventListener('click', e => { const b = e.target.closest('.month-btn'); if (b) setMonth(+b.dataset.m); });
+$('#months').addEventListener('keydown', e => {
+  const b = e.target.closest('.month-btn'); if (!b) return;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); setMonth(+b.dataset.m + (e.key === 'ArrowRight' ? 1 : -1), { focus: true }); }
+});
+$('#today').addEventListener('click', () => { if (state.month !== NOW.month) setMonth(NOW.month); });
+$('#chips').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  state.filter = b.dataset.cat;
+  renderAll();
+});
+$('#list').addEventListener('click', e => {
+  if (e.target.closest('#exit-contrarian')) { state.contrarian = false; renderList(); return; }
+  const c = e.target.closest('.card'); if (c) openDetail(c.dataset.id);
+});
+
+const q = $('#q');
+q.addEventListener('input', () => {
+  state.query = q.value.trim();
+  $('#clear').hidden = !q.value;
+  if (state.query) state.contrarian = false;
+  renderList();
+  checkShout(q.value);
+});
+q.addEventListener('keydown', e => { if (e.key === 'Escape' && q.value) { e.stopPropagation(); q.value = ''; q.dispatchEvent(new Event('input')); } });
+$('#clear').addEventListener('click', () => { q.value = ''; q.dispatchEvent(new Event('input')); q.focus(); });
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && document.activeElement !== q && !dlg.open) { e.preventDefault(); q.focus(); }
+});
+
+
+/* ---------- rotary dials: light/dark mode and colour palette ---------- */
+const ICON = {
+  auto:   '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.8a6.2 6.2 0 0 1 0 12.4z" fill="currentColor"/></svg>',
+  light:  '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="currentColor"/><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 1v1.6M8 13.4V15M1 8h1.6M13.4 8H15M3 3l1.1 1.1M11.9 11.9 13 13M3 13l1.1-1.1M11.9 4.1 13 3"/></g></svg>',
+  dark:   '<svg viewBox="0 0 16 16"><path d="M13.6 10.4A6 6 0 0 1 5.6 2.4a6 6 0 1 0 8 8z" fill="currentColor"/></svg>',
+  wheel:  '<svg viewBox="0 0 16 16"><path d="M8 8V1.5A6.5 6.5 0 0 1 14.5 8z" fill="#e0603e"/><path d="M8 8h6.5A6.5 6.5 0 0 1 8 14.5z" fill="#c9792f"/><path d="M8 8v6.5A6.5 6.5 0 0 1 1.5 8z" fill="#4f8f7d"/><path d="M8 8H1.5A6.5 6.5 0 0 1 8 1.5z" fill="#6fa043"/></svg>',
+  summer: '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="3.2" fill="#e0603e"/><g stroke="#e0603e" stroke-width="1.6" stroke-linecap="round"><path d="M8 1v1.6M8 13.4V15M1 8h1.6M13.4 8H15M3 3l1.1 1.1M11.9 11.9 13 13M3 13l1.1-1.1M11.9 4.1 13 3"/></g></svg>',
+  autumn: '<svg viewBox="0 0 16 16"><path d="M2.5 13.5C2.5 6.5 6.5 2.5 13.5 2.5c0 7-4 11-11 11z" fill="#c9792f"/><path d="M2.5 13.5 9 7" stroke="var(--surface)" stroke-width="1.2" stroke-linecap="round"/></svg>',
+  winter: '<svg viewBox="0 0 16 16"><g stroke="#4f8f7d" stroke-width="1.7" stroke-linecap="round"><path d="M8 1.5v13M2.4 4.75l11.2 6.5M2.4 11.25l11.2-6.5"/></g></svg>',
+  spring: '<svg viewBox="0 0 16 16"><g fill="#6fa043"><circle cx="8" cy="4.4" r="3"/><circle cx="11.6" cy="8" r="3"/><circle cx="8" cy="11.6" r="3"/><circle cx="4.4" cy="8" r="3"/></g><circle cx="8" cy="8" r="1.9" fill="#f3d35b"/></svg>'
+};
+
+// Builds one dial. `options` are in clockwise order; clicking advances one step.
+function makeDial(btn, { name, options, initial, onChange }) {
+  const N = options.length;
+  const copies = Math.ceil(5 / N);              // repeat options so neighbours always peek into the window
+  const slots = N * copies, step = 360 / slots;
+  let turns = Math.max(0, options.findIndex(o => o.id === initial));
+  btn.innerHTML = `<span class="dial-window" aria-hidden="true"><span class="dial-disc">${
+    Array.from({ length: slots }, (_, k) => `<span class="dial-slot" style="--a:${-k * step}deg">${options[k % N].icon}</span>`).join('')
+  }</span><span class="dial-hub"></span><span class="dial-tick"></span></span><span class="dial-label" aria-hidden="true"></span>`;
+  const disc = btn.querySelector('.dial-disc'), slotEls = btn.querySelectorAll('.dial-slot'), label = btn.querySelector('.dial-label');
+  function show(animate) {
+    if (!animate) disc.style.transition = 'none';
+    disc.style.transform = `rotate(${turns * step}deg)`;   // positive = clockwise
+    if (!animate) { void disc.offsetWidth; disc.style.transition = ''; }
+    const cur = options[turns % N], next = options[(turns + 1) % N];
+    slotEls.forEach((el, k) => el.classList.toggle('on', k === turns % slots));
+    label.textContent = cur.label;
+    btn.setAttribute('aria-label', `${name}: ${cur.label}${cur.hint ? ` (${cur.hint})` : ''}. Turn to ${next.label}.`);
+    btn.title = `${name}: ${cur.label}`;
+  }
+  btn.addEventListener('click', () => { turns++; show(true); onChange(options[turns % N].id); });
+  show(false);
+}
+
+const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+function syncThemeColor() {
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#f6f7f0');
+}
+function applyTheme(pref) {
+  const dark = pref === 'dark' || (pref === 'auto' && systemDark.matches);
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  document.documentElement.setAttribute('data-theme-pref', pref);
+  syncThemeColor();
+}
+makeDial($('#theme-dial'), {
+  name: 'Light or dark',
+  options: [
+    { id: 'auto',  label: 'Auto',  icon: ICON.auto,  hint: 'follows your device' },
+    { id: 'light', label: 'Light', icon: ICON.light },
+    { id: 'dark',  label: 'Dark',  icon: ICON.dark }
+  ],
+  initial: document.documentElement.getAttribute('data-theme-pref') || 'auto',
+  onChange: pref => { try { localStorage.setItem('seasons.theme', pref); } catch (e) {} applyTheme(pref); }
+});
+// In Auto, follow the device if it switches while the page is open.
+const onSystemChange = () => { if ((document.documentElement.getAttribute('data-theme-pref') || 'auto') === 'auto') applyTheme('auto'); };
+if (systemDark.addEventListener) systemDark.addEventListener('change', onSystemChange); else if (systemDark.addListener) systemDark.addListener(onSystemChange);
+applyTheme(document.documentElement.getAttribute('data-theme-pref') || 'auto');
+
+makeDial($('#palette-dial'), {
+  name: 'Colour palette',
+  options: [
+    { id: 'auto',   label: 'Auto',   icon: ICON.wheel,  hint: 'matches the month you’re viewing' },
+    { id: 'summer', label: 'Summer', icon: ICON.summer },
+    { id: 'autumn', label: 'Autumn', icon: ICON.autumn },
+    { id: 'winter', label: 'Winter', icon: ICON.winter },
+    { id: 'spring', label: 'Spring', icon: ICON.spring }
+  ],
+  initial: paletteChoice,
+  onChange: id => { paletteChoice = id; try { localStorage.setItem('seasons.palette', id); } catch (e) {} renderHero(); }
+});
+
+
+/* =====================================================================
+   SECRETS (lightweight, nothing traps or autoplays)
+   ===================================================================== */
+const STORE_KEY = 'seasons.secrets';
+let foundSet = new Set();
+try { foundSet = new Set(JSON.parse(localStorage.getItem(STORE_KEY) || '[]')); } catch (e) {}
+
+function found(id) {
+  if (foundSet.has(id)) return;
+  foundSet.add(id);
+  try { localStorage.setItem(STORE_KEY, JSON.stringify([...foundSet])); } catch (e) {}
+  renderSecrets();
+  setTimeout(() => toast(`Secret found (${foundSet.size} of ${SECRETS.length}).`), 900);
+}
+function renderSecrets() {
+  const n = foundSet.size;
+  $('#secrets').innerHTML = `<h2>${n === SECRETS.length ? 'You found them all. Go and buy some asparagus.' : `There are ${SECRETS.length} secrets here.`}</h2><p>You’ve found ${n}. Some clues:</p><ol>${SECRETS.map(s => `<li class="${foundSet.has(s.id) ? 'found' : ''}">${esc(s.clue)}${foundSet.has(s.id) ? '<span class="sr"> (found)</span>' : ''}</li>`).join('')}</ol>`;
+}
+$('#psst').addEventListener('click', e => {
+  const open = e.currentTarget.getAttribute('aria-expanded') !== 'true';
+  e.currentTarget.setAttribute('aria-expanded', String(open));
+  $('#secrets').classList.toggle('show', open);
+  if (open) renderSecrets();
+});
+
+let toastTimer;
+function toast(msg, ms = 3200) {
+  const t = $('#toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), ms);
+}
+
+// 1. The ticklish title: cycles through alternate names.
+let titleIdx = 0;
+$('#title').addEventListener('click', () => {
+  titleIdx = (titleIdx + 1) % (ALT_TITLES.length - 1);
+  $('#title').textContent = ALT_TITLES[titleIdx];
+  if (titleIdx >= 2) found('title');
+});
+
+// 2 + 3. Raining produce: the Konami code, or SHOUTING a food’s name.
+function rain(emojis, message) {
+  if (reduceMotion.matches) { toast(message ? `${message} (Imagine a lot of ${emojis[0]} falling.)` : 'Imagine produce falling from the sky.'); return; }
+  const layer = document.createElement('div'); layer.className = 'rain'; layer.setAttribute('aria-hidden', 'true');
+  for (let i = 0; i < 42; i++) {
+    const s = document.createElement('span');
+    s.textContent = emojis[i % emojis.length];
+    s.style.left = Math.random() * 100 + 'vw';
+    s.style.fontSize = 22 + Math.random() * 26 + 'px';
+    s.style.animationDuration = 2.2 + Math.random() * 2.2 + 's';
+    s.style.animationDelay = Math.random() * 1.2 + 's';
+    s.style.setProperty('--r', (Math.random() * 540 - 270) + 'deg');
+    layer.appendChild(s);
+  }
+  document.body.appendChild(layer);
+  if (message) {
+    const big = document.createElement('div'); big.className = 'shout'; big.setAttribute('aria-hidden', 'true'); big.textContent = message;
+    document.body.appendChild(big); setTimeout(() => big.remove(), 2700);
+    toast(message);
+  }
+  setTimeout(() => layer.remove(), 5000);
+}
+const KONAMI = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+let kPos = 0;
+document.addEventListener('keydown', e => {
+  if (e.target === q) return;
+  const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+  kPos = k === KONAMI[kPos] ? kPos + 1 : (k === KONAMI[0] ? 1 : 0);
+  if (kPos === KONAMI.length) {
+    kPos = 0;
+    const em = [...new Set(foods.filter(f => f.kind === 'produce' && rankAt(f, state.month) >= 2).map(f => f.emoji))];
+    rain(em.length ? em : ['🍑'], 'Season’s eatings!');
+    found('konami');
+  }
+});
+let lastShout = '';
+function checkShout(raw) {
+  const m = raw.trim().match(/^([A-Z][A-Z &'’-]{2,})!+$/);
+  if (!m || raw === lastShout) return;
+  const word = norm(m[1]);
+  const f = foods.find(x => norm(x.name) === word || norm(x.name).replace(/s$/, '') === word.replace(/s$/, '')) || foods.find(x => matches(x, word));
+  if (!f) return;
+  lastShout = raw;
+  rain([f.emoji], f.name.toUpperCase() + '!');
+  found('shout');
+}
+
+// 4. Tap the latitude to see the world the right way up (for once).
+let flipping = false;
+$('#coords').addEventListener('click', () => {
+  found('flip');
+  if (reduceMotion.matches) { toast('We’d flip the page upside down, but you’ve asked for less motion. Picture it.'); return; }
+  if (flipping) return; flipping = true;
+  document.documentElement.classList.add('flipped');
+  toast('G’day from down under. Everything’s the other way up here.', 2600);
+  setTimeout(() => { document.documentElement.classList.remove('flipped'); setTimeout(() => flipping = false, 900); }, 2600);
+});
+
+// 5. The quiet fourth item in the key opens contrarian mode.
+$('#legend-out').addEventListener('click', () => {
+  state.contrarian = !state.contrarian;
+  if (state.contrarian) { state.query = ''; q.value = ''; $('#clear').hidden = true; found('contrarian'); }
+  renderList();
+  $('#list').scrollIntoView({ behavior: reduceMotion.matches ? 'auto' : 'smooth', block: 'start' });
+});
+
+/* ---------- start ---------- */
+(function start() {
+  const h = (location.hash || '').slice(1, 4).toLowerCase();
+  const hm = MON.findIndex(x => x.toLowerCase() === h);
+  if (hm >= 0) state.month = hm;
+  q.placeholder = `Search ${foods.length} foods`;
+  renderMasthead();
+  renderAll();
+  requestAnimationFrame(() => scrollMonthIntoView(false));
+  window.addEventListener('hashchange', () => {
+    const hh = (location.hash || '').slice(1, 4).toLowerCase();
+    const i = MON.findIndex(x => x.toLowerCase() === hh);
+    if (i >= 0 && i !== state.month) setMonth(i);
+  });
+})();
+</script>
+</body>
+</html>
