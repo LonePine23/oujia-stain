@@ -256,6 +256,16 @@ ol.steps li::before {
   background: var(--surface-2); color: var(--text); border: 1px solid var(--line);
   display: grid; place-items: center; font-size: 13px; font-weight: 700;
 }
+/* Method headings: styled to match the ingredient headings, and they don't
+   take a number — the count carries on past them. */
+ol.steps li.step-head {
+  counter-increment: none; padding: 14px 0 12px;
+  border-top: 1px solid var(--line); margin-top: 4px;
+  font-size: 12px; font-weight: 700; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--text);
+}
+ol.steps li.step-head::before { content: none; }
+ol.steps li.step-head:first-child { border-top: none; margin-top: 0; padding-top: 0; }
 .notebox { background: var(--surface-2); border-left: 3px solid var(--accent); border-radius: 8px; padding: 12px 14px; margin-top: 20px; font-size: 15px; white-space: pre-wrap; }
 
 /* --- editor --------------------------------------------------------------- */
@@ -347,6 +357,36 @@ ol.steps li::before {
 @media (min-width: 560px) { .panel { align-items: center; } .panel .sheet { border-radius: 16px; } }
 .menuitem { display: block; width: 100%; text-align: left; border: none; background: none; padding: 12px 6px; border-radius: 8px; }
 .menuitem:hover { background: var(--surface-2); }
+
+/* --- manage categories ---------------------------------------------------- */
+.sheet-head { display: flex; align-items: center; gap: 10px; }
+.cat-row {
+  display: grid; gap: 8px; align-items: center;
+  grid-template-columns: 1fr auto auto;
+  grid-template-areas: "name name name" "count save del";
+  padding: 12px 0; border-top: 1px solid var(--line-soft);
+}
+.cat-row:first-child { border-top: none; padding-top: 0; }
+.cat-row .cat-name  { grid-area: name; }
+.cat-row .cat-count { grid-area: count; font-size: 13px; color: var(--muted); }
+.cat-row .cat-save  { grid-area: save; padding: 7px 12px; font-size: 13px; }
+.cat-row .cat-del   { grid-area: del;  padding: 7px 12px; font-size: 13px; }
+.cat-row.unused .cat-count { color: var(--placeholder); font-style: italic; }
+@media (min-width: 560px) {
+  .cat-row { grid-template-columns: 1fr auto auto auto; grid-template-areas: "name count save del"; }
+}
+
+/* --- unit toggle ---------------------------------------------------------- */
+.units { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 2px; background: var(--surface); }
+.units button {
+  border: none; background: none; border-radius: 999px;
+  padding: 6px 11px; font-size: 12px; font-weight: 600; color: var(--muted);
+}
+.units button:hover { background: var(--surface-2); color: var(--text); }
+.units button.on { background: var(--surface-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line); }
+/* A value that was converted gets a quiet dotted underline, so you can always
+   tell which numbers are the recipe's own and which are the app's arithmetic. */
+.conv { text-decoration: underline dotted var(--muted); text-underline-offset: 3px; }
 .hint { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
 .spinner { text-align: center; padding: 60px; color: var(--muted); }
 .imgpreview { max-width: 100%; border-radius: 10px; margin-bottom: 10px; max-height: 220px; object-fit: cover; display: block; }
@@ -508,9 +548,12 @@ ol.steps li::before {
 
         <div class="field">
           <label>Method</label>
-          <p class="reorder-hint">Drag a step by its number to move it. Splitting a step in two: add a new one, then drag it into place.</p>
+          <p class="reorder-hint">Drag a step by its number to move it. Splitting a step in two: add a new one, then drag it into place. A method heading applies to every step below it.</p>
           <div id="step-list"></div>
-          <button type="button" id="btn-add-step">+ Add step</button>
+          <div class="row" style="margin-top:2px">
+            <button type="button" id="btn-add-step" style="flex:0 0 auto">+ Add step</button>
+            <button type="button" id="btn-add-step-heading" style="flex:0 0 auto">+ Add method heading</button>
+          </div>
         </div>
 
         <div class="field">
@@ -579,6 +622,7 @@ ol.steps li::before {
   <div class="sheet">
     <h3>Yummers</h3>
     <p class="hint" id="menu-account" style="margin-bottom:12px"></p>
+    <button class="menuitem" id="mi-cats">✎&nbsp; Manage categories</button>
     <button class="menuitem" id="mi-export">⬇︎&nbsp; Export a backup (JSON)</button>
     <button class="menuitem" id="mi-export-images">⬇︎&nbsp; Export backup <i>with</i> image files</button>
     <button class="menuitem" id="mi-import">⬆︎&nbsp; Import a backup</button>
@@ -586,6 +630,20 @@ ol.steps li::before {
     <button class="menuitem" id="mi-signout">↪&nbsp; Sign out</button>
     <button class="menuitem ghost" id="mi-close" style="margin-top:8px;text-align:center">Close</button>
     <input type="file" id="import-input" accept="application/json,.json" hidden>
+  </div>
+</div>
+
+<!-- Manage categories sheet -->
+<div class="panel" id="cats-panel" hidden>
+  <div class="sheet">
+    <div class="sheet-head">
+      <h3 style="margin:0;flex:1">Categories</h3>
+      <button class="ghost" id="cats-close">Done</button>
+    </div>
+    <p class="hint" style="margin:6px 0 16px">Edit a name and tap Save to fix a typo.
+      Renaming to a name that already exists merges the two. Deleting a category
+      only takes the label off — the recipes themselves are kept.</p>
+    <div id="cats-list"></div>
   </div>
 </div>
 
@@ -1086,8 +1144,32 @@ const UNITS = [
 const FRAC = '¼½¾⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞';
 const NUM  = `(?:\\d+\\s*[${FRAC}]|\\d+\\s*\\d\\/\\d|\\d+(?:[.,]\\d+)?\\/\\d+|\\d+(?:[.,]\\d+)?|[${FRAC}])`;
 const RANGE= `${NUM}(?:\\s*(?:-|–|—|to|or)\\s*${NUM})?`;
-const AMOUNT_RE = new RegExp(`^(${RANGE})\\s*(${UNITS.join('|')})?\\.?\\b\\s*(?:of\\s+)?(.*)$`, 'i');
+// After the unit: EITHER a full stop ("Tbsp.") OR a word boundary — never an
+// optional full stop followed by a boundary. That older form failed on
+// "2 Tbsp. soy sauce": the full stop then a space has no boundary between
+// them, so it backed off the full stop and left the ingredient as ". soy sauce".
+const AMOUNT_RE = new RegExp(`^(${RANGE})\\s*(?:(${UNITS.join('|')})(?:\\.|\\b)|\\b)\\s*(?:of\\s+)?(.*)$`, 'i');
 const WORDY_AMOUNT_RE = new RegExp(`^(an?|one|two|three|four|five|six)\\s+((?:${UNITS.join('|')}))\\s+(?:of\\s+)?(.+)$`, 'i');
+
+// Units that measure an amount, as opposed to counting containers. Used to
+// tell "¾ cup (180 g)" — the same amount written twice, which should scale
+// together — from "1 tin (400 g)" — a tin of a fixed size, which shouldn't.
+const MEASURE_UNITS = 'cups?|c|tbsps?|tbs|tablespoons?|tsps?|teaspoons?|dsp|dessertspoons?|' +
+  'g|gr|grams?|kg|kilos?|kilograms?|ml|mls|millilit(?:re|er)s?|l|lit(?:re|er)s?|' +
+  'fl\\.?\\s?oz|oz|ounces?|lbs?|pounds?|sticks?';
+const METRIC_SHORT = { gram:'g', grams:'g', gr:'g', milliliter:'ml', milliliters:'ml',
+  millilitre:'ml', millilitres:'ml', mls:'ml', kilogram:'kg', kilograms:'kg', kilos:'kg',
+  liter:'L', liters:'L', litre:'L', litres:'L' };
+const shortUnit = u => METRIC_SHORT[u.toLowerCase()] || u;
+
+// The second half of a two-unit amount, sitting at the start of the item:
+// "/180 grams eggnog", "(4 oz) mascarpone", "(¾ stick) butter". The
+// (?![A-Za-z]) makes "grams" match as "grams" — without it, "g" alone would
+// match first and leave "rams eggnog" behind.
+const ALT_LEADING_RE  = new RegExp(`^\\s*(?:\\/|\\()\\s*(${NUM})\\s*(${MEASURE_UNITS})(?![A-Za-z])\\.?\\s*\\)?\\s*`, 'i');
+// …or at the end: "granulated sugar (90 g)".
+const ALT_TRAILING_RE = new RegExp(`\\s*\\(\\s*(${NUM})\\s*(g|gr|grams?|kg|kilograms?|ml|millilit(?:re|er)s?|oz|ounces?)\\s*\\)\\s*$`, 'i');
+const HAS_MEASURE_RE  = new RegExp(`(?:^|\\s)(?:${MEASURE_UNITS})\\.?$`, 'i');
 
 // Lines that are website furniture rather than recipe content.
 const JUNK_RE = /^(print(?:\s+recipe)?|pin(?:\s+it)?|save(?:\s+recipe)?|share|jump to (?:recipe|video)|rate this recipe|advertisement|watch|shop|equipment|nutrition(?: information| facts)?|calories?|protein|carbohydrates?|fat|sodium|fibre|sugar|author|course|cuisine|keywords?|difficulty|©.*|all rights reserved.*)\s*:?\s*$/i;
@@ -1104,18 +1186,37 @@ function stripBullet(line) {
     .trim();
 }
 function stripStepNumber(line) {
-  return line.replace(/^\s*(?:step\s*)?\d{1,2}\s*[.):\]]\s+/i, '').trim();
+  // "1. Preheat", "Step 2) Mix", and "7<tab>At this stage" (a number and a tab,
+  // which is how some sites' numbered lists come through when copied).
+  return line.replace(/^\s*(?:step\s*)?\d{1,2}\s*(?:[.):\]]\s+|\t+)/i, '').trim();
 }
 
-/** Split "2 cups plain flour" into { amount: "2 cups", item: "plain flour" }. */
+/** Split "2 cups plain flour" into { amount: "2 cups", item: "plain flour" }.
+ *
+ *  If the recipe gives the amount two ways — "¾ cup/180 grams eggnog",
+ *  "½ cup (4 oz) mascarpone", "sugar (90 g)" — both halves stay together in
+ *  the amount, as "¾ cup (180 g)". Left in the item, the second half would sit
+ *  there unscaled when you double the recipe, and the line would contradict
+ *  itself. */
 function splitAmount(line) {
   const wordy = line.match(WORDY_AMOUNT_RE);
   if (wordy) return { amount: `${wordy[1]} ${wordy[2]}`.trim(), item: wordy[3].trim() };
 
   const m = line.match(AMOUNT_RE);
   if (m && m[1]) {
-    const amount = [m[1].trim(), (m[2] || '').trim()].filter(Boolean).join(' ');
-    const item = (m[3] || '').trim();
+    let amount = [m[1].trim(), (m[2] || '').trim()].filter(Boolean).join(' ');
+    let item = (m[3] || '').trim();
+    if (HAS_MEASURE_RE.test(amount)) {
+      const lead = item.match(ALT_LEADING_RE);
+      const tail = !lead && item.match(ALT_TRAILING_RE);
+      if (lead) {
+        amount += ` (${lead[1].trim()} ${shortUnit(lead[2])})`;
+        item = item.slice(lead[0].length).trim();
+      } else if (tail) {
+        amount += ` (${tail[1].trim()} ${shortUnit(tail[2])})`;
+        item = item.slice(0, tail.index).trim();
+      }
+    }
     // If splitting left nothing behind, it wasn't really an amount.
     if (item) return { amount, item };
   }
@@ -1137,6 +1238,30 @@ function isIngredientHeading(text) {
 /** Strip the trailing colon off a heading. */
 function cleanHeading(text) {
   return text.trim().replace(/[:：]$/, '').trim();
+}
+
+/** Is this line a section label inside a method — "Make the dough", "Bake",
+ *  "For the frosting:" — rather than an instruction? Short, no full stop, and
+ *  not starting with a number. */
+function isStepLabel(s) {
+  if (typeof s !== 'string') return false;
+  const t = s.trim();
+  if (!t || t.length > 50 || /^[\d¼½¾⅓⅔]/.test(t)) return false;
+  const words = t.replace(/[:：]$/, '').split(/\s+/).length;
+  if (/[:：]$/.test(t)) return words <= 7;
+  if (/[.!?;,)]$/.test(t)) return false;
+  return words <= 5;
+}
+
+/** Turn method labels into headings — but only a label that's followed by a
+ *  real instruction. A short last line like "Serve warm" stays a step. */
+function labelStepHeadings(steps) {
+  return steps.map((s, i) => {
+    const next = steps[i + 1];
+    return isStepLabel(s) && typeof next === 'string' && !isStepLabel(next)
+      ? { heading: cleanHeading(s) }
+      : s;
+  });
 }
 
 /** Does this line look like an ingredient rather than an instruction? */
@@ -1168,6 +1293,8 @@ function parseRecipeText(raw) {
   for (let line of lines) {
     if (!line) { kept.push({ blank: true }); continue; }
     if (JUNK_RE.test(line)) continue;
+    // Divider lines — "⸻", "---", "***" — have no letters or numbers in them.
+    if (!/[\p{L}\p{N}]/u.test(line)) continue;
 
     let m;
     if ((m = line.match(/^serv(?:es|ings?)\s*[:\-–]?\s*(.+)$/i)) && !out.servings) { out.servings = 'Serves ' + m[1].replace(/^serves?\s*/i,''); continue; }
@@ -1274,6 +1401,7 @@ function parseRecipeText(raw) {
   }
 
   out.notes = noteBits.join('\n');
+  out.steps = labelStepHeadings(out.steps);
 
   // Some pastes have no title line at all — fall back to the first step.
   if (!out.title && out.steps.length) out.title = 'Untitled recipe';
@@ -1449,6 +1577,20 @@ function formatQty(v) {
   return String(Math.round(v * 100) / 100);
 }
 
+/** Format a scaled number to suit the unit that follows it. Cups and spoons
+ *  get cook's fractions ("1½ cups"); grams and millilitres get whole numbers,
+ *  because "168¾ g" is a weight nobody can measure. */
+function fmtScaled(v, after) {
+  const u = ((after || '').match(/^\s*([A-Za-z]+)/) || [])[1] || '';
+  if (/^(g|gr|grams?|ml|mls|millilit(?:re|er)s?)$/i.test(u)) return v >= 10 ? String(Math.round(v)) : String(Number(v.toFixed(1)));
+  if (/^(kg|kilos?|kilograms?|l|L|lit(?:re|er)s?)$/i.test(u)) return String(Number(v.toFixed(2)));
+  return formatQty(v);
+}
+
+// "¾ cup (" / "6 tbsp (" / "14 ounces /" — a measuring unit, then the start of
+// a second way of writing the same amount.
+const ALT_MEASURE_RE = new RegExp(`^(\\s*(?:${MEASURE_UNITS})\\.?\\s*(?:\\(|\\/|;|or\\b)\\s*)`, 'i');
+
 /** Scale an amount.
  *
  *  Only the LEADING quantity is scaled — plus its partner if it's a range like
@@ -1456,6 +1598,11 @@ function formatQty(v) {
  *  in "2 x 400g tins" you want four tins, not four tins that have each grown
  *  to 800 g. Same for "1 tin (400g)" — the tin count doubles, the tin doesn't.
  *  Multiplying every number in sight gets both of those wrong.
+ *
+ *  The one exception is the same amount written two ways: "¾ cup (180 g)",
+ *  "6 tbsp (¾ stick)". The tell is that the first number is followed by a
+ *  measuring unit — a cup, a spoon, grams — rather than a container, so the
+ *  bracketed figure is a conversion, not a size, and it scales too.
  *
  *  Text with no number at all — "a pinch", "to taste" — comes back untouched. */
 function scaleText(text, factor) {
@@ -1465,18 +1612,32 @@ function scaleText(text, factor) {
   const first = QTY_RE.exec(text);
   if (!first) return text;                       // nothing numeric to scale
 
-  let out  = text.slice(0, first.index) + formatQty(qtyToNumber(first[0]) * factor);
   let rest = text.slice(first.index + first[0].length);
+  let out  = text.slice(0, first.index) + fmtScaled(qtyToNumber(first[0]) * factor, rest);
 
-  // Is this a range? "1-2 tbsp", "1 – 2 cloves", "2 to 3 tsp"
-  const sep = rest.match(/^(\s*(?:-|–|—|to|or)\s*)/i);
+  // Is this a range? "1-2 tbsp", "1 – 2 cloves", "2 to 3 tsp", "7- to 8-inch"
+  const sep = rest.match(/^(\s*(?:-\s*to|-|–|—|to|or)\s*)/i);
   if (sep) {
     const after = rest.slice(sep[0].length);
     QTY_RE.lastIndex = 0;
     const second = QTY_RE.exec(after);
     if (second && second.index === 0) {          // yes — scale the far end too
-      out += sep[0] + formatQty(qtyToNumber(second[0]) * factor);
-      rest = after.slice(second[0].length);
+      const tail = after.slice(second[0].length);
+      out += sep[0] + fmtScaled(qtyToNumber(second[0]) * factor, tail);
+      rest = tail;
+    }
+  }
+
+  // The same amount written a second way? "¾ cup (180 g)" → scale the 180 too.
+  const alt = rest.match(ALT_MEASURE_RE);
+  if (alt) {
+    const after = rest.slice(alt[0].length);
+    QTY_RE.lastIndex = 0;
+    const q = QTY_RE.exec(after);
+    if (q && q.index === 0) {
+      const tail = after.slice(q[0].length);
+      out += alt[0] + fmtScaled(qtyToNumber(q[0]) * factor, tail);
+      rest = tail;
     }
   }
   return out + rest;
@@ -1495,6 +1656,287 @@ function isScalable(recipe) {
 
 
 /* ===========================================================================
+   10d. UNIT CONVERSION — imperial to metric
+   ===========================================================================
+   A display-only toggle on the recipe page: "As written" or "Metric". Nothing
+   is saved back; the recipe on file keeps exactly what you entered.
+
+   WHAT IT CONVERTS — the conversions that are pure arithmetic, and therefore
+   reliable:
+     °F → °C            350°F, 350 F, 350 degrees F, and bare "350 degrees"
+     oz, lb → g, kg     8 oz → 225 g
+     fl oz, pints,      8 fl oz → 235 ml   (US pints/quarts/gallons — the
+       quarts → ml, L                        imperial ones are different sizes)
+     inches → cm        9-inch tin → 23 cm,  9x13-inch → 23 × 33 cm
+     sticks of butter   1 stick → 113 g   (US convention)
+
+   WHAT IT DELIBERATELY LEAVES ALONE:
+     Cups and spoons. Australia uses them too, so converting "1 cup" to "240 ml"
+     would just be noise. The trap worth knowing is that an Australian
+     tablespoon is 20 ml and an American one is 15 ml — a third bigger — so the
+     page reminds you of that when it matters.
+
+     Cups → grams. "1 cup flour" is about 125 g but "1 cup sugar" is about 200 g,
+     because a cup measures volume and what you need is weight. Doing that
+     properly means a density for every ingredient, and the results are only
+     approximate anyway (scooped flour vs spooned flour differ by 20%). Rather
+     than show numbers that look precise and aren't, it doesn't try.
+
+   TEMPERATURE ROUNDING: oven temperatures round to the nearest 10 (350°F is
+   177°C, which every Australian recipe calls 180°C). Anything under 140°C —
+   sugar stages, meat thermometers, deep-fry oil — rounds to the degree,
+   because 240°F for soft-ball sugar is 116°C and "120°C" would ruin it.
+
+   IF THE RECIPE ALREADY GIVES BOTH — "350°F (180°C)", "8 oz (225 g)" — the
+   author's own metric figure is used and the imperial one dropped, rather than
+   showing "180°C (180°C)".
+*/
+
+const UNITS_KEY = 'yummers.units';
+let unitMode = 'original';
+// Remembered per device. Wrapped in try/catch because private browsing and
+// some locked-down browsers throw on any access to localStorage at all.
+try { if (localStorage.getItem(UNITS_KEY) === 'metric') unitMode = 'metric'; } catch {}
+function setUnitMode(m) {
+  unitMode = m;
+  try { localStorage.setItem(UNITS_KEY, m); } catch {}
+}
+
+// A quantity: same alternatives as QTY_RE, as a reusable non-capturing piece.
+const Q = '(?:\\d+\\s+\\d+\\s*\\/\\s*\\d+|\\d+\\s*[¼½¾⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]|\\d+\\s*\\/\\s*\\d+|\\d+(?:[.,]\\d+)?|[¼½¾⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞])';
+// "-\s*to" comes first so that "7- to 8-inch" is read as one range, 7 to 8,
+// rather than a 7 with a stray hyphen and then a separate "to 8-inch".
+const RANGE_SEP = '\\s*(?:-\\s*to|–|—|-|to)\\s*';
+
+// Each imperial unit: how to recognise it, and what it converts to.
+// Order matters — "fl oz" must be tried before plain "oz".
+const IMPERIAL = [
+  { re: 'fl\\.?\\s*oz|fluid\\s+ounces?',                         kind: 'vol',  f: 29.5735 },
+  { re: 'oz|ounces?',                                            kind: 'mass', f: 28.3495 },
+  { re: 'lbs?|pounds?',                                          kind: 'mass', f: 453.592 },
+  { re: 'pints?|pts?',                                           kind: 'vol',  f: 473.176 },
+  { re: 'quarts?|qts?',                                          kind: 'vol',  f: 946.353 },
+  { re: 'gallons?|gal',                                          kind: 'vol',  f: 3785.41 },
+  { re: 'inch(?:es)?',                                           kind: 'len',  f: 2.54    },
+  { re: '°\\s*F|º\\s*F|degrees?\\s+F(?:ahrenheit)?|F(?:ahrenheit)?', kind: 'temp'           },
+];
+IMPERIAL.forEach(u => u.test = new RegExp(`^(?:${u.re})$`, 'i'));
+const UNIT_ALTS = IMPERIAL.map(u => u.re).join('|');
+
+// "<qty>[–<qty>] <unit>". The (?![A-Za-z]) stops "12 Fresh basil" being read
+// as 12 degrees Fahrenheit.
+const IMPERIAL_RE = new RegExp(
+  `(${Q})(?:${RANGE_SEP}(${Q}))?\\s*-?\\s*(${UNIT_ALTS})(?![A-Za-z])`, 'gi');
+
+// An imperial measurement with the metric already given beside it:
+// "350°F (180°C)", "8 oz / 225 g", "(8 ounces; 225 g)". We keep the author's
+// metric figure. The bracketed form only swallows a closing bracket it opened
+// itself — so in "(8 ounces; 225 g)" the outer brackets survive intact.
+const METRIC_PART = `\\d+(?:[.,]\\d+)?(?:${RANGE_SEP}\\d+(?:[.,]\\d+)?)?\\s*` +
+  `(?:(?:°|º)?\\s*C(?:elsius)?|degrees?\\s+C(?:elsius)?|kg|g|ml|mL|L|l|cm|mm)(?![A-Za-z])`;
+const BOTH_RE = new RegExp(
+  `(${Q})(?:${RANGE_SEP}(${Q}))?\\s*-?\\s*(?:${UNIT_ALTS})(?![A-Za-z])` +
+  `\\s*(?:\\(\\s*(${METRIC_PART})\\s*\\)|(?:\\/|;|or\\b)\\s*(${METRIC_PART}))`, 'gi');
+
+// The reverse: metric first with Fahrenheit tacked on — "180°C (350°F)",
+// "170–180°C (340–350°F)", "180C (160C fan)/350F/gas 4". The °C is already
+// there, so the °F is simply dropped rather than converted into a duplicate.
+const F_PART = `\\d+(?:${RANGE_SEP}\\d+)?\\s*(?:°|º)?\\s*F(?![A-Za-z])`;
+const METRIC_THEN_F_RE = new RegExp(
+  `(\\d+(?:${RANGE_SEP}\\d+)?\\s*(?:°|º)?\\s*C(?![A-Za-z])(?:\\s*\\([^)]*\\))?)` +
+  `\\s*(?:\\(\\s*${F_PART}\\s*\\)|\\/\\s*${F_PART})`, 'g');
+
+// "1 lb 4 oz" — a compound weight, converted as one total.
+const LB_OZ_RE = new RegExp(`(${Q})\\s*(?:lbs?|pounds?)\\.?\\s*(?:,|and)?\\s*(${Q})\\s*(?:oz|ounces?)(?![A-Za-z])`, 'gi');
+
+// Tin sizes: "9x13-inch", "9 x 13 inch", '9x13"', "8-by 8-inch", and a bare
+// "9-by-13 pan" — which in an American recipe always means inches. Without the
+// word "inch" we only convert when a pan, tin or dish follows, so that
+// "2 x 400g tins" and "30 × 48 cm" are left alone.
+const DIM_SEP = '\\s*(?:[x×]|-?\\s*by\\s*-?)\\s*';
+const DIMENSIONS_RE = new RegExp(
+  `(\\d+(?:\\.\\d+)?)${DIM_SEP}(\\d+(?:\\.\\d+)?)(?:${DIM_SEP}(\\d+(?:\\.\\d+)?))?` +
+  `(?:\\s*-?\\s*(?:inch(?:es)?|in\\.|")|` +
+  `(?=\\s+(?:(?:baking|cake|loaf|square|round|rimmed|roasting|sheet)\\s+)?(?:pan|tin|dish|tray|sheet|skillet)s?\\b))`, 'gi');
+
+// Bare degrees, no F or C: "bake at 350 degrees", "a 275° oven". Treated as
+// Fahrenheit from 260 up: a home oven tops out around 250°C, so "275°" can
+// only mean °F. Below that it's genuinely ambiguous — 250 could be a hot
+// oven in °C or a slow one in °F — and is left alone.
+const BARE_DEGREES_RE = /\b(\d{3})\s*(?:°|º|degrees?)(?!\s*(?:[CcFf](?![A-Za-z])|Celsius|Fahrenheit))/g;
+const BARE_F_FROM = 260;
+
+// An inch mark on its own: '10" skillet'. Only when a word follows, so that a
+// number at the end of a quotation ('"Serves 10"') isn't mistaken for inches.
+const INCH_MARK_RE = /(\d+(?:\.\d+)?)\s*(?:"|″|”)(?=\s+[A-Za-z])/g;
+
+/* --- rounding and formatting ---------------------------------------------- */
+const trim = (v, dp) => String(Number(v.toFixed(dp)));
+
+function niceRound(v) {
+  if (v < 15)   return Math.max(1, Math.round(v));
+  if (v < 1000) return Math.round(v / 5) * 5;     // 226.8 g → 225 g
+  return Math.round(v);
+}
+function fToC(f) {
+  const c = (f - 32) * 5 / 9;
+  return c >= 140 ? Math.round(c / 10) * 10 : Math.round(c);
+}
+function fmtMetric(kind, lo, hi = null) {
+  const range = (a, b, fn) => (b == null ? fn(a) : `${fn(a)}–${fn(b)}`);
+  const top = hi == null ? lo : hi;
+  if (kind === 'temp') return range(lo, hi, fToC) + '°C';
+  if (kind === 'len') {
+    // Under a centimetre reads better in millimetres: ¼ inch is "6 mm", not "0.5 cm".
+    if (top < 1) return range(lo, hi, v => String(Math.max(1, Math.round(v * 10)))) + ' mm';
+    return range(lo, hi, v => trim(v < 10 ? Math.round(v * 2) / 2 : Math.round(v), 1)) + ' cm';
+  }
+  // Kilos and litres: two decimals for small amounts (1.36 kg of mince), one
+  // for big ones — "5.4 kg turkey", not "5.44 kg", which is false precision.
+  const big = v => trim(v / 1000, top >= 5000 ? 1 : 2);
+  if (kind === 'mass') {
+    return top >= 1000 ? range(lo, hi, big) + ' kg' : range(lo, hi, niceRound) + ' g';
+  }
+  /* vol */
+  return top >= 1000 ? range(lo, hi, big) + ' L' : range(lo, hi, niceRound) + ' ml';
+}
+
+/* --- marking converted text ------------------------------------------------
+   Converted pieces are wrapped in invisible marker characters that carry both
+   the original and the new text. That lets one function feed two outputs:
+   the page (dotted underline, original in the tooltip) and the clipboard
+   (just the converted text). The markers are control characters that can't
+   appear in anything you'd type. */
+const M_OPEN = '\u0001', M_MID = '\u0003', M_CLOSE = '\u0002';
+const mark = (orig, conv) => M_OPEN + orig + M_MID + conv + M_CLOSE;
+const MARK_RE = /\u0001([^\u0003]*)\u0003([^\u0002]*)\u0002/g;
+
+/** For the page: escape everything, then turn markers into underlined spans. */
+function renderConv(s) {
+  return esc(s).replace(MARK_RE, '<span class="conv" title="As written: $1">$2</span>');
+}
+/** For the clipboard: just the converted text. */
+function plainConv(s) { return String(s).replace(MARK_RE, '$2'); }
+
+/** Run a replacement only over the parts that haven't been converted yet —
+ *  otherwise a later pass could find "13-inch" inside the *original* text a
+ *  marker is carrying, and convert it twice. */
+function outsideMarks(text, re, fn) {
+  return text.split(/(\u0001[^\u0002]*\u0002)/)
+    .map(seg => seg.startsWith(M_OPEN) ? seg : seg.replace(re, fn))
+    .join('');
+}
+
+/** Convert every imperial measurement in a piece of text. */
+function convertText(text) {
+  if (!text) return text || '';
+  let s = text;
+
+  // 1. The author already gave metric alongside — use theirs. Tidy a bare
+  //    "200C" into "200°C" while we're at it.
+  s = outsideMarks(s, BOTH_RE, (all, _a, _b, inBrackets, afterSlash) => {
+    let m = (inBrackets || afterSlash).trim();
+    if (!/cm$|mm$/i.test(m) && /C(?:elsius)?$/i.test(m)) {
+      m = m.replace(/\s*(?:°|º)?\s*(?:degrees?\s+)?C(?:elsius)?$/i, '') + '°C';
+    }
+    return mark(all.trim(), m);
+  });
+
+  // 1b. Metric first with °F tacked on after: keep the metric, drop the °F.
+  s = outsideMarks(s, METRIC_THEN_F_RE, (all, metric) => mark(all, metric.trim()));
+
+  // 2. Tin and pan sizes — always in whole or half centimetres.
+  s = outsideMarks(s, DIMENSIONS_RE, (all, a, b, c) => {
+    const cm = [a, b, c].filter(Boolean).map(v => {
+      const x = parseFloat(v) * 2.54;
+      return trim(x < 10 ? Math.round(x * 2) / 2 : Math.round(x), 1);
+    });
+    return mark(all, cm.join(' × ') + ' cm');
+  });
+
+  // 2b. Compound weights, "1 lb 4 oz", as a single total.
+  s = outsideMarks(s, LB_OZ_RE, (all, lb, oz) =>
+    mark(all, fmtMetric('mass', qtyToNumber(lb) * 453.592 + qtyToNumber(oz) * 28.3495)));
+
+  // 3. Quantities with an imperial unit.
+  s = outsideMarks(s, IMPERIAL_RE, (all, q1, q2, unit) => {
+    const u = IMPERIAL.find(x => x.test.test(unit.trim()));
+    if (!u) return all;
+    const lo = qtyToNumber(q1), hi = q2 ? qtyToNumber(q2) : null;
+    if (!isFinite(lo)) return all;
+    const conv = u.kind === 'temp'
+      ? fmtMetric('temp', lo, hi)
+      : fmtMetric(u.kind, lo * u.f, hi == null ? null : hi * u.f);
+    return mark(all, conv);
+  });
+
+  // 3b. A lone inch mark: '10" skillet'.
+  s = outsideMarks(s, INCH_MARK_RE, (all, n) => mark(all, fmtMetric('len', parseFloat(n) * 2.54)));
+
+  // 4. "350 degrees" / "275°" with no scale given.
+  s = outsideMarks(s, BARE_DEGREES_RE, (all, n) =>
+    Number(n) >= BARE_F_FROM ? mark(all, fmtMetric('temp', Number(n))) : all);
+
+  // 5. Fix the article in front of anything converted: "an 8-inch tin" becomes
+  //    "a 20 cm tin", and "a 7-inch" becoming 18 cm needs "an". English uses
+  //    "an" before numbers said with a vowel sound: 8, 11, 18, 80-something…
+  s = s.replace(/\b(an?|An?)(\s+)(?=\u0001[^\u0003]*\u0003([^\u0002]*)\u0002)/g, (all, art, sp, conv) => {
+    const wantAn = /^(8|11(?!\d)|18(?!\d))/.test(conv);
+    const cap = art[0] === 'A';
+    return (wantAn ? (cap ? 'An' : 'an') : (cap ? 'A' : 'a')) + sp;
+  });
+
+  return s;
+}
+
+/** Ingredient amounts get one extra rule: US sticks of butter. */
+const STICK_RE = new RegExp(`^\\s*(${Q})\\s*sticks?\\s*$`, 'i');
+function convertAmount(amount, item) {
+  const m = amount && amount.match(STICK_RE);
+  if (m && /butter/i.test(item || '')) {
+    return mark(amount, fmtMetric('mass', qtyToNumber(m[1]) * 113.4));
+  }
+  return convertText(amount);
+}
+
+/* --- what the page and the clipboard both use -------------------------------
+   These return marked text, already scaled and converted per the current view.
+   Scaling happens first, then conversion: "8 oz" doubled is "16 oz", which is
+   then 455 g. */
+function viewAmount(x, factor) {
+  const scaled = x.amount ? scaleText(x.amount, factor) : '';
+  return unitMode === 'metric' ? convertAmount(scaled, x.item) : scaled;
+}
+function viewItem(x)  { return unitMode === 'metric' ? convertText(x.item || '') : (x.item || ''); }
+function viewProse(s) { return unitMode === 'metric' ? convertText(s || '') : (s || ''); }
+
+/** Is there anything in this recipe that the Metric toggle would change? */
+function hasImperial(r) {
+  const hit = s => typeof s === 'string' && !!s && convertText(s).includes(M_OPEN);
+  return (r.ingredients || []).some(x =>
+      hit(x.amount) || hit(x.item) ||
+      (STICK_RE.test(x.amount || '') && /butter/i.test(x.item || '')))
+    || (r.steps || []).some(hit) || hit(r.notes);
+}
+
+/* --- method headings --------------------------------------------------------
+   A method is a list of steps, and a step is either a string (an instruction)
+   or { heading: "Make the dough" }. Same idea as ingredient headings: a
+   heading is just another entry in the list, so it can be dragged like a step,
+   and everything below it belongs to it until the next heading.
+
+   Step numbers run straight through the headings (1, 2, 3 | 4, 5…) rather
+   than restarting per section, so a note like "make ahead through step 2"
+   still points at the right step. */
+const isStepHeading = s => !!s && typeof s === 'object' && typeof s.heading === 'string';
+
+/** Does this recipe use tablespoons? (For the 15 ml vs 20 ml reminder.) */
+function usesTablespoons(r) {
+  return (r.ingredients || []).some(x => /\b(tbsp|tbs|tablespoons?)\b/i.test(`${x.amount || ''} ${x.item || ''}`));
+}
+
+
+/* ===========================================================================
    10c. COPY TO CLIPBOARD
    ===========================================================================
    Three copy buttons: the ingredients on their own (for a shopping list or a
@@ -1506,7 +1948,8 @@ function isScalable(recipe) {
    original would be surprising, given the screen says 4 cups.
 */
 
-/** The ingredient list as plain text, with a blank line before each section. */
+/** The ingredient list as plain text, with a blank line before each section.
+ *  Scaled and unit-converted exactly as the page currently shows it. */
 function ingredientsToText(r, factor) {
   const lines = [];
   (r.ingredients || []).forEach(x => {
@@ -1514,7 +1957,7 @@ function ingredientsToText(r, factor) {
       if (lines.length) lines.push('');
       lines.push(x.heading);
     } else {
-      lines.push([x.amount ? scaleText(x.amount, factor) : '', x.item]
+      lines.push([plainConv(viewAmount(x, factor)), plainConv(viewItem(x))]
         .filter(Boolean).join(' '));
     }
   });
@@ -1523,7 +1966,19 @@ function ingredientsToText(r, factor) {
 
 /** The method as a numbered list. */
 function stepsToText(r) {
-  return (r.steps || []).map((s, i) => `${i + 1}. ${s}`).join('\n');
+  // Headings on their own line with a blank line before; step numbers carry
+  // on across sections, the same as on screen.
+  const lines = [];
+  let n = 0;
+  (r.steps || []).forEach(s => {
+    if (isStepHeading(s)) {
+      if (lines.length) lines.push('');
+      lines.push(s.heading);
+    } else {
+      lines.push(`${++n}. ${plainConv(viewProse(s))}`);
+    }
+  });
+  return lines.join('\n');
 }
 
 /** The whole thing, laid out so it reads properly pasted into Notes, an email
@@ -1545,7 +2000,7 @@ function recipeToText(r, factor) {
   const steps = stepsToText(r);
   if (steps) out.push('', 'METHOD', '', steps);
 
-  if (r.notes) out.push('', 'NOTES', '', r.notes);
+  if (r.notes) out.push('', 'NOTES', '', plainConv(viewProse(r.notes)));
   if (r.source_url) out.push('', `Source: ${r.source_url}`);
 
   return out.join('\n');
@@ -1604,6 +2059,10 @@ async function copyToClipboard(text, button, what) {
 async function openDetail(id) {
   const r = recipes.find(x => x.id === id);
   if (!r) return;
+  // Redrawing the recipe you're already looking at (scaling, switching units,
+  // starring it) should leave you where you were on the page, not throw you
+  // back to the top.
+  const keepScroll = (id === detailId && !$('#view-detail').hidden) ? window.scrollY : null;
   // Opening a different recipe resets the scale; re-rendering the same one
   // (e.g. after tapping the favourite star) keeps it.
   if (id !== detailId) { detailId = id; scaleIdx = SCALE_DEFAULT; }
@@ -1629,6 +2088,17 @@ async function openDetail(id) {
       <button id="sc-up" title="Bigger batch" aria-label="Scale up" ${scaleIdx === SCALES.length - 1 ? 'disabled' : ''}>+</button>
     </span>` : (servings ? `<span><b>${esc(servings)}</b></span>` : '');
 
+  // The units toggle only appears when this recipe actually has something to
+  // convert — on a recipe that's already metric it would be a button that
+  // does nothing.
+  const convertible = hasImperial(r);
+  const unitsHtml = convertible ? `
+    <span class="units" role="group" aria-label="Units">
+      <button data-u="original" class="${unitMode === 'original' ? 'on' : ''}">As written</button>
+      <button data-u="metric"   class="${unitMode === 'metric'   ? 'on' : ''}">Metric</button>
+    </span>` : '';
+  const showSpoonNote = convertible && unitMode === 'metric' && usesTablespoons(r);
+
   $('#view-detail').innerHTML = `
     ${src ? `<img class="hero" src="${esc(src)}" alt="">` : ''}
     <div class="toolbar">
@@ -1640,6 +2110,7 @@ async function openDetail(id) {
     ${r.description ? `<p class="lede">${esc(r.description)}</p>` : ''}
     <div class="factbar">
       ${scalerHtml}
+      ${unitsHtml}
       ${r.prep_time  ? `<span>Prep <b>${esc(r.prep_time)}</b></span>` : ''}
       ${r.cook_time  ? `<span>Cook <b>${esc(r.cook_time)}</b></span>` : ''}
       ${stars        ? `<span style="color:var(--star)">${stars}</span>` : ''}
@@ -1652,11 +2123,15 @@ async function openDetail(id) {
           ${(r.ingredients || []).length ? `<button class="btn-copy" id="cp-ing">Copy</button>` : ''}
         </div>
         <ul class="ingredients">
-          ${(r.ingredients || []).map(x => x.heading
-            ? `<li class="ing-head">${esc(x.heading)}</li>`
-            : `<li>${x.amount ? `<b>${esc(scaleText(x.amount, factor))}</b> ` : ''}${esc(x.item)}</li>`
-          ).join('') || '<li style="color:var(--muted)">None listed</li>'}
+          ${(r.ingredients || []).map(x => {
+            if (x.heading) return `<li class="ing-head">${esc(x.heading)}</li>`;
+            const amt = viewAmount(x, factor);
+            return `<li>${amt ? `<b>${renderConv(amt)}</b> ` : ''}${renderConv(viewItem(x))}</li>`;
+          }).join('') || '<li style="color:var(--muted)">None listed</li>'}
         </ul>
+        ${showSpoonNote ? `<p class="hint" style="margin-top:10px">Cups and spoons are left
+          as written. If this is an American recipe, mind the tablespoons: theirs is
+          15 ml, an Australian one is 20 ml. Use 3 teaspoons for each.</p>` : ''}
         ${factor !== 1 ? `<p class="hint" style="margin-top:10px">Amounts without a number
           — "a pinch", "to taste" — are shown unchanged. Cooking times usually don't
           scale linearly either; use your judgement.</p>` : ''}
@@ -1667,10 +2142,12 @@ async function openDetail(id) {
           ${(r.steps || []).length ? `<button class="btn-copy" id="cp-steps">Copy</button>` : ''}
         </div>
         <ol class="steps">
-          ${(r.steps || []).map(s => `<li>${esc(s)}</li>`).join('')
+          ${(r.steps || []).map(s => isStepHeading(s)
+            ? `<li class="step-head">${esc(s.heading)}</li>`
+            : `<li>${renderConv(viewProse(s))}</li>`).join('')
             || '<li style="color:var(--muted)">No steps listed</li>'}
         </ol>
-        ${r.notes ? `<div class="notebox"><b>Notes</b>\n${esc(r.notes)}</div>` : ''}
+        ${r.notes ? `<div class="notebox"><b>Notes</b>\n${renderConv(viewProse(r.notes))}</div>` : ''}
         ${r.source_url ? `<p class="hint" style="margin-top:18px">Source: ${
           /^https?:\/\//i.test(r.source_url)
             ? `<a href="${esc(r.source_url)}" target="_blank" rel="noopener">${esc(r.source_url)}</a>`
@@ -1687,6 +2164,14 @@ async function openDetail(id) {
   if ($('#sc-down')) $('#sc-down').addEventListener('click', () => {
     scaleIdx = Math.max(0, scaleIdx - 1); openDetail(id);
   });
+
+  // Units toggle. Remembered on this device, so once you've chosen Metric
+  // every American recipe opens converted.
+  $$('.units button').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.u === unitMode) return;
+    setUnitMode(b.dataset.u);
+    openDetail(id);
+  }));
 
   // Copy buttons. Each one reads the recipe as it's currently shown, so the
   // scale factor carries through.
@@ -1709,6 +2194,7 @@ async function openDetail(id) {
   });
 
   show('detail');
+  if (keepScroll != null) window.scrollTo(0, keepScroll);
 }
 
 
@@ -1877,24 +2363,44 @@ function makeStepRow(text = '') {
     <textarea placeholder="What happens at this step?"></textarea>
     <button type="button" class="rm" title="Remove">✕</button>`;
   row.querySelector('textarea').value = text;
+  wireStepRemove(row);
+  return row;
+}
+
+/** A method heading row — same look as an ingredient heading row. */
+function makeStepHeadingRow(text = '') {
+  const row = document.createElement('div');
+  row.className = 'step-row heading-row';
+  row.innerHTML = `
+    <button type="button" class="handle" title="Drag to reorder" aria-label="Reorder method heading">⠿</button>
+    <input class="hdg" placeholder="Make the dough" value="${esc(text)}">
+    <button type="button" class="rm" title="Remove">✕</button>`;
+  wireStepRemove(row);
+  return row;
+}
+
+function wireStepRemove(row) {
   row.querySelector('.rm').addEventListener('click', () => {
     row.remove();
     if (!$('#step-list').children.length) $('#step-list').appendChild(makeStepRow());
     renumberSteps();
   });
-  return row;
 }
 
-/** Keep the numbers on the handles matching the on-screen order. */
+/** Keep the numbers on the handles matching the on-screen order. Headings
+ *  don't take a number, and the count carries on past them. */
 function renumberSteps() {
-  $$('#step-list .step-row').forEach((r, i) => r.querySelector('.handle').textContent = i + 1);
+  let n = 0;
+  $$('#step-list .step-row').forEach(r => {
+    if (!r.classList.contains('heading-row')) r.querySelector('.handle').textContent = ++n;
+  });
 }
 
 function renderSteps() {
   const box = $('#step-list');
   box.innerHTML = '';
   const list = draft.steps.length ? draft.steps : [''];
-  list.forEach(s => box.appendChild(makeStepRow(s)));
+  list.forEach(s => box.appendChild(isStepHeading(s) ? makeStepHeadingRow(s.heading) : makeStepRow(s)));
   renumberSteps();
 }
 
@@ -1905,8 +2411,21 @@ $('#btn-add-step').addEventListener('click', () => {
   row.querySelector('textarea').focus();
 });
 
+$('#btn-add-step-heading').addEventListener('click', () => {
+  const row = makeStepHeadingRow();
+  $('#step-list').appendChild(row);
+  row.querySelector('.hdg').focus();
+});
+
+/** Read the method back out in on-screen order: strings for steps,
+ *  { heading } for headings, blanks dropped. */
 function collectSteps() {
-  return $$('#step-list .step-row textarea').map(t => t.value.trim()).filter(Boolean);
+  return $$('#step-list .step-row').map(r => {
+    const hdg = r.querySelector('.hdg');
+    if (hdg) { const t = hdg.value.trim(); return t ? { heading: t } : null; }
+    const t = r.querySelector('textarea').value.trim();
+    return t || null;
+  }).filter(Boolean);
 }
 
 /* ---------------------------------------------------------------------------
@@ -2110,7 +2629,10 @@ $('#btn-parse').addEventListener('click', () => {
   fillEditor();
   $('#paste-block').hidden = true;
   $('#form-edit').hidden = false;
-  toast(`Found ${parsed.ingredients.length} ingredients and ${parsed.steps.length} steps — check them over.`);
+  // Count real ingredients and steps, not the section headings among them.
+  const nIng   = parsed.ingredients.filter(x => !x.heading).length;
+  const nSteps = parsed.steps.filter(s => !isStepHeading(s)).length;
+  toast(`Found ${nIng} ingredients and ${nSteps} steps — check them over.`);
 });
 $('#btn-skip-parse').addEventListener('click', () => {
   $('#paste-block').hidden = true;
@@ -2218,7 +2740,7 @@ window.addEventListener('beforeunload', (e) => {
   const started = $('#ed-title').value.trim() ||
                   $('#paste').value.trim() ||
                   $$('#ing-list .itm, #ing-list .hdg').some(i => i.value.trim()) ||
-                  Array.from($$('#step-list textarea')).some(t => t.value.trim());
+                  $$('#step-list textarea, #step-list .hdg').some(t => t.value.trim());
   if (!started) return;
   e.preventDefault();
   e.returnValue = '';
@@ -2393,9 +2915,185 @@ $('#import-input').addEventListener('change', e => {
 $('#mi-passkey').addEventListener('click', () => { menu.hidden = true; addPasskey(); });
 $('#mi-signout').addEventListener('click', signOut);
 
+
+/* ===========================================================================
+   14b. MANAGING CATEGORIES — rename, merge, delete
+   ===========================================================================
+   Three operations, and the database work behind each:
+
+   RENAME   One UPDATE on the categories table. Every recipe tagged with it
+            follows automatically, because recipes point at the category's id,
+            not its name. That's the payoff of the join-table design.
+
+   MERGE    What a rename becomes when the new name already exists — fixing
+            "Tukey" when you also have "Turkey". The schema won't allow two
+            categories with the same name, so instead we:
+              1. tag every "Tukey" recipe with "Turkey" too, skipping any that
+                 already have it, then
+              2. delete "Tukey", which removes its old links automatically
+                 (that's the "on delete cascade" in the schema).
+            Step 1 happens first on purpose: if anything fails partway, the
+            worst case is a recipe carrying both tags, never one that has lost
+            its tag altogether.
+
+   DELETE   One DELETE. The cascade removes the links; the recipes are untouched.
+
+   All three use retrying(), so Supabase's clock-skew hiccup can't strand you
+   halfway through a merge.
+*/
+const catsPanel = $('#cats-panel');
+
+function openCatsPanel() {
+  menu.hidden = true;
+  renderCatsPanel();
+  catsPanel.hidden = false;
+}
+function closeCatsPanel() { catsPanel.hidden = true; }
+
+$('#mi-cats').addEventListener('click', openCatsPanel);
+$('#cats-close').addEventListener('click', closeCatsPanel);
+catsPanel.addEventListener('click', e => { if (e.target === catsPanel) closeCatsPanel(); });
+
+function recipeCount(catId) {
+  return links.filter(l => l.category_id === catId).length;
+}
+
+function renderCatsPanel() {
+  const box = $('#cats-list');
+  if (!categories.length) {
+    box.innerHTML = '<p class="hint">No categories yet. Add them from the recipe editor.</p>';
+    return;
+  }
+  box.innerHTML = '';
+  categories.forEach(c => {
+    const n = recipeCount(c.id);
+    const row = document.createElement('div');
+    row.className = 'cat-row' + (n ? '' : ' unused');
+    row.innerHTML = `
+      <input class="cat-name" value="${esc(c.name)}" aria-label="Category name">
+      <span class="cat-count">${n ? `${n} recipe${n === 1 ? '' : 's'}` : 'unused'}</span>
+      <button class="cat-save" disabled>Save</button>
+      <button class="cat-del danger">Delete</button>`;
+
+    const input = row.querySelector('.cat-name');
+    const save  = row.querySelector('.cat-save');
+    const del   = row.querySelector('.cat-del');
+    let armedSave = false, armedDel = false;
+
+    // Save only lights up when the name has actually changed. If the new name
+    // matches another category, the button says so — a merge is a bigger deal
+    // than a rename and shouldn't happen by surprise.
+    input.addEventListener('input', () => {
+      const v = input.value.trim();
+      const clash = clashFor(c.id, v);
+      save.disabled = !v || v === c.name;
+      save.textContent = clash ? `Merge into ${clash.name}` : 'Save';
+      armedSave = false;
+    });
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); save.click(); } });
+
+    save.addEventListener('click', async () => {
+      const v = input.value.trim();
+      const clash = clashFor(c.id, v);
+      if (clash && !armedSave) {                 // first tap on a merge: confirm
+        armedSave = true;
+        save.textContent = 'Tap again to merge';
+        return;
+      }
+      save.disabled = true;
+      try {
+        if (clash) {
+          await mergeCategory(c.id, clash.id);
+          toast(`Merged "${c.name}" into "${clash.name}"`);
+        } else {
+          await renameCategory(c.id, v);
+          toast(`Renamed to "${v}"`);
+        }
+        await afterCategoryChange();
+      } catch (e) {
+        toast(e.message || 'Could not save that.');
+        save.disabled = false;
+      }
+    });
+
+    del.addEventListener('click', async () => {
+      if (!armedDel) {
+        armedDel = true;
+        del.textContent = n ? `Remove from ${n}?` : 'Tap again';
+        setTimeout(() => { armedDel = false; del.textContent = 'Delete'; }, 4000);
+        return;
+      }
+      del.disabled = true;
+      try {
+        await deleteCategory(c.id);
+        toast(`Deleted "${c.name}"`);
+        await afterCategoryChange();
+      } catch (e) {
+        toast(e.message || 'Could not delete that.');
+        del.disabled = false;
+      }
+    });
+
+    box.appendChild(row);
+  });
+}
+
+/** Another category with this name, ignoring case — or null. */
+function clashFor(selfId, name) {
+  const n = name.trim().toLowerCase();
+  return n ? categories.find(c => c.id !== selfId && c.name.toLowerCase() === n) || null : null;
+}
+
+async function renameCategory(id, name) {
+  await retrying(async () => must(
+    await supabase.from('categories').update({ name }).eq('id', id)));
+}
+
+async function mergeCategory(fromId, intoId) {
+  const recipeIds = links.filter(l => l.category_id === fromId).map(l => l.recipe_id);
+  if (recipeIds.length) {
+    // ignoreDuplicates = "if this recipe already has the target tag, skip it
+    // quietly" rather than erroring on the duplicate.
+    await retrying(async () => must(
+      await supabase.from('recipe_categories').upsert(
+        recipeIds.map(rid => ({ recipe_id: rid, category_id: intoId })),
+        { onConflict: 'recipe_id,category_id', ignoreDuplicates: true })));
+  }
+  await retrying(async () => must(
+    await supabase.from('categories').delete().eq('id', fromId)));
+  remapDraftCategory(fromId, intoId);
+  if (filterCat === fromId) filterCat = intoId;
+}
+
+async function deleteCategory(id) {
+  await retrying(async () => must(
+    await supabase.from('categories').delete().eq('id', id)));
+  remapDraftCategory(id, null);
+  if (filterCat === id) filterCat = null;
+}
+
+/** If a recipe is open in the editor while you manage categories, keep its
+ *  ticked categories valid — otherwise Save would try to link it to a category
+ *  that no longer exists, and the database would (rightly) refuse. */
+function remapDraftCategory(fromId, toId) {
+  if (!draft || !draft.categoryIds) return;
+  if (draft.categoryIds.delete(fromId) && toId) draft.categoryIds.add(toId);
+}
+
+/** Reload, then redraw whichever screen is showing underneath the sheet. */
+async function afterCategoryChange() {
+  await loadAll();
+  renderChips();
+  renderCatsPanel();
+  if (!$('#view-edit').hidden)        renderCatPicker();
+  else if (!$('#view-detail').hidden && detailId) openDetail(detailId);
+  else                                renderList();
+}
+
 // Escape key: close the menu, or step back one view.
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
+  if (!catsPanel.hidden) { closeCatsPanel(); return; }
   if (!menu.hidden) { menu.hidden = true; return; }
   if (!$('#view-detail').hidden || !$('#view-edit').hidden) goList();
 });
