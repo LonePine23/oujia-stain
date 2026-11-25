@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plant Reminders</title>
+<meta name="theme-color" content="#2f6b4f">
+<style>
+  :root {
+    --bg: #f3f0e8;
+    --surface: #fffdf8;
+    --surface-2: #f8f5ee;
+    --ink: #1d2721;
+    --muted: #5d6b62;
+    --line: #ddd6c7;
+    --green: #2f6b4f;
+    --green-ink: #ffffff;
+    --green-soft: #e3efe6;
+    --water: #2f6f98;
+    --water-soft: #e1edf5;
+    --winter: #36648a;
+    --winter-soft: #e2edf6;
+    --warn: #a4462a;
+    --warn-soft: #f8e6df;
+    --sun: #8a5a10;
+    --sun-soft: #f8ecd4;
+    --radius: 14px;
+    --shadow: 0 1px 2px rgba(30, 40, 30, .06), 0 6px 18px rgba(30, 40, 30, .05);
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #131915;
+      --surface: #1b231e;
+      --surface-2: #18201b;
+      --ink: #e6ece8;
+      --muted: #9aa89f;
+      --line: #2e3a33;
+      --green: #74c294;
+      --green-ink: #0f1a13;
+      --green-soft: #20362a;
+      --water: #82b9de;
+      --water-soft: #1b2c39;
+      --winter: #9cc3e4;
+      --winter-soft: #1c2a37;
+      --warn: #f0a183;
+      --warn-soft: #3a2219;
+      --sun: #f0c475;
+      --sun-soft: #3a2d17;
+      --shadow: none;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.5 var(--sans);
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 24px 16px 64px; }
+
+  header.site { margin-bottom: 24px; }
+  header.site h1 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: clamp(1.9rem, 4vw, 2.6rem);
+    letter-spacing: -.01em;
+    margin: 0 0 4px;
+  }
+  header.site p { margin: 0; color: var(--muted); max-width: 60ch; }
+
+  .layout {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: 1fr;
+    grid-template-areas: "add" "plants" "export" "settings";
+  }
+  @media (min-width: 880px) {
+    .layout {
+      grid-template-columns: minmax(320px, 380px) 1fr;
+      grid-template-rows: auto auto 1fr;
+      grid-template-areas: "add plants" "export plants" "settings plants";
+      align-items: start;
+    }
+  }
+  #add-panel { grid-area: add; }
+  #plants-panel { grid-area: plants; }
+  #export-panel { grid-area: export; }
+  #settings-panel { grid-area: settings; }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px;
+  }
+  .panel h2 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 1.3rem;
+    margin: 0 0 12px;
+  }
+  .panel-note { color: var(--muted); font-size: .9rem; margin: 10px 0 0; }
+
+  .field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; min-width: 0; }
+  .field > span { font-size: .85rem; font-weight: 600; color: var(--muted); }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 380px) { .row { grid-template-columns: 1fr; } }
+
+  input[type="text"], input:not([type]), input[type="number"], input[type="date"], input[type="time"], select {
+    font: inherit;
+    color: inherit;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 9px 11px;
+    width: 100%;
+    min-height: 42px;
+  }
+  input:focus-visible, select:focus-visible, button:focus-visible {
+    outline: 2px solid var(--water);
+    outline-offset: 2px;
+  }
+  input[type="date"] { min-width: 0; }
+
+  .check { display: flex; gap: 10px; align-items: flex-start; margin: 4px 0 14px; cursor: pointer; }
+  .check input { width: 18px; height: 18px; margin: 3px 0 0; accent-color: var(--green); flex: none; }
+  .check small { display: block; color: var(--muted); font-size: .82rem; }
+
+  .btn {
+    font: inherit;
+    font-weight: 600;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    padding: 9px 14px;
+    min-height: 42px;
+    cursor: pointer;
+    background: var(--surface-2);
+    color: var(--ink);
+    border-color: var(--line);
+  }
+  .btn:hover { filter: brightness(.97); }
+  .btn:disabled { opacity: .55; cursor: not-allowed; filter: none; }
+  .btn.primary { background: var(--green); color: var(--green-ink); border-color: var(--green); }
+  .btn.water { background: var(--water); color: var(--surface); border-color: var(--water); }
+  .btn.ghost { background: transparent; }
+  .btn.danger { color: var(--warn); }
+  .btn.danger.confirming { background: var(--warn); color: var(--surface); border-color: var(--warn); }
+  .btn.block { width: 100%; }
+
+  /* Plant list */
+  .list-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+  .list-head h2 { margin: 0; }
+  .list-head .count { color: var(--muted); font-size: .9rem; }
+  .cards { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-top: 4px solid var(--green);
+  }
+  .card.due-today { border-top-color: var(--water); }
+  .card.overdue { border-top-color: var(--warn); }
+  .card h3 { font-family: var(--serif); font-weight: 600; font-size: 1.2rem; margin: 0; overflow-wrap: anywhere; }
+  .card .species { margin: 2px 0 0; color: var(--muted); font-size: .9rem; }
+
+  .badges { display: flex; flex-wrap: wrap; gap: 6px; }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: .78rem;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    color: var(--muted);
+    border: 1px solid var(--line);
+  }
+  .badge.winter { background: var(--winter-soft); color: var(--winter); border-color: transparent; }
+  .badge.summer { background: var(--sun-soft); color: var(--sun); border-color: transparent; }
+  .notes { margin: 0; padding-left: 1.1em; font-size: .86rem; color: var(--muted); display: grid; gap: 4px; }
+  .form-notes .notes { margin: -4px 0 14px; background: var(--surface-2); border-radius: 10px; padding: 10px 12px 10px 28px; }
+  .rest-hint { margin: -6px 0 12px; }
+  details.care { border-top: 1px solid var(--line); padding-top: 10px; }
+  details.care summary { cursor: pointer; font-weight: 600; font-size: .9rem; color: var(--green); }
+  details.care .notes { margin-top: 8px; }
+
+  .facts { margin: 0; display: grid; gap: 8px; }
+  .facts div { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  .facts dt { color: var(--muted); font-size: .88rem; }
+  .facts dd { margin: 0; text-align: right; }
+  .sub { color: var(--muted); font-size: .85rem; font-weight: 400; }
+  .pill { font-size: .78rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; margin-left: 4px; white-space: nowrap; }
+  .pill.ok { background: var(--green-soft); color: var(--green); }
+  .pill.today { background: var(--water-soft); color: var(--water); }
+  .pill.late { background: var(--warn-soft); color: var(--warn); }
+
+  .card-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; }
+  .card-actions .btn.water { flex: 1 1 100%; }
+  .card-actions .btn.ghost { flex: 1 1 0; }
+
+  .card form .actions { display: flex; gap: 8px; }
+  .card form .actions .btn { flex: 1; }
+
+  .empty {
+    border: 1.5px dashed var(--line);
+    border-radius: var(--radius);
+    padding: 32px 20px;
+    text-align: center;
+    color: var(--muted);
+  }
+  .empty strong { display: block; color: var(--ink); font-family: var(--serif); font-size: 1.15rem; margin-bottom: 4px; }
+
+  /* Settings */
+  .range-row { display: flex; align-items: center; gap: 12px; }
+  .range-row input[type="range"] { flex: 1; accent-color: var(--winter); min-height: 32px; }
+  .range-row output { font-variant-numeric: tabular-nums; font-weight: 700; min-width: 3.2em; text-align: right; }
+  .hint { color: var(--muted); font-size: .82rem; margin: 2px 0 0; }
+  fieldset { border: 0; padding: 0; margin: 0 0 12px; }
+  legend { font-size: .85rem; font-weight: 600; color: var(--muted); margin-bottom: 6px; padding: 0; }
+  .radio { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; cursor: pointer; }
+  .radio input { margin: 4px 0 0; accent-color: var(--green); flex: none; }
+  .radio small { display: block; color: var(--muted); font-size: .82rem; }
+  .season-status {
+    background: var(--winter-soft);
+    color: var(--winter);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: .9rem;
+    margin: 0 0 14px;
+  }
+  .season-status.off { background: var(--surface-2); color: var(--muted); }
+  .season-status.summer { background: var(--sun-soft); color: var(--sun); }
+
+  /* Export */
+  .export-summary { font-size: .92rem; margin: 0 0 12px; color: var(--muted); }
+  .export-summary strong { color: var(--ink); }
+  .one-way {
+    margin: 12px 0 0;
+    padding: 10px 12px;
+    border-left: 3px solid var(--water);
+    background: var(--water-soft);
+    border-radius: 0 10px 10px 0;
+    font-size: .86rem;
+  }
+
+  .storage-warning {
+    display: none;
+    background: var(--warn-soft);
+    color: var(--warn);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+    font-size: .9rem;
+  }
+  .storage-warning.show { display: block; }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 20px;
+    transform: translate(-50%, 20px);
+    opacity: 0;
+    pointer-events: none;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 10px 12px 10px 16px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: calc(100% - 32px);
+    transition: opacity .2s, transform .2s;
+    font-size: .92rem;
+    z-index: 10;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+  .toast button {
+    font: inherit;
+    font-weight: 700;
+    background: transparent;
+    color: var(--bg);
+    border: 1px solid currentColor;
+    border-radius: 8px;
+    padding: 4px 10px;
+    cursor: pointer;
+  }
+  .toast button[hidden] { display: none; }
+
+  footer.site { margin-top: 32px; color: var(--muted); font-size: .85rem; text-align: center; }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+  @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site">
+    <h1>Plant Reminders</h1>
+    <p>Add your houseplants, set how often each one needs water, then download a calendar file with a reminder for every watering over the next year.</p>
+  </header>
+
+  <div class="storage-warning" id="storage-warning" role="alert">
+    This browser isn't letting the page save data, so your plants and settings will be lost when you close the tab.
+  </div>
+
+  <div class="layout">
+    <section class="panel" id="add-panel" aria-labelledby="add-title">
+      <h2 id="add-title">Add a plant</h2>
+      <form id="add-form" novalidate></form>
+    </section>
+
+    <section id="plants-panel" aria-labelledby="plants-title">
+      <div class="list-head">
+        <h2 id="plants-title" class="panel-title" style="font-family:var(--serif);font-weight:600;font-size:1.3rem">Your plants</h2>
+        <span class="count" id="plant-count"></span>
+      </div>
+      <div id="plant-list"></div>
+    </section>
+
+    <section class="panel" id="export-panel" aria-labelledby="export-title">
+      <h2 id="export-title">Calendar</h2>
+      <p class="export-summary" id="export-summary"></p>
+      <label class="check">
+        <input type="checkbox" id="group-by-day">
+        <span>Group plants due on the same day into one event
+          <small>One “Water: fern, pothos, calathea” event per day instead of one per plant.</small>
+        </span>
+      </label>
+      <button type="button" class="btn primary block" id="download-btn">Download calendar (.ics)</button>
+      <p class="one-way">
+        <strong>This export is one-way.</strong> Your calendar won't update by itself. If you add a plant, change a schedule or change settings, download a fresh file and replace the old events. Importing into a dedicated “Plants” calendar makes this easy: delete that calendar's events, then import the new file.
+      </p>
+    </section>
+
+    <section class="panel" id="settings-panel" aria-labelledby="settings-title">
+      <h2 id="settings-title">Settings</h2>
+      <p class="season-status" id="season-status"></p>
+
+      <div class="field">
+        <span id="mult-label">Winter multiplier</span>
+        <div class="range-row">
+          <input type="range" id="multiplier" min="1" max="3" step="0.1" aria-labelledby="mult-label">
+          <output id="multiplier-out" for="multiplier"></output>
+        </div>
+        <p class="hint">During a plant's rest season, its interval is multiplied by this and rounded to the nearest day. Most plants rest in winter; summer-resting plants (e.g. aeoniums) use the same multiplier during the opposite months. Set it to ×1.0 to turn this off.</p>
+      </div>
+
+      <div class="row">
+        <label class="field"><span>Winter starts</span><select id="winter-start"></select></label>
+        <label class="field"><span>Winter ends</span><select id="winter-end"></select></label>
+      </div>
+      <p class="hint" style="margin:-6px 0 14px">Both months are included. The window can wrap past December (e.g. November to February). Summer is the same months six months later.</p>
+
+      <label class="field">
+        <span>Reminder time</span>
+        <input type="time" id="alarm-time" step="60">
+      </label>
+
+      <fieldset>
+        <legend>Calendar event style</legend>
+        <label class="radio">
+          <input type="radio" name="event-style" value="allday">
+          <span>All-day event, alert at the reminder time
+            <small>The alert fires at the reminder time in your device's local time zone.</small>
+          </span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="event-style" value="timed">
+          <span>15-minute event at the reminder time
+            <small>Pinned to Melbourne time (Australia/Melbourne), even if your device is elsewhere.</small>
+          </span>
+        </label>
+      </fieldset>
+    </section>
+  </div>
+
+  <footer class="site">Your plants are saved in this browser only.</footer>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <span id="toast-msg"></span>
+  <button type="button" id="toast-undo" hidden>Undo</button>
+</div>
+
+<script>
+'use strict';
+
+/* ===== CORE (pure logic, no DOM) ===== */
+
+/* rest: the season the plant slows down in ('winter', 'summer' or 'none').
+   notes: short care notes shown on the plant's card. */
+const PRESETS = [
+  { species: 'Aeonium', interval: 10, rest: 'summer', notes: [
+    'Grows mainly in the cooler months and slows down in summer heat, so it gets the longer interval in summer, not winter.',
+    'In summer the rosettes may close up and drop older leaves. That\'s normal dormancy, not a sign it needs more water.',
+    'Shallow roots: water thoroughly, then let the mix dry before watering again.'
+  ] },
+  { species: 'Aloe vera', interval: 14, notes: [
+    'Soak, then let the mix dry out completely. Constantly damp soil rots the roots.',
+    'Toxic to cats and dogs if chewed. The clear inner gel is the edible part; the yellow sap is not.'
+  ] },
+  { species: 'Boston fern', interval: 5 },
+  { species: 'Cactus', interval: 21 },
+  { species: 'Calathea', interval: 5 },
+  { species: 'Chinese money plant (Pilea)', interval: 7 },
+  { species: 'English ivy (Hedera helix)', interval: 7, notes: [
+    'Water once the top few centimetres are dry, but don\'t let it dry out completely.',
+    'Toxic to cats and dogs (vomiting, drooling, diarrhoea).',
+    'A serious environmental weed in Victoria. Keep it potted, don\'t let it climb trees or set berries, and bin cuttings rather than composting or dumping them.'
+  ] },
+  { species: 'Fiddle-leaf fig', interval: 8 },
+  { species: 'Foxtail agave (Agave attenuata)', interval: 14, notes: [
+    'Let the mix dry out between waterings. Needs much less in winter.',
+    'Soft and spineless, but frost-tender: shelter it on frosty nights.',
+    'Sap can irritate skin, and it\'s harmful to pets if eaten.'
+  ] },
+  { species: 'Gollum jade (Crassula ovata \'Gollum\')', interval: 14, notes: [
+    'Water when the mix has dried out. Wrinkly leaves mean thirsty; soft, mushy leaves mean too much water.',
+    'Flowers in winter. Give it plenty of light.',
+    'Toxic to cats and dogs; sap can irritate skin.'
+  ] },
+  { species: 'Hoya', interval: 10 },
+  { species: 'Inch plant (Tradescantia zebrina)', interval: 7, notes: [
+    'Water when the top few centimetres are dry. Likes slightly moist soil, never soggy.',
+    'Sap can irritate skin (yours and pets\'). Toxic to cats and dogs if chewed.'
+  ] },
+  { species: 'Jade plant (Crassula ovata)', interval: 14, notes: [
+    'Water when the mix has dried out. Wrinkly leaves mean thirsty; soft, mushy leaves mean too much water.',
+    'Keep it away from cold windows in winter or it may drop leaves.',
+    'Toxic to cats and dogs; sap can irritate skin.'
+  ] },
+  { species: 'Monstera', interval: 7 },
+  { species: 'Orchid (Phalaenopsis)', interval: 7 },
+  { species: 'Paddle plant (Kalanchoe or Cotyledon)', interval: 14, notes: [
+    'Kalanchoe luciae (flapjack) and Cotyledon orbiculata (pig\'s ear) take the same care: soak, then let the mix dry out.',
+    'Telling them apart: Kalanchoe sends up a tall spike of small yellow-green flowers, then that rosette dies (offsets carry on). Cotyledon has hanging orange-red bell flowers and keeps going.',
+    'Both are toxic to pets, more seriously than jade: they contain heart-affecting compounds.'
+  ] },
+  { species: 'Peace lily', interval: 6 },
+  { species: 'Philodendron', interval: 7 },
+  { species: 'Pothos', interval: 7 },
+  { species: 'Prickly pear (Opuntia)', interval: 14, notes: [
+    'Water every 1–2 weeks in warm weather and very little in winter (once a month at most). If the mix is still damp, skip it.',
+    'Small pots dry out faster than big ones. Check the soil rather than trusting the date.',
+    'The fine bristles (glochids) lodge in skin. Handle with thick gloves or tongs.',
+    'Most Opuntia are Weeds of National Significance. Never dump pads or fruit in the garden or bush.'
+  ] },
+  { species: 'Rubber plant', interval: 8 },
+  { species: 'Snake plant', interval: 14 },
+  { species: 'Spider plant', interval: 7 },
+  { species: 'Succulent', interval: 14 },
+  { species: 'Torch aloe (Aloe arborescens)', interval: 14, notes: [
+    'A large, shrubby aloe that does best outdoors in full sun. Soak, then let the mix dry out completely.',
+    'Sources disagree on whether it rests in summer or winter. If the mix is still damp on the day, skip it.',
+    'Treat it as toxic to pets, like other aloes.'
+  ] },
+  { species: 'ZZ plant', interval: 14, notes: [
+    'Stores water in its underground rhizome. Overwatering is the most common way to kill it; let the mix dry right through.',
+    'Yellow leaves with soft stems almost always mean too much water.',
+    'Contains calcium oxalate: irritates the mouth and stomach of pets and people if chewed.'
+  ] }
+];
+const CUSTOM = 'Custom';
+const REST_OPTIONS = [
+  { value: 'winter', label: 'Winter (most plants)' },
+  { value: 'summer', label: 'Summer (e.g. aeoniums)' },
+  { value: 'none', label: 'Doesn\'t slow down' }
+];
+
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'];
+
+const DEFAULT_SETTINGS = {
+  multiplier: 1.5,
+  winterStart: 6,
+  winterEnd: 8,
+  alarmTime: '08:00',
+  eventStyle: 'allday',
+  groupByDay: false
+};
+
+const TZID = 'Australia/Melbourne';
+const UID_DOMAIN = 'plant-reminders.geordie.lol';
+const DAY_MS = 86400000;
+
+/* Dates are handled as whole "day numbers" (days since 1970-01-01, UTC-based)
+   so daylight-saving changes can never shift a date. */
+function parseISO(s) {
+  const [y, m, d] = s.split('-').map(Number);
+  return Date.UTC(y, m - 1, d) / DAY_MS;
+}
+function toISO(day) {
+  return new Date(day * DAY_MS).toISOString().slice(0, 10);
+}
+function localTodayDay(now = new Date()) {
+  return Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / DAY_MS;
+}
+function monthOf(day) {
+  return new Date(day * DAY_MS).getUTCMonth() + 1;
+}
+function addMonths(day, k) {
+  const d = new Date(day * DAY_MS);
+  const y = d.getUTCFullYear();
+  const m = d.getUTCMonth() + k;
+  const lastDay = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+  return Date.UTC(y, m, Math.min(d.getUTCDate(), lastDay)) / DAY_MS;
+}
+
+function isWinter(day, s) {
+  const m = monthOf(day);
+  const a = s.winterStart, b = s.winterEnd;
+  return a <= b ? (m >= a && m <= b) : (m >= a || m <= b);
+}
+/* Summer is the winter window shifted by six months (June–August → December–February). */
+function summerMonths(s) {
+  return { start: ((s.winterStart + 5) % 12) + 1, end: ((s.winterEnd + 5) % 12) + 1 };
+}
+function isSummer(day, s) {
+  const w = summerMonths(s);
+  return isWinter(day, { winterStart: w.start, winterEnd: w.end });
+}
+function inRestSeason(plant, day, s) {
+  if (plant.rest === 'winter') return isWinter(day, s);
+  if (plant.rest === 'summer') return isSummer(day, s);
+  return false;
+}
+function winterInterval(base, multiplier) {
+  // Small epsilon so e.g. 5 × 2.3 (= 11.4999… in floating point) rounds to 12, as it should.
+  return Math.max(1, Math.round(base * multiplier + 1e-9));
+}
+/* The interval that applies when stepping forward from a given watering date. */
+function intervalOn(plant, day, s) {
+  if (s.multiplier > 1 && inRestSeason(plant, day, s)) {
+    return winterInterval(plant.interval, s.multiplier);
+  }
+  return plant.interval;
+}
+function nextDue(plant, s) {
+  const last = parseISO(plant.lastWatered);
+  return last + intervalOn(plant, last, s);
+}
+/* Explicit watering dates in [from, to]. If the plant is overdue, the first reminder is `from` (today). */
+function wateringDates(plant, s, from, to) {
+  let d = nextDue(plant, s);
+  if (d < from) d = from;
+  const out = [];
+  while (d <= to) {
+    out.push(d);
+    d += intervalOn(plant, d, s);
+  }
+  return out;
+}
+/* Compress a date list into runs of equal spacing. Each run becomes one RRULE.
+   The date at which the spacing changes stays in the earlier run (it was reached
+   by the earlier interval); the next run starts on the following watering date. */
+function toSegments(dates) {
+  const segs = [];
+  let i = 0;
+  while (i < dates.length) {
+    if (i === dates.length - 1) {
+      segs.push({ start: dates[i], end: dates[i], step: null, count: 1 });
+      break;
+    }
+    const step = dates[i + 1] - dates[i];
+    let j = i + 1;
+    while (j + 1 < dates.length && dates[j + 1] - dates[j] === step) j++;
+    segs.push({ start: dates[i], end: dates[j], step, count: j - i + 1 });
+    i = j + 1;
+  }
+  return segs;
+}
+
+/* ---- iCalendar helpers (RFC 5545) ---- */
+function pad(n) { return String(n).padStart(2, '0'); }
+function icsDate(day) { return toISO(day).replace(/-/g, ''); }
+function utcStamp(date) {
+  return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+}
+function icsEscape(text) {
+  return String(text)
+    .replace(/\\/g, '\\\\')
+    .replace(/;/g, '\\;')
+    .replace(/,/g, '\\,')
+    .replace(/\r\n|\r|\n/g, '\\n');
+}
+/* Fold lines longer than 75 octets (UTF-8 bytes, not characters). Continuation lines start with a space. */
+const utf8 = new TextEncoder();
+function foldLine(line) {
+  if (utf8.encode(line).length <= 75) return line;
+  const parts = [];
+  let cur = '', bytes = 0;
+  for (const ch of line) {           // iterates by code point, so multi-byte characters are never split
+    const b = utf8.encode(ch).length;
+    if (bytes + b > 75) {
+      parts.push(cur);
+      cur = ' ' + ch;
+      bytes = 1 + b;
+    } else {
+      cur += ch;
+      bytes += b;
+    }
+  }
+  parts.push(cur);
+  return parts.join('\r\n');
+}
+function relativeTrigger(h, m) {
+  if (!h && !m) return 'PT0S';
+  return 'PT' + (h ? h + 'H' : '') + (m ? m + 'M' : '');
+}
+/* Melbourne's UTC offset (minutes) at a given instant. */
+function melbourneOffset(utcMs) {
+  try {
+    const parts = new Intl.DateTimeFormat('en-AU', {
+      timeZone: TZID, hourCycle: 'h23',
+      year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+    }).formatToParts(new Date(utcMs));
+    const get = t => Number(parts.find(p => p.type === t).value);
+    const asUTC = Date.UTC(get('year'), get('month') - 1, get('day'), get('hour'), get('minute'));
+    return Math.round((asUTC - utcMs) / 60000);
+  } catch (e) {
+    return 600; // fall back to AEST if the browser lacks time zone data
+  }
+}
+/* Convert a Melbourne wall-clock time on a given day to a UTC timestamp (ms). */
+function melbourneToUTC(day, h, m) {
+  const naive = day * DAY_MS + (h * 60 + m) * 60000;
+  let utc = naive - melbourneOffset(naive - 600 * 60000) * 60000;
+  utc = naive - melbourneOffset(utc) * 60000;
+  return utc;
+}
+
+const VTIMEZONE = [
+  'BEGIN:VTIMEZONE',
+  'TZID:Australia/Melbourne',
+  'X-LIC-LOCATION:Australia/Melbourne',
+  'BEGIN:STANDARD',
+  'DTSTART:19700405T030000',
+  'RRULE:FREQ=YEARLY;BYMONTH=4;BYDAY=1SU',
+  'TZOFFSETFROM:+1100',
+  'TZOFFSETTO:+1000',
+  'TZNAME:AEST',
+  'END:STANDARD',
+  'BEGIN:DAYLIGHT',
+  'DTSTART:19701004T020000',
+  'RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=1SU',
+  'TZOFFSETFROM:+1000',
+  'TZOFFSETTO:+1100',
+  'TZNAME:AEDT',
+  'END:DAYLIGHT',
+  'END:VTIMEZONE'
+];
+
+/* Build the whole calendar. Returns { text, events, occurrences, firstDay, lastDay }. */
+function buildICS(plants, s, now = new Date()) {
+  const today = localTodayDay(now);
+  const end = addMonths(today, 12);
+  const stamp = utcStamp(now);
+  const sequence = Math.floor(now.getTime() / 1000); // grows with every export so apps treat it as newer
+  const [ah, am] = s.alarmTime.split(':').map(Number);
+  const timed = s.eventStyle === 'timed';
+
+  const startLines = day => timed
+    ? ['DTSTART;TZID=' + TZID + ':' + icsDate(day) + 'T' + pad(ah) + pad(am) + '00', 'DURATION:PT15M']
+    : ['DTSTART;VALUE=DATE:' + icsDate(day), 'DTEND;VALUE=DATE:' + icsDate(day + 1)];
+  // UNTIL must match DTSTART's type: a DATE for all-day events, a UTC date-time for zoned events.
+  const until = day => timed ? utcStamp(new Date(melbourneToUTC(day, ah, am))) : icsDate(day);
+  const trigger = timed ? 'PT0S' : relativeTrigger(ah, am);
+
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//geordie.lol//Plant Reminders//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'X-WR-CALNAME:Plant watering',
+    'X-WR-TIMEZONE:' + TZID,
+    ...VTIMEZONE
+  ];
+
+  let events = 0, occurrences = 0, firstDay = null, lastDay = null;
+  const track = (a, b) => {
+    if (firstDay === null || a < firstDay) firstDay = a;
+    if (lastDay === null || b > lastDay) lastDay = b;
+  };
+  const pushEvent = (uid, summary, description, day, rrule) => {
+    lines.push(
+      'BEGIN:VEVENT',
+      'UID:' + uid,
+      'DTSTAMP:' + stamp,
+      'SEQUENCE:' + sequence,
+      'SUMMARY:' + icsEscape(summary),
+      'DESCRIPTION:' + icsEscape(description),
+      ...startLines(day)
+    );
+    if (rrule) lines.push(rrule);
+    lines.push(
+      'TRANSP:TRANSPARENT',
+      'BEGIN:VALARM',
+      'ACTION:DISPLAY',
+      'DESCRIPTION:' + icsEscape(summary),
+      'TRIGGER:' + trigger,
+      'END:VALARM',
+      'END:VEVENT'
+    );
+    events++;
+  };
+
+  if (s.groupByDay) {
+    const byDay = new Map();
+    const sorted = plants.slice().sort((a, b) => a.name.localeCompare(b.name, 'en-AU'));
+    for (const p of sorted) {
+      for (const d of wateringDates(p, s, today, end)) {
+        if (!byDay.has(d)) byDay.set(d, []);
+        byDay.get(d).push(p.name);
+      }
+    }
+    for (const d of [...byDay.keys()].sort((a, b) => a - b)) {
+      const names = byDay.get(d);
+      pushEvent(
+        'day-' + icsDate(d) + '@' + UID_DOMAIN,
+        'Water: ' + names.join(', '),
+        'Plants to water today: ' + names.join(', ') + '.',
+        d, null
+      );
+      occurrences++;
+      track(d, d);
+    }
+  } else {
+    for (const p of plants) {
+      const segs = toSegments(wateringDates(p, s, today, end));
+      segs.forEach((seg, i) => {
+        let desc;
+        if (seg.step === null) {
+          desc = 'Single reminder.';
+        } else if (seg.step !== p.interval) {
+          desc = 'Every ' + seg.step + ' days (' + p.rest + ' rest; normally every ' + p.interval + ').';
+        } else {
+          desc = 'Every ' + seg.step + ' days.';
+        }
+        desc += ' Species: ' + p.species + '.';
+        const rrule = seg.count > 1
+          ? 'RRULE:FREQ=DAILY;INTERVAL=' + seg.step + ';UNTIL=' + until(seg.end)
+          : null;
+        pushEvent('plant-' + p.id + '-seg' + i + '@' + UID_DOMAIN, 'Water: ' + p.name, desc, seg.start, rrule);
+        occurrences += seg.count;
+        track(seg.start, seg.end);
+      });
+    }
+  }
+
+  lines.push('END:VCALENDAR');
+  return {
+    text: lines.map(foldLine).join('\r\n') + '\r\n',
+    events, occurrences, firstDay, lastDay
+  };
+}
+
+/* ===== END CORE ===== */
+
+/* ===== STORAGE ===== */
+const KEYS = { plants: 'plantReminders.plants.v1', settings: 'plantReminders.settings.v1' };
+let storageOK = true;
+
+function readStore(key, fallback) {
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch (e) {
+    storageFailed();
+    return fallback;
+  }
+}
+function writeStore(key, value) {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {
+    storageFailed();
+  }
+}
+function storageFailed() {
+  storageOK = false;
+  const el = document.getElementById('storage-warning');
+  if (el) el.classList.add('show');
+}
+
+function clampInt(v, min, max) {
+  const n = Math.round(Number(v));
+  if (!Number.isFinite(n)) return null;
+  return Math.min(max, Math.max(min, n));
+}
+function newId() {
+  try {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID().slice(0, 13).replace('-', '');
+  } catch (e) { /* fall through */ }
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+function sanitisePlant(p) {
+  if (!p || typeof p !== 'object') return null;
+  const interval = clampInt(p.interval, 1, 365);
+  if (interval === null) return null;
+  if (typeof p.lastWatered !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(p.lastWatered)) return null;
+  return {
+    id: String(p.id || newId()).replace(/[^A-Za-z0-9_-]/g, '') || newId(),
+    name: String(p.name || 'Unnamed plant').slice(0, 80),
+    species: String(p.species || CUSTOM).slice(0, 80),
+    interval,
+    lastWatered: p.lastWatered,
+    // Older saves used an "ignoreWinter" flag; convert it.
+    rest: ['winter', 'summer', 'none'].includes(p.rest) ? p.rest : (p.ignoreWinter ? 'none' : 'winter')
+  };
+}
+function sanitiseSettings(raw) {
+  const s = Object.assign({}, DEFAULT_SETTINGS, raw && typeof raw === 'object' ? raw : {});
+  let mult = Number(s.multiplier);
+  if (!Number.isFinite(mult)) mult = DEFAULT_SETTINGS.multiplier;
+  s.multiplier = Math.round(Math.min(3, Math.max(1, mult)) * 10) / 10;
+  s.winterStart = clampInt(s.winterStart, 1, 12) || DEFAULT_SETTINGS.winterStart;
+  s.winterEnd = clampInt(s.winterEnd, 1, 12) || DEFAULT_SETTINGS.winterEnd;
+  if (typeof s.alarmTime !== 'string' || !/^\d{2}:\d{2}$/.test(s.alarmTime)) s.alarmTime = DEFAULT_SETTINGS.alarmTime;
+  s.eventStyle = s.eventStyle === 'timed' ? 'timed' : 'allday';
+  s.groupByDay = !!s.groupByDay;
+  return s;
+}
+
+let plants = (Array.isArray(readStore(KEYS.plants, [])) ? readStore(KEYS.plants, []) : [])
+  .map(sanitisePlant).filter(Boolean);
+let settings = sanitiseSettings(readStore(KEYS.settings, null));
+const savePlants = () => writeStore(KEYS.plants, plants);
+const saveSettings = () => writeStore(KEYS.settings, settings);
+
+/* ===== UI ===== */
+const $ = id => document.getElementById(id);
+let editingId = null;
+let confirmDeleteId = null;
+let confirmTimer = null;
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function fmtDay(day, withYear) {
+  const opts = { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' };
+  if (withYear) opts.year = 'numeric';
+  return new Date(day * DAY_MS).toLocaleDateString('en-AU', opts);
+}
+function plural(n, word) { return n + ' ' + word + (n === 1 ? '' : 's'); }
+function presetFor(species) { return PRESETS.find(p => p.species === species); }
+
+function fieldsHTML(p) {
+  const todayISO = toISO(localTodayDay());
+  const known = p.species && (p.species === CUSTOM || presetFor(p.species));
+  const selected = p.species ? (known ? p.species : CUSTOM) : '';
+  const opts = ['<option value="" disabled' + (selected ? '' : ' selected') + '>Choose…</option>']
+    .concat(PRESETS.map(x =>
+      '<option value="' + esc(x.species) + '"' + (x.species === selected ? ' selected' : '') + '>' +
+      esc(x.species) + ' — ' + x.interval + ' days</option>'))
+    .concat('<option value="' + CUSTOM + '"' + (selected === CUSTOM ? ' selected' : '') + '>Custom (set your own)</option>');
+  return '' +
+    '<label class="field"><span>Name</span>' +
+      '<input name="name" type="text" required maxlength="80" autocomplete="off" placeholder="e.g. Fern by the window" value="' + esc(p.name || '') + '"></label>' +
+    '<div class="row">' +
+      '<label class="field"><span>Species</span><select name="species" class="species-select" required>' + opts.join('') + '</select></label>' +
+      '<label class="field"><span>Water every (days)</span>' +
+        '<input name="interval" type="number" min="1" max="365" step="1" inputmode="numeric" required value="' + (p.interval || '') + '"></label>' +
+    '</div>' +
+    '<label class="field"><span>Last watered</span>' +
+      '<input name="lastWatered" type="date" required max="' + todayISO + '" value="' + esc(p.lastWatered || todayISO) + '"></label>' +
+    '<label class="field"><span>Slows down in</span><select name="rest">' +
+      REST_OPTIONS.map(o => '<option value="' + o.value + '"' + (o.value === (p.rest || 'winter') ? ' selected' : '') + '>' + o.label + '</option>').join('') +
+      '</select></label>' +
+    '<p class="hint rest-hint">Its interval is multiplied during this season. Choose "Doesn\'t slow down" for plants that keep growing year-round, e.g. in a heated room.</p>' +
+    '<div class="form-notes">' + notesHTML(selected) + '</div>';
+}
+
+function notesHTML(species) {
+  const preset = presetFor(species);
+  if (!preset || !preset.notes) return '';
+  return '<ul class="notes">' + preset.notes.map(n => '<li>' + esc(n) + '</li>').join('') + '</ul>';
+}
+
+function readForm(form) {
+  const last = form.elements.lastWatered;
+  const todayISO = toISO(localTodayDay());
+  last.setCustomValidity(last.value && last.value > todayISO ? 'Last watered can\'t be in the future.' : '');
+  const name = form.elements.name;
+  name.setCustomValidity(name.value.trim() ? '' : 'Give the plant a name.');
+  if (!form.reportValidity()) return null;
+  return {
+    name: name.value.trim(),
+    species: form.elements.species.value || CUSTOM,
+    interval: clampInt(form.elements.interval.value, 1, 365),
+    lastWatered: last.value,
+    rest: form.elements.rest.value
+  };
+}
+
+function renderAddForm() {
+  const form = $('add-form');
+  form.innerHTML = fieldsHTML({}) + '<button type="submit" class="btn primary block">Add plant</button>';
+}
+
+function cardHTML(p, today) {
+  if (p.id === editingId) {
+    return '<article class="card" data-id="' + esc(p.id) + '">' +
+      '<form class="edit-form" novalidate><h3 style="margin-bottom:10px">Edit plant</h3>' + fieldsHTML(p) +
+      '<div class="actions"><button type="submit" class="btn primary">Save</button>' +
+      '<button type="button" class="btn" data-action="cancel">Cancel</button></div></form></article>';
+  }
+  const s = settings;
+  const eff = intervalOn(p, today, s);
+  const adjustOn = s.multiplier > 1;
+  const applying = adjustOn && inRestSeason(p, today, s);
+  const next = nextDue(p, s);
+  const diff = next - today;
+  const last = parseISO(p.lastWatered);
+  const ago = today - last;
+
+  let pill, cls = '';
+  if (diff < 0) { pill = '<span class="pill late">Overdue by ' + plural(-diff, 'day') + '</span>'; cls = 'overdue'; }
+  else if (diff === 0) { pill = '<span class="pill today">Today</span>'; cls = 'due-today'; }
+  else if (diff === 1) { pill = '<span class="pill ok">Tomorrow</span>'; }
+  else { pill = '<span class="pill ok">In ' + diff + ' days</span>'; }
+
+  const badges = [];
+  if (applying && p.rest === 'winter') badges.push('<span class="badge winter">❄ Winter adjustment on</span>');
+  else if (applying && p.rest === 'summer') badges.push('<span class="badge summer">☀ Summer rest adjustment on</span>');
+  else if (adjustOn && p.rest === 'summer') badges.push('<span class="badge">Rests in summer</span>');
+  else if (adjustOn && p.rest === 'none') badges.push('<span class="badge">No seasonal adjustment</span>');
+
+  const intervalSub = applying
+    ? '<span class="sub">' + p.interval + ' × ' + s.multiplier.toFixed(1) + '</span>'
+    : '';
+  const lastSub = ago === 0 ? 'today' : ago === 1 ? 'yesterday' : ago + ' days ago';
+  const wateredToday = ago === 0;
+  const confirming = confirmDeleteId === p.id;
+
+  return '<article class="card ' + cls + '" data-id="' + esc(p.id) + '">' +
+    '<div><h3>' + esc(p.name) + '</h3><p class="species">' + esc(p.species) + '</p></div>' +
+    (badges.length ? '<div class="badges">' + badges.join('') + '</div>' : '') +
+    '<dl class="facts">' +
+      '<div><dt>Waters every</dt><dd><strong>' + plural(eff, 'day') + '</strong> ' + intervalSub + '</dd></div>' +
+      '<div><dt>Next watering</dt><dd><strong>' + fmtDay(next) + '</strong>' + pill + '</dd></div>' +
+      '<div><dt>Last watered</dt><dd>' + fmtDay(last) + ' <span class="sub">' + lastSub + '</span></dd></div>' +
+    '</dl>' +
+    (notesHTML(p.species) ? '<details class="care"><summary>Care notes</summary>' + notesHTML(p.species) + '</details>' : '') +
+    '<div class="card-actions">' +
+      '<button type="button" class="btn water" data-action="water"' + (wateredToday ? ' disabled' : '') + '>' +
+        (wateredToday ? 'Watered today ✓' : 'Mark as watered today') + '</button>' +
+      '<button type="button" class="btn ghost" data-action="edit">Edit</button>' +
+      '<button type="button" class="btn ghost danger' + (confirming ? ' confirming' : '') + '" data-action="delete">' +
+        (confirming ? 'Confirm delete' : 'Delete') + '</button>' +
+    '</div></article>';
+}
+
+function renderPlants() {
+  const today = localTodayDay();
+  const list = $('plant-list');
+  $('plant-count').textContent = plants.length ? plural(plants.length, 'plant') : '';
+  if (!plants.length) {
+    list.innerHTML = '<div class="empty"><strong>No plants yet</strong>Add your first plant to start building a watering schedule.</div>';
+    return;
+  }
+  const sorted = plants.slice().sort((a, b) =>
+    (nextDue(a, settings) - nextDue(b, settings)) || a.name.localeCompare(b.name, 'en-AU'));
+  list.innerHTML = '<div class="cards">' + sorted.map(p => cardHTML(p, today)).join('') + '</div>';
+}
+
+function monthRange(a, b) {
+  return a === b ? MONTHS[a - 1] + ' only' : MONTHS[a - 1] + ' to ' + MONTHS[b - 1];
+}
+function renderSeason() {
+  const s = settings;
+  const el = $('season-status');
+  const today = localTodayDay();
+  const winter = monthRange(s.winterStart, s.winterEnd);
+  const sm = summerMonths(s);
+  const summer = monthRange(sm.start, sm.end);
+  const x = '×' + s.multiplier.toFixed(1);
+  if (s.multiplier <= 1) {
+    el.className = 'season-status off';
+    el.textContent = 'Seasonal adjustment is off (×1.0). Every plant uses its normal interval all year.';
+  } else if (isWinter(today, s)) {
+    el.className = 'season-status';
+    el.textContent = '❄ It\'s winter now (' + winter + '), so winter-resting plants water ' + x + ' less often.';
+  } else if (isSummer(today, s)) {
+    el.className = 'season-status summer';
+    el.textContent = '☀ It\'s summer (' + summer + '), so summer-resting plants such as aeoniums water ' + x + ' less often. Everything else is on its normal interval.';
+  } else {
+    el.className = 'season-status off';
+    el.textContent = 'Winter runs ' + winter + ' and summer ' + summer + '. Neither is on now, so normal intervals apply.';
+  }
+}
+
+function renderExport() {
+  const btn = $('download-btn');
+  const el = $('export-summary');
+  if (!plants.length) {
+    btn.disabled = true;
+    el.textContent = 'Add a plant to create a calendar.';
+    return;
+  }
+  btn.disabled = false;
+  const r = buildICS(plants, settings);
+  if (!r.occurrences) {
+    el.textContent = 'No waterings fall in the next 12 months.';
+    return;
+  }
+  el.innerHTML = '<strong>' + plural(r.occurrences, 'reminder') + '</strong> across ' +
+    plural(plants.length, 'plant') + ', ' + fmtDay(r.firstDay, true) + ' to ' + fmtDay(r.lastDay, true) +
+    ' <span class="sub">(' + r.events + (r.events === 1 ? ' calendar entry' : ' calendar entries') + ')</span>.';
+}
+
+function renderSettings() {
+  const s = settings;
+  $('multiplier').value = s.multiplier;
+  $('multiplier-out').textContent = '×' + s.multiplier.toFixed(1);
+  $('winter-start').value = s.winterStart;
+  $('winter-end').value = s.winterEnd;
+  $('alarm-time').value = s.alarmTime;
+  document.querySelectorAll('input[name="event-style"]').forEach(r => { r.checked = r.value === s.eventStyle; });
+  $('group-by-day').checked = s.groupByDay;
+}
+
+function renderAll() {
+  renderPlants();
+  renderSeason();
+  renderExport();
+}
+
+/* Toast with optional undo */
+let toastTimer = null, toastUndo = null;
+function toast(msg, undo) {
+  $('toast-msg').textContent = msg;
+  toastUndo = undo || null;
+  $('toast-undo').hidden = !undo;
+  $('toast').classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { $('toast').classList.remove('show'); toastUndo = null; }, 5000);
+}
+$('toast-undo').addEventListener('click', () => {
+  if (toastUndo) toastUndo();
+  toastUndo = null;
+  $('toast').classList.remove('show');
+});
+
+/* Species select pre-fills the interval (still editable) */
+document.addEventListener('change', e => {
+  if (!e.target.classList || !e.target.classList.contains('species-select')) return;
+  const form = e.target.form;
+  const preset = presetFor(e.target.value);
+  form.querySelector('.form-notes').innerHTML = notesHTML(e.target.value);
+  if (preset) {
+    form.elements.interval.value = preset.interval;
+    form.elements.rest.value = preset.rest || 'winter';
+  } else {
+    form.elements.interval.focus();
+    form.elements.interval.select();
+  }
+});
+
+/* Add plant */
+$('add-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const data = readForm(e.target);
+  if (!data) return;
+  plants.push(Object.assign({ id: newId() }, data));
+  savePlants();
+  renderAddForm();
+  renderAll();
+  toast('Added ' + data.name + '.');
+});
+
+/* Card actions */
+$('plant-list').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-action]');
+  if (!btn) return;
+  const card = btn.closest('.card');
+  const id = card && card.dataset.id;
+  const idx = plants.findIndex(p => p.id === id);
+  if (idx < 0) return;
+  const plant = plants[idx];
+  const action = btn.dataset.action;
+
+  if (action === 'water') {
+    const prev = plant.lastWatered;
+    plant.lastWatered = toISO(localTodayDay());
+    savePlants();
+    renderAll();
+    toast(plant.name + ' watered. Next: ' + fmtDay(nextDue(plant, settings)) + '.', () => {
+      plant.lastWatered = prev;
+      savePlants();
+      renderAll();
+    });
+  } else if (action === 'edit') {
+    editingId = id;
+    confirmDeleteId = null;
+    renderPlants();
+    const f = $('plant-list').querySelector('.card[data-id="' + CSS.escape(id) + '"] input[name="name"]');
+    if (f) f.focus();
+  } else if (action === 'cancel') {
+    editingId = null;
+    renderPlants();
+  } else if (action === 'delete') {
+    if (confirmDeleteId !== id) {
+      confirmDeleteId = id;
+      clearTimeout(confirmTimer);
+      confirmTimer = setTimeout(() => { confirmDeleteId = null; renderPlants(); }, 4000);
+      renderPlants();
+      return;
+    }
+    clearTimeout(confirmTimer);
+    confirmDeleteId = null;
+    const removed = plants.splice(idx, 1)[0];
+    savePlants();
+    renderAll();
+    toast('Deleted ' + removed.name + '.', () => {
+      plants.splice(Math.min(idx, plants.length), 0, removed);
+      savePlants();
+      renderAll();
+    });
+  }
+});
+
+$('plant-list').addEventListener('submit', e => {
+  if (!e.target.classList.contains('edit-form')) return;
+  e.preventDefault();
+  const id = e.target.closest('.card').dataset.id;
+  const plant = plants.find(p => p.id === id);
+  const data = readForm(e.target);
+  if (!plant || !data) return;
+  Object.assign(plant, data);
+  editingId = null;
+  savePlants();
+  renderAll();
+  toast('Saved ' + plant.name + '.');
+});
+
+/* Settings */
+function populateMonths() {
+  const opts = MONTHS.map((m, i) => '<option value="' + (i + 1) + '">' + m + '</option>').join('');
+  $('winter-start').innerHTML = opts;
+  $('winter-end').innerHTML = opts;
+}
+function updateSetting(key, value) {
+  settings[key] = value;
+  settings = sanitiseSettings(settings);
+  saveSettings();
+  renderAll();
+}
+$('multiplier').addEventListener('input', e => {
+  const v = Math.round(Number(e.target.value) * 10) / 10;
+  $('multiplier-out').textContent = '×' + v.toFixed(1);
+  updateSetting('multiplier', v);
+});
+$('winter-start').addEventListener('change', e => updateSetting('winterStart', Number(e.target.value)));
+$('winter-end').addEventListener('change', e => updateSetting('winterEnd', Number(e.target.value)));
+$('alarm-time').addEventListener('change', e => {
+  if (/^\d{2}:\d{2}$/.test(e.target.value)) updateSetting('alarmTime', e.target.value);
+});
+document.querySelectorAll('input[name="event-style"]').forEach(r =>
+  r.addEventListener('change', e => { if (e.target.checked) updateSetting('eventStyle', e.target.value); }));
+$('group-by-day').addEventListener('change', e => updateSetting('groupByDay', e.target.checked));
+
+/* Download */
+$('download-btn').addEventListener('click', () => {
+  if (!plants.length) return;
+  const r = buildICS(plants, settings);
+  const blob = new Blob([r.text], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'plant-watering-' + toISO(localTodayDay()) + '.ics';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  toast('Calendar downloaded: ' + plural(r.occurrences, 'reminder') + '.');
+});
+
+/* Re-render if the page is left open past midnight */
+document.addEventListener('visibilitychange', () => { if (!document.hidden) renderAll(); });
+
+/* Init */
+populateMonths();
+renderAddForm();
+renderSettings();
+renderAll();
+if (!storageOK) storageFailed();
+</script>
+</body>
+</html>
