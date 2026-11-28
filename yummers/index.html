@@ -161,6 +161,10 @@ header.app {
   font-size: 23px; font-weight: 800; letter-spacing: -.005em;
   color: var(--accent); margin: 0; flex: 1;
 }
+/* The wordmark in the app header is a link home. Only the word itself is
+   tappable — not the empty header space beside it. */
+.brand a { color: inherit; text-decoration: none; display: inline-block; border-radius: 6px; }
+.brand a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .searchbar { display: flex; gap: 8px; padding-bottom: 10px; }
 .chips { display: flex; gap: 7px; overflow-x: auto; padding: 0 0 12px; scrollbar-width: none; }
 .chips::-webkit-scrollbar { display: none; }
@@ -203,7 +207,7 @@ header.app {
 .empty .big { font-size: 46px; margin-bottom: 10px; }
 
 /* --- detail view ---------------------------------------------------------- */
-.hero { width: 100%; border-radius: var(--radius); display: block; margin-bottom: 18px; max-height: 46vh; object-fit: cover; }
+.hero { width: 100%; border-radius: var(--radius); display: block; margin: 14px 0 18px; max-height: 46vh; object-fit: cover; }
 .detail h2 { font-size: 28px; }
 .detail .lede { color: var(--muted); margin: 0 0 14px; }
 .factbar { display: flex; gap: 18px; flex-wrap: wrap; font-size: 14px; color: var(--muted);
@@ -312,6 +316,25 @@ ol.steps li.step-head:first-child { border-top: none; margin-top: 0; padding-top
 .stars button.on { color: var(--star); }
 .catpick { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 10px; }
 
+/* --- category picker: chosen chips + type-to-find ------------------------- */
+.catpick .chip .x { margin-left: 6px; font-size: 14px; line-height: 1; opacity: .75; }
+/* Suggestions sit inline under the box as a couple of rows of chips, rather
+   than a dropdown list — on a phone a dropdown tends to end up hidden behind
+   the keyboard. */
+.tag-suggest { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.tag-suggest .cap { width: 100%; font-size: 12px; color: var(--muted); margin-bottom: 1px; }
+.tag-opt {
+  font-size: 13px; padding: 6px 11px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--text);
+}
+.tag-opt .n { color: var(--muted); font-size: 11px; margin-left: 5px; }
+.tag-opt mark { background: none; color: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+.tag-opt.active, .tag-opt:hover { background: var(--surface-2); border-color: var(--muted); }
+.tag-opt.create { border-style: dashed; }
+.tag-note { font-size: 12px; color: var(--muted); padding: 6px 2px; }
+.tag-all-toggle { font-size: 13px; padding: 8px 2px 2px; color: var(--muted); }
+#catall { margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--line-soft); }
+
 /* --- auth ----------------------------------------------------------------- */
 .authpage { max-width: 380px; margin: 0 auto; padding: 12vh 20px 40px; }
 .authpage .brand { text-align: center; font-size: 40px; margin-bottom: 4px; }
@@ -399,6 +422,118 @@ ol.steps li.step-head:first-child { border-top: none; margin-top: 0; padding-top
    wraps on its own — which looks broken. Wider screens share one line. */
 .detail .toolbar h2 { flex: 1 1 100%; margin: 0; }
 @media (min-width: 560px) { .detail .toolbar h2 { flex: 1 1 auto; } }
+
+/* ===========================================================================
+   PRINTABLE RECIPE — the PDF export
+   ===========================================================================
+   A separate, print-only layout rather than the app screen with bits hidden.
+   It's built fresh from the recipe each time (#print-view) and is the only
+   thing that prints. White paper, deep navy text, the orange used only for
+   the wordmark, the rule under each section title and the step-number discs —
+   all decorative, never small orange text on white, which would be hard to
+   read. Ingredients run down a narrow left column beside the method, like a
+   printed cookbook.
+
+   Sizes are in points and millimetres because this is laid out for A4 paper.
+   Colours are written out in full here rather than borrowed from the app's
+   dark theme. */
+@page { size: A4; margin: 14mm 15mm 15mm; }
+
+#print-view { display: none; }
+
+.pd {
+  --pd-ink:   #0b1a2b;   /* body text — deep navy */
+  --pd-soft:  #4b5866;   /* description, captions */
+  --pd-faint: #8a939c;   /* footer */
+  --pd-rule:  #e4dfd6;   /* hairlines */
+  --pd-warm:  #faf6ee;   /* notes panel */
+  --pd-accent:#ffb300;   /* the orange */
+  color: var(--pd-ink); background: #fff; color-scheme: light;
+  font: 10.5pt/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;   /* keep the orange and the notes tint when printing */
+}
+.pd * { box-sizing: border-box; }
+.pd-word { font-family: 'Yummers Wordmark', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 800; color: var(--pd-accent); }
+.pd-top { border-bottom: .75pt solid var(--pd-rule); padding-bottom: 5pt; margin-bottom: 16pt; }
+.pd-top .pd-word { font-size: 14pt; }
+.pd-kicker { font-size: 7.5pt; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--pd-soft); margin: 0 0 5pt; }
+.pd-title { font-size: 25pt; line-height: 1.08; font-weight: 750; letter-spacing: -.015em; margin: 0 0 7pt; color: var(--pd-ink); }
+.pd-desc { font-size: 10.5pt; line-height: 1.5; color: var(--pd-soft); margin: 0 0 10pt; max-width: 150mm; }
+.pd-meta { display: flex; flex-wrap: wrap; gap: 3pt 16pt; font-size: 9pt; margin: 0 0 13pt; }
+.pd-meta .k { font-size: 7pt; letter-spacing: .14em; text-transform: uppercase; color: var(--pd-faint); margin-right: 4pt; }
+.pd-meta b { font-weight: 650; }
+.pd-photo { display: block; width: 100%; height: 58mm; object-fit: cover; border-radius: 2.5mm; margin: 0 0 14pt; break-inside: avoid; }
+
+.pd-cols { display: flow-root; }              /* contains the floated ingredient column */
+.pd-ing { float: left; width: 61mm; }
+.pd-method { margin-left: 69mm; }
+.pd h2 {
+  font-size: 7.5pt; font-weight: 750; letter-spacing: .18em; text-transform: uppercase;
+  margin: 0 0 7pt; padding-bottom: 5pt; border-bottom: 1.5pt solid var(--pd-accent); color: var(--pd-ink);
+  break-after: avoid;
+}
+.pd ul, .pd ol { list-style: none; padding: 0; margin: 0; }
+.pd-ing li { padding: 3pt 0; border-bottom: .5pt solid var(--pd-rule); font-size: 9.5pt; line-height: 1.3; break-inside: avoid; }
+.pd-ing li b { font-weight: 700; }
+.pd li.pd-sub {
+  font-size: 7pt; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--pd-soft);
+  border-bottom: none; padding: 11pt 0 2pt; margin: 0; break-after: avoid;
+}
+.pd li.pd-sub:first-child { padding-top: 0; }
+.pd-method ol { counter-reset: pd; }
+.pd-method li.pd-step { counter-increment: pd; position: relative; padding-left: 22pt; margin: 0 0 8pt; break-inside: avoid; }
+.pd-method li.pd-step::before {
+  content: counter(pd); position: absolute; left: 0; top: .5pt;
+  width: 15pt; height: 15pt; line-height: 15pt; border-radius: 50%; text-align: center;
+  background: var(--pd-accent); color: var(--pd-ink); font-size: 7.5pt; font-weight: 800;
+}
+.pd-method li.pd-sub + li.pd-step, .pd-method li.pd-sub { margin-top: 0; }
+.pd-notes { margin-top: 13pt; background: var(--pd-warm); border-left: 2pt solid var(--pd-accent);
+  border-radius: 0 2mm 2mm 0; padding: 8pt 11pt; font-size: 9.5pt; break-inside: avoid; }
+.pd-notes h3 { font-size: 7pt; font-weight: 750; letter-spacing: .16em; text-transform: uppercase; margin: 0 0 3pt; color: var(--pd-ink); }
+.pd-notes p { margin: 0; white-space: pre-wrap; }
+/* The source sits up top under the times, like a byline. The credit closes the
+   page, full width beneath both columns, and is told never to be split off
+   from the content above onto a page of its own. */
+.pd-source { margin: -6pt 0 13pt; font-size: 8pt; color: var(--pd-soft); overflow-wrap: anywhere; }
+.pd-foot { clear: both; margin-top: 12pt; padding-top: 6pt; border-top: .5pt solid var(--pd-rule);
+  font-size: 7.5pt; color: var(--pd-faint); text-align: center; letter-spacing: .02em;
+  break-inside: avoid; break-before: avoid; page-break-before: avoid; }
+.pd-foot .pd-word { font-size: 8.5pt; }
+
+/* --- the printable page, when opened on screen (the iPhone home-screen route) --- */
+body.print-page { background: #e9e5df; }
+body.print-page > *:not(#print-view):not(.pd-measure) { display: none !important; }
+body.print-page #print-view { display: block; }
+.pp-bar {
+  position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center;
+  padding: calc(10px + env(safe-area-inset-top)) 16px 10px; background: #001021; color: #eaf2fa;
+}
+.pp-bar .pp-hint { flex: 1 1 220px; font-size: 12px; line-height: 1.4; color: #9db3c9; }
+.pp-bar a { color: #9db3c9; font-size: 13px; text-decoration: none; }
+.pp-paper { background: #fff; max-width: 210mm; margin: 22px auto 40px; padding: 15mm; border-radius: 3px; box-shadow: 0 10px 40px rgba(0,0,0,.18); }
+/* On a phone screen the preview stacks the columns. Scoped to #print-view so
+   it never affects printing, or the off-screen copy used to measure the page. */
+@media screen and (max-width: 700px) {
+  #print-view .pp-paper { margin: 0; padding: 22px 18px 30px; border-radius: 0; box-shadow: none; }
+  #print-view .pd-ing { float: none; width: auto; margin-bottom: 16pt; }
+  #print-view .pd-method { margin-left: 0; }
+  #print-view .pd-photo { height: 52vw !important; }
+}
+/* The invisible, off-screen copy laid out at exact A4 text width to measure
+   whether the recipe fits on a page. */
+.pd-measure { position: absolute; left: -10000px; top: 0; width: 180mm; visibility: hidden; pointer-events: none; }
+.pd-measure .pp-paper { margin: 0; padding: 0; max-width: none; box-shadow: none; border-radius: 0; }
+html.pd-margin-credit .pd-measure .pd-foot { display: none; }
+
+/* --- what actually goes to the printer ----------------------------------------- */
+@media print {
+  html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+  body.printing > *:not(#print-view) { display: none !important; }
+  body.printing #print-view { display: block !important; }
+  .pp-bar { display: none !important; }
+  .pp-paper { max-width: none; margin: 0; padding: 0; border-radius: 0; box-shadow: none; }
+}
 </style>
 </head>
 <body>
@@ -485,7 +620,7 @@ ol.steps li.step-head:first-child { border-top: none; margin-top: 0; padding-top
     <div class="wrap">
       <div class="brandbar">
         <button class="ghost" id="btn-back" hidden aria-label="Back">&larr;</button>
-        <h1 class="brand">Yummers</h1>
+        <h1 class="brand"><a href="./" id="brand-home" title="Back to all recipes">Yummers</a></h1>
         <button class="ghost" id="btn-menu" aria-label="Menu">&#9776;</button>
       </div>
       <div class="searchbar" id="searchbar">
@@ -557,12 +692,16 @@ ol.steps li.step-head:first-child { border-top: none; margin-top: 0; padding-top
         </div>
 
         <div class="field">
-          <label>Categories</label>
+          <label for="tag-input">Categories</label>
           <div class="catpick" id="catpick"></div>
-          <div class="row">
-            <input id="new-cat" placeholder="New category…" style="flex:1 1 0;min-width:0">
-            <button type="button" id="btn-add-cat" style="flex:0 0 auto">Add</button>
-          </div>
+          <!-- Type-to-find: matching categories appear as suggestions under the
+               box; if nothing matches, the last suggestion offers to create it. -->
+          <input id="tag-input" placeholder="Type to find or add a category…"
+                 autocomplete="off" autocapitalize="none" spellcheck="false"
+                 role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="tag-suggest">
+          <div class="tag-suggest" id="tag-suggest" role="listbox" hidden></div>
+          <button type="button" class="ghost tag-all-toggle" id="btn-all-tags">Show all categories</button>
+          <div class="catpick" id="catall" hidden></div>
         </div>
 
         <div class="field">
@@ -647,6 +786,9 @@ ol.steps li.step-head:first-child { border-top: none; margin-top: 0; padding-top
   </div>
 </div>
 
+<!-- The printable recipe is built in here, only when exporting a PDF. -->
+<div id="print-view"></div>
+
 <div id="toast"></div>
 
 <script type="module">
@@ -696,6 +838,10 @@ const ENABLE_PASSKEYS = true;
 
 // The Storage bucket name. Must match what you created in the dashboard.
 const BUCKET = 'recipe-images';
+
+// The name in the credit line at the foot of every exported PDF:
+// "Exported from Yummers by …"
+const PDF_CREDIT_NAME = 'Geordie Crawley';
 
 // Image sizing. Bigger = better looking, more storage and bandwidth used.
 const FULL_MAX_PX  = 1400;   // longest edge of the full-size image
@@ -1185,10 +1331,24 @@ function stripBullet(line) {
     .replace(/^\s*\[\s*\]\s*/, '')
     .trim();
 }
+// "Step 1", "STEP ONE", "Step 3:" on a line of its own. Sites like NYT Cooking
+// put these between every instruction; they're numbering, not content, and the
+// app numbers the steps itself. Before this was caught, a "Step 1" line could
+// land in the ingredients (it's short with no full stop, so it looked like an
+// ingredient) or become a method heading.
+const NUMBER_WORDS = 'one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|' +
+  'thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty';
+const STEP_LABEL_RE  = new RegExp(`^\\s*step\\s*(?:\\d{1,2}|${NUMBER_WORDS})\\s*[:.)\\-–—]?\\s*$`, 'i');
+const STEP_PREFIX_RE = new RegExp(`^\\s*step\\s*(?:\\d{1,2}|${NUMBER_WORDS})\\b\\s*[:.)\\-–—]?\\s*`, 'i');
+
 function stripStepNumber(line) {
-  // "1. Preheat", "Step 2) Mix", and "7<tab>At this stage" (a number and a tab,
-  // which is how some sites' numbered lists come through when copied).
-  return line.replace(/^\s*(?:step\s*)?\d{1,2}\s*(?:[.):\]]\s+|\t+)/i, '').trim();
+  // "1. Preheat", "Step 2) Mix", "Step Three: Whisk", "Step 4 Bake", and
+  // "7<tab>At this stage" (a number and a tab, which is how some sites'
+  // numbered lists come through when copied).
+  return line
+    .replace(STEP_PREFIX_RE, '')
+    .replace(/^\s*\d{1,2}\s*(?:[.):\]]\s+|\t+)/, '')
+    .trim();
 }
 
 /** Split "2 cups plain flour" into { amount: "2 cups", item: "plain flour" }.
@@ -1293,6 +1453,7 @@ function parseRecipeText(raw) {
   for (let line of lines) {
     if (!line) { kept.push({ blank: true }); continue; }
     if (JUNK_RE.test(line)) continue;
+    if (STEP_LABEL_RE.test(line)) continue;     // "Step 1" on its own line
     // Divider lines — "⸻", "---", "***" — have no letters or numbers in them.
     if (!/[\p{L}\p{N}]/u.test(line)) continue;
 
@@ -2054,6 +2215,243 @@ async function copyToClipboard(text, button, what) {
 
 
 /* ===========================================================================
+   10e. EXPORT TO PDF
+   ===========================================================================
+   Browsers already turn any page into a PDF through Print → "Save as PDF", so
+   there's no PDF library here. What this does is lay the recipe out as a
+   proper printable page (the .pd styles) and hand that to the browser.
+
+   TWO ROUTES, because of an iPhone limitation:
+   • In a normal browser tab — laptop, or Yummers open in Safari — the PDF
+     button opens the print dialog straight away.
+   • In the home-screen app on an iPhone, window.print() silently does nothing:
+     Apple doesn't give installed web apps a print dialog. So there, the button
+     opens the printable page in the browser instead, where printing does work.
+     The recipe travels inside the link itself (after the #), so that page
+     doesn't need you to be logged in and never touches the database.
+
+   Either way, what you export is the recipe as you're viewing it: doubled if
+   you've doubled it, metric if you've switched to metric. */
+
+/** Gather everything the printed page shows, as plain text. */
+function printData(r, factor) {
+  const meta = [];
+  if (r.servings)  meta.push(['', scaleText(r.servings, factor)]);
+  if (r.prep_time) meta.push(['Prep', r.prep_time]);
+  if (r.cook_time) meta.push(['Cook', r.cook_time]);
+  if (factor !== 1) meta.push(['', `Quantities ×${factor}`]);
+  if (unitMode === 'metric' && hasImperial(r)) meta.push(['', 'Converted to metric']);
+  const photo = imageSrc(r, 'full');
+  return {
+    title: r.title || 'Untitled recipe',
+    description: r.description || '',
+    tags: catsOf(r.id).map(catName).filter(Boolean),
+    meta,
+    photo: photo && /^https:\/\//i.test(photo) ? photo : '',
+    ingredients: (r.ingredients || []).map(x => x.heading
+      ? { h: x.heading }
+      : { a: plainConv(viewAmount(x, factor)), i: plainConv(viewItem(x)) }),
+    steps: (r.steps || []).map(s => isStepHeading(s) ? { h: s.heading } : { t: plainConv(viewProse(s)) }),
+    notes: r.notes ? plainConv(viewProse(r.notes)) : '',
+    source: r.source_url || ''
+  };
+}
+
+/** Lay out the printable page. Everything is escaped — this also renders
+ *  recipes that arrive in a link, so it trusts nothing in them.
+ *  photoMM, if given, overrides the photo's height (see fitToOnePage). */
+function renderPrintDoc(d, photoMM = null) {
+  const ing = (d.ingredients || []).map(x => x.h != null
+    ? `<li class="pd-sub">${esc(x.h)}</li>`
+    : `<li>${x.a ? `<b>${esc(x.a)}</b> ` : ''}${esc(x.i)}</li>`).join('');
+  const steps = (d.steps || []).map(s => s.h != null
+    ? `<li class="pd-sub">${esc(s.h)}</li>`
+    : `<li class="pd-step">${esc(s.t)}</li>`).join('');
+  const meta = (d.meta || []).map(([k, v]) =>
+    `<span>${k ? `<span class="k">${esc(k)}</span>` : ''}<b>${esc(v)}</b></span>`).join('');
+  return `
+    <div class="pp-paper"><article class="pd">
+      <header class="pd-top"><span class="pd-word">Yummers</span></header>
+      ${d.tags && d.tags.length ? `<p class="pd-kicker">${d.tags.map(esc).join(' · ')}</p>` : ''}
+      <h1 class="pd-title">${esc(d.title)}</h1>
+      ${d.description ? `<p class="pd-desc">${esc(d.description)}</p>` : ''}
+      ${meta ? `<div class="pd-meta">${meta}</div>` : ''}
+      ${d.source ? `<p class="pd-source">Source: ${esc(d.source)}</p>` : ''}
+      ${d.photo ? `<img class="pd-photo" src="${esc(d.photo)}" alt=""${photoMM ? ` style="height:${Number(photoMM).toFixed(1)}mm"` : ''}>` : ''}
+      <div class="pd-cols">
+        ${ing ? `<section class="pd-ing"><h2>Ingredients</h2><ul>${ing}</ul></section>` : ''}
+        <section class="pd-method" ${ing ? '' : 'style="margin-left:0"'}>
+          ${steps ? `<h2>Method</h2><ol>${steps}</ol>` : ''}
+          ${d.notes ? `<div class="pd-notes"><h3>Notes</h3><p>${esc(d.notes)}</p></div>` : ''}
+        </section>
+        <footer class="pd-foot">Exported from <span class="pd-word">Yummers</span> by ${esc(PDF_CREDIT_NAME)}</footer>
+      </div>
+    </article></div>`;
+}
+
+// The area of an A4 page the text sits in: 297 mm tall, less the @page margins.
+const PD_PAGE_H_MM    = 297 - 14 - 15;
+const PD_PHOTO_MM     = 58;      // the photo's normal height — matches .pd-photo above
+const PD_PHOTO_MIN_MM = 30;      // never shrink it below this
+
+/** A recipe that runs over one page by only a little shouldn't print a second
+ *  page for a single stray line. This lays the page out invisibly at exactly
+ *  A4 text width and measures it. If it runs over by less than the photo can
+ *  give up, it returns a shorter photo height that brings everything onto one
+ *  page. Otherwise it returns null, and a longer recipe simply flows onto
+ *  page two with the photo at its normal size. */
+function fitToOnePage(d) {
+  if (!d.photo) return null;
+  const probe = document.createElement('div');
+  probe.className = 'pd-measure';
+  probe.innerHTML = renderPrintDoc(d);
+  document.body.appendChild(probe);
+  const px = probe.querySelector('.pd').getBoundingClientRect().height;
+  probe.remove();
+  const over = px * 25.4 / 96 - PD_PAGE_H_MM;     // CSS lays out 96px to the inch
+  if (over <= 0) return null;                      // fits already
+  const target = PD_PHOTO_MM - over - 8;           // 8 mm of slack for where page breaks fall
+  return target >= PD_PHOTO_MIN_MM ? target : null;
+}
+
+/** Wait for the photo to load (or fail), so it isn't missing from the PDF.
+ *  A photo that can't be loaded is removed rather than printed as a broken
+ *  image. Gives up after a few seconds rather than hang. */
+function photosReady(root, ms = 5000) {
+  const imgs = [...root.querySelectorAll('img')];
+  return Promise.race([
+    Promise.all(imgs.map(img => img.complete && img.naturalWidth ? null : new Promise(res => {
+      img.addEventListener('load', res, { once: true });
+      img.addEventListener('error', () => { img.remove(); res(); }, { once: true });
+    }))),
+    sleep(ms)
+  ]);
+}
+
+/* The recipe rides along in the link as base64 text. TextEncoder handles
+   characters like ½ and é, which plain btoa() can't. */
+function encodePrintData(obj) {
+  const bytes = new TextEncoder().encode(JSON.stringify(obj));
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function decodePrintData(s) {
+  const b64 = s.replace(/-/g, '+').replace(/_/g, '/');
+  const bin = atob(b64 + '==='.slice((b64.length + 3) % 4));
+  return JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0))));
+}
+/** Keep only the expected fields, as text — a link could carry anything. */
+function cleanPrintData(d) {
+  const str = v => (typeof v === 'string' ? v : '');
+  return {
+    title: str(d.title) || 'Untitled recipe', description: str(d.description),
+    tags: Array.isArray(d.tags) ? d.tags.map(str).filter(Boolean) : [],
+    meta: Array.isArray(d.meta) ? d.meta.filter(Array.isArray).map(([k, v]) => [str(k), str(v)]) : [],
+    photo: /^https:\/\//i.test(str(d.photo)) ? str(d.photo) : '',
+    ingredients: Array.isArray(d.ingredients) ? d.ingredients.map(x => x && typeof x.h === 'string'
+      ? { h: x.h } : { a: str(x && x.a), i: str(x && x.i) }) : [],
+    steps: Array.isArray(d.steps) ? d.steps.map(s => s && typeof s.h === 'string'
+      ? { h: s.h } : { t: str(s && s.t) }) : [],
+    notes: str(d.notes), source: str(d.source)
+  };
+}
+
+/* The credit line, and where it goes.
+   Chrome and Edge (version 131 on) can print text in the page's bottom margin,
+   outside the content area. There the credit appears on every page and can
+   never end up stranded on a page of its own, so on those browsers that's
+   where it goes, and the copy at the end of the recipe is hidden. Safari —
+   which is what prints on an iPhone — can't print in page margins, so it
+   keeps the copy at the end of the recipe, which is told to stay with the
+   content above it. */
+(function setUpPageCredit() {
+  const brands = (navigator.userAgentData && navigator.userAgentData.brands) || [];
+  const chromium = brands.find(b => /chromium/i.test(b.brand));
+  if (!chromium || Number(chromium.version) < 131) return;
+  const text = `Exported from Yummers by ${PDF_CREDIT_NAME}`.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  const style = document.createElement('style');
+  style.textContent = `@page { @bottom-center { content: "${text}";
+      font: 7.5pt -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      color: #8a939c; letter-spacing: .02em; vertical-align: middle; } }
+    @media print { html.pd-margin-credit .pd-foot { display: none; } }`;
+  document.head.appendChild(style);
+  document.documentElement.classList.add('pd-margin-credit');
+})();
+
+/** Print in this tab: build the page, wait for the photo, open the dialog. */
+async function printHere(data) {
+  const pv = $('#print-view');
+  pv.innerHTML = renderPrintDoc(data, fitToOnePage(data));
+  document.body.classList.add('printing');
+  await photosReady(pv);
+  const oldTitle = document.title;
+  document.title = data.title;          // becomes the PDF's suggested file name
+  const done = () => {
+    document.title = oldTitle;
+    document.body.classList.remove('printing');
+    pv.innerHTML = '';
+    window.removeEventListener('afterprint', done);
+  };
+  window.addEventListener('afterprint', done);
+  window.print();
+}
+
+/** The PDF button on a recipe. */
+function exportPdf(r, factor) {
+  const data = printData(r, factor);
+  // navigator.standalone is Apple's flag for "running as a home-screen app".
+  if (navigator.standalone === true) {
+    window.open(`${location.origin}${location.pathname}#print=${encodePrintData(data)}`, '_blank');
+    return;
+  }
+  printHere(data);
+}
+
+/** Pressing Cmd/Ctrl-P on a recipe page gets the same tidy layout, rather than
+ *  a printout of the dark app screen. */
+window.addEventListener('beforeprint', () => {
+  if (document.body.classList.contains('printing') || $('#view-detail').hidden || !detailId) return;
+  const r = recipes.find(x => x.id === detailId);
+  if (!r) return;
+  const pd = printData(r, SCALES[scaleIdx]);
+  $('#print-view').innerHTML = renderPrintDoc(pd, fitToOnePage(pd));
+  document.body.classList.add('printing');
+  window.addEventListener('afterprint', function done() {
+    document.body.classList.remove('printing');
+    $('#print-view').innerHTML = '';
+    window.removeEventListener('afterprint', done);
+  });
+});
+
+/** The page you land on from the iPhone home-screen app: the printable recipe
+ *  on screen, with a Save as PDF button. Printing works here because this is
+ *  an ordinary browser page, not the installed app. */
+function showPrintPage(payload) {
+  let data = null;
+  try { data = cleanPrintData(decodePrintData(payload)); } catch { /* bad or cut-off link */ }
+  document.body.classList.add('print-page', 'printing');
+  const pv = $('#print-view');
+  const bar = `
+    <div class="pp-bar">
+      <button class="primary" id="pp-save" type="button">Save as PDF</button>
+      <span class="pp-hint">iPhone: tap Save as PDF, then the share icon on the preview → Save to Files.</span>
+      <a href="./">Open Yummers</a>
+    </div>`;
+  if (!data) {
+    pv.innerHTML = bar + `<div class="pp-paper"><article class="pd"><p>This printable link looks incomplete —
+      go back to the recipe in Yummers and tap PDF again.</p></article></div>`;
+  } else {
+    document.title = data.title;
+    pv.innerHTML = bar + renderPrintDoc(data, fitToOnePage(data));
+    pv.querySelectorAll('img').forEach(img =>
+      img.addEventListener('error', () => img.remove(), { once: true }));
+  }
+  $('#pp-save').addEventListener('click', () => window.print());
+}
+
+
+/* ===========================================================================
    11. DETAIL VIEW
    =========================================================================== */
 async function openDetail(id) {
@@ -2105,6 +2503,7 @@ async function openDetail(id) {
       <h2>${esc(r.title)}</h2>
       <button id="d-fav" class="ghost" title="Favourite" style="font-size:22px;color:${r.is_favourite ? 'var(--star)' : 'var(--muted)'}">${r.is_favourite ? '★' : '☆'}</button>
       <button id="d-copy" title="Copy the whole recipe">Copy all</button>
+      <button id="d-pdf" title="Save as PDF or print">PDF</button>
       <button id="d-edit">Edit</button>
     </div>
     ${r.description ? `<p class="lede">${esc(r.description)}</p>` : ''}
@@ -2177,6 +2576,7 @@ async function openDetail(id) {
   // scale factor carries through.
   $('#d-copy').addEventListener('click', (e) =>
     copyToClipboard(recipeToText(r, factor), e.currentTarget, 'Recipe'));
+  $('#d-pdf').addEventListener('click', () => exportPdf(r, factor));
   if ($('#cp-ing')) $('#cp-ing').addEventListener('click', (e) =>
     copyToClipboard(ingredientsToText(r, factor), e.currentTarget, 'Ingredients'));
   if ($('#cp-steps')) $('#cp-steps').addEventListener('click', (e) =>
@@ -2241,8 +2641,41 @@ function openEditor(recipe) {
     $('#form-edit').hidden = true;
     $('#btn-delete').hidden = true;
   }
+  resetTagPicker();
   fillEditor();
   show('edit');
+  markEditorClean();
+}
+
+/* --- unsaved-changes check --------------------------------------------------
+   A snapshot of everything in the editor is taken when it opens. Leaving
+   compares against that snapshot, so you're only asked "leave without saving?"
+   when you've actually changed something — opening a recipe, looking, and
+   leaving again never nags. */
+let editorBaseline = null;
+
+function editorState() {
+  const formShown = !$('#form-edit').hidden;
+  return JSON.stringify({
+    paste:  formShown ? '' : $('#paste').value.trim(),
+    title:  $('#ed-title').value.trim(),   desc:   $('#ed-desc').value.trim(),
+    serv:   $('#ed-servings').value.trim(), prep:  $('#ed-prep').value.trim(),
+    cook:   $('#ed-cook').value.trim(),    source: $('#ed-source').value.trim(),
+    notes:  $('#ed-notes').value.trim(),   imgUrl: $('#ed-img-url').value.trim(),
+    ing:    collectIngredients(),          steps:  collectSteps(),
+    cats:   [...(draft && draft.categoryIds || [])].sort(),
+    rating: draft ? draft.rating || 0 : 0, fav:    !!(draft && draft.is_favourite),
+    newImg: !!(draft && draft._newFull),   noImg:  !!(draft && draft._clearImage)
+  });
+}
+function markEditorClean() { editorBaseline = editorState(); }
+function isEditorDirty() {
+  return !$('#view-edit').hidden && editorBaseline !== null && editorState() !== editorBaseline;
+}
+/** True if it's fine to leave the editor: nothing changed, or you said so. */
+function confirmLeaveEditor() {
+  if (!isEditorDirty()) return true;
+  return window.confirm('Leave without saving? Your changes to this recipe will be lost.');
 }
 
 function fillEditor() {
@@ -2516,39 +2949,192 @@ function enableReorder(container, rowSelector, afterChange) {
 enableReorder($('#ing-list'),  '.ing-row');
 enableReorder($('#step-list'), '.step-row', renumberSteps);
 
-/* --- categories ----------------------------------------------------------- */
-function renderCatPicker() {
-  const box = $('#catpick');
-  box.innerHTML = categories.map(c =>
-    `<button type="button" class="chip ${draft.categoryIds.has(c.id) ? 'on' : ''}" data-id="${c.id}">${esc(c.name)}</button>`
-  ).join('') || '<span class="hint">No categories yet — add one below.</span>';
-  box.querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => {
-    const id = b.dataset.id;
-    draft.categoryIds.has(id) ? draft.categoryIds.delete(id) : draft.categoryIds.add(id);
-    renderCatPicker();
-  }));
+/* --- categories: chosen chips + type-to-find --------------------------------
+   The recipe's chosen categories show as chips (tap one to remove it). Below,
+   a single box: type and matching categories appear as suggestions; Enter or a
+   tap picks one. If nothing matches what you typed exactly, the last
+   suggestion offers to create it. With the box empty, it suggests your
+   most-used categories. "Show all categories" opens the full list for
+   browsing, which is how the picker used to work.
+
+   Matching ranks names that START with what you typed first ("ba" → baking),
+   then names with a word starting with it ("tr" → sweet treats), then
+   anything containing it. */
+
+let tagOptions = [];          // what's currently offered, in order
+let tagActive  = 0;           // which one Enter would pick
+
+function catCounts() {
+  const m = new Map();
+  links.forEach(l => m.set(l.category_id, (m.get(l.category_id) || 0) + 1));
+  return m;
 }
 
-/** Create a category on the fly. */
-$('#btn-add-cat').addEventListener('click', async () => {
-  const name = $('#new-cat').value.trim();
-  if (!name) return;
-  const existing = categories.find(c => c.name.toLowerCase() === name.toLowerCase());
-  if (existing) { draft.categoryIds.add(existing.id); $('#new-cat').value = ''; renderCatPicker(); return; }
+/** Bold the part of the name that matches what was typed. */
+function markMatch(name, q) {
+  const i = q ? name.toLowerCase().indexOf(q) : -1;
+  if (i < 0) return esc(name);
+  return esc(name.slice(0, i)) + '<mark>' + esc(name.slice(i, i + q.length)) + '</mark>' + esc(name.slice(i + q.length));
+}
+
+function tagMatches(raw) {
+  const q = raw.trim().toLowerCase();
+  const counts = catCounts();
+  const pool = categories.filter(c => !draft.categoryIds.has(c.id));
+  let picks;
+  if (!q) {
+    picks = pool.slice()
+      .sort((a, b) => (counts.get(b.id) || 0) - (counts.get(a.id) || 0) || a.name.localeCompare(b.name))
+      .slice(0, 6);
+  } else {
+    const rank = c => {
+      const n = c.name.toLowerCase();
+      if (n.startsWith(q)) return 0;
+      if (n.split(/[\s\-/&]+/).some(w => w.startsWith(q))) return 1;
+      return n.includes(q) ? 2 : -1;
+    };
+    picks = pool.map(c => [c, rank(c)]).filter(([, r]) => r >= 0)
+      .sort((a, b) => a[1] - b[1] || a[0].name.localeCompare(b[0].name))
+      .slice(0, 8).map(([c]) => c);
+  }
+  const opts = picks.map(c => ({ type: 'pick', cat: c, n: counts.get(c.id) || 0 }));
+  const exact = q && categories.find(c => c.name.toLowerCase() === q);
+  if (q && !exact) opts.push({ type: 'create', name: raw.trim() });
+  const note = exact && draft.categoryIds.has(exact.id) ? `"${exact.name}" is already on this recipe.` : '';
+  return { opts, note, q };
+}
+
+function renderTagSuggest() {
+  const input = $('#tag-input'), box = $('#tag-suggest');
+  const { opts, note, q } = tagMatches(input.value);
+  tagOptions = opts;
+  tagActive = Math.min(tagActive, Math.max(0, opts.length - 1));
+  if (!opts.length && !note) { box.hidden = true; input.setAttribute('aria-expanded', 'false'); return; }
+  box.innerHTML =
+    (!q && opts.length ? '<div class="cap">Most used</div>' : '') +
+    opts.map((o, i) => o.type === 'pick'
+      ? `<button type="button" class="tag-opt ${i === tagActive ? 'active' : ''}" role="option" data-i="${i}"
+           aria-selected="${i === tagActive}">${markMatch(o.cat.name, q)}<span class="n">${o.n}</span></button>`
+      : `<button type="button" class="tag-opt create ${i === tagActive ? 'active' : ''}" role="option" data-i="${i}"
+           aria-selected="${i === tagActive}">+ Create "${esc(o.name)}"</button>`
+    ).join('') +
+    (note ? `<div class="tag-note">${esc(note)}</div>` : '');
+  box.hidden = false;
+  input.setAttribute('aria-expanded', 'true');
+  box.querySelectorAll('.tag-opt').forEach(el => {
+    // Keep focus in the text box when a suggestion is tapped, so you can carry
+    // straight on typing the next one.
+    el.addEventListener('pointerdown', e => e.preventDefault());
+    el.addEventListener('click', () => chooseTagOption(Number(el.dataset.i)));
+  });
+}
+
+async function chooseTagOption(i) {
+  const o = tagOptions[i];
+  if (!o) return;
+  if (o.type === 'pick') {
+    draft.categoryIds.add(o.cat.id);
+  } else {
+    const row = await createCategory(o.name);
+    if (!row) return;
+    draft.categoryIds.add(row.id);
+  }
+  $('#tag-input').value = '';
+  tagActive = 0;
+  renderCatPicker();
+  renderTagSuggest();
+}
+
+/** Create a category in the database and add it to the local list. */
+async function createCategory(name) {
   try {
     // .insert(...).select().single() = insert one row and give me back the row
     // that was created (so we get its generated id).
-    const row = must(await supabase.from('categories').insert({ name }).select().single());
+    const row = await retrying(async () => must(
+      await supabase.from('categories').insert({ name }).select().single()));
     categories.push(row);
     categories.sort((a, b) => a.name.localeCompare(b.name));
-    draft.categoryIds.add(row.id);
-    $('#new-cat').value = '';
+    return row;
+  } catch (e) { toast(e.message); return null; }
+}
+
+function renderCatPicker() {
+  // The chosen categories, as removable chips.
+  const box = $('#catpick');
+  const chosen = categories.filter(c => draft.categoryIds.has(c.id));
+  box.innerHTML = chosen.map(c =>
+    `<button type="button" class="chip on" data-id="${c.id}" aria-label="Remove ${esc(c.name)}">${esc(c.name)}<span class="x" aria-hidden="true">×</span></button>`
+  ).join('') || '<span class="hint">None yet — type below to find or add one.</span>';
+  box.querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => {
+    draft.categoryIds.delete(b.dataset.id);
     renderCatPicker();
-  } catch (e) { toast(e.message); }
+  }));
+
+  // The full list, when "Show all categories" is open.
+  const all = $('#catall');
+  if (!all.hidden) {
+    all.innerHTML = categories.map(c =>
+      `<button type="button" class="chip ${draft.categoryIds.has(c.id) ? 'on' : ''}" data-id="${c.id}">${esc(c.name)}</button>`
+    ).join('') || '<span class="hint">No categories yet.</span>';
+    all.querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => {
+      const id = b.dataset.id;
+      draft.categoryIds.has(id) ? draft.categoryIds.delete(id) : draft.categoryIds.add(id);
+      renderCatPicker();
+    }));
+  }
+
+  if (document.activeElement === $('#tag-input')) renderTagSuggest();
+}
+
+/** Put the picker back to its resting state — used when the editor opens. */
+function resetTagPicker() {
+  $('#tag-input').value = '';
+  $('#tag-suggest').hidden = true;
+  $('#catall').hidden = true;
+  $('#btn-all-tags').textContent = 'Show all categories';
+  tagActive = 0;
+}
+
+$('#btn-all-tags').addEventListener('click', () => {
+  const all = $('#catall');
+  all.hidden = !all.hidden;
+  $('#btn-all-tags').textContent = all.hidden ? 'Show all categories' : 'Hide all categories';
+  renderCatPicker();
 });
-$('#new-cat').addEventListener('keydown', e => {
-  if (e.key === 'Enter') { e.preventDefault(); $('#btn-add-cat').click(); }
-});
+
+(() => {
+  const input = $('#tag-input');
+  input.addEventListener('focus', () => { tagActive = 0; renderTagSuggest(); });
+  input.addEventListener('input', () => { tagActive = 0; renderTagSuggest(); });
+  input.addEventListener('blur', () => setTimeout(() => {
+    if (document.activeElement === input) return;
+    $('#tag-suggest').hidden = true;
+    input.setAttribute('aria-expanded', 'false');
+  }, 150));
+  input.addEventListener('keydown', e => {
+    const open = !$('#tag-suggest').hidden && tagOptions.length;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      if (!open) return;
+      e.preventDefault();
+      const n = tagOptions.length;
+      tagActive = (tagActive + (e.key === 'ArrowDown' ? 1 : n - 1)) % n;
+      renderTagSuggest();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();                       // never submit the whole recipe form from here
+      if (open) chooseTagOption(tagActive);
+    } else if (e.key === 'Escape') {
+      if (!$('#tag-suggest').hidden) {
+        e.stopPropagation();                    // close the suggestions, don't leave the editor
+        $('#tag-suggest').hidden = true;
+      }
+    } else if (e.key === 'Backspace' && !input.value) {
+      // Backspace in an empty box removes the most recently added chip.
+      const chosen = categories.filter(c => draft.categoryIds.has(c.id));
+      const last = [...draft.categoryIds].reverse().find(id => chosen.some(c => c.id === id));
+      if (last) { draft.categoryIds.delete(last); renderCatPicker(); }
+    }
+  });
+})();
 
 /* --- rating and favourite ------------------------------------------------- */
 function renderStars() {
@@ -2731,17 +3317,13 @@ $('#btn-cancel').addEventListener('click', () => {
   draft.id ? openDetail(draft.id) : goList();
 });
 
-/** Safety net: if you close the tab or hit reload with a part-written recipe
- *  open, the browser asks you to confirm first. It can't be styled or worded
+/** Safety net: if you close the tab or hit reload with unsaved changes in the
+ *  editor, the browser asks you to confirm first. It can't be styled or worded
  *  by us — browsers show their own generic message — but it stops accidental
- *  loss of a long paste. */
+ *  loss of a long paste. Opening a recipe and closing the tab without changing
+ *  anything doesn't trigger it. */
 window.addEventListener('beforeunload', (e) => {
-  if ($('#view-edit').hidden) return;
-  const started = $('#ed-title').value.trim() ||
-                  $('#paste').value.trim() ||
-                  $$('#ing-list .itm, #ing-list .hdg').some(i => i.value.trim()) ||
-                  $$('#step-list textarea, #step-list .hdg').some(t => t.value.trim());
-  if (!started) return;
+  if (!isEditorDirty()) return;
   e.preventDefault();
   e.returnValue = '';
 });
@@ -2889,7 +3471,20 @@ async function importData(file) {
    =========================================================================== */
 function goList() { show('list'); renderList(); }
 
-$('#btn-back').addEventListener('click', goList);
+// The back arrow returns to the list as you left it (same search, same filter).
+$('#btn-back').addEventListener('click', () => { if (confirmLeaveEditor()) goList(); });
+
+// The wordmark is "home": the full list, with any search or filter cleared.
+$('#brand-home').addEventListener('click', (e) => {
+  e.preventDefault();                  // it's a link for accessibility; don't reload
+  if (!confirmLeaveEditor()) return;
+  query = ''; $('#search').value = '';
+  filterCat = null;
+  $('#menu-panel').hidden = true; $('#cats-panel').hidden = true;
+  renderChips();
+  goList();
+});
+
 $('#fab').addEventListener('click', () => openEditor(null));
 
 $('#search').addEventListener('input', e => { query = e.target.value; renderList(); });
@@ -3095,7 +3690,8 @@ document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   if (!catsPanel.hidden) { closeCatsPanel(); return; }
   if (!menu.hidden) { menu.hidden = true; return; }
-  if (!$('#view-detail').hidden || !$('#view-edit').hidden) goList();
+  if (!$('#view-detail').hidden) { goList(); return; }
+  if (!$('#view-edit').hidden && confirmLeaveEditor()) goList();
 });
 
 
@@ -3151,6 +3747,10 @@ async function startApp() {
 }
 
 async function boot() {
+  // A printable-recipe link (from the PDF button in the iPhone home-screen
+  // app) shows just that recipe, ready to save — no sign-in involved.
+  if (location.hash.startsWith('#print=')) { showPrintPage(location.hash.slice('#print='.length)); return; }
+
   if (!configured) { $('#view-config').hidden = false; return; }
 
   // If we arrived from a password-reset email, the URL carries the proof.
